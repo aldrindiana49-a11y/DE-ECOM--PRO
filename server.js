@@ -530,7 +530,7 @@ app.post("/api/create-maya-payment", async (req, res) => {
         success: "https://drinelectronicsph.com/Home/index.html",
         failure: "https://drinelectronicsph.com/Checkout/checkout.html",
         cancel: "https://drinelectronicsph.com/Checkout/checkout.html"
-      }
+      },
       requestReferenceNumber: orderId
     };
 
