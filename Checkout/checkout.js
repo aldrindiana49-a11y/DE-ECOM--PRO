@@ -18,7 +18,7 @@ const courierStatus = document.getElementById("courierStatus");
 const nameInput = document.getElementById("custName");
 const phoneInput = document.getElementById("custPhone");
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "https://de-ecom-pro.onrender.com";
 
 let cartItems = JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
 let currentShippingFee = null;
