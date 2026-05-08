@@ -849,9 +849,35 @@ if (addVariantBtn) {
   });
 }
 
-normalizeProducts();
-renderInventory();
-updateDashboard();
+async function loadAdminProductsFromSupabase() {
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    showToast("Failed to load products from Supabase.", "error");
+    return;
+  }
+
+  products = (data || []).map((item) => ({
+    id: item.id,
+    name: item.title,
+    brand: item.brand || "",
+    category: item.category,
+    productType: item.variations && item.variations.length > 1 ? "variant" : "single",
+    variantTitle: "Options",
+    image: item.image,
+    description: item.description,
+    variants: item.variations || []
+  }));
+
+  renderInventory();
+  updateDashboard();
+}
+
+loadAdminProductsFromSupabase();
 setImagePreview("");
 renderVariantTable([]);
 setModeUI();
