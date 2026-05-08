@@ -839,6 +839,45 @@ function scrollToCategories() {
 }
 
 /* INIT */
+async function loadProductsFromSupabase() {
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  products = (data || []).map((item) => ({
+    id: item.id,
+    name: item.title,
+    brand: item.brand || "",
+    category: item.category,
+    image: item.image,
+    description: item.description,
+    productType: item.variations && item.variations.length > 1 ? "variant" : "single",
+
+    variants:
+      item.variations && item.variations.length
+        ? item.variations
+        : [
+          {
+            label: "Default",
+            price: item.price,
+            stock: item.stock,
+            weight: item.weight,
+            length: item.length,
+            width: item.width,
+            height: item.height,
+          },
+        ],
+  }));
+
+  renderHomepageProducts(products);
+}
+
 normalizeProducts();
 applyTheme();
 renderBranding();
