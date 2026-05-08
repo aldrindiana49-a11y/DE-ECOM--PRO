@@ -850,16 +850,8 @@ async function loadProductsFromSupabase() {
     return;
   }
 
-  products = (data || []).map((item) => ({
-    id: item.id,
-    name: item.title,
-    brand: item.brand || "",
-    category: item.category,
-    image: item.image,
-    description: item.description,
-    productType: item.variations && item.variations.length > 1 ? "variant" : "single",
-
-    variants:
+  products = (data || []).map((item) => {
+    const variants =
       item.variations && item.variations.length
         ? item.variations
         : [
@@ -871,9 +863,26 @@ async function loadProductsFromSupabase() {
             length: item.length,
             width: item.width,
             height: item.height,
-          },
-        ],
-  }));
+            image: item.image
+          }
+        ];
+
+    return {
+      id: item.id,
+      name: item.title,
+      brand: item.brand || "",
+      category: item.category,
+      description: item.description,
+      productType: variants.length > 1 ? "variant" : "single",
+      variantTitle: "Options",
+      variants: variants,
+      image: item.image,
+      images: [item.image || "https://via.placeholder.com/400x300?text=No+Image"],
+      price: item.price,
+      discountPrice: 0,
+      stock: item.stock
+    };
+  });
 
   renderHomepageProducts(products);
 }
