@@ -878,12 +878,11 @@ async function loadProductsFromSupabase() {
   renderHomepageProducts(products);
 }
 
-normalizeProducts();
 applyTheme();
 renderBranding();
 renderNavbarLogo();
 renderBanner();
-renderHomepageProducts(products);
+loadProductsFromSupabase();
 updateCartCount();
 
 /* GLOBAL */
