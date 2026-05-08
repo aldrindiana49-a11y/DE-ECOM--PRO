@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -6,6 +7,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Drin Electronics</title>
   <meta name="description" content="Drin Electronics - Amplifiers, electronic parts, and repair services." />
+
+  <!-- FACEBOOK / MESSENGER / SOCIAL MEDIA PREVIEW -->
+
+  <meta property="og:title" content="🎁 Sign Up & Claim ₱50 OFF | Drin Electronics" />
+  <meta property="og:description" content="Amplifiers, electronic parts, accessories, and repair services." />
+  <meta property="og:image" content="https://www.drinelectronicsph.com/images/preview.jpg" />
+  <meta property="og:url" content="https://www.drinelectronicsph.com/" />
+  <meta property="og:type" content="website" />
+
+  <!-- TWITTER / X PREVIEW -->
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="🎁 Sign Up & Claim ₱50 OFF | Drin Electronics" />
+  <meta name="twitter:description" content="Amplifiers, electronic parts, accessories, and repair services." />
+  <meta name="twitter:image" content="https://www.drinelectronicsph.com/images/preview.jpg" />
+
+  <meta name="theme-color" content="#00bcd4" />
+
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="product.css" />
 </head>
@@ -15,7 +34,7 @@
     <div class="nav-left">
       <button class="menu-btn" type="button" id="menuBtn" aria-label="Open Menu">☰</button>
 
-      <a href="index.html" class="home-link" aria-label="Home">
+      <a href="/" class="home-link" aria-label="Home">
         <span class="nav-logo-box">
           <img id="navLogo" src="" alt="" />
           <span id="navLogoFallback">DE</span>
@@ -41,7 +60,7 @@
         <span class="notif-badge">0</span>
       </button>
 
-      <button class="icon-btn cart-btn" type="button" aria-label="Cart" onclick="window.location.href='cart.html'">
+      <button class="icon-btn cart-btn" type="button" aria-label="Cart" onclick="window.location.href='/cart/'">
         🛒
         <span class="cart-badge" id="cartCount">0</span>
       </button>
@@ -50,11 +69,12 @@
         <button id="accountBtn" class="icon-btn" type="button" aria-label="Account">👤</button>
 
         <div class="account-dropdown" id="accountDropdown">
-          <a href="login.html">Login</a>
-          <a href="signup.html">Sign Up</a>
+          <a href="/login/">Login</a>
+          <a href="/signup/">Sign Up</a>
         </div>
       </div>
     </div>
+
   </nav>
 
   <div class="mobile-search-panel" id="mobileSearchPanel">
@@ -69,6 +89,7 @@
         ✕
       </button>
     </div>
+
   </div>
 
   <aside class="sidebar" id="sidebar">
@@ -110,8 +131,8 @@
         <ul class="sidebar-links">
           <li><a href="#">Notifications</a></li>
           <li><a href="#">Profile</a></li>
-          <li><a href="login.html">Login</a></li>
-          <li><a href="signup.html">Sign Up</a></li>
+          <li><a href="/login/">Login</a></li>
+          <li><a href="/signup/">Sign Up</a></li>
         </ul>
       </div>
 
@@ -124,6 +145,7 @@
         </ul>
       </div>
     </div>
+
   </aside>
 
   <div class="overlay" id="overlay"></div>
@@ -149,7 +171,7 @@
       <div class="shortcut-header">
         <h2>Shop by Category</h2>
 
-        <a href="../Categories/categories.html" class="shortcut-view-all">
+        <a href="/categories/" class="shortcut-view-all">
           See More →
         </a>
       </div>
@@ -254,6 +276,7 @@
 
       <div id="homepageProductList" class="homepage-product-grid"></div>
     </section>
+
   </main>
 
   <div class="product-modal" id="productModal">
@@ -283,6 +306,7 @@
         </div>
       </div>
     </div>
+
   </div>
 
   <a href="#" class="messenger-float" aria-label="Messenger">💬</a>
@@ -292,36 +316,71 @@
   <script src="script.js"></script>
 
   <div class="mobile-bottom-nav">
-    <button onclick="goHome()">🏠<span>Home</span></button>
-    <button onclick="goMessage()">💬<span>Chat</span></button>
-    <button onclick="goCart()">🛒<span>Cart</span></button>
-    <button onclick="goAccount()">👤<span>Account</span></button>
+
+    <button class="mobile-nav-item active" onclick="goHome()">
+      <div class="mobile-nav-icon home-icon">🏠</div>
+      <span>Home</span>
+    </button>
+
+    <button class="mobile-nav-item" onclick="goMessage()">
+      <div class="mobile-nav-icon chat-icon">💬</div>
+      <span>Chat</span>
+    </button>
+
+    <button class="mobile-nav-item" onclick="goCart()">
+      <div class="mobile-nav-icon cart-icon">🛒</div>
+      <span>Cart</span>
+    </button>
+
   </div>
 
   <!-- WELCOME VOUCHER POPUP -->
+
+  <!-- WELCOME VOUCHER POPUP -->
   <div id="welcomePopup" class="welcome-popup">
+
     <div class="welcome-box">
 
-      <button class="welcome-close" onclick="closeWelcomePopup()">×</button>
+      <button class="welcome-close" onclick="closeWelcomePopup()">
 
-      <div class="welcome-badge">NEW CUSTOMER VOUCHER</div>
+        ×
 
-      <h2>🎉 Welcome to Drin Electronics!</h2>
+      </button>
 
-      <p class="welcome-main">Get <strong>₱50 OFF</strong></p>
-      <p class="welcome-sub">Minimum ₱1,000 order</p>
+      <div class="welcome-badge">
+        🎁 CLAIM YOUR NEW CUSTOMER VOUCHER
+      </div>
+
+      <h2>
+        🎉 Welcome To Drinelectronics!
+      </h2>
+
+      <p class="welcome-main">
+        Get <strong>₱50 OFF</strong>
+      </p>
+
+      <p class="welcome-sub">
+        Sign up to claim and use your ₱50 voucher • Min. ₱1,000 spend
+      </p>
 
       <div class="welcome-actions">
-        <button onclick="claimWelcomeVoucher()" class="claim-btn">
-          Claim Voucher
+
+        <button onclick="window.location.href='/signup/'" class="claim-btn">
+
+          🎁 Claim Voucher
+
         </button>
 
         <button onclick="shopNowWelcome()" class="shop-btn">
-          Shop Now
+
+          Continue as Guest
+
         </button>
+
       </div>
 
     </div>
+
   </div>
 </body>
 

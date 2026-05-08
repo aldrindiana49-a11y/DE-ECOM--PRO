@@ -1029,7 +1029,15 @@ function claimWelcomeVoucher() {
   });
 })();
 
-// ===============================
-// DELETE UNTIL HERE ↑↑↑
-// READ MORE FEATURE END
-// ===============================
+function goHome() {
+  window.location.href = "/";
+}
+
+function goMessage() {
+  // replace with messenger link later
+  alert("Messenger chat coming soon!");
+}
+
+function goCart() {
+  window.location.href = "/cart/";
+}
