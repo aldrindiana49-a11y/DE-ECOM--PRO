@@ -72,8 +72,8 @@ function normalizeProducts() {
     description: safeText(product.description, ""),
     variants: Array.isArray(product.variants)
       ? product.variants.map((variant, variantIndex) =>
-          normalizeVariant(variant, variantIndex)
-        )
+        normalizeVariant(variant, variantIndex)
+      )
       : [],
   }));
 
@@ -609,8 +609,8 @@ function renderInventory(filter = "") {
 
     const variantMatch = Array.isArray(product.variants)
       ? product.variants.some((variant) =>
-          safeText(variant.label).toLowerCase().includes(searchValue)
-        )
+        safeText(variant.label).toLowerCase().includes(searchValue)
+      )
       : false;
 
     return (
@@ -654,8 +654,8 @@ function renderInventory(filter = "") {
         <td>
           <img
             src="${escapeAttribute(
-              safeText(product.image, "https://via.placeholder.com/100x100?text=No+Image")
-            )}"
+        safeText(product.image, "https://via.placeholder.com/100x100?text=No+Image")
+      )}"
             alt="${escapeHtml(safeText(product.name))}"
             class="table-image"
             onerror="this.src='https://via.placeholder.com/100x100?text=No+Image'"
@@ -668,13 +668,13 @@ function renderInventory(filter = "") {
         <td>
           <div class="variant-preview-list">
             ${variants
-              .map(
-                (variant) =>
-                  `<span class="variant-chip" title="${escapeAttribute(
-                    safeText(variant.label, "Option")
-                  )}">${escapeHtml(safeText(variant.label, "Option"))}</span>`
-              )
-              .join("")}
+          .map(
+            (variant) =>
+              `<span class="variant-chip" title="${escapeAttribute(
+                safeText(variant.label, "Option")
+              )}">${escapeHtml(safeText(variant.label, "Option"))}</span>`
+          )
+          .join("")}
           </div>
         </td>
         <td>${totalStock}</td>
@@ -702,75 +702,68 @@ if (productForm) {
         finalImage = await fileToBase64(uploadedFile);
       }
 
-      const finalProductId = safeText(productId?.value) || generateProductId();
       const currentMode = safeText(productTypeInput?.value, "single");
 
-      const baseData = {
-        id: finalProductId,
-        name: safeText(nameInput?.value),
-        category: safeText(categoryInput?.value),
-        brand: safeText(brandInput?.value),
-        productType: currentMode,
-        variantTitle:
-          currentMode === "single" ? "" : safeText(variantTitleInput?.value),
-        image: safeText(finalImage),
-        description: safeText(descriptionInput?.value),
-        variants: [],
-      };
-
-      if (!validateProductBase(baseData)) return;
-
-      if (currentMode === "single") {
-        if (!validateSingleSku()) return;
-
-        const defaultSingleItem = buildSingleSkuVariant();
-        defaultSingleItem.label = "Default";
-        baseData.variants = [defaultSingleItem];
-      } else {
-        if (!safeText(baseData.variantTitle)) {
-          showToast('Please enter a variant title. Example: "Select Model".', "error");
-          return;
-        }
-
-        if (safeText(baseData.variantTitle).length > 25) {
-          showToast("Variant title is too long. Keep it within 25 characters.", "error");
-          return;
-        }
-
-        const variants = getVariantRows().map((variant, index) =>
+      const variants = currentMode === "single"
+        ? [buildSingleSkuVariant()]
+        : getVariantRows().map((variant, index) =>
           normalizeVariant(variant, index)
         );
 
-        if (!validateVariants(variants)) return;
-        baseData.variants = variants;
-      }
+      const firstVariant = variants[0] || {};
 
-      if (!Array.isArray(baseData.variants) || !baseData.variants.length) {
-        showToast("Product must have at least one valid item before saving.", "error");
+      const productData = {
+        title: safeText(nameInput?.value),
+        price: safeNumber(firstVariant.price, 0),
+        category: safeText(categoryInput?.value),
+        description: safeText(descriptionInput?.value),
+        stock: safeNumber(firstVariant.stock, 0),
+        image: safeText(finalImage),
+        variations: variants,
+        weight: safeNumber(firstVariant.weight, 0),
+        length: safeNumber(firstVariant.length, 0),
+        width: safeNumber(firstVariant.width, 0),
+        height: safeNumber(firstVariant.height, 0)
+      };
+
+      if (!productData.title) {
+        showToast("Please enter product title.", "error");
         return;
       }
 
-      const existingIndex = products.findIndex(
-        (item) => String(item.id) === String(baseData.id)
-      );
-
-      if (existingIndex !== -1) {
-        products[existingIndex] = baseData;
-        showToast("Product updated successfully.", "success");
-      } else {
-        products.push(baseData);
-        showToast("Product added successfully.", "success");
+      if (!productData.category) {
+        showToast("Please select category.", "error");
+        return;
       }
 
-      saveProducts();
-      normalizeProducts();
-      renderInventory(searchInput?.value);
-      updateDashboard();
+      if (!productData.description) {
+        showToast("Please enter description.", "error");
+        return;
+      }
+
+      if (productData.price <= 0) {
+        showToast("Please enter valid price.", "error");
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from("products")
+        .insert([productData]);
+
+      if (error) {
+        console.error(error);
+        showToast(error.message || "Supabase save failed.", "error");
+        return;
+      }
+
+      showToast("Product saved online successfully.", "success");
+
       resetProductForm();
       showSection("inventorySection");
+
     } catch (error) {
       console.error(error);
-      showToast("Failed to upload product photo.", "error");
+      showToast("Failed to save product online.", "error");
     }
   });
 }
