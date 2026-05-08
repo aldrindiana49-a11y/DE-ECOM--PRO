@@ -1886,7 +1886,15 @@ body {
 /* HIDE MOBILE NAV ON DESKTOP */
 
 @media (min-width: 768px) {
+
   .mobile-bottom-nav {
     display: none;
   }
+
+}
+
+.sidebar.active ~ .mobile-bottom-nav {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(120px);
 }

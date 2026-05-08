@@ -2,78 +2,73 @@
 
 <html lang="en">
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Drin Electronics</title>
-  <meta name="description" content="Drin Electronics - Amplifiers, electronic parts, and repair services." />
+<!-- SOCIAL MEDIA PREVIEW -->
 
-  <!-- FACEBOOK / MESSENGER / SOCIAL MEDIA PREVIEW -->
+<meta property="og:title" content="Drin Electronics" />
 
-  <meta property="og:title" content="🎁 Sign Up & Claim ₱50 OFF | Drin Electronics" />
-  <meta property="og:description" content="Amplifiers, electronic parts, accessories, and repair services." />
-  <meta property="og:image" content="https://www.drinelectronicsph.com/images/preview.jpg" />
-  <meta property="og:url" content="https://www.drinelectronicsph.com/" />
-  <meta property="og:type" content="website" />
+<meta property="og:description" content="Amplifiers, electronic parts, accessories, and repair services." />
 
-  <!-- TWITTER / X PREVIEW -->
+<meta property="og:image" content="https://www.drinelectronicsph.com/Image/DE%20LOGO%20PNG.png" />
 
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="🎁 Sign Up & Claim ₱50 OFF | Drin Electronics" />
-  <meta name="twitter:description" content="Amplifiers, electronic parts, accessories, and repair services." />
-  <meta name="twitter:image" content="https://www.drinelectronicsph.com/images/preview.jpg" />
+<meta property="og:url" content="https://www.drinelectronicsph.com" />
 
-  <meta name="theme-color" content="#00bcd4" />
+<meta property="og:type" content="website" />
 
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="product.css" />
-</head>
+<!-- TWITTER / X -->
+
+<meta name="twitter:card" content="summary_large_image" />
+
+<meta name="twitter:image" content="https://www.drinelectronicsph.com/Image/DE%20LOGO%20PNG.png" />
+
+<!-- FAVICON -->
+
+<link rel="icon" type="image/png" href="Image/favicon.png" />
 
 <body>
   <nav class="navbar">
     <div class="nav-left">
       <button class="menu-btn" type="button" id="menuBtn" aria-label="Open Menu">☰</button>
 
-  <a href="/" class="home-link" aria-label="Home">
-    <span class="nav-logo-box">
-      <img id="navLogo" src="" alt="" />
-      <span id="navLogoFallback">DE</span>
-    </span>
-    <span>Home</span>
-  </a>
-</div>
-
-<div class="nav-center">
-  <div class="desktop-search">
-    <input type="text" id="desktopSearchInput" placeholder="Search products..." aria-label="Search products" />
-    <button type="button" id="desktopSearchBtn" class="search-submit-btn">Search</button>
-  </div>
-</div>
-
-<div class="nav-right">
-  <button class="icon-btn mobile-search-btn" type="button" id="mobileSearchToggleBtn" aria-label="Open Search">
-    🔍
-  </button>
-
-  <button class="icon-btn notification-btn desktop-only" type="button" aria-label="Notifications">
-    🔔
-    <span class="notif-badge">0</span>
-  </button>
-
-  <button class="icon-btn cart-btn" type="button" aria-label="Cart" onclick="window.location.href='/cart/'">
-    🛒
-    <span class="cart-badge" id="cartCount">0</span>
-  </button>
-
-  <div class="account-menu">
-    <button id="accountBtn" class="icon-btn" type="button" aria-label="Account">👤</button>
-
-    <div class="account-dropdown" id="accountDropdown">
-      <a href="/login/">Login</a>
-      <a href="/signup/">Sign Up</a>
+      <a href="/" class="home-link" aria-label="Home">
+        <span class="nav-logo-box">
+          <img id="navLogo" src="" alt="" />
+          <span id="navLogoFallback">DE</span>
+        </span>
+        <span>Home</span>
+      </a>
     </div>
-  </div>
-</div>
+
+    <div class="nav-center">
+      <div class="desktop-search">
+        <input type="text" id="desktopSearchInput" placeholder="Search products..." aria-label="Search products" />
+        <button type="button" id="desktopSearchBtn" class="search-submit-btn">Search</button>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <button class="icon-btn mobile-search-btn" type="button" id="mobileSearchToggleBtn" aria-label="Open Search">
+        🔍
+      </button>
+
+      <button class="icon-btn notification-btn desktop-only" type="button" aria-label="Notifications">
+        🔔
+        <span class="notif-badge">0</span>
+      </button>
+
+      <button class="icon-btn cart-btn" type="button" aria-label="Cart" onclick="window.location.href='/cart/'">
+        🛒
+        <span class="cart-badge" id="cartCount">0</span>
+      </button>
+
+      <div class="account-menu">
+        <button id="accountBtn" class="icon-btn" type="button" aria-label="Account">👤</button>
+
+        <div class="account-dropdown" id="accountDropdown">
+          <a href="/login/">Login</a>
+          <a href="/signup/">Sign Up</a>
+        </div>
+      </div>
+    </div>
 
   </nav>
 
@@ -83,12 +78,12 @@
         ←
       </button>
 
-  <input type="text" id="mobileSearchInput" placeholder="Search products..." aria-label="Search products" />
+      <input type="text" id="mobileSearchInput" placeholder="Search products..." aria-label="Search products" />
 
-  <button class="mobile-search-clear" type="button" id="clearMobileSearchBtn" aria-label="Clear Search">
-    ✕
-  </button>
-</div>
+      <button class="mobile-search-clear" type="button" id="clearMobileSearchBtn" aria-label="Clear Search">
+        ✕
+      </button>
+    </div>
 
   </div>
 
@@ -100,51 +95,51 @@
           <p>Find your parts fast</p>
         </div>
 
-    <button class="sidebar-close-btn" type="button" onclick="closeSidebar()">✕</button>
-  </div>
-</div>
+        <button class="sidebar-close-btn" type="button" onclick="closeSidebar()">✕</button>
+      </div>
+    </div>
 
-<div class="sidebar-body">
-  <div class="sidebar-section">
-    <h3 class="sidebar-title">🛒 Shop</h3>
-    <ul class="sidebar-links">
+    <div class="sidebar-body">
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">🛒 Shop</h3>
+        <ul class="sidebar-links">
 
-      <li>
-        <a href="#" onclick="renderHomepageProducts(products); closeSidebar(); return false;">
-          All Products
-        </a>
-      </li>
+          <li>
+            <a href="#" onclick="renderHomepageProducts(products); closeSidebar(); return false;">
+              All Products
+            </a>
+          </li>
 
-      <li>
-        <a href="#" id="toggleCategoryMenu">
-          📂 Categories ▾
-        </a>
+          <li>
+            <a href="#" id="toggleCategoryMenu">
+              📂 Categories ▾
+            </a>
 
-        <ul id="sidebarCategoryList" style="display:none; padding-left: 12px;"></ul>
-      </li>
+            <ul id="sidebarCategoryList" style="display:none; padding-left: 12px;"></ul>
+          </li>
 
-    </ul>
-  </div>
+        </ul>
+      </div>
 
-  <div class="sidebar-section">
-    <h3 class="sidebar-title">👤 Account</h3>
-    <ul class="sidebar-links">
-      <li><a href="#">Notifications</a></li>
-      <li><a href="#">Profile</a></li>
-      <li><a href="/login/">Login</a></li>
-      <li><a href="/signup/">Sign Up</a></li>
-    </ul>
-  </div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">👤 Account</h3>
+        <ul class="sidebar-links">
+          <li><a href="#">Notifications</a></li>
+          <li><a href="#">Profile</a></li>
+          <li><a href="/login/">Login</a></li>
+          <li><a href="/signup/">Sign Up</a></li>
+        </ul>
+      </div>
 
-  <div class="sidebar-section">
-    <h3 class="sidebar-title">🏢 Company</h3>
-    <ul class="sidebar-links">
-      <li><a href="#">Branch Locator</a></li>
-      <li><a href="#">About Us</a></li>
-      <li><a href="#">Contact Us</a></li>
-    </ul>
-  </div>
-</div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">🏢 Company</h3>
+        <ul class="sidebar-links">
+          <li><a href="#">Branch Locator</a></li>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
 
   </aside>
 
@@ -155,161 +150,161 @@
       <div class="banner-shell" id="bannerShell" role="button" tabindex="0" aria-label="Homepage Banner">
         <div class="banner-track" id="bannerTrack"></div>
 
-    <button class="banner-arrow banner-arrow-left" id="bannerPrevBtn" type="button" aria-label="Previous Banner">
-      ‹
-    </button>
+        <button class="banner-arrow banner-arrow-left" id="bannerPrevBtn" type="button" aria-label="Previous Banner">
+          ‹
+        </button>
 
-    <button class="banner-arrow banner-arrow-right" id="bannerNextBtn" type="button" aria-label="Next Banner">
-      ›
-    </button>
+        <button class="banner-arrow banner-arrow-right" id="bannerNextBtn" type="button" aria-label="Next Banner">
+          ›
+        </button>
 
-    <div class="banner-dots" id="bannerDots"></div>
-  </div>
-</section>
+        <div class="banner-dots" id="bannerDots"></div>
+      </div>
+    </section>
 
-<section class="shortcut-section" id="categorySection">
-  <div class="shortcut-header">
-    <h2>Shop by Category</h2>
+    <section class="shortcut-section" id="categorySection">
+      <div class="shortcut-header">
+        <h2>Shop by Category</h2>
 
-    <a href="/categories/" class="shortcut-view-all">
-      See More →
-    </a>
-  </div>
+        <a href="/categories/" class="shortcut-view-all">
+          See More →
+        </a>
+      </div>
 
-  <div class="shortcut-grid">
-    <a href="#" class="shortcut-item" onclick="filterByCategory('Speaker & Tweeter'); return false;">
-      <div class="shortcut-icon">🔊</div>
-      <span class="shortcut-label">Speaker</span>
-    </a>
+      <div class="shortcut-grid">
+        <a href="#" class="shortcut-item" onclick="filterByCategory('Speaker & Tweeter'); return false;">
+          <div class="shortcut-icon">🔊</div>
+          <span class="shortcut-label">Speaker</span>
+        </a>
 
-    <a href="#" class="shortcut-item" onclick="filterByCategory('Power Amplifier'); return false;">
-      <div class="shortcut-icon">⚡</div>
-      <span class="shortcut-label">Amplifier</span>
-    </a>
+        <a href="#" class="shortcut-item" onclick="filterByCategory('Power Amplifier'); return false;">
+          <div class="shortcut-icon">⚡</div>
+          <span class="shortcut-label">Amplifier</span>
+        </a>
 
-    <a href="#" class="shortcut-item" onclick="filterByCategory('Transistor / MOSFET'); return false;">
-      <div class="shortcut-icon">🔧</div>
-      <span class="shortcut-label">MOSFET</span>
-    </a>
+        <a href="#" class="shortcut-item" onclick="filterByCategory('Transistor / MOSFET'); return false;">
+          <div class="shortcut-icon">🔧</div>
+          <span class="shortcut-label">MOSFET</span>
+        </a>
 
-    <a href="#" class="shortcut-item" onclick="filterByCategory('PCB / Boards'); return false;">
-      <div class="shortcut-icon">📦</div>
-      <span class="shortcut-label">PCB</span>
-    </a>
+        <a href="#" class="shortcut-item" onclick="filterByCategory('PCB / Boards'); return false;">
+          <div class="shortcut-icon">📦</div>
+          <span class="shortcut-label">PCB</span>
+        </a>
 
-    <a href="#" class="shortcut-item" onclick="filterByCategory('Audio Processor'); return false;">
-      <div class="shortcut-icon">🎛️</div>
-      <span class="shortcut-label">Processor</span>
-    </a>
+        <a href="#" class="shortcut-item" onclick="filterByCategory('Audio Processor'); return false;">
+          <div class="shortcut-icon">🎛️</div>
+          <span class="shortcut-label">Processor</span>
+        </a>
 
-    <a href="#" class="shortcut-item" onclick="filterByCategory('Capacitor'); return false;">
-      <div class="shortcut-icon">🔋</div>
-      <span class="shortcut-label">Capacitor</span>
-    </a>
+        <a href="#" class="shortcut-item" onclick="filterByCategory('Capacitor'); return false;">
+          <div class="shortcut-icon">🔋</div>
+          <span class="shortcut-label">Capacitor</span>
+        </a>
 
-    <a href="#" class="shortcut-item" onclick="filterByCategory('Connectors & Terminals'); return false;">
-      <div class="shortcut-icon">🔌</div>
-      <span class="shortcut-label">Connector</span>
-    </a>
+        <a href="#" class="shortcut-item" onclick="filterByCategory('Connectors & Terminals'); return false;">
+          <div class="shortcut-icon">🔌</div>
+          <span class="shortcut-label">Connector</span>
+        </a>
 
-    <a href="#" class="shortcut-item" onclick="filterByCategory('Wires & Cables'); return false;">
-      <div class="shortcut-icon">📡</div>
-      <span class="shortcut-label">Cables</span>
-    </a>
+        <a href="#" class="shortcut-item" onclick="filterByCategory('Wires & Cables'); return false;">
+          <div class="shortcut-icon">📡</div>
+          <span class="shortcut-label">Cables</span>
+        </a>
 
-    <a href="#" class="shortcut-item extra-category" onclick="filterByCategory('Relay'); return false;">
-      <div class="shortcut-icon">🔁</div>
-      <span class="shortcut-label">Relay</span>
-    </a>
+        <a href="#" class="shortcut-item extra-category" onclick="filterByCategory('Relay'); return false;">
+          <div class="shortcut-icon">🔁</div>
+          <span class="shortcut-label">Relay</span>
+        </a>
 
-    <a href="#" class="shortcut-item extra-category" onclick="filterByCategory('Others'); return false;">
-      <div class="shortcut-icon">🧩</div>
-      <span class="shortcut-label">Others</span>
-    </a>
-  </div>
-</section>
-<section class="voucher-section">
+        <a href="#" class="shortcut-item extra-category" onclick="filterByCategory('Others'); return false;">
+          <div class="shortcut-icon">🧩</div>
+          <span class="shortcut-label">Others</span>
+        </a>
+      </div>
+    </section>
+    <section class="voucher-section">
 
-  <div class="voucher-header">
-    <h2>🎟️ Vouchers</h2>
-  </div>
+      <div class="voucher-header">
+        <h2>🎟️ Vouchers</h2>
+      </div>
 
-  <div class="voucher-list">
+      <div class="voucher-list">
 
-    <div class="voucher-card">
-      <h4>₱10 OFF</h4>
-      <span>Min ₱1,000</span>
-      <button>Claim</button>
-    </div>
+        <div class="voucher-card">
+          <h4>₱10 OFF</h4>
+          <span>Min ₱1,000</span>
+          <button>Claim</button>
+        </div>
 
-    <div class="voucher-card">
-      <h4>₱20 OFF</h4>
-      <span>Min ₱2,000</span>
-      <button>Claim</button>
-    </div>
+        <div class="voucher-card">
+          <h4>₱20 OFF</h4>
+          <span>Min ₱2,000</span>
+          <button>Claim</button>
+        </div>
 
-    <div class="voucher-card">
-      <h4>₱50 OFF</h4>
-      <span>Min ₱5,000</span>
-      <button>Claim</button>
-    </div>
+        <div class="voucher-card">
+          <h4>₱50 OFF</h4>
+          <span>Min ₱5,000</span>
+          <button>Claim</button>
+        </div>
 
-    <div class="voucher-card">
-      <h4>₱100 OFF</h4>
-      <span>Min ₱10,000</span>
-      <button>Claim</button>
-    </div>
+        <div class="voucher-card">
+          <h4>₱100 OFF</h4>
+          <span>Min ₱10,000</span>
+          <button>Claim</button>
+        </div>
 
-    <div class="voucher-card">
-      <h4>₱200 OFF</h4>
-      <span>Min ₱20,000</span>
-      <button>Claim</button>
-    </div>
+        <div class="voucher-card">
+          <h4>₱200 OFF</h4>
+          <span>Min ₱20,000</span>
+          <button>Claim</button>
+        </div>
 
-  </div>
+      </div>
 
-</section>
-<section class="homepage-products" id="productsSection">
-  <div class="section-title">
-    <h2>Recommended For You</h2>
-  </div>
+    </section>
+    <section class="homepage-products" id="productsSection">
+      <div class="section-title">
+        <h2>Recommended For You</h2>
+      </div>
 
-  <div id="homepageProductList" class="homepage-product-grid"></div>
-</section>
+      <div id="homepageProductList" class="homepage-product-grid"></div>
+    </section>
 
   </main>
 
   <div class="product-modal" id="productModal">
     <div class="product-modal-overlay" onclick="closeProductModal()"></div>
 
-<div class="product-modal-content">
-  <button class="product-modal-close" type="button" onclick="closeProductModal()">✕</button>
+    <div class="product-modal-content">
+      <button class="product-modal-close" type="button" onclick="closeProductModal()">✕</button>
 
-  <div class="product-modal-grid">
-    <div class="product-modal-image-wrap">
-      <img id="modalProductImage" src="" alt="Product Image" class="product-modal-image" />
-    </div>
+      <div class="product-modal-grid">
+        <div class="product-modal-image-wrap">
+          <img id="modalProductImage" src="" alt="Product Image" class="product-modal-image" />
+        </div>
 
-    <div class="product-modal-info">
-      <span id="modalProductCategory" class="product-modal-category">Category</span>
-      <h2 id="modalProductName">Product Name</h2>
-      <div id="modalProductStars" class="product-rating"></div>
-      <div id="modalProductPricing" class="product-pricing-block"></div>
-      <p id="modalProductStock" class="product-stock-line">Stock: 0</p>
-      <p id="modalProductDescription" class="product-modal-description">Product description goes here.</p>
+        <div class="product-modal-info">
+          <span id="modalProductCategory" class="product-modal-category">Category</span>
+          <h2 id="modalProductName">Product Name</h2>
+          <div id="modalProductStars" class="product-rating"></div>
+          <div id="modalProductPricing" class="product-pricing-block"></div>
+          <p id="modalProductStock" class="product-stock-line">Stock: 0</p>
+          <p id="modalProductDescription" class="product-modal-description">Product description goes here.</p>
 
-      <div class="product-modal-actions">
-        <button id="modalAddToCartBtn" class="add-cart-btn" type="button">Add to Cart</button>
-        <button id="modalBuyNowBtn" class="buy-now-btn" type="button">Buy Now</button>
-        <button class="view-btn" type="button" onclick="closeProductModal()">Close</button>
+          <div class="product-modal-actions">
+            <button id="modalAddToCartBtn" class="add-cart-btn" type="button">Add to Cart</button>
+            <button id="modalBuyNowBtn" class="buy-now-btn" type="button">Buy Now</button>
+            <button class="view-btn" type="button" onclick="closeProductModal()">Close</button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
   </div>
 
-<a href="#" class="messenger-float" aria-label="Messenger">💬</a>
+  <a href="#" class="messenger-float" aria-label="Messenger">💬</a>
 
   <div id="cartToast" class="cart-toast"></div>
 
@@ -325,56 +320,51 @@
   <!-- WELCOME VOUCHER POPUP -->
 
   <!-- WELCOME VOUCHER POPUP -->
-<div id="welcomePopup" class="welcome-popup">
+  <div id="welcomePopup" class="welcome-popup">
 
-  <div class="welcome-box">
+    <div class="welcome-box">
 
-    <button
-      class="welcome-close"
-      onclick="closeWelcomePopup()">
+      <button class="welcome-close" onclick="closeWelcomePopup()">
 
-      ×
-
-    </button>
-
-    <div class="welcome-badge">
-      🎁 CLAIM YOUR NEW CUSTOMER VOUCHER
-    </div>
-
-    <h2>
-      🎉 Sign Up & Get ₱50 OFF!
-    </h2>
-
-    <p class="welcome-main">
-      Get <strong>₱50 OFF</strong>
-    </p>
-
-    <p class="welcome-sub">
-      Sign up now to unlock your exclusive new customer voucher.
-    </p>
-
-    <div class="welcome-actions">
-
-      <button
-        onclick="window.location.href='/signup/'"
-        class="claim-btn">
-
-        🎁 Claim Voucher
+        ×
 
       </button>
 
-      <button
-        onclick="shopNowWelcome()"
-        class="shop-btn">
+      <div class="welcome-badge">
+        🎁 CLAIM YOUR NEW CUSTOMER VOUCHER
+      </div>
 
-        Continue as Guest
+      <h2>
+        🎉 Sign Up & Get ₱50 OFF!
+      </h2>
 
-      </button>
+      <p class="welcome-main">
+        Get <strong>₱50 OFF</strong>
+      </p>
+
+      <p class="welcome-sub">
+        Sign up now to unlock your exclusive new customer voucher.
+      </p>
+
+      <div class="welcome-actions">
+
+        <button onclick="window.location.href='/signup/'" class="claim-btn">
+
+          🎁 Claim Voucher
+
+        </button>
+
+        <button onclick="shopNowWelcome()" class="shop-btn">
+
+          Continue as Guest
+
+        </button>
+
+      </div>
 
     </div>
 
   </div>
-
-</div>
 </body>
+
 </html>
