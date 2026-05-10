@@ -879,7 +879,7 @@ async function loadProductsFromSupabase() {
       image: item.image,
       images: [item.image || "https://via.placeholder.com/400x300?text=No+Image"],
       price: item.price,
-      discountPrice: 0,
+      discountPrice: item.discount_price || 0,
       stock: item.stock
     };
   });
