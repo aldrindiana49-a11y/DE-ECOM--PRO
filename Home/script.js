@@ -858,6 +858,7 @@ async function loadProductsFromSupabase() {
           {
             label: "Default",
             price: item.price,
+            discountPrice: item.discount_price || 0,
             stock: item.stock,
             weight: item.weight,
             length: item.length,
