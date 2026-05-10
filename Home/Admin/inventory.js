@@ -740,9 +740,24 @@ if (productForm) {
         return;
       }
 
-      const { error } = await supabaseClient
-        .from("products")
-        .insert([productData]);
+      const editingId = safeText(productId?.value);
+
+      let error;
+
+      if (editingId) {
+        const result = await supabaseClient
+          .from("products")
+          .update(productData)
+          .eq("id", editingId);
+
+        error = result.error;
+      } else {
+        const result = await supabaseClient
+          .from("products")
+          .insert([productData]);
+
+        error = result.error;
+      }
 
       if (error) {
         console.error(error);
@@ -750,7 +765,12 @@ if (productForm) {
         return;
       }
 
-      showToast("Product saved online successfully.", "success");
+      showToast(
+        editingId
+          ? "Product updated online successfully."
+          : "Product saved online successfully.",
+        "success"
+      );
 
       resetProductForm();
       showSection("inventorySection");
