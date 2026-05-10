@@ -708,6 +708,7 @@ if (productForm) {
 
       const productData = {
         title: safeText(nameInput?.value),
+        brand: safeText(brandInput?.value),
         price: safeNumber(firstVariant.price, 0),
         discount_price: safeNumber(firstVariant.discountPrice, 0),
         category: safeText(categoryInput?.value),
