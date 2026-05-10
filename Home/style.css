@@ -1535,7 +1535,8 @@ body {
 }
 
 .voucher-header {
-  text-align: center;   /* 🔥 ito fix */
+  text-align: center;
+  /* 🔥 ito fix */
   margin-bottom: 10px;
 }
 
@@ -1544,7 +1545,7 @@ body {
   font-weight: 600;
 }
 
-  
+
 .voucher-list {
   display: flex;
   gap: 10px;
@@ -1566,8 +1567,10 @@ body {
 /* 🔥 Desktop */
 @media (min-width: 768px) {
   .voucher-list {
-    justify-content: center;   /* center sa desktop */
-    overflow-x: visible;       /* no scroll */
+    justify-content: center;
+    /* center sa desktop */
+    overflow-x: visible;
+    /* no scroll */
   }
 
   .voucher-card {
@@ -1609,8 +1612,9 @@ body {
 .welcome-popup {
   position: fixed;
   inset: 0;
-  background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(37,99,235,0.4));
-  display: none; /* 🔥 important */
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(37, 99, 235, 0.4));
+  display: none;
+  /* 🔥 important */
   align-items: center;
   justify-content: center;
   z-index: 99999;
@@ -1729,7 +1733,7 @@ body {
 
 /* SEPARATOR STYLE */
 #sidebarCategoryList li:not(:last-child) a {
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* ===============================
@@ -1762,8 +1766,10 @@ body {
 
 /* HOVER EFFECT (LIGHT BOX STYLE) */
 .sidebar-links li a:hover {
-  background: #e5e7eb;   /* light gray */
-  color: #111827;        /* dark text */
+  background: #e5e7eb;
+  /* light gray */
+  color: #111827;
+  /* dark text */
 }
 
 /* CATEGORY DROPDOWN ITEMS (same style) */
@@ -1810,7 +1816,7 @@ body {
   width: calc(100% - 18px);
   max-width: 480px;
 
-  background: rgba(255,255,255,0.96);
+  background: rgba(255, 255, 255, 0.96);
 
   backdrop-filter: blur(12px);
 
@@ -1823,7 +1829,7 @@ body {
   align-items: center;
 
   box-shadow:
-    0 10px 30px rgba(0,0,0,0.12);
+    0 10px 30px rgba(0, 0, 0, 0.12);
 
   z-index: 9999;
 }
@@ -1893,8 +1899,24 @@ body {
 
 }
 
-.sidebar.active ~ .mobile-bottom-nav {
+.sidebar.active~.mobile-bottom-nav {
   opacity: 0;
   pointer-events: none;
   transform: translateX(-50%) translateY(120px);
+}
+
+/* FIX LIVE VOUCHER LAYOUT */
+
+.voucher-list {
+  display: flex !important;
+  gap: 14px !important;
+  overflow-x: auto !important;
+  padding-bottom: 10px !important;
+  flex-wrap: nowrap !important;
+}
+
+.voucher-card {
+  min-width: 170px !important;
+  max-width: 170px !important;
+  flex-shrink: 0 !important;
 }
