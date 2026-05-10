@@ -985,3 +985,71 @@ body {
 .employee-tab-btn.active:hover {
   background: var(--primary-dark);
 }
+
+/* PAYSLIP PREVIEW */
+.payslip-preview {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  max-width: 850px;
+}
+
+.payslip-header {
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+}
+
+.payslip-header h2 {
+  color: var(--primary-dark);
+  margin-bottom: 4px;
+}
+
+.payslip-section {
+  margin-bottom: 18px;
+  line-height: 1.8;
+}
+
+.payslip-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.payslip-grid h4 {
+  margin-bottom: 10px;
+}
+
+.payslip-grid p {
+  margin-bottom: 8px;
+}
+
+.net-pay-box {
+  background: #ecfeff;
+  color: #0e7490;
+  border: 1px solid #67e8f9;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.payslip-signature {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.payslip-signature span {
+  flex: 1;
+  border-top: 1px solid #111827;
+  text-align: center;
+  padding-top: 8px;
+  font-size: 13px;
+}

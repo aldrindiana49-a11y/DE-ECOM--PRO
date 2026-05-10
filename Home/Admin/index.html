@@ -647,32 +647,121 @@
 
           <!-- REPORTS -->
           <div class="employee-tab-content" id="reportsTab">
+
             <div class="panel-card">
-              <h3>Reports</h3>
-              <p>Payroll and attendance reports preview.</p>
+              <h3>Employee Payslip Report</h3>
+              <p>Select employee and payroll period, then generate printable payslip.</p>
+
+              <div class="form-grid">
+
+                <div class="form-group">
+                  <label>Employee</label>
+                  <select id="payslipEmployeeSelect">
+                    <option value="">Select employee</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Payroll Period From</label>
+                  <input type="date" id="payslipDateFrom" />
+                </div>
+
+                <div class="form-group">
+                  <label>Payroll Period To</label>
+                  <input type="date" id="payslipDateTo" />
+                </div>
+
+                <div class="form-actions full-width">
+
+                  <button type="button" class="primary-btn">
+                    Generate Payslip
+                  </button>
+
+                  <button type="button" class="secondary-btn">
+                    Print Payslip
+                  </button>
+
+                  <button type="button" class="primary-btn">
+                    Download PDF
+                  </button>
+
+                </div>
+
+              </div>
             </div>
+
           </div>
 
-        </section>
 
-        <section class="content-section" id="paymentsSection">
-          <div class="section-header">
-            <h2>Payments</h2>
-            <p>Monitor payment status and records</p>
-          </div>
-          <div class="panel-card">
-            <p>Payments module placeholder.</p>
-          </div>
-        </section>
+          <!-- EMPLOYEES -->
+          <div class="employee-tab-content" id="employeesTab">
 
-        <section class="content-section" id="usersSection">
-          <div class="section-header">
-            <h2>Users / Moderators</h2>
-            <p>Manage admin access and moderators</p>
+            <div class="panel-card">
+              <h3>Add Employee</h3>
+
+              <form id="employeeForm" class="form-grid">
+
+                <div class="form-group">
+                  <label>Employee Code / PIN</label>
+                  <input type="text" id="employeeCodeInput" placeholder="EMP001" required />
+                </div>
+
+                <div class="form-group">
+                  <label>Full Name</label>
+                  <input type="text" id="employeeNameInput" placeholder="Employee full name" required />
+                </div>
+
+                <div class="form-group">
+                  <label>Position</label>
+                  <input type="text" id="employeePositionInput" placeholder="Packer / Sales / Technician" />
+                </div>
+
+                <div class="form-group">
+                  <label>Daily Rate</label>
+                  <input type="number" id="employeeDailyRateInput" min="0" step="0.01" placeholder="500" />
+                </div>
+
+                <div class="form-actions full-width">
+                  <button type="submit" class="primary-btn">
+                    Save Employee
+                  </button>
+                </div>
+
+              </form>
+            </div>
+
+            <div class="panel-card">
+              <h3>Employee List</h3>
+
+              <div class="table-wrap">
+                <table class="data-table">
+
+                  <thead>
+                    <tr>
+                      <th>Code</th>
+                      <th>Name</th>
+                      <th>Position</th>
+                      <th>Daily Rate</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="employeesTableBody">
+                    <tr>
+                      <td colspan="5">
+                        <div class="empty-box">
+                          No employees yet.
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+
+                </table>
+              </div>
+            </div>
+
           </div>
-          <div class="panel-card">
-            <p>Users module placeholder.</p>
-          </div>
+
         </section>
 
         <section class="content-section" id="settingsSection">
@@ -713,8 +802,6 @@
     </div>
   </div>
 
-  <link rel="stylesheet" href="./admin.css" />
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script src="supabase.js"></script>
 
@@ -725,7 +812,7 @@
   <script src="./categories.js"></script>
   <script src="./orders.js"></script>
 
-
+  <script src="./employee.js"></script>
 </body>
 
 </html>
