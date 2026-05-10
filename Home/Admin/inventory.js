@@ -20,6 +20,10 @@ function saveProducts() {
   // Supabase only - localStorage disabled
 }
 
+function generateVariantId() {
+  return `var-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+}
+
 function createEmptyVariant() {
   return {
     id: generateVariantId(),
