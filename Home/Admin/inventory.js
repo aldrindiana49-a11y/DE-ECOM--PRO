@@ -14,18 +14,10 @@
 ================================ */
 
 let singleVariantImageData = "";
-let products = JSON.parse(localStorage.getItem("drinProducts")) || [];
+let products = [];
 
 function saveProducts() {
-  localStorage.setItem("drinProducts", JSON.stringify(products));
-}
-
-function generateProductId() {
-  return `prod-${Date.now()}`;
-}
-
-function generateVariantId() {
-  return `var-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  // Supabase only - localStorage disabled
 }
 
 function createEmptyVariant() {
@@ -76,8 +68,6 @@ function normalizeProducts() {
       )
       : [],
   }));
-
-  saveProducts();
 }
 
 function showSection(sectionId) {
@@ -814,19 +804,28 @@ function editProduct(id) {
   showToast("Loaded product for editing.", "success");
 }
 
-function deleteProduct(id) {
+async function deleteProduct(id) {
   const selected = products.find((item) => String(item.id) === String(id));
   if (!selected) return;
 
   const confirmed = confirm(`Delete "${safeText(selected.name, "this product")}"?`);
   if (!confirmed) return;
 
+  const { error } = await supabaseClient
+    .from("products")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    showToast("Failed to delete product online.", "error");
+    return;
+  }
+
   products = products.filter((item) => String(item.id) !== String(id));
-  saveProducts();
-  normalizeProducts();
   renderInventory(searchInput?.value);
   updateDashboard();
-  showToast("Product deleted.", "success");
+  showToast("Product deleted online.", "success");
 }
 
 if (resetBtn) {
