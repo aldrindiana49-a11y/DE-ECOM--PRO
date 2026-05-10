@@ -22,6 +22,9 @@
         <button class="menu-item" data-section="inventorySection">Inventory</button>
         <button class="menu-item" data-section="bannerSection">Banner Manager</button>
         <button class="menu-item" data-section="ordersSection">Orders</button>
+        <button class="menu-item" data-section="employeeDashboardSection">
+          Employee Dashboard
+        </button>
         <button class="menu-item" data-section="paymentsSection">Payments</button>
         <button class="menu-item" data-section="usersSection">Users / Moderators</button>
         <button class="menu-item" data-section="settingsSection">Settings</button>
@@ -474,6 +477,7 @@
               <button class="primary-btn" type="button" onclick="loadAdminOrders()">Refresh</button>
             </div>
 
+
             <div class="table-wrap">
               <table class="data-table admin-orders-table">
                 <thead>
@@ -485,7 +489,6 @@
                     <th>Payment</th>
                     <th>Status</th>
 
-                    <!-- ADD MO ITO -->
                     <th>Courier</th>
                     <th>Tracking</th>
 
@@ -493,10 +496,163 @@
                     <th>Action</th>
                   </tr>
                 </thead>
+
                 <tbody id="adminOrdersTableBody"></tbody>
+
               </table>
             </div>
           </div>
+        </section>
+
+
+        <section class="content-section" id="employeeDashboardSection">
+
+          <div class="section-header">
+            <h2>Employee Dashboard</h2>
+            <p>Attendance, payroll, overtime, benefits, cash advance, and employee management.</p>
+          </div>
+
+          <div class="employee-dashboard-tabs">
+
+            <button class="employee-tab-btn" data-employee-tab="employeesTab">
+              Employees
+            </button>
+
+            <button class="employee-tab-btn active" data-employee-tab="attendanceTab">
+              Attendance
+            </button>
+
+            <button class="employee-tab-btn" data-employee-tab="payrollTab">
+              Payroll
+            </button>
+
+            <button class="employee-tab-btn" data-employee-tab="cashAdvanceTab">
+              Cash Advance
+            </button>
+
+            <button class="employee-tab-btn" data-employee-tab="chargesTab">
+              Charges
+            </button>
+
+            <button class="employee-tab-btn" data-employee-tab="benefitsTab">
+              Benefits
+            </button>
+
+            <button class="employee-tab-btn" data-employee-tab="reportsTab">
+              Reports
+            </button>
+          </div>
+
+          <!-- ATTENDANCE -->
+          <div class="employee-tab-content active-employee-tab" id="attendanceTab">
+
+            <div class="dashboard-cards">
+              <div class="dashboard-card">
+                <span class="card-label">Present Today</span>
+                <strong>12</strong>
+              </div>
+
+              <div class="dashboard-card">
+                <span class="card-label">Late Today</span>
+                <strong>2</strong>
+              </div>
+
+              <div class="dashboard-card">
+                <span class="card-label">Working Now</span>
+                <strong>8</strong>
+              </div>
+
+              <div class="dashboard-card">
+                <span class="card-label">Absent</span>
+                <strong>1</strong>
+              </div>
+            </div>
+
+            <div class="panel-card">
+              <h3>Today Attendance</h3>
+
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Employee</th>
+                      <th>Position</th>
+                      <th>Time In</th>
+                      <th>Time Out</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td>Juan Dela Cruz</td>
+                      <td>Warehouse Staff</td>
+                      <td>7:55 AM</td>
+                      <td>—</td>
+                      <td>
+                        <span class="employee-status status-on-time">
+                          ON TIME
+                        </span>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td>Mark Santos</td>
+                      <td>Packer</td>
+                      <td>8:21 AM</td>
+                      <td>—</td>
+                      <td>
+                        <span class="employee-status status-late">
+                          LATE
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- PAYROLL -->
+          <div class="employee-tab-content" id="payrollTab">
+            <div class="panel-card">
+              <h3>Payroll Overview</h3>
+              <p>Payroll module preview.</p>
+            </div>
+          </div>
+
+          <!-- CASH ADVANCE -->
+          <div class="employee-tab-content" id="cashAdvanceTab">
+            <div class="panel-card">
+              <h3>Cash Advance</h3>
+              <p>Cash advance records preview.</p>
+            </div>
+          </div>
+
+          <!-- CHARGES -->
+          <div class="employee-tab-content" id="chargesTab">
+            <div class="panel-card">
+              <h3>Employee Charges</h3>
+              <p>Employee penalties and charges preview.</p>
+            </div>
+          </div>
+
+          <!-- BENEFITS -->
+          <div class="employee-tab-content" id="benefitsTab">
+            <div class="panel-card">
+              <h3>Benefits</h3>
+              <p>SSS, Pag-IBIG, and PhilHealth preview.</p>
+            </div>
+          </div>
+
+          <!-- REPORTS -->
+          <div class="employee-tab-content" id="reportsTab">
+            <div class="panel-card">
+              <h3>Reports</h3>
+              <p>Payroll and attendance reports preview.</p>
+            </div>
+          </div>
+
         </section>
 
         <section class="content-section" id="paymentsSection">
@@ -557,17 +713,17 @@
     </div>
   </div>
 
-<link rel="stylesheet" href="./admin.css" />
+  <link rel="stylesheet" href="./admin.css" />
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script src="supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="supabase.js"></script>
 
-<script src="./utils.js"></script>
-<script src="./admin.js"></script>
-<script src="./inventory.js"></script>
-<script src="./generator.js"></script>
-<script src="./categories.js"></script>
-<script src="./orders.js"></script>
+  <script src="./utils.js"></script>
+  <script src="./admin.js"></script>
+  <script src="./inventory.js"></script>
+  <script src="./generator.js"></script>
+  <script src="./categories.js"></script>
+  <script src="./orders.js"></script>
 
 
 </body>
