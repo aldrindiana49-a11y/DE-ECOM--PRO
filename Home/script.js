@@ -851,14 +851,38 @@ async function loadProductsFromSupabase() {
   }
 
   products = (data || []).map((item) => {
+    const firstVariation =
+      Array.isArray(item.variations) && item.variations.length
+        ? item.variations[0]
+        : {};
+
+    const mainPrice = safeNumber(item.price || firstVariation.price, 0);
+
+    const mainDiscount = safeNumber(
+      item.discount_price ||
+      item.discountPrice ||
+      firstVariation.discountPrice ||
+      firstVariation.discount_price ||
+      0,
+      0
+    );
+
     const variants =
       item.variations && item.variations.length
-        ? item.variations
+        ? item.variations.map((variant) => ({
+          ...variant,
+          discountPrice:
+            variant.discountPrice ||
+            variant.discount_price ||
+            item.discount_price ||
+            item.discountPrice ||
+            0
+        }))
         : [
           {
             label: "Default",
-            price: item.price,
-            discountPrice: item.discount_price || 0,
+            price: mainPrice,
+            discountPrice: mainDiscount,
             stock: item.stock,
             weight: item.weight,
             length: item.length,
@@ -876,11 +900,11 @@ async function loadProductsFromSupabase() {
       description: item.description,
       productType: variants.length > 1 ? "variant" : "single",
       variantTitle: "Options",
-      variants: variants,
+      variants,
       image: item.image,
       images: [item.image || "https://via.placeholder.com/400x300?text=No+Image"],
-      price: item.price,
-      discountPrice: item.discount_price || 0,
+      price: mainPrice,
+      discountPrice: mainDiscount,
       stock: item.stock
     };
   });
