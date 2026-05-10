@@ -12,7 +12,7 @@
   <div class="admin-layout">
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-top">
-        <h2>Seller Centre</h2>
+        <h2>Dashboard</h2>
         <p>Control Panel</p>
       </div>
 
@@ -546,30 +546,59 @@
           <!-- ATTENDANCE -->
           <div class="employee-tab-content active-employee-tab" id="attendanceTab">
 
-            <div class="dashboard-cards">
-              <div class="dashboard-card">
-                <span class="card-label">Present Today</span>
-                <strong>12</strong>
-              </div>
+            <div class="panel-card">
+              <h3>Manual Attendance Entry</h3>
 
-              <div class="dashboard-card">
-                <span class="card-label">Late Today</span>
-                <strong>2</strong>
-              </div>
+              <form id="manualAttendanceForm" class="form-grid">
 
-              <div class="dashboard-card">
-                <span class="card-label">Working Now</span>
-                <strong>8</strong>
-              </div>
+                <div class="form-group">
+                  <label>Employee</label>
+                  <select id="manualAttendanceEmployee" required>
+                    <option value="">Select employee</option>
+                  </select>
+                </div>
 
-              <div class="dashboard-card">
-                <span class="card-label">Absent</span>
-                <strong>1</strong>
-              </div>
+                <div class="form-group">
+                  <label>Date</label>
+                  <input type="date" id="manualAttendanceDate" required />
+                </div>
+
+                <div class="form-group">
+                  <label>Time In</label>
+                  <input type="time" id="manualTimeIn" required />
+                </div>
+
+                <div class="form-group">
+                  <label>Time Out</label>
+                  <input type="time" id="manualTimeOut" />
+                </div>
+
+                <div class="form-group">
+                  <label>Status</label>
+                  <select id="manualAttendanceStatus">
+                    <option value="on_time">On Time</option>
+                    <option value="late">Late</option>
+                    <option value="absent">Absent</option>
+                    <option value="half_day">Half Day</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>Notes</label>
+                  <input type="text" id="manualAttendanceNotes" placeholder="Brownout / forgot to scan / correction" />
+                </div>
+
+                <div class="form-actions full-width">
+                  <button type="submit" class="primary-btn">
+                    Save Attendance
+                  </button>
+                </div>
+
+              </form>
             </div>
 
+            
             <div class="panel-card">
-              <h3>Today Attendance</h3>
 
               <div class="table-wrap">
                 <table class="data-table">
@@ -583,28 +612,12 @@
                     </tr>
                   </thead>
 
-                  <tbody>
+                  <tbody id="attendanceLogsTableBody">
                     <tr>
-                      <td>Juan Dela Cruz</td>
-                      <td>Warehouse Staff</td>
-                      <td>7:55 AM</td>
-                      <td>—</td>
-                      <td>
-                        <span class="employee-status status-on-time">
-                          ON TIME
-                        </span>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td>Mark Santos</td>
-                      <td>Packer</td>
-                      <td>8:21 AM</td>
-                      <td>—</td>
-                      <td>
-                        <span class="employee-status status-late">
-                          LATE
-                        </span>
+                      <td colspan="5">
+                        <div class="empty-box">
+                          No attendance records yet.
+                        </div>
                       </td>
                     </tr>
                   </tbody>
@@ -762,17 +775,15 @@
 
           </div>
 
-        </section>
-
-        <section class="content-section" id="settingsSection">
-          <div class="section-header">
-            <h2>Settings</h2>
-            <p>Basic store setup</p>
-          </div>
-          <div class="panel-card">
-            <p>Settings module placeholder.</p>
-          </div>
-        </section>
+          <section class="content-section" id="settingsSection">
+            <div class="section-header">
+              <h2>Settings</h2>
+              <p>Basic store setup</p>
+            </div>
+            <div class="panel-card">
+              <p>Settings module placeholder.</p>
+            </div>
+          </section>
       </main>
     </div>
   </div>
