@@ -838,6 +838,61 @@ function scrollToCategories() {
   if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+/* ===============================
+   START DYNAMIC VOUCHERS
+   purpose: load vouchers from Supabase/Admin
+================================ */
+
+async function loadVouchersFromSupabase() {
+  const voucherList = document.getElementById("voucherList");
+  const voucherSection = document.getElementById("voucherSection");
+
+  if (!voucherList) return;
+
+  const { data, error } = await supabaseClient
+    .from("vouchers")
+    .select("*")
+    .eq("is_active", true)
+    .eq("voucher_type", "regular")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Voucher load error:", error);
+    voucherList.innerHTML = "";
+    if (voucherSection) voucherSection.style.display = "none";
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    voucherList.innerHTML = "";
+    if (voucherSection) voucherSection.style.display = "none";
+    return;
+  }
+
+  if (voucherSection) voucherSection.style.display = "block";
+
+  voucherList.innerHTML = data.map((voucher) => {
+    const amount = safeNumber(voucher.discount_amount, 0);
+    const minSpend = safeNumber(voucher.min_spend, 0);
+    const code = safeText(voucher.code, "DRIN");
+
+    return `
+      <div class="voucher-card">
+        <h4>₱${amount.toLocaleString()} OFF</h4>
+        <span>Min ₱${minSpend.toLocaleString()}</span>
+        <button onclick="claimVoucher('${code}')">Claim</button>
+      </div>
+    `;
+  }).join("");
+}
+
+function claimVoucher(code) {
+  localStorage.setItem("claimedVoucherCode", code);
+  alert(`Voucher ${code} claimed!`);
+}
+
+/* END DYNAMIC VOUCHERS */
+
 /* INIT */
 async function loadProductsFromSupabase() {
   const { data, error } = await supabaseClient
@@ -917,6 +972,7 @@ renderBranding();
 renderNavbarLogo();
 renderBanner();
 loadProductsFromSupabase();
+loadVouchersFromSupabase();
 updateCartCount();
 
 /* GLOBAL */
@@ -941,18 +997,55 @@ function goAccount() {
   if (accountBtn) accountBtn.click();
 }
 
-// ===== WELCOME POPUP =====
+// ===== DYNAMIC WELCOME POPUP =====
 
-// show on load (temporary always)
+let activeWelcomeVoucher = null;
+
 window.addEventListener("load", () => {
-  const popup = document.getElementById("welcomePopup");
-  if (popup) {
-    popup.style.display = "flex";
-  }
+  loadWelcomeVoucherPopup();
 });
 
+async function loadWelcomeVoucherPopup() {
+  const popup = document.getElementById("welcomePopup");
+  const mainText = document.querySelector(".welcome-main");
+  const subText = document.querySelector(".welcome-sub");
+
+  if (!popup) return;
+
+  const { data, error } = await supabaseClient
+    .from("vouchers")
+    .select("*")
+    .eq("is_active", true)
+    .eq("voucher_type", "welcome")
+    .eq("show_popup", true)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error || !data) {
+    popup.style.display = "none";
+    return;
+  }
+
+  activeWelcomeVoucher = data;
+
+  const amount = Number(data.discount_amount || 0).toLocaleString();
+  const minSpend = Number(data.min_spend || 0).toLocaleString();
+
+  if (mainText) {
+    mainText.innerHTML = `Get <strong>₱${amount} OFF</strong>`;
+  }
+
+  if (subText) {
+    subText.textContent = `Sign up to claim and use your ₱${amount} voucher • Min. ₱${minSpend} spend`;
+  }
+
+  popup.style.display = "flex";
+}
+
 function closeWelcomePopup() {
-  document.getElementById("welcomePopup").style.display = "none";
+  const popup = document.getElementById("welcomePopup");
+  if (popup) popup.style.display = "none";
 }
 
 function claimWelcomeVoucher() {
@@ -961,10 +1054,13 @@ function claimWelcomeVoucher() {
   const mainText = document.querySelector(".welcome-main");
   const subText = document.querySelector(".welcome-sub");
 
+  if (!activeWelcomeVoucher) return;
+
   localStorage.setItem("welcomeVoucherClaimed", "true");
+  localStorage.setItem("claimedVoucherCode", activeWelcomeVoucher.code);
 
   if (badge) badge.textContent = "VOUCHER CLAIMED";
-  if (mainText) mainText.innerHTML = "✅ ₱50 OFF Claimed!";
+  if (mainText) mainText.innerHTML = `✅ ${activeWelcomeVoucher.code} Claimed!`;
   if (subText) subText.textContent = "Your voucher is ready to use.";
 
   if (box) {
@@ -980,6 +1076,8 @@ function claimWelcomeVoucher() {
     closeWelcomePopup();
   }, 1200);
 }
+
+// ===== END DYNAMIC WELCOME POPUP =====
 
 /* ===============================
    SIDEBAR CATEGORY DROPDOWN SYNC

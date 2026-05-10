@@ -28,15 +28,15 @@
 
   <meta name="twitter:card" content="summary_large_image" />
 
- <meta name="twitter:image" content="https://drinelectronicsph.com/Image/social-preview.png" />
+  <meta name="twitter:image" content="https://drinelectronicsph.com/Image/social-preview.png" />
 
   <meta name="theme-color" content="#00bcd4" />
 
-<link rel="icon" type="image/png" href="Image/favicon.png" />
+  <link rel="icon" type="image/png" href="Image/favicon.png" />
 
   <link rel="stylesheet" href="style.css" />
 
- <link rel="stylesheet" href="../Product/product.css" />
+  <link rel="stylesheet" href="../Product/product.css" />
 
 </head>
 
@@ -238,45 +238,20 @@
         </a>
       </div>
     </section>
-    <section class="voucher-section">
+
+    <!-- START DYNAMIC VOUCHERS -->
+    <section class="voucher-section" id="voucherSection">
 
       <div class="voucher-header">
         <h2>🎟️ Vouchers</h2>
       </div>
 
-      <div class="voucher-list">
-
-        <div class="voucher-card">
-          <h4>₱10 OFF</h4>
-          <span>Min ₱1,000</span>
-          <button>Claim</button>
-        </div>
-
-        <div class="voucher-card">
-          <h4>₱20 OFF</h4>
-          <span>Min ₱2,000</span>
-          <button>Claim</button>
-        </div>
-
-        <div class="voucher-card">
-          <h4>₱50 OFF</h4>
-          <span>Min ₱5,000</span>
-          <button>Claim</button>
-        </div>
-
-        <div class="voucher-card">
-          <h4>₱100 OFF</h4>
-          <span>Min ₱10,000</span>
-          <button>Claim</button>
-        </div>
-
-        <div class="voucher-card">
-          <h4>₱200 OFF</h4>
-          <span>Min ₱20,000</span>
-          <button>Claim</button>
-        </div>
-
+      <div class="voucher-list" id="voucherList">
+        <!-- Dynamic vouchers from admin -->
       </div>
+
+    </section>
+    <!-- END DYNAMIC VOUCHERS -->
 
     </section>
     <section class="homepage-products" id="productsSection">
@@ -347,7 +322,6 @@
 
   </div>
 
-  <!-- WELCOME VOUCHER POPUP -->
 
   <!-- WELCOME VOUCHER POPUP -->
   <div id="welcomePopup" class="welcome-popup">
@@ -365,26 +339,26 @@
       </div>
 
       <h2>
-        🎉 Welcome To Drinelectronics!
+        🎉 Welcome To Drin Electronics!
       </h2>
 
       <p class="welcome-main">
-        Get <strong>₱50 OFF</strong>
+        Loading voucher...
       </p>
 
       <p class="welcome-sub">
-        Sign up to claim and use your ₱50 voucher • Min. ₱1,000 spend
+        Please wait...
       </p>
 
       <div class="welcome-actions">
 
-        <button onclick="window.location.href='/signup/'" class="claim-btn">
+        <button onclick="claimWelcomeVoucher()" class="claim-btn">
 
           🎁 Claim Voucher
 
         </button>
 
-        <button onclick="shopNowWelcome()" class="shop-btn">
+        <button onclick="closeWelcomePopup()" class="shop-btn">
 
           Continue as Guest
 
@@ -395,6 +369,3 @@
     </div>
 
   </div>
-</body>
-
-</html>

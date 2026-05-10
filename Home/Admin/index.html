@@ -21,6 +21,11 @@
         <button class="menu-item" data-section="addListingSection">Add Listing</button>
         <button class="menu-item" data-section="inventorySection">Inventory</button>
         <button class="menu-item" data-section="bannerSection">Banner Manager</button>
+        <!-- START MARKETING CENTER MENU -->
+        <button class="menu-item" data-section="marketingSection">
+          Marketing Center
+        </button>
+        <!-- END MARKETING CENTER MENU -->
         <button class="menu-item" data-section="ordersSection">Orders</button>
         <button class="menu-item" data-section="employeeDashboardSection">
           Employee Dashboard
@@ -431,6 +436,134 @@
           </div>
         </section>
 
+        <!-- START MARKETING CENTER -->
+        <section class="content-section" id="marketingSection">
+
+          <div class="section-header">
+            <h2>Marketing Center</h2>
+            <p>Manage vouchers and promotions</p>
+          </div>
+
+          <div class="panel-card">
+
+            <h3>Create Voucher</h3>
+
+            <form id="voucherForm" class="form-grid">
+
+              <div class="form-group">
+                <label>Voucher Code</label>
+                <input type="text" id="voucherCode" placeholder="DRIN50" required />
+              </div>
+
+              <div class="form-group">
+                <label>Discount Amount</label>
+                <input type="number" id="voucherAmount" min="0" placeholder="50" required />
+              </div>
+
+              <div class="form-group">
+                <label>Minimum Spend</label>
+                <input type="number" id="voucherMinSpend" min="0" placeholder="1000" required />
+              </div>
+
+              <div class="form-group">
+                <label>Status</label>
+
+                <select id="voucherStatus">
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </select>
+              </div>
+
+              <!-- START VOUCHER TYPE -->
+
+              <div class="form-group">
+                <label>Voucher Type</label>
+
+                <select id="voucherType">
+                  <option value="regular">Regular Voucher</option>
+                  <option value="welcome">Welcome Popup Voucher</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Show Popup</label>
+
+                <select id="voucherShowPopup">
+                  <option value="false">No</option>
+                  <option value="true">Yes</option>
+                </select>
+              </div>
+
+              <!-- END VOUCHER TYPE -->
+
+              <div class="form-actions full-width">
+                <button type="submit" class="primary-btn">
+                  Save Voucher
+                </button>
+              </div>
+
+            </form>
+
+          </div>
+
+
+          <div class="panel-card">
+
+            <h3>Regular Voucher List</h3>
+
+            <div class="table-wrap">
+
+              <table class="data-table">
+
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Discount</th>
+                    <th>Min Spend</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody id="voucherTableBody"></tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+          <div class="panel-card">
+
+            <h3>Welcome Popup Voucher List</h3>
+
+            <div class="table-wrap">
+
+              <table class="data-table">
+
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Discount</th>
+                    <th>Min Spend</th>
+                    <th>Status</th>
+                    <th>Popup</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody id="welcomeVoucherTableBody"></tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- END MARKETING CENTER -->
+
         <section class="content-section" id="ordersSection">
           <div class="section-header">
             <h2>Orders</h2>
@@ -597,7 +730,7 @@
               </form>
             </div>
 
-            
+
             <div class="panel-card">
 
               <div class="table-wrap">
@@ -821,7 +954,7 @@
   <script src="./inventory.js"></script>
   <script src="./generator.js"></script>
   <script src="./categories.js"></script>
-  <script src="./orders.js"></script>
+ <!-- <script src="./orders.js"></script> -->
 
   <script src="./employee.js"></script>
 </body>
