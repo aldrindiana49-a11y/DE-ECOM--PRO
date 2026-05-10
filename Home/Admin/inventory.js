@@ -792,7 +792,25 @@ function editProduct(id) {
   if (existingImageData) existingImageData.value = safeText(product.image);
   if (nameInput) nameInput.value = safeText(product.name);
   if (categoryInput) categoryInput.value = safeText(product.category);
-  if (brandInput) brandInput.value = safeText(product.brand);
+  if (brandInput) {
+    const savedBrand = safeText(product.brand);
+
+    const optionExists = Array.from(brandInput.options).some(
+      (option) => option.value === savedBrand
+    );
+    if (savedBrand && optionExists) {
+      brandInput.value = savedBrand;
+    } else if (savedBrand) {
+      const newOption = document.createElement("option");
+      newOption.value = savedBrand;
+      newOption.textContent = savedBrand;
+      brandInput.appendChild(newOption);
+      brandInput.value = savedBrand;
+    } else {
+      brandInput.value = "";
+    }
+
+  }
   if (descriptionInput) descriptionInput.value = safeText(product.description);
   if (productTypeInput) productTypeInput.value = safeText(product.productType, "single");
 
