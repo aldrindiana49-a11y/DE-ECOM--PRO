@@ -330,8 +330,10 @@
 }
 
 .product-info .voucher-card {
-  min-width: 150px;
-  max-width: 150px;
+  min-width: 220px;
+  max-width: 220px;
+
   flex-shrink: 0;
+
   scroll-snap-align: start;
 }
