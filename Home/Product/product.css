@@ -242,12 +242,6 @@
   color: #111827;
 }
 
-.voucher-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
 .voucher-card {
   border: 1px dashed var(--primary);
   background: #eff6ff;
