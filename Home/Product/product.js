@@ -410,7 +410,9 @@ if (desc && descToggle) {
       : "Show less";
   });
 }
+
 async function loadProductVouchers() {
+
   const voucherList = document.getElementById("voucherList");
   const voucherSection = document.querySelector(".voucher-section");
 
@@ -431,24 +433,40 @@ async function loadProductVouchers() {
 
   if (voucherSection) voucherSection.style.display = "block";
 
-  voucherList.innerHTML = data.map((voucher) => {
+  voucherList.innerHTML = data.map((voucher, index) => {
+
     const amount = Number(voucher.discount_amount || 0).toLocaleString();
+
     const minSpend = Number(voucher.min_spend || 0).toLocaleString();
+
     const code = voucher.code || "DRIN";
 
     return `
-      <div class="voucher-card">
+      <div class="voucher-card ${index === 0 ? "active" : ""}">
+        
         <strong>₱${amount} OFF</strong>
+
         <span>Min. spend ₱${minSpend}</span>
-        <button onclick="claimProductVoucher('${code}')">
+
+        <button onclick="claimProductVoucher('${code}', this)">
           Claim
         </button>
+
       </div>
     `;
   }).join("");
+
 }
 
-function claimProductVoucher(code) {
+function claimProductVoucher(code, btn) {
+
   localStorage.setItem("claimedVoucherCode", code);
+
+  document.querySelectorAll(".voucher-card")
+    .forEach(card => card.classList.remove("active"));
+
+  btn.closest(".voucher-card")
+    .classList.add("active");
+
   alert(`Voucher ${code} claimed!`);
 }
