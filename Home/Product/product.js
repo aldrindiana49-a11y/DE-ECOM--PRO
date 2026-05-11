@@ -458,13 +458,6 @@ async function loadProductVouchers() {
 
 enableVoucherDragSwipe();
 
-if (voucherSection && !voucherSection.querySelector(".voucher-swipe-hint")) {
-  voucherSection.insertAdjacentHTML(
-    "beforeend",
-    `<div class="voucher-swipe-hint"></div>`
-  );
-}
-
 }
 
 function claimProductVoucher(code, btn) {
