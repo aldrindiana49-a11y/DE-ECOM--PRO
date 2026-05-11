@@ -350,7 +350,7 @@ function renderSuggestedProducts() {
 
 function openSuggestedProduct(id) {
   localStorage.setItem("selectedProductId", id);
-  window.location.href = `/Home/Product/index.html?id=${encodeURIComponent(id)}`;
+  window.location.href = `/Home/Product/?id=${encodeURIComponent(id)}`;
 }
 
 // ===== SIDEBAR MENU FIX =====
