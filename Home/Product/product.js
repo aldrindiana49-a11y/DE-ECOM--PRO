@@ -455,6 +455,12 @@ async function loadProductVouchers() {
       </div>
     `;
   }).join("");
+  if (voucherSection && !voucherSection.querySelector(".voucher-swipe-hint")) {
+    voucherSection.insertAdjacentHTML(
+      "beforeend",
+      `<div class="voucher-swipe-hint"></div>`
+    );
+  }
 
 }
 

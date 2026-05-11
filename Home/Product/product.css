@@ -416,3 +416,55 @@
     min-width: calc(33.333% - 10px) !important;
   }
 }
+
+/* MOBILE VOUCHER SWIPE FIX */
+
+@media (max-width: 768px) {
+  .product-info .voucher-section {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .product-info .voucher-list {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+
+    gap: 10px;
+    padding-bottom: 10px;
+
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .product-info .voucher-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .product-info .voucher-card {
+    flex: 0 0 78% !important;
+    min-width: 78% !important;
+    max-width: 78% !important;
+
+    scroll-snap-align: start;
+
+    padding: 12px;
+    box-sizing: border-box;
+  }
+}
+
+/* VOUCHER SWIPE INDICATOR */
+
+.voucher-swipe-hint {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 6px;
+  text-align: center;
+}
+
+.voucher-swipe-hint::after {
+  content: "Swipe left/right →";
+}
