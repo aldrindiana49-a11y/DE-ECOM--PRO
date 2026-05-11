@@ -226,10 +226,14 @@
 
 .voucher-section {
   background: #f5fefe;
+
   border: 1px solid #00bcd4;
-  border-radius: 10px;
-  padding: 12px;
-  margin-top: 16px;
+
+  border-radius: 12px;
+
+  padding: 10px;
+
+  margin-top: 12px;
 }
 
 .voucher-section h3 {
