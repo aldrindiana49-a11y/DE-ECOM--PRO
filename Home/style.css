@@ -1920,3 +1920,17 @@ body {
   max-width: 170px !important;
   flex-shrink: 0 !important;
 }
+
+.search-submit-btn {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 10px;
+  background: #00bcd4;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
