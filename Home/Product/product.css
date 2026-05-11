@@ -389,3 +389,20 @@ START PRODUCT VOUCHERS
   align-self: flex-end !important;
   text-align: right !important;
 }
+
+/* READ MORE BUTTON RIGHT */
+
+.desc-toggle-row {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.desc-toggle {
+  border: none;
+  background: transparent;
+  color: #ff9800;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px 0;
+}
