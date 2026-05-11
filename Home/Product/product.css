@@ -348,3 +348,15 @@ START PRODUCT VOUCHERS
   padding: 12px;
   margin-top: 14px;
 }
+
+/* READ MORE RIGHT ALIGN */
+
+#descToggle {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+  color: #ff9800;
+  font-weight: 600;
+  cursor: pointer;
+}
