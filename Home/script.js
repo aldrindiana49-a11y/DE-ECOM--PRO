@@ -1211,3 +1211,15 @@ function goMessage() {
 function goCart() {
   window.location.href = "/cart/";
 }
+
+const searchInput = document.getElementById("desktopSearchInput");
+const clearSearchBtn = document.getElementById("clearSearchBtn");
+
+if (searchInput && clearSearchBtn) {
+
+  clearSearchBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    searchInput.focus();
+  });
+
+}
