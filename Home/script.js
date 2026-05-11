@@ -244,7 +244,7 @@ function renderProductCards(productArray) {
     card.onclick = () => {
       localStorage.setItem("selectedProduct", JSON.stringify(product));
       localStorage.setItem("selectedProductId", product.id);
-      window.location.href = `/Product/product.html?id=${encodeURIComponent(product.id)}`;
+      window.location.href = `/Product/?id=${encodeURIComponent(product.id)}`;
     };
 
     const imageSlides = product.images
