@@ -202,10 +202,19 @@ function renderProduct() {
   quantityInput.max = stock;
 
   if (stock <= 0) {
-    quantityInput.value = 0;
-    addToCartBtn.disabled = true;
-    addToCartBtn.textContent = "Out of Stock";
-  }
+  document.querySelector(".product-container").innerHTML = `
+    <div class="empty-products">
+      <h2>Product Unavailable</h2>
+      <p>This product is currently out of stock.</p>
+      <button onclick="window.location.href='/'" class="add-cart-btn">
+        Back to Home
+      </button>
+    </div>
+  `;
+
+  return;
+}
+
 }
 
 function getCart() {
