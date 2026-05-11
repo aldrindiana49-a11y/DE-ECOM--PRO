@@ -36,7 +36,7 @@ function renderProducts() {
 
 function openProduct(id) {
   localStorage.setItem("selectedProductId", id);
-  window.location.href = `../product/product.html?id=${id}`;
+  window.location.href = `/Home/Product/index.html?id=${encodeURIComponent(id)}`;
 }
 
 seeMoreBtn.addEventListener("click", () => {
