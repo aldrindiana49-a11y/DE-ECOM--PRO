@@ -52,11 +52,7 @@
   color: #111827;
 }
 
-.price-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+
 
 .price {
   font-size: 28px;
@@ -396,5 +392,27 @@
   .product-info .voucher-card {
     min-width: 85%;
     max-width: 85%;
+  }
+}
+
+.product-info .voucher-card {
+  flex: 0 0 calc(50% - 7px) !important;
+
+  max-width: calc(50% - 7px) !important;
+
+  min-width: calc(50% - 7px) !important;
+
+  flex-shrink: 0;
+
+  scroll-snap-align: start;
+}
+
+@media (min-width: 1200px) {
+  .product-info .voucher-card {
+    flex: 0 0 calc(33.333% - 10px) !important;
+
+    max-width: calc(33.333% - 10px) !important;
+
+    min-width: calc(33.333% - 10px) !important;
   }
 }
