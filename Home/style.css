@@ -1924,7 +1924,13 @@ body {
 }
 
 @media (max-width: 768px) {
+  .cart-btn,
   .account-menu {
     display: none !important;
+  }
+
+  .notification-btn,
+  .notification-btn.desktop-only {
+    display: inline-flex !important;
   }
 }
