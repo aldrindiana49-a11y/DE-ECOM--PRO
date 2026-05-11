@@ -1336,7 +1336,10 @@ body {
   scroll-snap-align: start;
 }
 
-================================*/ @media (max-width: 768px) {
+/* ===============================
+   MOBILE TOP NAV FINAL
+================================ */
+@media (max-width: 768px) {
   .mobile-bottom-nav {
     display: flex;
   }
@@ -1374,8 +1377,6 @@ body {
     display: none !important;
   }
 
-  /* IMPORTANT:
-     Huwag i-hide ang .nav-right kasi nandito ang notification bell. */
   .nav-right {
     display: flex !important;
     align-items: center;
@@ -1386,6 +1387,20 @@ body {
   .notification-btn.desktop-only {
     display: inline-flex !important;
   }
+}
+
+/* IMPORTANT:
+     Huwag i-hide ang .nav-right kasi nandito ang notification bell. */
+.nav-right {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification-btn,
+.notification-btn.desktop-only {
+  display: inline-flex !important;
+}
 }
 
 
@@ -1787,7 +1802,7 @@ body {
 
   backdrop-filter: blur(12px);
 
-  border-radius: 24px;
+  border-radius: 0px;
 
   padding: 10px 8px;
 
