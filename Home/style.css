@@ -1329,37 +1329,7 @@ body {
 }
 
 
-/* ===============================
-   📱 MOBILE BOTTOM NAV
-   purpose: app-like bottom navigation
-================================ */
-.mobile-bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: #fff;
-  border-top: 1px solid #eee;
-  display: none;
-  justify-content: space-around;
-  padding: 8px 0;
-  z-index: 2000;
-}
 
-.mobile-bottom-nav button {
-  background: none;
-  border: none;
-  font-size: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  cursor: pointer;
-}
-
-/* ===============================
-   📱 MOBILE TOP NAV FINAL
-   purpose: keep menu + search + notification bell
 ================================ */
 @media (max-width: 768px) {
   .mobile-bottom-nav {
@@ -1797,14 +1767,6 @@ body {
   margin-top: 2px;
 }
 
-/* READ MORE STYLE */
-.desc-toggle {
-  font-size: 13px;
-  color: blue;
-  cursor: pointer;
-  margin-top: 5px;
-  font-weight: 700;
-}
 
 /* MOBILE BOTTOM NAV */
 
@@ -1933,4 +1895,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .home-link {
+    display: none;
+  }
 }
