@@ -158,6 +158,7 @@ async function loadProductsFromSupabase() {
 
   renderProduct();
   renderSuggestedProducts();
+  loadProductVouchers();
   updateCartCount();
 }
 
@@ -408,4 +409,46 @@ if (desc && descToggle) {
       ? "Read more"
       : "Show less";
   });
+}
+async function loadProductVouchers() {
+  const voucherList = document.getElementById("voucherList");
+  const voucherSection = document.querySelector(".voucher-section");
+
+  if (!voucherList) return;
+
+  const { data, error } = await supabaseClient
+    .from("vouchers")
+    .select("*")
+    .eq("is_active", true)
+    .eq("voucher_type", "regular")
+    .order("created_at", { ascending: false });
+
+  if (error || !data || data.length === 0) {
+    voucherList.innerHTML = "";
+    if (voucherSection) voucherSection.style.display = "none";
+    return;
+  }
+
+  if (voucherSection) voucherSection.style.display = "block";
+
+  voucherList.innerHTML = data.map((voucher) => {
+    const amount = Number(voucher.discount_amount || 0).toLocaleString();
+    const minSpend = Number(voucher.min_spend || 0).toLocaleString();
+    const code = voucher.code || "DRIN";
+
+    return `
+      <div class="voucher-card">
+        <strong>₱${amount} OFF</strong>
+        <span>Min. spend ₱${minSpend}</span>
+        <button onclick="claimProductVoucher('${code}')">
+          Claim
+        </button>
+      </div>
+    `;
+  }).join("");
+}
+
+function claimProductVoucher(code) {
+  localStorage.setItem("claimedVoucherCode", code);
+  alert(`Voucher ${code} claimed!`);
 }
