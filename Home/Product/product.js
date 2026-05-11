@@ -401,7 +401,7 @@ if (desc && descToggle) {
   descToggle.addEventListener("click", () => {
     desc.classList.toggle("description-limit");
     descToggle.textContent = desc.classList.contains("description-limit")
-      ? "▼ Read more"
-      : "▲ Show less";
+      ? "Read more"
+      : "Show less";
   });
 }
