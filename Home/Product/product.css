@@ -609,3 +609,25 @@
   font-size: 16px;
   font-weight: bold;
 }
+
+/* MOBILE ACTION BUTTONS SIDE BY SIDE */
+
+@media (max-width: 768px) {
+
+  .product-action-buttons {
+    display: grid !important;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+  }
+
+  .product-action-buttons button {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .share-btn {
+    grid-column: 1 / -1;
+  }
+}
