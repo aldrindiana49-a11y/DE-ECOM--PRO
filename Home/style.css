@@ -87,37 +87,45 @@ body {
   background: rgba(255, 255, 255, 0.14);
 }
 
+/* FINAL SEARCH BAR */
+
 .desktop-search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  max-width: 760px;
-  margin: 0 auto;
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 760px !important;
+  margin: 0 auto !important;
+  background: white !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  border: 1px solid #ddd !important;
 }
 
 .desktop-search input {
-  flex: 1;
-  min-width: 0;
-  height: 42px;
-  border: none;
-  border-radius: 999px;
-  padding: 0 16px;
-  outline: none;
-  font-size: 14px;
+  flex: 1 !important;
+  min-width: 0 !important;
+  height: 42px !important;
+  border: none !important;
+  padding: 0 16px !important;
+  outline: none !important;
+  font-size: 14px !important;
+  background: transparent !important;
 }
 
 .search-submit-btn {
-  height: 42px;
-  padding: 0 18px;
-  border-radius: 999px;
-  background: var(--primary);
-  color: white;
-  font-weight: 700;
+  width: 50px !important;
+  height: 42px !important;
+  border: none !important;
+  border-left: 1px solid #eee !important;
+  background: white !important;
+  color: #555 !important;
+  font-size: 20px !important;
+  cursor: pointer !important;
+  border-radius: 0 !important;
 }
 
 .search-submit-btn:hover {
-  background: var(--primary-dark);
+  background: #f5f5f5 !important;
 }
 
 .notif-badge,
@@ -1328,8 +1336,7 @@ body {
   scroll-snap-align: start;
 }
 
-================================ */
-@media (max-width: 768px) {
+================================*/ @media (max-width: 768px) {
   .mobile-bottom-nav {
     display: flex;
   }
@@ -1924,6 +1931,7 @@ body {
 }
 
 @media (max-width: 768px) {
+
   .cart-btn,
   .account-menu {
     display: none !important;
