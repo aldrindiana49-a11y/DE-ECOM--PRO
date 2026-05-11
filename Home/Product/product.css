@@ -468,3 +468,111 @@
 .voucher-swipe-hint::after {
   content: "Swipe left/right →";
 }
+
+
+/* FULL PRODUCT PAGE MOBILE FIX */
+
+@media (max-width: 768px) {
+
+  .product-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    padding: 12px;
+
+    width: 100%;
+    max-width: 100%;
+
+    overflow-x: hidden;
+
+    box-sizing: border-box;
+  }
+
+  .product-left,
+  .product-info,
+  .product-description-section {
+    width: 100%;
+    max-width: 100%;
+
+    box-sizing: border-box;
+  }
+
+  .product-image img {
+    width: 100%;
+    height: auto;
+
+    border-radius: 12px;
+
+    object-fit: cover;
+  }
+
+  .product-info h1 {
+    font-size: 20px;
+    line-height: 1.4;
+  }
+
+  .price {
+    font-size: 24px;
+  }
+
+  .product-action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .product-action-buttons button {
+    width: 100%;
+  }
+
+  .quantity-box {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .voucher-section {
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .product-info .voucher-list {
+    display: flex !important;
+
+    flex-direction: row !important;
+
+    flex-wrap: nowrap !important;
+
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+
+    gap: 10px;
+
+    scroll-snap-type: x mandatory;
+
+    -webkit-overflow-scrolling: touch;
+
+    padding-bottom: 8px;
+  }
+
+  .product-info .voucher-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .product-info .voucher-card {
+    flex: 0 0 78% !important;
+
+    min-width: 78% !important;
+
+    max-width: 78% !important;
+
+    scroll-snap-align: start;
+
+    box-sizing: border-box;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+}
