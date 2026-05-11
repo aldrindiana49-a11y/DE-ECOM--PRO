@@ -311,7 +311,10 @@
 
 .product-info .voucher-list {
   display: flex;
+
   gap: 14px;
+
+  flex-wrap: nowrap;
 
   overflow-x: auto;
   overflow-y: hidden;
@@ -330,8 +333,8 @@
 }
 
 .product-info .voucher-card {
-  min-width: calc(50% - 8px);
-  max-width: calc(50% - 8px);
+  flex: 0 0 calc(50% - 7px);
+  max-width: calc(50% - 7px);
 
   flex-shrink: 0;
 
