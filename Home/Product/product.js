@@ -516,3 +516,17 @@ function enableVoucherDragSwipe() {
     slider.scrollLeft = scrollLeft - walk;
   });
 }
+
+function scrollVoucher(direction) {
+
+  const voucherList = document.getElementById("voucherList");
+
+  if (!voucherList) return;
+
+  const scrollAmount = 300;
+
+  voucherList.scrollBy({
+    left: direction * scrollAmount,
+    behavior: "smooth"
+  });
+}

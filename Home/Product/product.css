@@ -584,3 +584,28 @@
 .product-info .voucher-list.dragging {
   cursor: grabbing;
 }
+
+/* VOUCHER NAV BUTTONS */
+
+.voucher-nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.voucher-nav button {
+  width: 32px;
+  height: 32px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: var(--primary);
+  color: white;
+
+  cursor: pointer;
+
+  font-size: 16px;
+  font-weight: bold;
+}
