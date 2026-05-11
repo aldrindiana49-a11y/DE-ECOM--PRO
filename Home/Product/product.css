@@ -315,3 +315,36 @@ START PRODUCT VOUCHERS
 }
 
 /* END PRODUCT VOUCHERS */
+
+/* PRODUCT PAGE UI IMPROVEMENTS */
+
+.quantity-wrapper,
+.quantity-controls {
+  margin-top: 18px;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.quantity-btn {
+  background: #00bcd4;
+  color: #fff;
+  border: none;
+}
+
+.quantity-btn:hover {
+  background: #0097a7;
+}
+
+#descToggle {
+  color: #ff9800;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.voucher-section {
+  background: #f5fefe;
+  border: 1px solid #00bcd4;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 14px;
+}
