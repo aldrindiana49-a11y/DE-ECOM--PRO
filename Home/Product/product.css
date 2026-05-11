@@ -360,3 +360,15 @@ START PRODUCT VOUCHERS
   font-weight: 600;
   cursor: pointer;
 }
+
+/* FORCE READ MORE RIGHT */
+
+#descToggle {
+  display: block !important;
+  width: 100% !important;
+  text-align: right !important;
+  margin-top: 8px !important;
+  color: #ff9800 !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+}
