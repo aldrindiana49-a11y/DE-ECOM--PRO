@@ -397,6 +397,8 @@ if (title && titleToggle) {
 const desc = document.getElementById("productDescription");
 const descToggle = document.getElementById("descToggle");
 
+descToggle.textContent = "Read more";
+
 if (desc && descToggle) {
   descToggle.addEventListener("click", () => {
     desc.classList.toggle("description-limit");
