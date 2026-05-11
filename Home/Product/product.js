@@ -389,7 +389,9 @@ if (title && titleToggle) {
   titleToggle.addEventListener("click", () => {
     title.classList.toggle("expanded");
     title.style.webkitLineClamp = title.classList.contains("expanded") ? "unset" : "2";
-    titleToggle.textContent = title.classList.contains("expanded") ? "▲" : "▼";
+    titleToggle.textContent = title.classList.contains("expanded")
+      ? "Show less"
+      : "Read more";
   });
 }
 
