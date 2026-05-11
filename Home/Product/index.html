@@ -141,6 +141,11 @@
   <div class="overlay" id="overlay"></div>
 
   <main class="main-content">
+    <button class="back-btn" onclick="window.location.href='../home/index.html'">
+
+      ← Back
+
+    </button>
     <section class="product-detail-section">
       <div class="product-container">
 
@@ -233,24 +238,35 @@
 
   <div class="mobile-bottom-nav">
 
-    <button class="mobile-nav-item active" onclick="window.location.href='/'">
-      <div class="mobile-nav-icon home-icon">🛍</div>
-      <span>Shop</span>
-    </button>
-
     <button class="mobile-nav-item" onclick="window.open('https://m.me/DrinElectronicsKoronadal', '_blank')">
-      <div class="mobile-nav-icon chat-icon">💬</div>
-      <span>Chat</span>
+
+      <div class="mobile-nav-icon">💬</div>
+
+      <span>Message</span>
     </button>
 
-    <button class="mobile-nav-item" onclick="window.location.href='/cart/'">
-      <div class="mobile-nav-icon cart-icon">🛒</div>
+    <button class="mobile-nav-item" onclick="window.location.href='../cart/cart.html'">
+
+      <div class="mobile-nav-icon">
+        🛒
+        <span class="cart-badge" id="mobileCartCount">0</span>
+      </div>
+
       <span>Cart</span>
     </button>
 
-    <button class="mobile-nav-item" onclick="toggleAccountMenu()">
-      <div class="mobile-nav-icon home-icon">👤</div>
-      <span>Account</span>
+    <button class="mobile-nav-item" onclick="document.getElementById('addToCartBtn').click()">
+
+      <div class="mobile-nav-icon">➕</div>
+
+      <span>Add Cart</span>
+    </button>
+
+    <button class="mobile-nav-item buy-now-mobile" onclick="document.getElementById('buyNowBtn').click()">
+
+      <div class="mobile-nav-icon">⚡</div>
+
+      <span>Buy Now</span>
     </button>
 
   </div>
