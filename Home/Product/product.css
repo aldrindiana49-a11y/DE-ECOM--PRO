@@ -190,11 +190,15 @@
   overflow: hidden;
 }
 
-.desc-toggle {
-  font-size: 13px;
-  color: var(--primary);
-  cursor: pointer;
-  margin-top: 5px;
+.desc-toggle,
+#descToggle {
+  display: block !important;
+  width: 100% !important;
+  text-align: right !important;
+  margin: 8px 0 0 auto !important;
+  color: #ff9800 !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
 }
 
 .description-section {
@@ -363,12 +367,25 @@ START PRODUCT VOUCHERS
 
 /* FORCE READ MORE RIGHT */
 
+.desc-toggle,
 #descToggle {
   display: block !important;
   width: 100% !important;
   text-align: right !important;
-  margin-top: 8px !important;
+  margin: 8px 0 0 auto !important;
   color: #ff9800 !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   cursor: pointer !important;
+}
+
+/* FINAL READ MORE FIX */
+
+.product-description-section {
+  display: flex;
+  flex-direction: column;
+}
+
+#descToggle {
+  align-self: flex-end !important;
+  text-align: right !important;
 }
