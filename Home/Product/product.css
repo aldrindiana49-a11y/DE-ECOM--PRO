@@ -118,12 +118,13 @@
 
 .desc-toggle {
   border: none;
-  background: transparent;
+  background: #fff7ed;
   color: #ff9800;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
-  padding: 0;
+  padding: 7px 12px;
+  border-radius: 999px;
 }
 
 .variant-container {
