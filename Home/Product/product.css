@@ -576,3 +576,11 @@
     overflow-x: hidden;
   }
 }
+
+.product-info .voucher-list {
+  cursor: grab;
+}
+
+.product-info .voucher-list.dragging {
+  cursor: grabbing;
+}

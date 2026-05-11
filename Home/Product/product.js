@@ -455,12 +455,15 @@ async function loadProductVouchers() {
       </div>
     `;
   }).join("");
-  if (voucherSection && !voucherSection.querySelector(".voucher-swipe-hint")) {
-    voucherSection.insertAdjacentHTML(
-      "beforeend",
-      `<div class="voucher-swipe-hint"></div>`
-    );
-  }
+
+enableVoucherDragSwipe();
+
+if (voucherSection && !voucherSection.querySelector(".voucher-swipe-hint")) {
+  voucherSection.insertAdjacentHTML(
+    "beforeend",
+    `<div class="voucher-swipe-hint"></div>`
+  );
+}
 
 }
 
@@ -475,4 +478,41 @@ function claimProductVoucher(code, btn) {
     .classList.add("active");
 
   alert(`Voucher ${code} claimed!`);
+}
+
+// DESKTOP + MOBILE VOUCHER DRAG SWIPE
+function enableVoucherDragSwipe() {
+  const slider = document.getElementById("voucherList");
+  if (!slider) return;
+
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  slider.addEventListener("mousedown", (e) => {
+    isDown = true;
+    slider.classList.add("dragging");
+    startX = e.pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
+  });
+
+  slider.addEventListener("mouseleave", () => {
+    isDown = false;
+    slider.classList.remove("dragging");
+  });
+
+  slider.addEventListener("mouseup", () => {
+    isDown = false;
+    slider.classList.remove("dragging");
+  });
+
+  slider.addEventListener("mousemove", (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - startX) * 1.5;
+
+    slider.scrollLeft = scrollLeft - walk;
+  });
 }
