@@ -648,3 +648,33 @@
 
   margin-bottom: 4px;
 }
+
+.voucher-swipe-hint {
+  display: none !important;
+}
+
+/* VOUCHER HEADER INLINE */
+
+.voucher-header {
+  display: flex !important;
+
+  align-items: center !important;
+
+  justify-content: space-between !important;
+
+  width: 100%;
+
+  margin-bottom: 4px;
+}
+
+.voucher-header h3 {
+  margin: 0;
+
+  font-size: 14px;
+}
+
+.voucher-nav {
+  display: flex;
+
+  gap: 6px;
+}
