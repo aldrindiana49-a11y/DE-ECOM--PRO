@@ -1,4 +1,4 @@
-let products = JSON.parse(localStorage.getItem("drinProducts")) || [];
+let products = [];
 let cart = JSON.parse(localStorage.getItem("drinCart")) || [];
 
 const params = new URLSearchParams(window.location.search);
@@ -72,47 +72,122 @@ function findProduct() {
   return products[0] || null;
 }
 
-const product = findProduct();
+let product = null;
 
-if (!product) {
-  document.querySelector(".product-container").innerHTML = `
-    <div>
-      <h2>Product not found</h2>
-      <p>No product data found. Add products in admin first.</p>
-      <a href="../home/home.html">Back to Home</a>
-    </div>
-  `;
-} else {
+async function loadProductsFromSupabase() {
+
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  products = (data || []).map((item) => {
+
+    const firstVariation =
+      Array.isArray(item.variations) && item.variations.length
+        ? item.variations[0]
+        : {};
+
+    const mainPrice = safeNumber(
+      item.price || firstVariation.price,
+      0
+    );
+
+    const mainDiscount = safeNumber(
+      item.discount_price ||
+      item.discountPrice ||
+      firstVariation.discountPrice ||
+      firstVariation.discount_price ||
+      0,
+      0
+    );
+
+    const variants =
+      item.variations && item.variations.length
+        ? item.variations.map((variant) => ({
+          ...variant,
+          discountPrice:
+            variant.discountPrice ||
+            variant.discount_price ||
+            item.discount_price ||
+            item.discountPrice ||
+            0
+        }))
+        : [
+          {
+            label: "Default",
+            price: mainPrice,
+            discountPrice: mainDiscount,
+            stock: item.stock,
+            image: item.image
+          }
+        ];
+
+    return {
+      id: item.id,
+      name: item.title,
+      brand: item.brand || "",
+      category: item.category,
+      description: item.description,
+      variants,
+      image: item.image,
+      price: mainPrice,
+      discountPrice: mainDiscount,
+      stock: item.stock
+    };
+  });
+
+  product = findProduct();
+
+  if (!product) {
+
+    document.querySelector(".product-container").innerHTML = `
+      <div>
+        <h2>Product not found</h2>
+        <p>No product data found.</p>
+      </div>
+    `;
+
+    return;
+  }
+
   renderProduct();
   renderSuggestedProducts();
   updateCartCount();
 }
+
+loadProductsFromSupabase();
 
 function renderProduct() {
   const stock = getProductStock(product);
 
   document.getElementById("productName").textContent = product.name || "Unnamed Product";
 
- const variant = getBestVariant(product);
+  const variant = getBestVariant(product);
 
-let price = variant ? variant.price : product.price;
-let discount = variant ? variant.discountPrice : product.discountPrice;
+  let price = variant ? variant.price : product.price;
+  let discount = variant ? variant.discountPrice : product.discountPrice;
 
-let finalPrice = price;
-let percent = 0;
+  let finalPrice = price;
+  let percent = 0;
 
-if (discount && discount < price) {
-  finalPrice = discount;
-  percent = Math.round(((price - discount) / price) * 100);
-}
+  if (discount && discount < price) {
+    finalPrice = discount;
+    percent = Math.round(((price - discount) / price) * 100);
+  }
 
-document.getElementById("productPrice").textContent = "₱" + finalPrice;
+  document.getElementById("productPrice").textContent = "₱" + finalPrice;
 
-document.getElementById("productOldPrice").textContent =
-  percent ? "₱" + price : "";
+  document.getElementById("productOldPrice").textContent =
+    percent ? "₱" + price : "";
 
-document.getElementById("discountBadge").textContent =
-  percent ? "-" + percent + "%" : "";
+  document.getElementById("discountBadge").textContent =
+    percent ? "-" + percent + "%" : "";
 
   document.getElementById("stockText").textContent =
     stock > 0 ? `Stock: ${stock} available` : "Out of stock";
