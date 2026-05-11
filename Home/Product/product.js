@@ -202,18 +202,11 @@ function renderProduct() {
   quantityInput.max = stock;
 
   if (stock <= 0) {
-  document.querySelector(".product-container").innerHTML = `
-    <div class="empty-products">
-      <h2>Product Unavailable</h2>
-      <p>This product is currently out of stock.</p>
-      <button onclick="window.location.href='/'" class="add-cart-btn">
-        Back to Home
-      </button>
-    </div>
-  `;
+    quantityInput.value = 0;
+    addToCartBtn.disabled = true;
+    addToCartBtn.textContent = "Out of Stock";
+  }
 
-  return;
-}
 
 }
 
@@ -321,7 +314,10 @@ function renderSuggestedProducts() {
   if (!container) return;
 
   const list = products
-    .filter(p => String(p.id) !== String(product.id))
+    .filter(p =>
+      String(p.id) !== String(product.id) &&
+      getProductStock(p) > 0
+    )
     .slice(0, 8);
 
   if (!list.length) {
