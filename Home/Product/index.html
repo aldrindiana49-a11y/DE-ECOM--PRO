@@ -7,8 +7,8 @@
   <title>Product Details | Drin Electronics</title>
   <meta name="description" content="Drin Electronics - Product details." />
 
-  <link rel="stylesheet" href="../style.css" />
-  <link rel="stylesheet" href="product.css?v=1000" />
+  <link rel="stylesheet" href="../style.css?v=
+  <link rel=" stylesheet" href="product.css?v=1000" />
 </head>
 
 <body>
@@ -25,17 +25,21 @@
       </a>
     </div>
 
-    <div class="desktop-search">
+    <div class="nav-center">
 
-      <input type="text" id="desktopSearchInput" placeholder="Search products..." aria-label="Search products" />
+      <div class="desktop-search">
 
-      <button type="button" id="clearSearchBtn" class="clear-search-btn">
-        ✕
-      </button>
+        <input type="text" id="desktopSearchInput" placeholder="Search products..." aria-label="Search products" />
 
-      <button type="button" id="desktopSearchBtn" class="search-submit-btn">
-        🔍
-      </button>
+        <button type="button" id="clearSearchBtn" class="clear-search-btn">
+          ✕
+        </button>
+
+        <button type="button" id="desktopSearchBtn" class="search-submit-btn">
+          🔍
+        </button>
+
+      </div>
 
     </div>
 
@@ -219,10 +223,27 @@
   <div id="cartToast" class="cart-toast"></div>
 
   <div class="mobile-bottom-nav">
-    <button onclick="window.location.href='../home/index.html'">🏠<span>Home</span></button>
-    <button onclick="window.open('https://m.me/DrinElectronicsKoronadal', '_blank')">💬<span>Chat</span></button>
-    <button onclick="window.location.href='../cart/cart.html'">🛒<span>Cart</span></button>
-    <button onclick="toggleAccountMenu()">👤<span>Account</span></button>
+
+    <button class="mobile-nav-item active" onclick="window.location.href='/'">
+      <div class="mobile-nav-icon home-icon">🏠</div>
+      <span>Home</span>
+    </button>
+
+    <button class="mobile-nav-item" onclick="window.open('https://m.me/DrinElectronicsKoronadal', '_blank')">
+      <div class="mobile-nav-icon chat-icon">💬</div>
+      <span>Chat</span>
+    </button>
+
+    <button class="mobile-nav-item" onclick="window.location.href='/cart/'">
+      <div class="mobile-nav-icon cart-icon">🛒</div>
+      <span>Cart</span>
+    </button>
+
+    <button class="mobile-nav-item" onclick="toggleAccountMenu()">
+      <div class="mobile-nav-icon home-icon">👤</div>
+      <span>Account</span>
+    </button>
+
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
