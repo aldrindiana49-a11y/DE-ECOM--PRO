@@ -523,3 +523,17 @@ function scrollVoucher(direction) {
     behavior: "smooth"
   });
 }
+
+const protectionToggle = document.getElementById("protectionToggle");
+const protectionMore = document.getElementById("protectionMore");
+
+if (protectionToggle && protectionMore) {
+  protectionToggle.addEventListener("click", () => {
+    protectionMore.classList.toggle("show");
+
+    protectionToggle.textContent =
+      protectionMore.classList.contains("show")
+        ? "Show Less"
+        : "Read More";
+  });
+}

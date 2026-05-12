@@ -393,21 +393,21 @@
   }
 
   .product-info .voucher-card {
-    flex: 0 0 78% !important;
-    min-width: 78% !important;
-    max-width: 78% !important;
+    flex: 0 0 calc(50% - 8px) !important;
+
+    min-width: calc(50% - 8px) !important;
+
+    max-width: calc(50% - 8px) !important;
 
     scroll-snap-align: start;
 
     padding: 12px;
+
     box-sizing: border-box;
   }
-}
 
 
-/* FULL PRODUCT PAGE MOBILE FIX */
-
-@media (max-width: 768px) {
+  /* FULL PRODUCT PAGE MOBILE FIX */
 
   .product-container {
     display: flex;
@@ -484,55 +484,6 @@
 .product-info .voucher-list.dragging {
   cursor: grabbing;
 }
-
-/* VOUCHER NAV BUTTONS */
-
-.voucher-nav {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.voucher-nav button {
-  width: 32px;
-  height: 32px;
-
-  border: none;
-  border-radius: 50%;
-
-  background: var(--primary);
-  color: white;
-
-  cursor: pointer;
-
-  font-size: 16px;
-  font-weight: bold;
-}
-
-/* MOBILE ACTION BUTTONS SIDE BY SIDE */
-
-@media (max-width: 768px) {
-
-  .product-action-buttons {
-    display: grid !important;
-
-    grid-template-columns: 1fr 1fr;
-
-    gap: 10px;
-  }
-
-  .product-action-buttons button {
-    width: 100%;
-    min-width: unset;
-  }
-
-  .share-btn {
-    grid-column: 1 / -1;
-  }
-}
-
-
 
 /* VOUCHER HEADER INLINE */
 
@@ -682,77 +633,6 @@
 
 }
 
-/* FORCE DESKTOP SEARCH ON MOBILE */
-
-@media (max-width: 768px) {
-
-  .desktop-search {
-    display: flex !important;
-
-    width: 100% !important;
-
-    min-width: 0;
-  }
-
-  .desktop-search input {
-    width: 100% !important;
-
-    min-width: 0;
-  }
-
-  .nav-center {
-    flex: 1 !important;
-
-    min-width: 0;
-  }
-
-  .mobile-search-btn {
-    display: none !important;
-  }
-}
-
-@media (max-width: 768px) {
-
-  .navbar {
-    gap: 4px !important;
-  }
-
-  .nav-left {
-    flex-shrink: 0;
-  }
-
-  .nav-center {
-    flex: 1 !important;
-    min-width: 0;
-  }
-
-  .desktop-search {
-    width: 100% !important;
-    min-width: 0;
-  }
-
-  .desktop-search input {
-    width: 100%;
-    min-width: 0;
-
-    font-size: 13px;
-
-    padding-left: 10px;
-    padding-right: 52px;
-  }
-
-  .nav-right {
-    gap: 4px !important;
-  }
-
-  .icon-btn {
-    width: 34px;
-    height: 34px;
-
-    font-size: 14px;
-  }
-}
-
 /* MOBILE BACK BUTTON ONLY */
 
 .back-btn {
@@ -815,11 +695,11 @@
   border: none;
   border-radius: 50%;
 
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
 
   backdrop-filter: blur(10px);
 
-  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
 
   display: inline-flex;
   align-items: center;
@@ -838,4 +718,134 @@
 
 .share-top-btn {
   right: 14px;
-}S
+}
+
+/* FINAL DESKTOP VOUCHER NAV FIX */
+
+.voucher-nav {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.voucher-nav button {
+  all: unset;
+
+  width: 36px;
+  height: 36px;
+
+  border-radius: 50%;
+
+  background: linear-gradient(135deg,
+      #00bcd4,
+      #0097a7);
+
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 18px;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  box-shadow: 0 4px 10px rgba(0, 188, 212, 0.25);
+
+  transition: 0.2s ease;
+
+  flex-shrink: 0;
+}
+
+.voucher-nav button:hover {
+  transform: translateY(-1px);
+}
+
+/* REMOVE EMPTY MOBILE SPACES */
+
+@media (max-width: 768px) {
+
+  .product-action-buttons:empty,
+  .quantity-box:empty,
+  .voucher-nav:empty {
+    display: none !important;
+  }
+
+  .product-action-buttons {
+    margin-top: 0 !important;
+  }
+
+  .quantity-box {
+    margin-top: 0 !important;
+  }
+
+  .product-description-section {
+    margin-top: 10px !important;
+  }
+}
+
+/* CUSTOMER PROTECTION */
+
+.customer-protection {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.protection-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  color: #111827;
+}
+
+.protection-list,
+.protection-more {
+  display: grid;
+  gap: 5px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.protection-more {
+  display: none;
+  margin-top: 5px;
+}
+
+.protection-more.show {
+  display: grid;
+}
+
+.protection-toggle {
+  margin-top: 8px;
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 800;
+  cursor: pointer;
+  padding: 0;
+}
+
+.protection-icon {
+  width: 34px;
+  height: 34px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: linear-gradient(135deg,
+      #00bcd4,
+      #0097a7);
+
+  color: white;
+
+  font-size: 18px;
+
+  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.25);
+}
