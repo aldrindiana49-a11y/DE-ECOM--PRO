@@ -934,14 +934,31 @@ body {
   .navbar {
     padding: 0 12px;
     gap: 8px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+  }
+
+  .nav-center {
+    display: block !important;
+    width: 100%;
+    min-width: 0;
   }
 
   .desktop-search {
-    display: none;
+    display: flex !important;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .desktop-search input {
+    width: 100%;
+    min-width: 0;
   }
 
   .mobile-search-btn {
-    display: inline-flex;
+    display: none !important;
   }
 
   .sidebar {
@@ -1155,10 +1172,7 @@ body {
   justify-content: center;
 }
 
-/* ===== FIX PARA DI MAG STRETCH ===== */
-.navbar {
-  align-items: center;
-}
+
 
 /* ===== SIDEBAR LOGO FIX ===== */
 .sidebar-logo {
@@ -1349,9 +1363,15 @@ body {
   }
 
   .navbar {
+    display: grid;
     grid-template-columns: auto 1fr auto;
+    align-items: center;
     gap: 8px;
     padding: 0 10px;
+  }
+
+  .nav-left {
+    min-width: 0;
   }
 
   .nav-center {
@@ -1362,17 +1382,17 @@ body {
 
   .desktop-search {
     display: flex !important;
+    align-items: center;
     width: 100%;
-    max-width: none;
+    min-width: 0;
   }
 
   .desktop-search input {
     width: 100%;
+    min-width: 0;
   }
 
-  .search-submit-btn,
   .mobile-search-btn,
-  .cart-btn,
   .home-link span:last-child {
     display: none !important;
   }
@@ -1380,12 +1400,17 @@ body {
   .nav-right {
     display: flex !important;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
 
   .notification-btn,
   .notification-btn.desktop-only {
     display: inline-flex !important;
+  }
+
+  .cart-btn,
+  .account-menu {
+    display: none !important;
   }
 }
 
@@ -1545,26 +1570,6 @@ body {
   -webkit-overflow-scrolling: touch;
 
   padding-bottom: 5px;
-}
-
-/* 🔥 Mobile (default) */
-.voucher-card {
-  min-width: 110px;
-  flex-shrink: 0;
-}
-
-/* 🔥 Desktop */
-@media (min-width: 768px) {
-  .voucher-list {
-    justify-content: center;
-    /* center sa desktop */
-    overflow-x: visible;
-    /* no scroll */
-  }
-
-  .voucher-card {
-    min-width: 130px;
-  }
 }
 
 .voucher-card {
@@ -1899,6 +1904,7 @@ body {
   overflow-x: auto !important;
   padding-bottom: 10px !important;
   flex-wrap: nowrap !important;
+  justify-content: center;
 }
 
 .voucher-card {
@@ -1907,60 +1913,6 @@ body {
   flex-shrink: 0 !important;
 }
 
-.search-submit-btn {
-  width: 42px;
-  height: 42px;
-  border: none;
-  border-radius: 10px;
-  background: #00bcd4;
-  color: white;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-@media (max-width: 768px) {
-  .home-link {
-    display: none;
-  }
-}
-
-@media (max-width: 768px) {
-
-  .desktop-search {
-    display: flex !important;
-    width: 100%;
-    max-width: none;
-  }
-
-  .desktop-search input {
-    width: 100%;
-  }
-
-  .nav-center {
-    display: block !important;
-    width: 100%;
-  }
-
-  .mobile-search-btn {
-    display: none !important;
-  }
-}
-
-@media (max-width: 768px) {
-
-  .cart-btn,
-  .account-menu {
-    display: none !important;
-  }
-
-  .notification-btn,
-  .notification-btn.desktop-only {
-    display: inline-flex !important;
-  }
-}
 
 .clear-search-btn {
   width: 40px;
@@ -1970,4 +1922,25 @@ body {
   color: #888;
   font-size: 18px;
   cursor: pointer;
+}
+
+/* TABLET / IPAD FIX */
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  .homepage-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .voucher-card {
+    min-width: 220px;
+    max-width: 220px;
+  }
+
+  .navbar {
+    gap: 10px;
+  }
+
+  .desktop-search {
+    max-width: 100%;
+  }
 }

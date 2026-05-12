@@ -141,13 +141,18 @@
   <div class="overlay" id="overlay"></div>
 
   <main class="main-content">
-    <button class="back-btn" onclick="window.location.href='../home/index.html'">
 
-      ← Back
-
-    </button>
     <section class="product-detail-section">
+
       <div class="product-container">
+
+        <button class="back-btn" onclick="window.location.href='../home/index.html'">
+          ←
+        </button>
+
+        <button id="shareBtn" class="share-top-btn" type="button">
+          ↗
+        </button>
 
         <div class="product-left">
           <div class="product-image">
@@ -156,10 +161,16 @@
         </div>
 
         <div class="product-info">
+
           <span class="product-badge">Product Details</span>
 
-          <h1 id="productName" class="product-title">Product Name</h1>
-          <div id="titleToggle" class="title-expand">Read more</div>
+          <h1 id="productName" class="product-title">
+            Product Name
+          </h1>
+
+          <div id="titleToggle" class="title-expand">
+            Read more
+          </div>
 
           <div class="price-row">
             <span class="price" id="productPrice">₱0</span>
@@ -167,7 +178,9 @@
             <span class="discount" id="discountBadge"></span>
           </div>
 
-          <p class="stock" id="stockText">Stock: 0 available</p>
+          <p class="stock" id="stockText">
+            Stock: 0 available
+          </p>S
 
           <!-- START PRODUCT VARIANTS -->
           <div id="variantContainer" class="variant-container"></div>
@@ -202,7 +215,6 @@
           <div class="product-action-buttons">
             <button id="addToCartBtn" class="add-cart-btn" type="button">🛒 Add to Cart</button>
             <button id="buyNowBtn" class="buy-now-btn" type="button">⚡ Buy Now</button>
-            <button id="shareBtn" class="share-btn" type="button">↗ Share</button>
           </div>
 
           <p id="message" class="message"></p>
