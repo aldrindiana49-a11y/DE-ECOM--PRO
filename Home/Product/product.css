@@ -1027,12 +1027,12 @@
 }
 
 .gallery-nav:hover {
-  background: rgba(255,255,255,0.58);
+  background: rgba(255, 255, 255, 0.58);
 }
 
 .gallery-nav:active {
   transform: translateY(-50%) scale(0.94);
-  background: rgba(255,255,255,0.35);
+  background: rgba(255, 255, 255, 0.35);
 }
 
 .gallery-nav:focus {
@@ -1042,7 +1042,7 @@
 .variant-popup-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0, 0, 0, 0.45);
   display: none;
   align-items: flex-end;
   justify-content: center;
@@ -1060,12 +1060,21 @@
   border-radius: 22px 22px 0 0;
   padding: 18px;
   position: relative;
+
+  max-height: 92vh;
+  overflow-y: auto;
+
   animation: popupUp 0.22s ease;
 }
 
 @keyframes popupUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
 }
 
 .variant-popup-close {
@@ -1141,4 +1150,59 @@
   font-weight: 800;
   font-size: 16px;
   cursor: pointer;
+}
+
+.variant-popup-qty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.variant-popup-qty button {
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 10px;
+  background: #f3f4f6;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.variant-popup-qty input {
+  width: 70px;
+  height: 38px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.popup-qty-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.variant-btn.active {
+  background: #06b6d4;
+  color: white;
+  border-color: #06b6d4;
+}
+
+@media (max-width: 768px) {
+  .variant-btn.active {
+    background: white !important;
+    color: #06b6d4 !important;
+    border-color: #d1d5db !important;
+  }
+
+  .variant-btn:active {
+    background: #f3f4f6 !important;
+    transform: scale(0.97);
+  }
 }

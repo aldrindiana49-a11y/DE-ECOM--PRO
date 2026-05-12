@@ -47,9 +47,10 @@ function renderVariantSelector() {
 
       if (!variant || safeNumber(variant.stock) <= 0) return;
 
-      buttons.forEach(btn => btn.classList.remove("active"));
-      this.classList.add("active");
-
+      if (window.innerWidth > 768) {
+        buttons.forEach(btn => btn.classList.remove("active"));
+        this.classList.add("active");
+      }
       selectedVariant = variant;
       updateVariantUI(variant);
     });
@@ -450,6 +451,11 @@ addToCartBtn.addEventListener("click", () => {
   const qty = validateQuantity();
   const variants = getVariants(product);
 
+  if (variants.length > 1 && window.innerWidth <= 768) {
+    openVariantPopup();
+    return;
+  }
+
   if (
     variants.length > 1 &&
     !selectedVariant
@@ -785,6 +791,34 @@ function openVariantPopup() {
     </button>
   `).join("");
 
+
+  if (selectedVariant) {
+    const selectedIndex = variants.findIndex(
+      item => item.label === selectedVariant.label
+    );
+
+    if (selectedIndex >= 0) {
+      const activeBtn = variantPopupOptions.querySelector(
+        `[data-index="${selectedIndex}"]`
+      );
+
+      activeBtn?.classList.add("active");
+
+      document.getElementById("variantPopupImage").src =
+        selectedVariant.image || getProductImage(product);
+
+      document.getElementById("variantPopupPrice").textContent =
+        formatPrice(
+          safeNumber(selectedVariant.discountPrice) > 0
+            ? selectedVariant.discountPrice
+            : selectedVariant.price
+        );
+
+      document.getElementById("variantPopupStock").textContent =
+        `Stock: ${selectedVariant.stock}`;
+    }
+  }
+
   variantPopup.classList.add("show");
 
   variantPopupOptions
@@ -827,12 +861,63 @@ function openVariantPopup() {
     });
 }
 
+function closeVariantPopup() {
+  const popup = document.getElementById("variantPopup");
+  if (!popup) return;
+
+  popup.classList.remove("show");
+
+  selectedVariant = null;
+
+  document
+    .querySelectorAll(".variant-popup-option")
+    .forEach(btn => btn.classList.remove("active"));
+}
+
 document
   .getElementById("closeVariantPopup")
+  ?.addEventListener("click", closeVariantPopup);
+
+document
+  .getElementById("variantPopup")
+  ?.addEventListener("click", (e) => {
+
+    if (e.target.id === "variantPopup") {
+      closeVariantPopup();
+    }
+
+  });
+
+const popupQtyInput =
+  document.getElementById("popupQtyInput");
+
+document
+  .getElementById("popupQtyPlus")
   ?.addEventListener("click", () => {
 
-    document
-      .getElementById("variantPopup")
-      ?.classList.remove("show");
+    let qty =
+      Number(popupQtyInput.value) || 1;
+
+    const maxStock =
+      selectedVariant
+        ? safeNumber(selectedVariant.stock)
+        : getProductStock(product);
+
+    if (qty < maxStock) {
+      popupQtyInput.value = qty + 1;
+    }
+
+  });
+
+document
+  .getElementById("popupQtyMinus")
+  ?.addEventListener("click", () => {
+
+    let qty =
+      Number(popupQtyInput.value) || 1;
+
+    if (qty > 1) {
+      popupQtyInput.value = qty - 1;
+    }
 
   });
