@@ -10,6 +10,79 @@ const minusBtn = document.getElementById("minusBtn");
 const addToCartBtn = document.getElementById("addToCartBtn");
 const message = document.getElementById("message");
 
+const variantContainer = document.getElementById("variantContainer");
+let selectedVariant = null;
+
+function renderVariantSelector() {
+  if (!variantContainer) return;
+
+  const variants = getVariants(product);
+
+  if (!variants.length) {
+    variantContainer.innerHTML = "";
+    selectedVariant = null;
+    return;
+  }
+
+  variantContainer.innerHTML = `
+    <h4 class="variant-title">${product.variantTitle || "Variation"}</h4>
+    <div class="variant-options">
+      ${variants.map((variant, index) => `
+        <button
+          type="button"
+          class="variant-btn ${safeNumber(variant.stock) <= 0 ? "out-of-stock" : ""}"
+          data-index="${index}"
+        >
+          ${variant.label}
+        </button>
+      `).join("")}
+    </div>
+  `;
+
+  const buttons = variantContainer.querySelectorAll(".variant-btn");
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const variant = variants[Number(this.dataset.index)];
+
+      if (!variant || safeNumber(variant.stock) <= 0) return;
+
+      buttons.forEach(btn => btn.classList.remove("active"));
+      this.classList.add("active");
+
+      selectedVariant = variant;
+      updateVariantUI(variant);
+    });
+  });
+
+  selectedVariant = null;
+}
+
+function updateVariantUI(variant) {
+  const price = safeNumber(variant.price);
+  const discount = safeNumber(variant.discountPrice);
+  const finalPrice = discount > 0 && discount < price ? discount : price;
+  const percent = discount > 0 && discount < price
+    ? Math.round(((price - discount) / price) * 100)
+    : 0;
+
+  document.getElementById("productPrice").textContent = formatPrice(finalPrice);
+  document.getElementById("productOldPrice").textContent = percent ? formatPrice(price) : "";
+  document.getElementById("discountBadge").textContent = percent ? `-${percent}%` : "";
+  document.getElementById("stockText").textContent =
+    safeNumber(variant.stock) > 0 ? `Stock: ${variant.stock} available` : "Out of stock";
+
+  if (variant.image) {
+    document.getElementById("productImg").src = variant.image;
+  }
+
+  quantityInput.max = safeNumber(variant.stock);
+  quantityInput.value = safeNumber(variant.stock) > 0 ? 1 : 0;
+
+  addToCartBtn.disabled = safeNumber(variant.stock) <= 0;
+  addToCartBtn.textContent = safeNumber(variant.stock) <= 0 ? "Out of Stock" : "Add to Cart";
+}
+
 function safeNumber(value, fallback = 0) {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
@@ -58,6 +131,21 @@ function getProductImage(product) {
     product?.image ||
     "https://via.placeholder.com/500x400?text=No+Image"
   );
+}
+
+function getProductGallery(product) {
+  const gallery = Array.isArray(product?.gallery)
+    ? product.gallery
+    : [];
+
+  const mainImage =
+    product?.image ||
+    getProductImage(product);
+
+  return [mainImage, ...gallery]
+    .filter(Boolean)
+    .filter((img, index, arr) => arr.indexOf(img) === index)
+    .slice(0, 5);
 }
 
 function findProduct() {
@@ -134,8 +222,10 @@ async function loadProductsFromSupabase() {
       brand: item.brand || "",
       category: item.category,
       description: item.description,
+      variantTitle: item.variant_title || "Variation",
       variants,
       image: item.image,
+      gallery: Array.isArray(item.gallery) ? item.gallery : [],
       price: mainPrice,
       discountPrice: mainDiscount,
       stock: item.stock
@@ -167,7 +257,8 @@ loadProductsFromSupabase();
 function renderProduct() {
   const stock = getProductStock(product);
 
-  document.getElementById("productName").textContent = product.name || "Unnamed Product";
+  document.getElementById("productName").textContent =
+    product.name || "Unnamed Product";
 
   const variant = getBestVariant(product);
 
@@ -182,23 +273,32 @@ function renderProduct() {
     percent = Math.round(((price - discount) / price) * 100);
   }
 
-  document.getElementById("productPrice").textContent = "₱" + finalPrice;
+  document.getElementById("productPrice").textContent =
+    formatPrice(finalPrice);
 
   document.getElementById("productOldPrice").textContent =
-    percent ? "₱" + price : "";
+    percent ? formatPrice(price) : "";
 
   document.getElementById("discountBadge").textContent =
-    percent ? "-" + percent + "%" : "";
+    percent ? `-${percent}%` : "";
 
   document.getElementById("stockText").textContent =
-    stock > 0 ? `Stock: ${stock} available` : "Out of stock";
+    stock > 0
+      ? `Stock: ${stock} available`
+      : "Out of stock";
 
-  document.getElementById("productImg").src = getProductImage(product);
+  renderProductGallery();
 
-  const descEl = document.getElementById("productDescription") || document.querySelector(".description");
+  const descEl =
+    document.getElementById("productDescription") ||
+    document.querySelector(".description");
+
   if (descEl) {
-    descEl.textContent = product.description || "No description available.";
+    descEl.textContent =
+      product.description || "No description available.";
   }
+
+  renderVariantSelector();
 
   quantityInput.max = stock;
 
@@ -207,9 +307,92 @@ function renderProduct() {
     addToCartBtn.disabled = true;
     addToCartBtn.textContent = "Out of Stock";
   }
-
-
 }
+
+function renderProductGallery() {
+  const imageBox = document.querySelector(".product-image");
+  if (!imageBox) return;
+
+  const images = getProductGallery(product);
+  let currentIndex = 0;
+
+  imageBox.innerHTML = `
+    <div class="product-gallery-slider">
+      <button type="button" class="gallery-nav prev" id="galleryPrevBtn">‹</button>
+
+      <img id="productImg" src="${images[0] || ""}" alt="Product Image" />
+
+      <button type="button" class="gallery-nav next" id="galleryNextBtn">›</button>
+    </div>
+
+    <div class="product-thumbnails">
+      ${images.map((img, index) => `
+        <button
+          type="button"
+          class="product-thumb ${index === 0 ? "active" : ""}"
+          data-index="${index}"
+        >
+          <img src="${img}" />
+        </button>
+      `).join("")}
+    </div>
+  `;
+
+  function showImage(index) {
+    currentIndex = index;
+
+    document.getElementById("productImg").src = images[currentIndex];
+
+    imageBox.querySelectorAll(".product-thumb").forEach((thumb, i) => {
+      thumb.classList.toggle("active", i === currentIndex);
+    });
+  }
+
+  imageBox.querySelectorAll(".product-thumb").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      showImage(Number(this.dataset.index));
+    });
+  });
+
+  document.getElementById("galleryPrevBtn")?.addEventListener("click", () => {
+    const nextIndex = currentIndex <= 0 ? images.length - 1 : currentIndex - 1;
+    showImage(nextIndex);
+  });
+
+  document.getElementById("galleryNextBtn")?.addEventListener("click", () => {
+    const nextIndex = currentIndex >= images.length - 1 ? 0 : currentIndex + 1;
+    showImage(nextIndex);
+  });
+
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  const slider = imageBox.querySelector(".product-gallery-slider");
+
+  slider?.addEventListener("touchstart", (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  });
+
+  slider?.addEventListener("touchend", (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+
+    const swipeDistance = touchEndX - touchStartX;
+
+    if (Math.abs(swipeDistance) < 50) return;
+
+    if (swipeDistance < 0) {
+      const nextIndex =
+        currentIndex >= images.length - 1 ? 0 : currentIndex + 1;
+      showImage(nextIndex);
+    } else {
+      const prevIndex =
+        currentIndex <= 0 ? images.length - 1 : currentIndex - 1;
+      showImage(prevIndex);
+    }
+  });
+}
+
+
 
 function getCart() {
   return JSON.parse(localStorage.getItem("drinCart")) || [];
@@ -265,7 +448,24 @@ quantityInput.addEventListener("input", validateQuantity);
 addToCartBtn.addEventListener("click", () => {
   const stock = getProductStock(product);
   const qty = validateQuantity();
+  const variants = getVariants(product);
 
+  if (
+    variants.length > 1 &&
+    !selectedVariant
+  ) {
+    showMessage(
+      `Please select ${product.variantTitle || "variation"}.`,
+      "error"
+    );
+
+    variantContainer?.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+    return;
+  }
   if (stock <= 0) {
     showMessage("Out of stock.", "error");
     return;
@@ -456,7 +656,7 @@ async function loadProductVouchers() {
     `;
   }).join("");
 
-enableVoucherDragSwipe();
+  enableVoucherDragSwipe();
 
 }
 

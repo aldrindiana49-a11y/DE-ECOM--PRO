@@ -334,7 +334,9 @@
                     <h3>Variant Options</h3>
                     <p>Create options with their own price, stock, SKU, weight, and dimensions.</p>
                   </div>
-                  <button type="button" class="primary-btn" id="addVariantBtn">+ Add Option</button>
+                  <button type="button" class="primary-btn" id="addVariantBtn" onclick="addVariantRow()">
+                    + Add Option
+                  </button>
                 </div>
 
                 <div class="table-wrap">
@@ -365,7 +367,7 @@
 
               <div class="form-group full-width">
                 <label for="productImageFile">Upload Main Product Photo</label>
-                <input type="file" id="productImageFile" accept="image/*" />
+                <input type="file" id="productImageFile" accept="image/*" multiple />
                 <small class="helper-text">
                   This is the main fallback image if no SKU/variant photo is provided.
                 </small>
@@ -954,7 +956,7 @@
   <script src="./inventory.js"></script>
   <script src="./generator.js"></script>
   <script src="./categories.js"></script>
- <!-- <script src="./orders.js"></script> -->
+  <!-- <script src="./orders.js"></script> -->
 
   <script src="./employee.js"></script>
 </body>

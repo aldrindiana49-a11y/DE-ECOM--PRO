@@ -162,26 +162,46 @@ if (productTypeInput) {
   productTypeInput.addEventListener("change", setModeUI);
 }
 
+
 if (productImageFile) {
   productImageFile.addEventListener("change", function () {
-    const file = this.files[0];
 
-    if (!file) {
+    const files = Array.from(this.files || []);
+
+    if (!files.length) {
       setImagePreview(safeText(existingImageData?.value));
       return;
     }
 
-    if (!file.type.startsWith("image/")) {
-      showToast("Please select a valid main product image file.", "error");
+    if (files.length > 5) {
+      showToast("Maximum 5 product photos only.", "error");
       this.value = "";
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      setImagePreview(e.target.result);
-    };
-    reader.readAsDataURL(file);
+    const invalidFile = files.find(
+      file => !file.type.startsWith("image/")
+    );
+
+    if (invalidFile) {
+      showToast("Please select valid image files only.", "error");
+      this.value = "";
+      return;
+    }
+
+    Promise.all(
+      files.map(file => fileToBase64(file))
+    ).then((images) => {
+
+      setImagePreview(images[0], images);
+
+      showToast(
+        `${images.length} product photos selected.`,
+        "success"
+      );
+
+    });
+
   });
 }
 
@@ -318,6 +338,8 @@ function addVariantRow() {
   variants.push(createEmptyVariant());
   renderVariantTable(variants);
 }
+
+window.addVariantRow = addVariantRow;
 
 function removeVariantRow(variantId) {
   const variants = getVariantRows().filter(
@@ -602,9 +624,16 @@ function renderInventory(filter = "") {
     const brand = safeText(product.brand).toLowerCase();
 
     const variantMatch = Array.isArray(product.variants)
-      ? product.variants.some((variant) =>
-        safeText(variant.label).toLowerCase().includes(searchValue)
-      )
+      ? product.variants.some((variant) => {
+
+        const label = safeText(variant.label).toLowerCase();
+        const sku = safeText(variant.sku).toLowerCase();
+
+        return (
+          label.includes(searchValue) ||
+          sku.includes(searchValue)
+        );
+      })
       : false;
 
     return (
@@ -689,11 +718,23 @@ if (productForm) {
     e.preventDefault();
 
     try {
-      let finalImage = safeText(existingImageData?.value);
-      const uploadedFile = productImageFile?.files?.[0];
 
-      if (uploadedFile) {
-        finalImage = await fileToBase64(uploadedFile);
+      let finalImage = safeText(existingImageData?.value);
+      let galleryImages = [];
+
+      const uploadedFiles = Array.from(productImageFile?.files || []);
+
+      if (uploadedFiles.length > 5) {
+        showToast("Maximum 5 product photos only.", "error");
+        return;
+      }
+
+      if (uploadedFiles.length > 0) {
+        galleryImages = await Promise.all(
+          uploadedFiles.map((file) => fileToBase64(file))
+        );
+
+        finalImage = galleryImages[0];
       }
 
       const currentMode = safeText(productTypeInput?.value, "single");
@@ -715,11 +756,12 @@ if (productForm) {
         description: safeText(descriptionInput?.value),
         stock: safeNumber(firstVariant.stock, 0),
         image: safeText(finalImage),
+        gallery: galleryImages,
+        variant_title: currentMode === "variant"
+          ? safeText(variantTitleInput?.value, "Variation")
+          : "Single SKU",
         variations: variants,
         weight: safeNumber(firstVariant.weight, 0),
-        length: safeNumber(firstVariant.length, 0),
-        width: safeNumber(firstVariant.width, 0),
-        height: safeNumber(firstVariant.height, 0)
       };
 
       if (!productData.title) {
@@ -872,25 +914,16 @@ async function deleteProduct(id) {
   showToast("Product deleted online.", "success");
 }
 
-if (resetBtn) {
-  resetBtn.addEventListener("click", function () {
-    resetProductForm();
-    showToast("Form cleared.", "success");
-  });
-}
-
 if (searchInput) {
   searchInput.addEventListener("input", function () {
-    renderInventory(this.value);
+
+    const keyword = safeText(this.value).toLowerCase().trim();
+
+    renderInventory(keyword);
+
   });
 }
 
-if (addVariantBtn) {
-  addVariantBtn.addEventListener("click", function () {
-    addVariantRow();
-    showToast("New option row added.", "success");
-  });
-}
 
 async function loadAdminProductsFromSupabase() {
   const { data, error } = await supabaseClient
