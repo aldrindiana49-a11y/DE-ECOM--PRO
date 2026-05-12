@@ -311,6 +311,33 @@
   <script src="../admin/supabase.js"></script>
   <script src="product.js?v=4"></script>
 
+  <div id="variantPopup" class="variant-popup-overlay">
+    <div class="variant-popup-box">
+
+      <button type="button" id="closeVariantPopup" class="variant-popup-close"
+        onclick="document.getElementById('variantPopup').classList.remove('show')">
+        ×
+      </button>
+
+      <div class="variant-popup-top">
+        <img id="variantPopupImage" src="" alt="Variant Image" />
+        <div>
+          <h3 id="variantPopupName"></h3>
+          <p id="variantPopupPrice"></p>
+          <span id="variantPopupStock"></span>
+        </div>
+      </div>
+
+      <h4 id="variantPopupTitle">Variation</h4>
+
+      <div id="variantPopupOptions" class="variant-popup-options"></div>
+
+      <button type="button" id="confirmVariantAdd" class="confirm-variant-btn">
+        Add to Cart
+      </button>
+
+    </div>
+  </div>
 </body>
 
 </html>

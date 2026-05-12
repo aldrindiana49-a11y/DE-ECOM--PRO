@@ -968,29 +968,27 @@
   width: 42px;
   height: 42px;
   border: none;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.75);
+  background: transparent;
   color: #111827;
-  border: 1px solid rgba(255,255,255,0.8);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  font-size: 28px;
+  box-shadow: none;
+  font-size: 34px;
   font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.15);
-  line-height: 1;
   cursor: pointer;
-  z-index: 5;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(6px);
+  transition: all 0.15s ease;
+  opacity: 0.75;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .gallery-nav.prev {
-  left: 12px;
+  left: -10px;
 }
 
 .gallery-nav.next {
-  right: 12px;
+  right: -10px;
 }
 
 .gallery-nav:hover {
@@ -1026,4 +1024,121 @@
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.gallery-nav:hover {
+  background: rgba(255,255,255,0.58);
+}
+
+.gallery-nav:active {
+  transform: translateY(-50%) scale(0.94);
+  background: rgba(255,255,255,0.35);
+}
+
+.gallery-nav:focus {
+  outline: none;
+}
+
+.variant-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.variant-popup-overlay.show {
+  display: flex;
+}
+
+.variant-popup-box {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 22px 22px 0 0;
+  padding: 18px;
+  position: relative;
+  animation: popupUp 0.22s ease;
+}
+
+@keyframes popupUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.variant-popup-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.variant-popup-top {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.variant-popup-top img {
+  width: 92px;
+  height: 92px;
+  object-fit: cover;
+  border-radius: 14px;
+  background: #f3f4f6;
+}
+
+#variantPopupPrice {
+  color: #dc2626;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+#variantPopupStock {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.variant-popup-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0 18px;
+}
+
+.variant-popup-option {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.variant-popup-option.active {
+  border-color: #06b6d4;
+  background: #ecfeff;
+  color: #0891b2;
+}
+
+.variant-popup-option.out-of-stock {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.confirm-variant-btn {
+  width: 100%;
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  background: #06b6d4;
+  color: white;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
 }

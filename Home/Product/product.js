@@ -454,18 +454,23 @@ addToCartBtn.addEventListener("click", () => {
     variants.length > 1 &&
     !selectedVariant
   ) {
-    showMessage(
-      `Please select ${product.variantTitle || "variation"}.`,
-      "error"
-    );
+    if (window.innerWidth <= 768) {
+      openVariantPopup();
+    } else {
+      showMessage(
+        `Please select ${product.variantTitle || "variation"}.`,
+        "error"
+      );
 
-    variantContainer?.scrollIntoView({
-      behavior: "smooth",
-      block: "center"
-    });
+      variantContainer?.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    }
 
     return;
   }
+
   if (stock <= 0) {
     showMessage("Out of stock.", "error");
     return;
@@ -737,3 +742,97 @@ if (protectionToggle && protectionMore) {
         : "Read More";
   });
 }
+
+let variantPopup;
+let variantPopupOptions;
+
+function openVariantPopup() {
+
+  variantPopup =
+    document.getElementById("variantPopup");
+
+  variantPopupOptions =
+    document.getElementById("variantPopupOptions");
+
+  if (window.innerWidth > 768) return;
+
+  const variants = getVariants(product);
+
+  if (!variants.length) return;
+
+  document.getElementById("variantPopupName").textContent =
+    product.name;
+
+  document.getElementById("variantPopupTitle").textContent =
+    product.variantTitle || "Variation";
+
+  document.getElementById("variantPopupImage").src =
+    getProductImage(product);
+
+  document.getElementById("variantPopupPrice").textContent =
+    formatPrice(getProductPrice(product));
+
+  document.getElementById("variantPopupStock").textContent =
+    `Stock: ${getProductStock(product)}`;
+
+  variantPopupOptions.innerHTML = variants.map((variant, index) => `
+    <button
+      type="button"
+      class="variant-popup-option ${safeNumber(variant.stock) <= 0 ? "out-of-stock" : ""}"
+      data-index="${index}"
+    >
+      ${variant.label}
+    </button>
+  `).join("");
+
+  variantPopup.classList.add("show");
+
+  variantPopupOptions
+    .querySelectorAll(".variant-popup-option")
+    .forEach((btn) => {
+
+      btn.addEventListener("click", function () {
+
+        const variant =
+          variants[Number(this.dataset.index)];
+
+        if (!variant) return;
+
+        if (safeNumber(variant.stock) <= 0) return;
+
+        variantPopupOptions
+          .querySelectorAll(".variant-popup-option")
+          .forEach(item =>
+            item.classList.remove("active")
+          );
+
+        this.classList.add("active");
+
+        selectedVariant = variant;
+
+        document.getElementById("variantPopupImage").src =
+          variant.image || getProductImage(product);
+
+        document.getElementById("variantPopupPrice").textContent =
+          formatPrice(
+            safeNumber(variant.discountPrice) > 0
+              ? variant.discountPrice
+              : variant.price
+          );
+
+        document.getElementById("variantPopupStock").textContent =
+          `Stock: ${variant.stock}`;
+      });
+
+    });
+}
+
+document
+  .getElementById("closeVariantPopup")
+  ?.addEventListener("click", () => {
+
+    document
+      .getElementById("variantPopup")
+      ?.classList.remove("show");
+
+  });
