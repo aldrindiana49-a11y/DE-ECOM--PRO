@@ -1980,3 +1980,5 @@ body {
   gap: 14px;
 }
 
+-webkit-line-clamp: 2;
+line-clamp: 2;

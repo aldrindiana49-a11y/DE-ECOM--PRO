@@ -1259,23 +1259,15 @@
 }
 
 /* ADD TO CART POPUP TITLE 2 LINES */
-
 .variant-popup-top div:first-child,
 .variant-popup-top h3,
 .variant-popup-top h4 {
   overflow: hidden !important;
-
   display: -webkit-box !important;
-
   -webkit-line-clamp: 2 !important;
-
   -webkit-box-orient: vertical !important;
-
   text-overflow: ellipsis !important;
-
   white-space: normal !important;
-
   line-height: 1.35 !important;
-
   max-height: 2.7em !important;
 }
