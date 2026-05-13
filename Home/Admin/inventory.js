@@ -132,18 +132,57 @@ function updateDashboard() {
   }
 }
 
-function setImagePreview(src) {
+function setImagePreview(src, gallery = []) {
+
   if (!productImagePreview || !imagePreviewPlaceholder) return;
 
-  if (src) {
-    productImagePreview.src = src;
-    productImagePreview.style.display = "block";
-    imagePreviewPlaceholder.style.display = "none";
-  } else {
-    productImagePreview.src = "";
-    productImagePreview.style.display = "none";
-    imagePreviewPlaceholder.style.display = "block";
+  const images =
+    gallery.length
+      ? gallery
+      : (src ? [src] : []);
+
+  const box =
+    productImagePreview.parentElement;
+
+  if (!images.length) {
+
+    box.innerHTML = `
+      <img
+        id="productImagePreview"
+        class="product-image-preview"
+        alt="Product Preview"
+      />
+
+      <div
+        id="imagePreviewPlaceholder"
+        class="preview-placeholder"
+      >
+        No photo selected
+      </div>
+    `;
+
+    return;
   }
+
+  box.innerHTML = `
+    <div class="admin-gallery-preview">
+
+      ${images.slice(0, 5).map((img, index) => `
+
+        <div class="admin-gallery-item">
+
+          <img src="${img}" />
+
+          <span>
+            Img ${index + 1}
+          </span>
+
+        </div>
+
+      `).join("")}
+
+    </div>
+  `;
 }
 
 function setModeUI() {

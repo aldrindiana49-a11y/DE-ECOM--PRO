@@ -52,6 +52,12 @@ function renderVariantSelector() {
         this.classList.add("active");
       }
       selectedVariant = variant;
+
+      if (window.innerWidth <= 768) {
+        openVariantPopup();
+        return;
+      }
+
       updateVariantUI(variant);
     });
   });
@@ -567,7 +573,9 @@ function renderSuggestedProducts() {
 
 function openSuggestedProduct(id) {
   localStorage.setItem("selectedProductId", id);
-  window.location.href = `/Product/?id=${encodeURIComponent(id)}`;
+
+  window.location.href =
+    `index.html?id=${encodeURIComponent(id)}`;
 }
 
 // ===== SIDEBAR MENU FIX =====

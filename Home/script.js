@@ -1223,3 +1223,4 @@ if (searchInput && clearSearchBtn) {
   });
 
 }
+
