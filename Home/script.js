@@ -1215,7 +1215,7 @@ function goMessage() {
 }
 
 window.goCart = function () {
-  window.location.href = "/Home/Cart/index.html";
+  window.location.href = "./Cart/index.html";
 };
 
 const searchInput = document.getElementById("desktopSearchInput");
