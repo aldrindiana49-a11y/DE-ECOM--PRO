@@ -140,7 +140,7 @@ body {
 }
 
 .notif-badge,
-.cart-badge {
+.nav-right .cart-badge {
   position: absolute;
   top: -4px;
   right: -2px;
@@ -1980,3 +1980,17 @@ body {
   gap: 14px;
 }
 
+.mobile-nav-icon {
+  position: relative;
+}
+
+.mobile-nav-icon .cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  font-size: 10px;
+  z-index: 5;
+}

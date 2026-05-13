@@ -402,8 +402,19 @@ function clearMobileSearch() {
 }
 
 function updateCartCount() {
-  const totalItems = cart.reduce((sum, item) => sum + safeNumber(item.quantity, 0), 0);
-  if (cartCount) cartCount.textContent = totalItems;
+
+  const cartData =
+    JSON.parse(localStorage.getItem("drinCart")) || [];
+
+  const totalItems = cartData.reduce((sum, item) => {
+    return sum + safeNumber(item.quantity, 0);
+  }, 0);
+
+  document
+    .querySelectorAll("#cartCount, #mobileCartCount")
+    .forEach((badge) => {
+      badge.textContent = totalItems;
+    });
 }
 
 /* BANNER */
@@ -658,6 +669,7 @@ function handleSearch(keyword) {
 
   if (!safeKeyword) {
     renderHomepageProducts(products);
+    updateCartCount();
     return;
   }
 
@@ -895,6 +907,7 @@ function claimVoucher(code) {
 
 /* INIT */
 async function loadProductsFromSupabase() {
+
   const { data, error } = await supabaseClient
     .from("products")
     .select("*")
@@ -904,8 +917,8 @@ async function loadProductsFromSupabase() {
     console.error(error);
     return;
   }
-
   products = (data || []).map((item) => {
+
     const firstVariation =
       Array.isArray(item.variations) && item.variations.length
         ? item.variations[0]
@@ -984,13 +997,6 @@ window.toggleCategories = toggleCategories;
 window.scrollToCategories = scrollToCategories;
 
 // 📱 MOBILE BOTTOM NAV FUNCTIONS
-function goHome() {
-  window.location.href = "index.html";
-}
-
-function goCart() {
-  window.location.href = "../cart/cart.html";
-}
 
 function goAccount() {
   const accountBtn = document.getElementById("accountBtn");
@@ -1208,9 +1214,9 @@ function goMessage() {
   alert("Messenger chat coming soon!");
 }
 
-function goCart() {
-  window.location.href = "/cart/";
-}
+window.goCart = function () {
+  window.location.href = "/Home/Cart/index.html";
+};
 
 const searchInput = document.getElementById("desktopSearchInput");
 const clearSearchBtn = document.getElementById("clearSearchBtn");
@@ -1224,3 +1230,11 @@ if (searchInput && clearSearchBtn) {
 
 }
 
+
+document.addEventListener("DOMContentLoaded", () => {
+  updateCartCount();
+});
+
+window.addEventListener("pageshow", () => {
+  updateCartCount();
+});

@@ -46,6 +46,10 @@ function formatPrice(value) {
   return `₱${safeNumber(value, 0).toLocaleString("en-PH")}`;
 }
 
+function getItemId(item) {
+  return item.id || item.productId;
+}
+
 function saveCart() {
   localStorage.setItem("drinCart", JSON.stringify(cart));
   updateCartCount();
@@ -96,7 +100,7 @@ function renderCart() {
       <div class="empty-cart">
         <h3>Your cart is empty</h3>
         <p>Add products first before checkout.</p>
-        <a href="../Home/index.html">Go back to shop</a>
+        <a href="../index.html">Go back to shop</a>
       </div>
     `;
 
@@ -115,10 +119,10 @@ function renderCart() {
       item.selected = true;
     }
 
-    const stock = getProductStock(item.productId, item);
+    const stock = getProductStock(getItemId(item), item);
 
     let quantity = safeNumber(item.quantity, 1);
-    quantity = clampQty(item.productId, quantity, item);
+    quantity = clampQty(getItemId(item), quantity, item);
     cart[index].quantity = quantity;
 
     const isZeroQty = quantity === 0;
@@ -160,7 +164,14 @@ function renderCart() {
 
       <div class="cart-item-info">
         <span class="cart-item-category">${escapeHtml(safeText(item.category, "General"))}</span>
-        <h3 class="cart-item-title">${escapeHtml(safeText(item.name, "Unnamed Product"))}</h3>
+        <h3 class="cart-item-title">
+  ${escapeHtml(safeText(item.name, "Unnamed Product"))}
+
+  ${item.variantLabel
+        ? `<br><small>Variation: ${escapeHtml(item.variantLabel)}</small>`
+        : ""}
+
+</h3>
         <p class="cart-item-price">${formatPrice(price)}</p>
 
         <p class="cart-item-stock ${isOutOfStock ? "out-stock" : stock !== -1 && quantity >= stock ? "max-stock" : ""
@@ -236,7 +247,7 @@ function renderCart() {
   if (selectAll) {
     const selectableItems = cart.filter((item) => {
       const qty = Number(item.quantity) || 0;
-      const stock = getProductStock(item.productId, item);
+      const stock = getProductStock(getItemId(item), item);
       return qty > 0 && stock !== 0;
     });
 
@@ -250,7 +261,7 @@ function toggleSelect(index) {
   if (!cart[index]) return;
 
   const qty = safeNumber(cart[index].quantity, 0);
-  const stock = getProductStock(cart[index].productId, cart[index]);
+  const stock = getProductStock(getItemId(cart[index]), cart[index]);
 
   if (qty <= 0 || stock === 0) {
     cart[index].selected = false;
@@ -267,7 +278,7 @@ function toggleSelect(index) {
 function toggleSelectAll(checkbox) {
   cart.forEach((item) => {
     const qty = Number(item.quantity) || 0;
-    const stock = getProductStock(item.productId, item);
+    const stock = getProductStock(getItemId(item), item);
 
     item.selected = checkbox.checked && qty > 0 && stock !== 0;
   });
@@ -280,7 +291,7 @@ function increaseQty(index) {
   if (!cart[index]) return;
 
   const currentQty = safeNumber(cart[index].quantity, 0);
-  const stock = getProductStock(cart[index].productId, cart[index]);
+  const stock = getProductStock(getItemId(cart[index]), cart[index]);
 
   if (stock !== -1 && currentQty >= stock) return;
 
@@ -316,11 +327,11 @@ function manualQty(index, value) {
   if (!cart[index]) return;
 
   let qty = safeNumber(value, 0);
-  qty = clampQty(cart[index].productId, qty, cart[index]);
+  qty = clampQty(getItemId(cart[index]), qty, cart[index]);
 
   cart[index].quantity = qty;
 
-  const stock = getProductStock(cart[index].productId, cart[index]);
+  const stock = getProductStock(getItemId(cart[index]), cart[index]);
 
   if (qty <= 0 || stock === 0) {
     cart[index].selected = false;

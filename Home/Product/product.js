@@ -174,14 +174,10 @@ async function loadProductsFromSupabase() {
   const { data, error } = await supabaseClient
     .from("products")
     .select("*")
-    .order("created_at", { ascending: false });
+    .eq("id", productId)
+    .single();
 
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  products = (data || []).map((item) => {
+  products = [data].map((item) => {
 
     const firstVariation =
       Array.isArray(item.variations) && item.variations.length
@@ -519,6 +515,21 @@ addToCartBtn.addEventListener("click", () => {
 });
 
 function showMessage(text, type) {
+  const toast = document.getElementById("cartToast");
+
+  if (toast) {
+    toast.textContent = text;
+    toast.classList.add("show");
+    toast.classList.toggle("success", type === "success");
+    toast.classList.toggle("error", type === "error");
+
+    setTimeout(() => {
+      toast.classList.remove("show", "success", "error");
+    }, 2500);
+
+    return;
+  }
+
   message.textContent = text;
   message.style.color = type === "success" ? "#16a34a" : "#dc2626";
 
@@ -572,7 +583,24 @@ function renderSuggestedProducts() {
 }
 
 function openSuggestedProduct(id) {
-  localStorage.setItem("selectedProductId", id);
+
+  const selected =
+    products.find(
+      p => String(p.id) === String(id)
+    );
+
+  if (selected) {
+
+    localStorage.setItem(
+      "selectedProduct",
+      JSON.stringify(selected)
+    );
+
+    localStorage.setItem(
+      "selectedProductId",
+      selected.id
+    );
+  }
 
   window.location.href =
     `index.html?id=${encodeURIComponent(id)}`;
@@ -912,7 +940,13 @@ document
         : getProductStock(product);
 
     if (qty < maxStock) {
+
       popupQtyInput.value = qty + 1;
+
+    } else {
+
+      showMessage("Quantity limit reached.", "error");
+
     }
 
   });
@@ -929,3 +963,60 @@ document
     }
 
   });
+
+document
+  .getElementById("confirmVariantAdd")
+  ?.addEventListener("click", () => {
+
+    if (!selectedVariant) {
+      showMessage(`Please select ${product.variantTitle || "variation"}.`, "error");
+      return;
+    }
+
+    const qty = Number(popupQtyInput.value) || 1;
+    const stock = safeNumber(selectedVariant.stock);
+
+    if (qty > stock) {
+      showMessage("Quantity limit reached.", "error");
+      return;
+    }
+
+    let cartData = getCart();
+
+    const existingItem = cartData.find(item =>
+      String(item.id) === String(product.id) &&
+      item.variantLabel === selectedVariant.label
+    );
+
+    if (existingItem) {
+      const newQty = safeNumber(existingItem.quantity) + qty;
+
+      if (newQty > stock) {
+        existingItem.quantity = stock;
+        showMessage("Cart updated to maximum available stock.", "error");
+      } else {
+        existingItem.quantity = newQty;
+        showMessage("Quantity added to cart!", "success");
+      }
+
+    } else {
+      cartData.push({
+        id: product.id,
+        name: product.name,
+        variantLabel: selectedVariant.label,
+        price: safeNumber(selectedVariant.discountPrice) > 0
+          ? safeNumber(selectedVariant.discountPrice)
+          : safeNumber(selectedVariant.price),
+        image: selectedVariant.image || getProductImage(product),
+        stock: stock,
+        quantity: qty
+      });
+
+      showMessage("Product added to cart!", "success");
+    }
+
+    saveCart(cartData);
+    updateCartCount();
+    closeVariantPopup();
+  });
+

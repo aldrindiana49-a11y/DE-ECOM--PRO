@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -34,7 +35,7 @@
 
   <link rel="icon" type="image/png" href="Image/favicon.png" />
 
- <link rel="stylesheet" href="style.css?v=7000" />
+  <link rel="stylesheet" href="style.css?v=8000" />
 
   <style>
     .voucher-list {
@@ -93,7 +94,8 @@
         <span class="notif-badge">0</span>
       </button>
 
-      <button class="icon-btn cart-btn" type="button" aria-label="Cart" onclick="window.location.href='/cart/'">
+      <button class="icon-btn cart-btn" type="button" aria-label="Cart"
+        onclick="window.location.href='./Cart/index.html'">
         🛒
         <span class="cart-badge" id="cartCount">0</span>
       </button>
@@ -324,7 +326,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script src="Admin/supabase.js"></script>
 
- <script src="script.js?v=7000"></script>
+  <script src="script.js?v=8000"></script>
 
 
   <div class="mobile-bottom-nav">
@@ -340,8 +342,17 @@
     </button>
 
     <button class="mobile-nav-item" onclick="goCart()">
-      <div class="mobile-nav-icon cart-icon">🛒</div>
+
+      <div class="mobile-nav-icon cart-icon">
+
+        🛒
+
+        <span class="cart-badge" id="mobileCartCount">0</span>
+
+      </div>
+
       <span>Cart</span>
+
     </button>
 
     <button class="mobile-nav-item" onclick="toggleAccountMenu()">
