@@ -591,334 +591,346 @@
             </div>
           </div>
 
-          <div class="panel-card">
 
-            <div class="panel-card">
-              <div class="parcel-header">
-                <h3><span id="parcelCount">0</span> Parcels To Pick</h3>
-                <p>Click each order to view items for picking.</p>
-              </div>
+          <div class="orders-toolbar">
 
-              <div id="pickOrdersList" class="pick-orders-list"></div>
+            <div class="orders-toolbar-left">
+
+              <button class="order-filter-btn active" data-filter="ALL">
+                All
+              </button>
+
+              <button class="order-filter-btn" data-filter="Pending Payment">
+                Pending
+              </button>
+
+              <button class="order-filter-btn" data-filter="PAID">
+                Paid
+              </button>
+
+              <button class="order-filter-btn" data-filter="Processing">
+                Processing
+              </button>
+
+              <button class="order-filter-btn" data-filter="Shipped">
+                Shipped
+              </button>
+
+              <button class="order-filter-btn" data-filter="Delivered">
+                Delivered
+              </button>
+
             </div>
 
-            <div class="orders-toolbar">
-              <button class="order-filter-btn active" data-filter="ALL">All</button>
-              <button class="order-filter-btn" data-filter="Pending Payment">Pending</button>
-              <button class="order-filter-btn" data-filter="PAID">Paid</button>
-              <button class="order-filter-btn" data-filter="Processing">Processing</button>
-              <button class="order-filter-btn" data-filter="Shipped">Shipped</button>
-              <button class="order-filter-btn" data-filter="Delivered">Delivered</button>
-              <button class="primary-btn" type="button" onclick="loadAdminOrders()">Refresh</button>
-            </div>
+            <div class="orders-toolbar-right">
 
+              <button class="secondary-btn" type="button">
+                Select Orders
+              </button>
 
-            <div class="table-wrap">
-              <table class="data-table admin-orders-table">
-                <thead>
-                  <tr>
-                    <th>Order No</th>
-                    <th>Customer</th>
-                    <th>Phone</th>
-                    <th>Amount</th>
-                    <th>Payment</th>
-                    <th>Status</th>
+              <button class="small-btn" type="button">
+                Mark Packed
+              </button>
 
-                    <th>Courier</th>
-                    <th>Tracking</th>
+              <button class="primary-btn" type="button">
+                Arrange Shipment
+              </button>
 
-                    <th>Date</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
+              <button class="primary-btn" type="button">
+                Print Waybill
+              </button>
 
-                <tbody id="adminOrdersTableBody"></tbody>
+              <button class="secondary-btn" type="button" onclick="loadAdminOrders()">
+                Refresh
+              </button>
 
-              </table>
-            </div>
-          </div>
-        </section>
-
-
-        <section class="content-section" id="employeeDashboardSection">
-
-          <div class="section-header">
-            <h2>Employee Dashboard</h2>
-            <p>Attendance, payroll, overtime, benefits, cash advance, and employee management.</p>
-          </div>
-
-          <div class="employee-dashboard-tabs">
-
-            <button class="employee-tab-btn" data-employee-tab="employeesTab">
-              Employees
-            </button>
-
-            <button class="employee-tab-btn active" data-employee-tab="attendanceTab">
-              Attendance
-            </button>
-
-            <button class="employee-tab-btn" data-employee-tab="payrollTab">
-              Payroll
-            </button>
-
-            <button class="employee-tab-btn" data-employee-tab="cashAdvanceTab">
-              Cash Advance
-            </button>
-
-            <button class="employee-tab-btn" data-employee-tab="chargesTab">
-              Charges
-            </button>
-
-            <button class="employee-tab-btn" data-employee-tab="benefitsTab">
-              Benefits
-            </button>
-
-            <button class="employee-tab-btn" data-employee-tab="reportsTab">
-              Reports
-            </button>
-          </div>
-
-          <!-- ATTENDANCE -->
-          <div class="employee-tab-content active-employee-tab" id="attendanceTab">
-
-            <div class="panel-card">
-              <h3>Manual Attendance Entry</h3>
-
-              <form id="manualAttendanceForm" class="form-grid">
-
-                <div class="form-group">
-                  <label>Employee</label>
-                  <select id="manualAttendanceEmployee" required>
-                    <option value="">Select employee</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label>Date</label>
-                  <input type="date" id="manualAttendanceDate" required />
-                </div>
-
-                <div class="form-group">
-                  <label>Time In</label>
-                  <input type="time" id="manualTimeIn" required />
-                </div>
-
-                <div class="form-group">
-                  <label>Time Out</label>
-                  <input type="time" id="manualTimeOut" />
-                </div>
-
-                <div class="form-group">
-                  <label>Status</label>
-                  <select id="manualAttendanceStatus">
-                    <option value="on_time">On Time</option>
-                    <option value="late">Late</option>
-                    <option value="absent">Absent</option>
-                    <option value="half_day">Half Day</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label>Notes</label>
-                  <input type="text" id="manualAttendanceNotes" placeholder="Brownout / forgot to scan / correction" />
-                </div>
-
-                <div class="form-actions full-width">
-                  <button type="submit" class="primary-btn">
-                    Save Attendance
-                  </button>
-                </div>
-
-              </form>
-            </div>
-
-
-            <div class="panel-card">
-
-              <div class="table-wrap">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Employee</th>
-                      <th>Position</th>
-                      <th>Time In</th>
-                      <th>Time Out</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-
-                  <tbody id="attendanceLogsTableBody">
-                    <tr>
-                      <td colspan="5">
-                        <div class="empty-box">
-                          No attendance records yet.
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- PAYROLL -->
-          <div class="employee-tab-content" id="payrollTab">
-            <div class="panel-card">
-              <h3>Payroll Overview</h3>
-              <p>Payroll module preview.</p>
-            </div>
-          </div>
-
-          <!-- CASH ADVANCE -->
-          <div class="employee-tab-content" id="cashAdvanceTab">
-            <div class="panel-card">
-              <h3>Cash Advance</h3>
-              <p>Cash advance records preview.</p>
-            </div>
-          </div>
-
-          <!-- CHARGES -->
-          <div class="employee-tab-content" id="chargesTab">
-            <div class="panel-card">
-              <h3>Employee Charges</h3>
-              <p>Employee penalties and charges preview.</p>
-            </div>
-          </div>
-
-          <!-- BENEFITS -->
-          <div class="employee-tab-content" id="benefitsTab">
-            <div class="panel-card">
-              <h3>Benefits</h3>
-              <p>SSS, Pag-IBIG, and PhilHealth preview.</p>
-            </div>
-          </div>
-
-          <!-- REPORTS -->
-          <div class="employee-tab-content" id="reportsTab">
-
-            <div class="panel-card">
-              <h3>Employee Payslip Report</h3>
-              <p>Select employee and payroll period, then generate printable payslip.</p>
-
-              <div class="form-grid">
-
-                <div class="form-group">
-                  <label>Employee</label>
-                  <select id="payslipEmployeeSelect">
-                    <option value="">Select employee</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label>Payroll Period From</label>
-                  <input type="date" id="payslipDateFrom" />
-                </div>
-
-                <div class="form-group">
-                  <label>Payroll Period To</label>
-                  <input type="date" id="payslipDateTo" />
-                </div>
-
-                <div class="form-actions full-width">
-
-                  <button type="button" class="primary-btn">
-                    Generate Payslip
-                  </button>
-
-                  <button type="button" class="secondary-btn">
-                    Print Payslip
-                  </button>
-
-                  <button type="button" class="primary-btn">
-                    Download PDF
-                  </button>
-
-                </div>
-
-              </div>
             </div>
 
           </div>
 
+          <div id="adminOrdersTableBody" class="admin-orders-list"></div>
 
-          <!-- EMPLOYEES -->
-          <div class="employee-tab-content" id="employeesTab">
 
-            <div class="panel-card">
-              <h3>Add Employee</h3>
+          <section class="content-section" id="employeeDashboardSection">
 
-              <form id="employeeForm" class="form-grid">
-
-                <div class="form-group">
-                  <label>Employee Code / PIN</label>
-                  <input type="text" id="employeeCodeInput" placeholder="EMP001" required />
-                </div>
-
-                <div class="form-group">
-                  <label>Full Name</label>
-                  <input type="text" id="employeeNameInput" placeholder="Employee full name" required />
-                </div>
-
-                <div class="form-group">
-                  <label>Position</label>
-                  <input type="text" id="employeePositionInput" placeholder="Packer / Sales / Technician" />
-                </div>
-
-                <div class="form-group">
-                  <label>Daily Rate</label>
-                  <input type="number" id="employeeDailyRateInput" min="0" step="0.01" placeholder="500" />
-                </div>
-
-                <div class="form-actions full-width">
-                  <button type="submit" class="primary-btn">
-                    Save Employee
-                  </button>
-                </div>
-
-              </form>
-            </div>
-
-            <div class="panel-card">
-              <h3>Employee List</h3>
-
-              <div class="table-wrap">
-                <table class="data-table">
-
-                  <thead>
-                    <tr>
-                      <th>Code</th>
-                      <th>Name</th>
-                      <th>Position</th>
-                      <th>Daily Rate</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-
-                  <tbody id="employeesTableBody">
-                    <tr>
-                      <td colspan="5">
-                        <div class="empty-box">
-                          No employees yet.
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-
-                </table>
-              </div>
-            </div>
-
-          </div>
-
-          <section class="content-section" id="settingsSection">
             <div class="section-header">
-              <h2>Settings</h2>
-              <p>Basic store setup</p>
+              <h2>Employee Dashboard</h2>
+              <p>Attendance, payroll, overtime, benefits, cash advance, and employee management.</p>
             </div>
-            <div class="panel-card">
-              <p>Settings module placeholder.</p>
+
+            <div class="employee-dashboard-tabs">
+
+              <button class="employee-tab-btn" data-employee-tab="employeesTab">
+                Employees
+              </button>
+
+              <button class="employee-tab-btn active" data-employee-tab="attendanceTab">
+                Attendance
+              </button>
+
+              <button class="employee-tab-btn" data-employee-tab="payrollTab">
+                Payroll
+              </button>
+
+              <button class="employee-tab-btn" data-employee-tab="cashAdvanceTab">
+                Cash Advance
+              </button>
+
+              <button class="employee-tab-btn" data-employee-tab="chargesTab">
+                Charges
+              </button>
+
+              <button class="employee-tab-btn" data-employee-tab="benefitsTab">
+                Benefits
+              </button>
+
+              <button class="employee-tab-btn" data-employee-tab="reportsTab">
+                Reports
+              </button>
             </div>
-          </section>
+
+            <!-- ATTENDANCE -->
+            <div class="employee-tab-content active-employee-tab" id="attendanceTab">
+
+              <div class="panel-card">
+                <h3>Manual Attendance Entry</h3>
+
+                <form id="manualAttendanceForm" class="form-grid">
+
+                  <div class="form-group">
+                    <label>Employee</label>
+                    <select id="manualAttendanceEmployee" required>
+                      <option value="">Select employee</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="manualAttendanceDate" required />
+                  </div>
+
+                  <div class="form-group">
+                    <label>Time In</label>
+                    <input type="time" id="manualTimeIn" required />
+                  </div>
+
+                  <div class="form-group">
+                    <label>Time Out</label>
+                    <input type="time" id="manualTimeOut" />
+                  </div>
+
+                  <div class="form-group">
+                    <label>Status</label>
+                    <select id="manualAttendanceStatus">
+                      <option value="on_time">On Time</option>
+                      <option value="late">Late</option>
+                      <option value="absent">Absent</option>
+                      <option value="half_day">Half Day</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Notes</label>
+                    <input type="text" id="manualAttendanceNotes"
+                      placeholder="Brownout / forgot to scan / correction" />
+                  </div>
+
+                  <div class="form-actions full-width">
+                    <button type="submit" class="primary-btn">
+                      Save Attendance
+                    </button>
+                  </div>
+
+                </form>
+              </div>
+
+
+              <div class="panel-card">
+
+                <div class="table-wrap">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Employee</th>
+                        <th>Position</th>
+                        <th>Time In</th>
+                        <th>Time Out</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+
+                    <tbody id="attendanceLogsTableBody">
+                      <tr>
+                        <td colspan="5">
+                          <div class="empty-box">
+                            No attendance records yet.
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- PAYROLL -->
+            <div class="employee-tab-content" id="payrollTab">
+              <div class="panel-card">
+                <h3>Payroll Overview</h3>
+                <p>Payroll module preview.</p>
+              </div>
+            </div>
+
+            <!-- CASH ADVANCE -->
+            <div class="employee-tab-content" id="cashAdvanceTab">
+              <div class="panel-card">
+                <h3>Cash Advance</h3>
+                <p>Cash advance records preview.</p>
+              </div>
+            </div>
+
+            <!-- CHARGES -->
+            <div class="employee-tab-content" id="chargesTab">
+              <div class="panel-card">
+                <h3>Employee Charges</h3>
+                <p>Employee penalties and charges preview.</p>
+              </div>
+            </div>
+
+            <!-- BENEFITS -->
+            <div class="employee-tab-content" id="benefitsTab">
+              <div class="panel-card">
+                <h3>Benefits</h3>
+                <p>SSS, Pag-IBIG, and PhilHealth preview.</p>
+              </div>
+            </div>
+
+            <!-- REPORTS -->
+            <div class="employee-tab-content" id="reportsTab">
+
+              <div class="panel-card">
+                <h3>Employee Payslip Report</h3>
+                <p>Select employee and payroll period, then generate printable payslip.</p>
+
+                <div class="form-grid">
+
+                  <div class="form-group">
+                    <label>Employee</label>
+                    <select id="payslipEmployeeSelect">
+                      <option value="">Select employee</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Payroll Period From</label>
+                    <input type="date" id="payslipDateFrom" />
+                  </div>
+
+                  <div class="form-group">
+                    <label>Payroll Period To</label>
+                    <input type="date" id="payslipDateTo" />
+                  </div>
+
+                  <div class="form-actions full-width">
+
+                    <button type="button" class="primary-btn">
+                      Generate Payslip
+                    </button>
+
+                    <button type="button" class="secondary-btn">
+                      Print Payslip
+                    </button>
+
+                    <button type="button" class="primary-btn">
+                      Download PDF
+                    </button>
+
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+
+
+            <!-- EMPLOYEES -->
+            <div class="employee-tab-content" id="employeesTab">
+
+              <div class="panel-card">
+                <h3>Add Employee</h3>
+
+                <form id="employeeForm" class="form-grid">
+
+                  <div class="form-group">
+                    <label>Employee Code / PIN</label>
+                    <input type="text" id="employeeCodeInput" placeholder="EMP001" required />
+                  </div>
+
+                  <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="employeeNameInput" placeholder="Employee full name" required />
+                  </div>
+
+                  <div class="form-group">
+                    <label>Position</label>
+                    <input type="text" id="employeePositionInput" placeholder="Packer / Sales / Technician" />
+                  </div>
+
+                  <div class="form-group">
+                    <label>Daily Rate</label>
+                    <input type="number" id="employeeDailyRateInput" min="0" step="0.01" placeholder="500" />
+                  </div>
+
+                  <div class="form-actions full-width">
+                    <button type="submit" class="primary-btn">
+                      Save Employee
+                    </button>
+                  </div>
+
+                </form>
+              </div>
+
+              <div class="panel-card">
+                <h3>Employee List</h3>
+
+                <div class="table-wrap">
+                  <table class="data-table">
+
+                    <thead>
+                      <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Daily Rate</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+
+                    <tbody id="employeesTableBody">
+                      <tr>
+                        <td colspan="5">
+                          <div class="empty-box">
+                            No employees yet.
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+
+                  </table>
+                </div>
+              </div>
+
+            </div>
+
+            <section class="content-section" id="settingsSection">
+              <div class="section-header">
+                <h2>Settings</h2>
+                <p>Basic store setup</p>
+              </div>
+              <div class="panel-card">
+                <p>Settings module placeholder.</p>
+              </div>
+            </section>
       </main>
     </div>
   </div>
@@ -949,13 +961,17 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script src="supabase.js"></script>
+
+  <script src="./supabase.js?v=10001"></script>
+  <script src="./utils.js?v=10001"></script>
 
   <script src="./admin.js?v=10001"></script>
   <script src="./inventory.js?v=10001"></script>
   <script src="./generator.js?v=10001"></script>
   <script src="./categories.js?v=10001"></script>
   <script src="./orders.js?v=10001"></script>
+  <script src="./employee.js?v=10001"></script>
+
 </body>
 
 </html>

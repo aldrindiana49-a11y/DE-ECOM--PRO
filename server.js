@@ -626,6 +626,110 @@ app.post("/api/orders/update", (req, res) => {
   }
 });
 
+// ================= CANCEL ORDER =================
+app.post("/api/orders/:orderId/cancel", (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    let orders = readOrders();
+
+    const index = orders.findIndex(
+      order => String(order.external_id) === String(orderId)
+    );
+
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    orders[index].order_status = "Cancelled";
+    orders[index].cancelled_at = new Date().toISOString();
+    orders[index].updated_at = new Date().toISOString();
+
+    saveOrders(orders);
+
+    res.json({
+      success: true,
+      message: "Order cancelled successfully",
+      order: orders[index]
+    });
+
+  } catch (err) {
+    console.error("CANCEL ORDER ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Cancel order failed"
+    });
+  }
+});
+
+// ================= GET CANCELLED ORDERS =================
+app.get("/api/orders/cancelled", (req, res) => {
+  try {
+    const orders = readOrders();
+
+    const cancelledOrders = orders.filter(order =>
+      order.order_status === "Cancelled"
+    );
+
+    res.json({
+      success: true,
+      orders: cancelledOrders
+    });
+
+  } catch (err) {
+    console.error("GET CANCELLED ORDERS ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to get cancelled orders"
+    });
+  }
+});
+
+// ================= DELETE ORDER PERMANENT =================
+app.delete("/api/orders/:orderId/delete", (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    let orders = readOrders();
+
+    const index = orders.findIndex(
+      order => String(order.external_id) === String(orderId)
+    );
+
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    const deletedOrder = orders[index];
+
+    orders.splice(index, 1);
+
+    saveOrders(orders);
+
+    res.json({
+      success: true,
+      message: "Order permanently deleted",
+      order: deletedOrder
+    });
+
+  } catch (err) {
+    console.error("DELETE ORDER ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Delete order failed"
+    });
+  }
+});
+
 // ================= MAYA WEBHOOK =================
 app.post("/webhook", (req, res) => {
   try {

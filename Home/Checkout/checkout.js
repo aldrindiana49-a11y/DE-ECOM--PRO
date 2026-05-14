@@ -456,7 +456,7 @@ function closeOrderModal() {
   if (modal) modal.classList.remove("show");
 }
 
-function togglePayment() {}
+function togglePayment() { }
 
 if (nameInput) {
   nameInput.addEventListener("input", () => {
@@ -470,12 +470,25 @@ if (phoneInput) {
   });
 }
 
+function cleanImageForOrder(image) {
+  const img = String(image || "");
+
+  if (img.startsWith("data:")) {
+    return "";
+  }
+
+  return img;
+}
+
 function normalizeOrderItems(items) {
   return items.map((item) => ({
     name: item.name || item.product_name || item.title || "Product",
     quantity: item.quantity || item.qty || 1,
     price: item.price || 0,
-    image: item.image || item.img || item.photo || "",
+
+    // FIX LARGE BASE64 PAYLOAD
+    image: cleanImageForOrder(item.image || item.img || item.photo),
+
     sku: item.sku || "",
     variant: item.variant || item.label || "",
     weight: Number(item.weight || item.parcel_weight || item.shippingWeight || 0.5) || 0.5,

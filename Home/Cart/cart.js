@@ -1,3 +1,7 @@
+/* ===============================
+   CART COUNT BADGE
+   Purpose: Update cart count display sa navbar/badge
+================================ */
 function updateCartCount() {
   const cart = JSON.parse(localStorage.getItem("drinCart")) || [];
 
@@ -12,13 +16,25 @@ function updateCartCount() {
   }
 }
 
+/* ===============================
+   DOM ELEMENTS
+   Purpose: Kunin lahat ng HTML elements na ginagamit ng cart page
+================================ */
 const cartList = document.getElementById("cartList");
 const cartTotal = document.getElementById("cartTotal");
 const checkoutBtn = document.getElementById("checkoutBtn");
 const selectedCount = document.getElementById("selectedCount");
 
+/* ===============================
+   CART STORAGE
+   Purpose: Kunin saved cart items from localStorage
+================================ */
 let cart = JSON.parse(localStorage.getItem("drinCart")) || [];
 
+/* ===============================
+   HELPER FUNCTIONS
+   Purpose: Safe conversion, escaping, formatting
+================================ */
 function safeText(value, fallback = "") {
   if (value === undefined || value === null) return fallback;
   return String(value);
@@ -46,6 +62,10 @@ function formatPrice(value) {
   return `₱${safeNumber(value, 0).toLocaleString("en-PH")}`;
 }
 
+/* ===============================
+   PRODUCT / STOCK HELPERS
+   Purpose: Kunin item ID, stock, at limit quantity based sa stock
+================================ */
 function getItemId(item) {
   return item.id || item.productId;
 }
@@ -84,12 +104,20 @@ function clampQty(productId, qty, cartItem = null) {
   return qty;
 }
 
+/* ===============================
+   SELECTED CART
+   Purpose: Kunin lang selected items na may quantity
+================================ */
 function getSelectedCart() {
   return cart.filter((item) => {
     return item.selected && Number(item.quantity) > 0;
   });
 }
 
+/* ===============================
+   RENDER CART
+   Purpose: I-display lahat ng cart items sa cart page
+================================ */
 function renderCart() {
   if (!cartList || !cartTotal) return;
 
@@ -141,8 +169,9 @@ function renderCart() {
     }
 
     const card = document.createElement("div");
-    card.className = `cart-item ${item.selected ? "selected" : "unselected"} ${isZeroQty || isOutOfStock ? "unavailable" : ""
-      }`;
+    card.className = `cart-item ${item.selected ? "selected" : "unselected"} ${
+      isZeroQty || isOutOfStock ? "unavailable" : ""
+    }`;
 
     card.innerHTML = `
       <div class="cart-check">
@@ -163,30 +192,36 @@ function renderCart() {
       </div>
 
       <div class="cart-item-info">
-        <span class="cart-item-category">${escapeHtml(safeText(item.category, "General"))}</span>
+        <span class="cart-item-category">
+          ${escapeHtml(safeText(item.category, "General"))}
+        </span>
+
         <h3 class="cart-item-title">
-  ${escapeHtml(safeText(item.name, "Unnamed Product"))}
+          ${escapeHtml(safeText(item.name, "Unnamed Product"))}
+          ${
+            item.variantLabel
+              ? `<br><small>Variation: ${escapeHtml(item.variantLabel)}</small>`
+              : ""
+          }
+        </h3>
 
-  ${item.variantLabel
-        ? `<br><small>Variation: ${escapeHtml(item.variantLabel)}</small>`
-        : ""}
-
-</h3>
         <p class="cart-item-price">${formatPrice(price)}</p>
 
-        <p class="cart-item-stock ${isOutOfStock ? "out-stock" : stock !== -1 && quantity >= stock ? "max-stock" : ""
-      }">
-  ${isZeroQty
-        ? "Qty is 0"
-        : isOutOfStock
-          ? "Out of stock"
-          : stock !== -1 && quantity >= stock
-            ? "Maximum stock reached"
-            : stock === -1
-              ? "Stock: Available"
-              : "Stock: " + stock
-      }
-</p>
+        <p class="cart-item-stock ${
+          isOutOfStock ? "out-stock" : stock !== -1 && quantity >= stock ? "max-stock" : ""
+        }">
+          ${
+            isZeroQty
+              ? "Qty is 0"
+              : isOutOfStock
+                ? "Out of stock"
+                : stock !== -1 && quantity >= stock
+                  ? "Maximum stock reached"
+                  : stock === -1
+                    ? "Stock: Available"
+                    : "Stock: " + stock
+          }
+        </p>
 
         <div class="cart-item-actions">
           <div class="qty-box">
@@ -244,6 +279,7 @@ function renderCart() {
   }
 
   const selectAll = document.getElementById("selectAll");
+
   if (selectAll) {
     const selectableItems = cart.filter((item) => {
       const qty = Number(item.quantity) || 0;
@@ -257,6 +293,10 @@ function renderCart() {
   }
 }
 
+/* ===============================
+   SELECT / UNSELECT ITEMS
+   Purpose: Toggle selected cart item or select all items
+================================ */
 function toggleSelect(index) {
   if (!cart[index]) return;
 
@@ -287,6 +327,10 @@ function toggleSelectAll(checkbox) {
   renderCart();
 }
 
+/* ===============================
+   QUANTITY CONTROLS
+   Purpose: Increase, decrease, manual input quantity
+================================ */
 function increaseQty(index) {
   if (!cart[index]) return;
 
@@ -341,6 +385,10 @@ function manualQty(index, value) {
   renderCart();
 }
 
+/* ===============================
+   REMOVE ITEM + UNDO
+   Purpose: Remove cart item with undo toast support
+================================ */
 let lastRemovedItem = null;
 let lastRemovedIndex = null;
 let undoTimer = null;
@@ -398,11 +446,36 @@ function undoRemove() {
   clearTimeout(undoTimer);
 }
 
+/* ===============================
+   CHECKOUT VALIDATION
+   Purpose: Limit checkout to max 50 items and max ₱50,000
+================================ */
 function goToCheckout() {
   const selectedItems = getSelectedCart();
 
+  const MAX_CHECKOUT_ITEMS = 50;
+  const MAX_ORDER_VALUE = 50000;
+
+  const totalQty = selectedItems.reduce((sum, item) => {
+    return sum + (Number(item.quantity) || 0);
+  }, 0);
+
+  const totalValue = selectedItems.reduce((sum, item) => {
+    return sum + ((Number(item.price) || 0) * (Number(item.quantity) || 0));
+  }, 0);
+
   if (selectedItems.length === 0) {
     alert("Please select at least one item to checkout.");
+    return;
+  }
+
+  if (totalQty > MAX_CHECKOUT_ITEMS) {
+    alert("Maximum 50 items per checkout only. Please create another order.");
+    return;
+  }
+
+  if (totalValue > MAX_ORDER_VALUE) {
+    alert("Maximum ₱50,000 per checkout only. Please create another order.");
     return;
   }
 
@@ -410,8 +483,16 @@ function goToCheckout() {
   window.location.href = "../Checkout/checkout.html";
 }
 
+/* ===============================
+   INIT
+   Purpose: Initial render when page loads
+================================ */
 renderCart();
 
+/* ===============================
+   GLOBAL FUNCTIONS
+   Purpose: Expose functions for inline HTML onclick/onchange
+================================ */
 window.increaseQty = increaseQty;
 window.decreaseQty = decreaseQty;
 window.manualQty = manualQty;
