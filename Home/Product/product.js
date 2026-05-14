@@ -342,9 +342,20 @@ function renderProductGallery() {
   `;
 
   function showImage(index) {
+    const img = document.getElementById("productImg");
+    if (!img) return;
+
     currentIndex = index;
 
-    document.getElementById("productImg").src = images[currentIndex];
+    img.style.opacity = "0";
+    img.style.transform = "translateX(18px)";
+
+    setTimeout(() => {
+      img.src = images[currentIndex];
+
+      img.style.opacity = "1";
+      img.style.transform = "translateX(0)";
+    }, 120);
 
     imageBox.querySelectorAll(".product-thumb").forEach((thumb, i) => {
       thumb.classList.toggle("active", i === currentIndex);
@@ -358,8 +369,8 @@ function renderProductGallery() {
   });
 
   document.getElementById("galleryPrevBtn")?.addEventListener("click", () => {
-    const nextIndex = currentIndex <= 0 ? images.length - 1 : currentIndex - 1;
-    showImage(nextIndex);
+    const prevIndex = currentIndex <= 0 ? images.length - 1 : currentIndex - 1;
+    showImage(prevIndex);
   });
 
   document.getElementById("galleryNextBtn")?.addEventListener("click", () => {
@@ -369,6 +380,7 @@ function renderProductGallery() {
 
   let touchStartX = 0;
   let touchEndX = 0;
+
 
   const slider = imageBox.querySelector(".product-gallery-slider");
 
@@ -381,20 +393,18 @@ function renderProductGallery() {
 
     const swipeDistance = touchEndX - touchStartX;
 
-    if (Math.abs(swipeDistance) < 50) return;
+    if (Math.abs(swipeDistance) < 35) return;
 
     if (swipeDistance < 0) {
-      const nextIndex =
-        currentIndex >= images.length - 1 ? 0 : currentIndex + 1;
-      showImage(nextIndex);
+      const nextIndex = currentIndex >= images.length - 1 ? 0 : currentIndex + 1;
+      requestAnimationFrame(() => showImage(nextIndex));
     } else {
-      const prevIndex =
-        currentIndex <= 0 ? images.length - 1 : currentIndex - 1;
-      showImage(prevIndex);
+      const prevIndex = currentIndex <= 0 ? images.length - 1 : currentIndex - 1;
+      requestAnimationFrame(() => showImage(prevIndex));
     }
   });
-}
 
+}
 
 
 function getCart() {
