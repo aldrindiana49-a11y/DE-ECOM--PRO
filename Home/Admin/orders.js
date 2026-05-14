@@ -125,7 +125,7 @@ async function loadAdminOrders() {
       `;
     }
 
-    const response = await fetch("http://localhost:3000/api/orders");
+    const response = await fetch("https://de-ecom-pro.onrender.com/api/orders");
     const data = await response.json();
 
     if (!data.success || !Array.isArray(data.orders)) {
@@ -188,7 +188,7 @@ async function createSPXShipment(orderId, btn) {
       btn.innerText = "Creating SPX...";
     }
 
-    const res = await fetch(`http://localhost:3000/api/orders/${orderId}/spx-create`, {
+    const res = await fetch(`https://de-ecom-pro.onrender.com/api/orders/${orderId}/spx-create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -415,7 +415,7 @@ async function updateOrder(orderId, data, btn) {
       btn.innerText = "Updating...";
     }
 
-    const res = await fetch("http://localhost:3000/api/orders/update", {
+    const res = await fetch("https://de-ecom-pro.onrender.com/api/orders/update", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
