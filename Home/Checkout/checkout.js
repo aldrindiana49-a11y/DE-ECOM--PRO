@@ -548,13 +548,21 @@ function saveOrder(order) {
 }
 
 function clearCheckedCartItems() {
-  localStorage.removeItem("drinCheckoutItems");
+  const checkedOutItems =
+    JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
 
-  let cart = JSON.parse(localStorage.getItem("drinCart")) || [];
+  let cart =
+    JSON.parse(localStorage.getItem("drinCart")) || [];
 
-  cart = cart.filter((item) => !item.selected);
+  cart = cart.filter(cartItem => {
+    return !checkedOutItems.some(orderItem =>
+      String(orderItem.id) === String(cartItem.id) &&
+      String(orderItem.variantLabel || "") === String(cartItem.variantLabel || "")
+    );
+  });
 
   localStorage.setItem("drinCart", JSON.stringify(cart));
+  localStorage.removeItem("drinCheckoutItems");
 
   window.dispatchEvent(new Event("storage"));
 }
