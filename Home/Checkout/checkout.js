@@ -808,12 +808,11 @@ async function placeOrder() {
     localStorage.removeItem("drinCheckoutItems");
 
     showOrderModal(
-      "Order Placed",
-      `Your COD order has been placed successfully. Courier: ${order.courier}`
+      "Thank You!",
+      `Your order has been placed successfully.`
     );
-
     setTimeout(() => {
-      window.location.href = "../Home/index.html";
+      window.location.href = "../index.html";
     }, 1200);
     return;
   }
