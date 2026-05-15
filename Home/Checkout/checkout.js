@@ -790,6 +790,7 @@ async function placeOrder() {
   saveOrder(order);
 
   if (paymentMain === "COD") {
+
     try {
       await fetch(`${API_BASE_URL}/api/orders/cod`, {
         method: "POST",
@@ -808,19 +809,27 @@ async function placeOrder() {
           items: order.items,
         }),
       });
+
     } catch (error) {
+
       console.warn("COD backend save failed:", error);
+
     }
 
     clearCheckedCartItems();
+
+    // FORCE BACK BUTTON TO HOME
+    forceBackToHomeAfterOrder();
 
     showOrderModal(
       "Thank You!",
       `Your order has been placed successfully.`
     );
+
     setTimeout(() => {
-      window.location.replace("../index.html");
+      window.location.href = "../index.html";
     }, 1200);
+
     return;
   }
 
@@ -910,4 +919,12 @@ function smartBack(fallback = "../Cart/index.html") {
     window.location.href = fallback;
   }
 
+}
+
+function forceBackToHomeAfterOrder() {
+  window.history.pushState(null, "", window.location.href);
+
+  window.addEventListener("popstate", function () {
+    window.location.href = "../index.html";
+  });
 }
