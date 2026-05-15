@@ -23,9 +23,20 @@ const API_BASE_URL = "https://de-ecom-pro.onrender.com";
 
 let cartItems = JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
 
-if (!cartItems.length) {
-  window.location.replace("../index.html");
+function redirectIfNoCheckoutItems() {
+  const items = JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
+
+  if (!items.length) {
+    window.location.replace("../index.html");
+  }
 }
+
+redirectIfNoCheckoutItems();
+
+window.addEventListener("pageshow", function () {
+  redirectIfNoCheckoutItems();
+});
+
 
 let currentShippingFee = null;
 let currentShippingQuote = null;
@@ -818,8 +829,6 @@ async function placeOrder() {
 
     clearCheckedCartItems();
 
-    // FORCE BACK BUTTON TO HOME
-    forceBackToHomeAfterOrder();
 
     showOrderModal(
       "Thank You!",
@@ -919,12 +928,4 @@ function smartBack(fallback = "../Cart/index.html") {
     window.location.href = fallback;
   }
 
-}
-
-function forceBackToHomeAfterOrder() {
-  window.history.pushState(null, "", window.location.href);
-
-  window.addEventListener("popstate", function () {
-    window.location.href = "../index.html";
-  });
 }
