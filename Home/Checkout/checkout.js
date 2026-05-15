@@ -828,7 +828,8 @@ async function placeOrder() {
     }
 
     clearCheckedCartItems();
-
+    localStorage.removeItem("drinCart");
+    localStorage.removeItem("drinCheckoutItems");
 
     showOrderModal(
       "Thank You!",
