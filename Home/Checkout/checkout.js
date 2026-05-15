@@ -932,11 +932,3 @@ function smartBack(fallback = "../Cart/index.html") {
 
 }
 
-window.addEventListener("pageshow", function () {
-
-  cart = JSON.parse(localStorage.getItem("drinCart")) || [];
-
-  renderCart();
-  updateCartCount();
-
-});

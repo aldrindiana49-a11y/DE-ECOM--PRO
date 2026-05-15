@@ -532,3 +532,12 @@ function smartBack(fallback = "../index.html") {
   }
 
 }
+
+window.addEventListener("pageshow", function () {
+
+  cart = JSON.parse(localStorage.getItem("drinCart")) || [];
+
+  renderCart();
+  updateCartCount();
+
+});
