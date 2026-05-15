@@ -501,3 +501,34 @@ window.goToCheckout = goToCheckout;
 window.toggleSelect = toggleSelect;
 window.toggleSelectAll = toggleSelectAll;
 window.undoRemove = undoRemove;
+
+function goBackProduct() {
+
+  const productId =
+    localStorage.getItem("selectedProductId");
+
+  if (productId) {
+
+    window.location.href =
+      `../Product/index.html?id=${productId}`;
+
+  } else {
+
+    history.back();
+
+  }
+
+}
+
+function smartBack(fallback = "../index.html") {
+
+  if (
+    document.referrer &&
+    document.referrer !== window.location.href
+  ) {
+    window.history.back();
+  } else {
+    window.location.href = fallback;
+  }
+
+}

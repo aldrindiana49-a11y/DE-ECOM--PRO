@@ -1,9 +1,9 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
 
 <head>
+  <link rel="icon" type="image/png" id="siteFavicon" href="Image/favicon.png" />
 
   <meta charset="UTF-8" />
 
@@ -33,8 +33,6 @@
 
   <meta name="theme-color" content="#00bcd4" />
 
-  <link rel="icon" type="image/png" href="Image/favicon.png" />
-
   <link rel="stylesheet" href="style.css?v=9001" />
 
   <style>
@@ -59,12 +57,10 @@
   <nav class="navbar">
     <div class="nav-left">
       <button class="menu-btn" type="button" id="menuBtn" aria-label="Open Menu">☰</button>
-      <a href="/" class="home-link" aria-label="Home">
+      <a href="./index.html" class="home-link" aria-label="Home">
         <span class="nav-logo-box">
           <img id="navLogo" src="" alt="" />
-          <span id="navLogoFallback">DE</span>
         </span>
-        <span>Shop</span>
       </a>
     </div>
 
@@ -326,13 +322,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script src="Admin/supabase.js"></script>
 
-  <script src="script.js?v=9001"></script>
-
-
+ 
   <div class="mobile-bottom-nav">
 
     <button class="mobile-nav-item active" onclick="goHome()">
-      <div class="mobile-nav-icon home-icon">🛍</div>
+      <div class="mobile-nav-icon home-icon">
+        <img id="mobileNavLogo" alt="Logo" class="mobile-nav-logo" />
+      </div>
       <span>Shop</span>
     </button>
 
@@ -408,3 +404,29 @@
     </div>
 
   </div>
+
+  <script>
+    function renderFavicon() {
+
+      const settings =
+        JSON.parse(localStorage.getItem("drinStoreSettings")) || {};
+
+      const logo =
+        settings?.branding?.logo || "";
+
+      const favicon =
+        document.getElementById("siteFavicon");
+
+      if (favicon && logo) {
+        favicon.href = logo;
+      }
+
+    }
+
+    renderFavicon();
+  </script>
+
+ <script src="script.js?v=9001"></script>
+</body>
+
+</html>

@@ -1994,3 +1994,61 @@ body {
   font-size: 10px;
   z-index: 5;
 }
+
+.mobile-nav-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.mobile-nav-icon.home-icon {
+  background: linear-gradient(
+    135deg,
+    #00bcd4,
+    #0097a7
+  );
+
+  box-shadow: 0 4px 14px rgba(0,188,212,0.35);
+
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.mobile-nav-icon.home-icon {
+  background: rgba(255,255,255,0.95);
+
+  border: 1px solid rgba(0,0,0,0.06);
+
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+.mobile-nav-icon.chat-icon,
+.mobile-nav-icon.cart-icon {
+  background: linear-gradient(
+    135deg,
+    #00bcd4,
+    #0097a7
+  );
+
+  box-shadow: 0 4px 14px rgba(0,188,212,0.35);
+
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.mobile-nav-logo[src=""],
+.mobile-nav-logo:not([src]) {
+  display: none;
+}
+
+.mobile-nav-icon.home-icon,
+.mobile-nav-icon.chat-icon,
+.mobile-nav-icon.cart-icon {
+  background: linear-gradient(
+    135deg,
+    #00bcd4,
+    #0097a7
+  );
+
+  box-shadow: 0 4px 14px rgba(0,188,212,0.35);
+
+  border: 1px solid rgba(255,255,255,0.15);
+}

@@ -244,18 +244,20 @@ function renderProductCards(productArray) {
     card.onclick = () => {
       localStorage.setItem("selectedProduct", JSON.stringify(product));
       localStorage.setItem("selectedProductId", product.id);
-      window.location.href = `/Product/?id=${encodeURIComponent(product.id)}`;
+
+      window.location.href =
+        `./Product/index.html?id=${encodeURIComponent(product.id)}`;
     };
 
     const imageSlides = product.images
       .map(
         (img) => `
-          <img
-            src="${img}"
-            alt="${escapeHtml(product.name)}"
-            onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'"
-          />
-        `
+      <img
+        src="${img}"
+        alt="${escapeHtml(product.name)}"
+        onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'"
+      />
+    `
       )
       .join("");
 
@@ -342,20 +344,48 @@ function renderBranding() {
 }
 
 function renderNavbarLogo() {
-  const settings = getStoreSettings();
-  const logo = safeText(settings?.branding?.logo, "");
 
-  if (logo && navLogo) {
-    navLogo.src = logo;
-    navLogo.classList.add("show");
-    if (navLogoFallback) navLogoFallback.style.display = "none";
+  const mobileNavLogo =
+    document.getElementById("mobileNavLogo");
+
+  const settings =
+    getStoreSettings();
+
+  const logo =
+    safeText(settings?.branding?.logo, "");
+
+  if (logo) {
+
+    if (navLogo) {
+      navLogo.src = logo;
+      navLogo.classList.add("show");
+    }
+
+    if (mobileNavLogo) {
+      mobileNavLogo.src = logo;
+    }
+
+    if (navLogoFallback) {
+      navLogoFallback.style.display = "none";
+    }
+
   } else {
+
     if (navLogo) {
       navLogo.classList.remove("show");
       navLogo.removeAttribute("src");
     }
-    if (navLogoFallback) navLogoFallback.style.display = "inline-flex";
+
+    if (mobileNavLogo) {
+      mobileNavLogo.removeAttribute("src");
+    }
+
+    if (navLogoFallback) {
+      navLogoFallback.style.display = "inline-flex";
+    }
+
   }
+
 }
 
 /* SIDEBAR / SEARCH */
@@ -1206,7 +1236,7 @@ function claimWelcomeVoucher() {
 })();
 
 function goHome() {
-  window.location.href = "/";
+  window.location.href = "./index.html";
 }
 
 function goMessage() {
@@ -1238,3 +1268,23 @@ document.addEventListener("DOMContentLoaded", () => {
 window.addEventListener("pageshow", () => {
   updateCartCount();
 });
+
+
+function renderFavicon() {
+
+  const settings =
+    JSON.parse(localStorage.getItem("drinStoreSettings")) || {};
+
+  const logo =
+    settings?.branding?.logo || "";
+
+  const favicon =
+    document.getElementById("siteFavicon");
+
+  if (favicon && logo) {
+    favicon.href = logo;
+  }
+
+}
+
+renderFavicon();

@@ -134,55 +134,40 @@ function updateDashboard() {
 
 function setImagePreview(src, gallery = []) {
 
-  if (!productImagePreview || !imagePreviewPlaceholder) return;
+  const preview =
+    document.getElementById("productImagePreview");
+
+  const placeholder =
+    document.getElementById("imagePreviewPlaceholder");
+
+  if (!preview || !placeholder) return;
+
+  const box =
+    preview.parentElement;
+
+  if (!box) return;
 
   const images =
     gallery.length
       ? gallery
       : (src ? [src] : []);
 
-  const box =
-    productImagePreview.parentElement;
-
   if (!images.length) {
 
-    box.innerHTML = `
-      <img
-        id="productImagePreview"
-        class="product-image-preview"
-        alt="Product Preview"
-      />
+    preview.src = "";
 
-      <div
-        id="imagePreviewPlaceholder"
-        class="preview-placeholder"
-      >
-        No photo selected
-      </div>
-    `;
+    preview.style.display = "none";
+
+    placeholder.style.display = "block";
 
     return;
   }
 
-  box.innerHTML = `
-    <div class="admin-gallery-preview">
+  preview.src = images[0];
 
-      ${images.slice(0, 5).map((img, index) => `
+  preview.style.display = "block";
 
-        <div class="admin-gallery-item">
-
-          <img src="${img}" />
-
-          <span>
-            Img ${index + 1}
-          </span>
-
-        </div>
-
-      `).join("")}
-
-    </div>
-  `;
+  placeholder.style.display = "none";
 }
 
 function setModeUI() {
@@ -743,7 +728,13 @@ function renderInventory(filter = "") {
         <td>${escapeHtml(safeText(product.description, "No description"))}</td>
         <td>
           <div class="action-buttons">
-            <button class="small-btn" onclick="editProduct('${product.id}')">Edit</button>
+            <button
+  type="button"
+  class="small-btn"
+  onclick="editProduct('${product.id}')"
+>
+  Edit
+</button>
             <button class="danger-btn" onclick="deleteProduct('${product.id}')">Delete</button>
           </div>
         </td>
@@ -856,6 +847,7 @@ if (productForm) {
       );
 
       resetProductForm();
+      await loadAdminProductsFromSupabase();
       showSection("inventorySection");
 
     } catch (error) {
@@ -866,7 +858,9 @@ if (productForm) {
 }
 
 function editProduct(id) {
-  const product = products.find((item) => String(item.id) === String(id));
+  const product = products.find(
+    (item) => String(item.id).trim() === String(id).trim()
+  );
   if (!product) return;
 
   if (productId) productId.value = safeText(product.id);
@@ -925,12 +919,19 @@ function editProduct(id) {
   if (submitBtn) submitBtn.textContent = "Update Product";
   setImagePreview(safeText(product.image));
   showSection("addListingSection");
-  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  productForm?.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+  // window.scrollTo({ top: 0, behavior: "smooth" });
   showToast("Loaded product for editing.", "success");
 }
 
 async function deleteProduct(id) {
-  const selected = products.find((item) => String(item.id) === String(id));
+  const selected = products.find(
+    (item) => String(item.id).trim() === String(id).trim()
+  );
   if (!selected) return;
 
   const confirmed = confirm(`Delete "${safeText(selected.name, "this product")}"?`);
@@ -982,10 +983,12 @@ async function loadAdminProductsFromSupabase() {
     brand: item.brand || "",
     category: item.category,
     productType: item.variations && item.variations.length > 1 ? "variant" : "single",
-    variantTitle: "Options",
+    variantTitle: item.variant_title || "Options",
     image: item.image,
     description: item.description,
-    variants: item.variations || []
+    variants: Array.isArray(item.variations)
+      ? item.variations
+      : []
   }));
 
   renderInventory();

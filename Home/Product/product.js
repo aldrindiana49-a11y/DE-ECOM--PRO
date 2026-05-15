@@ -24,6 +24,16 @@ function renderVariantSelector() {
     return;
   }
 
+  const realVariants = variants.filter(
+    v => v.label && v.label !== "Default"
+  );
+
+  if (!realVariants.length) {
+    variantContainer.innerHTML = "";
+    selectedVariant = null;
+    return;
+  }
+
   variantContainer.innerHTML = `
     <h4 class="variant-title">${product.variantTitle || "Variation"}</h4>
     <div class="variant-options">
@@ -174,10 +184,9 @@ async function loadProductsFromSupabase() {
   const { data, error } = await supabaseClient
     .from("products")
     .select("*")
-    .eq("id", productId)
-    .single();
+    .order("created_at", { ascending: false });
 
-  products = [data].map((item) => {
+  products = (data || []).map((item) => {
 
     const firstVariation =
       Array.isArray(item.variations) && item.variations.length
@@ -495,13 +504,35 @@ addToCartBtn.addEventListener("click", () => {
   }
 
   let cartData = getCart();
-  const existingItem = cartData.find(item => String(item.id) === String(product.id));
+
+  const selectedVariantLabel = selectedVariant?.label || "";
+
+  const selectedStock = selectedVariant
+    ? safeNumber(selectedVariant.stock)
+    : stock;
+
+  const selectedPrice = selectedVariant
+    ? (
+      safeNumber(selectedVariant.discountPrice) > 0
+        ? safeNumber(selectedVariant.discountPrice)
+        : safeNumber(selectedVariant.price)
+    )
+    : getProductPrice(product);
+
+  const selectedImage =
+    selectedVariant?.image ||
+    getProductImage(product);
+
+  const existingItem = cartData.find(item =>
+    String(item.id) === String(product.id) &&
+    String(item.variantLabel || "") === String(selectedVariantLabel)
+  );
 
   if (existingItem) {
     const newQty = safeNumber(existingItem.quantity) + qty;
 
-    if (newQty > stock) {
-      existingItem.quantity = stock;
+    if (newQty > selectedStock) {
+      existingItem.quantity = selectedStock;
       showMessage("Cart updated to maximum available stock.", "error");
     } else {
       existingItem.quantity = newQty;
@@ -511,10 +542,12 @@ addToCartBtn.addEventListener("click", () => {
     cartData.push({
       id: product.id,
       name: product.name,
-      price: getProductPrice(product),
-      image: getProductImage(product),
-      stock,
-      quantity: qty
+      variantLabel: selectedVariantLabel,
+      price: selectedPrice,
+      image: selectedImage,
+      stock: selectedStock,
+      quantity: qty,
+      selected: true
     });
 
     showMessage("Product added to cart!", "success");
@@ -553,10 +586,15 @@ function renderSuggestedProducts() {
   if (!container) return;
 
   const list = products
-    .filter(p =>
-      String(p.id) !== String(product.id) &&
-      getProductStock(p) > 0
-    )
+    .filter(p => {
+
+      if (String(p.id) === String(product.id)) {
+        return false;
+      }
+
+      return getProductStock(p) > 0;
+
+    })
     .slice(0, 8);
 
   if (!list.length) {
@@ -913,8 +951,6 @@ function closeVariantPopup() {
 
   popup.classList.remove("show");
 
-  selectedVariant = null;
-
   document
     .querySelectorAll(".variant-popup-option")
     .forEach(btn => btn.classList.remove("active"));
@@ -1030,3 +1066,59 @@ document
     closeVariantPopup();
   });
 
+document.getElementById("mobileCartBtn")
+  ?.addEventListener("touchend", function (e) {
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    window.location.href = "../cart/cart.html";
+  });
+
+renderStoreBranding();
+
+function renderStoreBranding() {
+  const mobileNavLogo =
+    document.getElementById("mobileNavLogo");
+  const settings =
+    JSON.parse(localStorage.getItem("drinStoreSettings")) || {};
+
+  const logo = settings?.branding?.logo || "";
+
+  const navLogo = document.getElementById("navLogo");
+  const navLogoFallback = document.getElementById("navLogoFallback");
+
+  if (navLogo && logo) {
+    navLogo.src = logo;
+    navLogo.style.display = "block";
+    if (mobileNavLogo) {
+      mobileNavLogo.src = logo;
+    }
+    if (navLogoFallback) {
+      navLogoFallback.style.display = "none";
+    }
+  }
+}
+
+renderStoreBranding();
+
+function smartBack(fallback = "../index.html") {
+
+  if (
+    document.referrer &&
+    document.referrer !== window.location.href
+  ) {
+
+    window.history.back();
+
+  } else {
+
+    window.location.href = fallback;
+
+  }
+
+}
+
+function goHome() {
+  window.location.href = "../index.html";
+}

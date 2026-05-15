@@ -303,15 +303,22 @@ function renderCheckout() {
     div.className = "checkout-item";
 
     div.innerHTML = `
-      <div class="co-item">
-        <img src="${safeText(item.image, "https://via.placeholder.com/100")}" />
-        <div>
-          <h4>${safeText(item.name, "Product")}</h4>
-          <p>Qty: ${quantity}</p>
-          <p>${formatPrice(itemTotal)}</p>
-        </div>
-      </div>
-    `;
+  <div class="co-item">
+    <img src="${safeText(item.image, "https://via.placeholder.com/100")}" />
+
+    <div>
+      <h4>${safeText(item.name, "Product")}</h4>
+
+      ${item.variantLabel
+        ? `<p class="checkout-variant">Variation: ${safeText(item.variantLabel)}</p>`
+        : ""
+      }
+
+      <p>Qty: ${quantity}</p>
+      <p>${formatPrice(itemTotal)}</p>
+    </div>
+  </div>
+`;
 
     checkoutItems.appendChild(div);
   });
@@ -490,7 +497,30 @@ function normalizeOrderItems(items) {
     image: cleanImageForOrder(item.image || item.img || item.photo),
 
     sku: item.sku || "",
-    variant: item.variant || item.label || "",
+    variant:
+      item.variantLabel ||
+      item.variant ||
+      item.variation ||
+      item.variant_name ||
+      item.variantName ||
+      item.option ||
+      item.option_name ||
+      item.selected_variant ||
+      item.selectedVariation ||
+      item.label ||
+      "",
+    variantLabel:
+      item.variantLabel ||
+      item.variant ||
+      item.variation ||
+      item.variant_name ||
+      item.variantName ||
+      item.option ||
+      item.option_name ||
+      item.selected_variant ||
+      item.selectedVariation ||
+      item.label ||
+      "",
     weight: Number(item.weight || item.parcel_weight || item.shippingWeight || 0.5) || 0.5,
     length: Number(item.length || item.parcel_length || item.shippingLength || 10) || 10,
     width: Number(item.width || item.parcel_width || item.shippingWidth || 10) || 10,
@@ -766,12 +796,25 @@ async function placeOrder() {
     }
 
     clearCheckedCartItems();
-    showOrderModal("Order Placed", `Your COD order has been placed successfully. Courier: ${order.courier}`);
+
+    /* REMOVE ORDERED ITEMS FROM CART */
+    let cart = JSON.parse(localStorage.getItem("drinCart")) || [];
+
+    cart = cart.filter(item => !item.selected);
+
+    localStorage.setItem("drinCart", JSON.stringify(cart));
+
+    /* CLEAR CHECKOUT SESSION */
+    localStorage.removeItem("drinCheckoutItems");
+
+    showOrderModal(
+      "Order Placed",
+      `Your COD order has been placed successfully. Courier: ${order.courier}`
+    );
 
     setTimeout(() => {
       window.location.href = "../Home/index.html";
     }, 1200);
-
     return;
   }
 
@@ -849,3 +892,16 @@ window.loadBarangays = loadBarangays;
 window.placeOrder = placeOrder;
 window.closeOrderModal = closeOrderModal;
 window.togglePayment = togglePayment;
+
+function smartBack(fallback = "../Cart/index.html") {
+
+  if (
+    document.referrer &&
+    document.referrer !== window.location.href
+  ) {
+    window.history.back();
+  } else {
+    window.location.href = fallback;
+  }
+
+}

@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+  <link rel="icon" type="image/png" id="siteFavicon" href="../Image/favicon.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -22,21 +23,28 @@
   <meta name="twitter:description" content="Quality electronic parts and audio equipment from Drin Electronics." />
   <meta name="twitter:image" content="https://drinelectronicsph.com/Image/social-preview.png" />
 
-  <link rel="stylesheet" href="../style.css?v=10000" />
-  <link rel="stylesheet" href="product.css?v=10000" />
+  <link rel="stylesheet" href="../style.css?v=10002" />
+  <link rel="stylesheet" href="product.css?v=10002" />
 </head>
 
 <body>
   <nav class="navbar">
     <div class="nav-left">
       <button class="menu-btn" type="button" id="menuBtn" aria-label="Open Menu">☰</button>
+      <button class="mobile-nav-item active home-mobile-btn" onclick="goHome()">
 
-      <a href="../home/index.html" class="home-link" aria-label="Home">
+        <div class="mobile-nav-icon home-icon">
+          <img id="mobileNavLogo" alt="Logo" class="mobile-nav-logo" />
+        </div>
+
+        <small class="home-mobile-label">Home</small>
+
+      </button>
+      <a href="../index.html" class="home-link" aria-label="Home">
         <span class="nav-logo-box">
           <img id="navLogo" src="" alt="" />
           <span id="navLogoFallback">DE</span>
         </span>
-        <span>Shop</span>
       </a>
     </div>
 
@@ -161,7 +169,7 @@
 
       <div class="product-container">
 
-        <button class="back-btn" onclick="window.location.href='../Cart/index.html'">
+        <button class="back-btn" type="button" onclick="smartBack('../index.html')">
           ←
         </button>
 
@@ -195,6 +203,28 @@
             Stock: 0 available
           </p>
 
+          <!-- START PRODUCT VOUCHERS -->
+          <div class="voucher-section">
+
+            <div class="voucher-header">
+
+              <h3>Available Vouchers</h3>
+
+              <div class="voucher-nav">
+                <button onclick="scrollVoucher(-1)">❮</button>
+                <button onclick="scrollVoucher(1)">❯</button>
+              </div>
+
+            </div>
+
+            <div id="voucherList" class="voucher-list"></div>
+
+          </div>
+
+          <!-- START PRODUCT VARIANTS -->
+          <div id="variantContainer" class="variant-container"></div>
+          <!-- END PRODUCT VARIANTS -->
+
           <div class="customer-protection">
 
             <div class="protection-header">
@@ -216,29 +246,6 @@
             <button id="protectionToggle" class="protection-toggle" type="button">
               Read More
             </button>
-
-          </div>
-
-          <!-- START PRODUCT VARIANTS -->
-          <div id="variantContainer" class="variant-container"></div>
-          <!-- END PRODUCT VARIANTS -->
-
-
-          <!-- START PRODUCT VOUCHERS -->
-          <div class="voucher-section">
-
-            <div class="voucher-header">
-
-              <h3>Available Vouchers</h3>
-
-              <div class="voucher-nav">
-                <button onclick="scrollVoucher(-1)">❮</button>
-                <button onclick="scrollVoucher(1)">❯</button>
-              </div>
-
-            </div>
-
-            <div id="voucherList" class="voucher-list"></div>
 
           </div>
           <!-- END PRODUCT VOUCHERS -->
@@ -294,7 +301,7 @@
       <span>Message</span>
     </button>
 
-    <button class="mobile-nav-item" onclick="window.location.href='/cart/'">
+    <button class="mobile-nav-item" onclick="window.location.href='../Cart/index.html'">
 
       <div class="mobile-nav-icon">
         🛒
@@ -365,7 +372,7 @@
     </div>
   </div>
 
-  <script src="product.js?v=10000"></script>
+  <script src="product.js?v=10002"></script>
 
 </body>
 

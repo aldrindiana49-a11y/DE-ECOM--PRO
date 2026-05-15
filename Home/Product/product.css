@@ -696,7 +696,7 @@
   border: none;
   border-radius: 50%;
 
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.18);
 
   backdrop-filter: blur(10px);
 
@@ -1364,3 +1364,48 @@
 /* =========================
    END CART BADGE RED STYLE
 ========================= */
+
+.home-mobile-btn {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+
+  .home-link {
+    display: none !important;
+  }
+
+  .home-mobile-btn {
+    display: flex !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+}
+
+.home-mobile-btn {
+  gap: 0 !important;
+}
+
+.home-mobile-btn .mobile-nav-icon {
+  width: 32px !important;
+  height: 32px !important;
+
+  margin-bottom: 0 !important;
+}
+
+.mobile-nav-logo {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.home-mobile-label {
+  font-size: 9px;
+  font-weight: 700;
+
+  margin-top: -2px !important;
+
+  line-height: 1;
+
+  color: white;
+}

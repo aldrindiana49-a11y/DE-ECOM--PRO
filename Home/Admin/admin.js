@@ -318,3 +318,73 @@ function showConfirmModal(title, message) {
 }
 
 /* END CUSTOM CONFIRM MODAL */
+
+function readFileAsBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+
+        reader.readAsDataURL(file);
+    });
+}
+
+function getStoreSettings() {
+    return JSON.parse(localStorage.getItem("drinStoreSettings")) || {
+        branding: {}
+    };
+}
+
+function saveStoreSettings(settings) {
+    localStorage.setItem("drinStoreSettings", JSON.stringify(settings));
+}
+
+function loadBrandingSettings() {
+    const settings = getStoreSettings();
+
+    const logoPreview = document.getElementById("storeLogoPreview");
+    const faviconPreview = document.getElementById("storeFaviconPreview");
+
+    if (logoPreview && settings.branding?.logo) {
+        logoPreview.src = settings.branding.logo;
+    }
+
+    if (faviconPreview && settings.branding?.favicon) {
+        faviconPreview.src = settings.branding.favicon;
+    }
+}
+
+document.getElementById("storeLogoUpload")?.addEventListener("change", async function () {
+    const file = this.files?.[0];
+    if (!file) return;
+
+    const base64 = await readFileAsBase64(file);
+
+    const settings = getStoreSettings();
+    settings.branding = settings.branding || {};
+    settings.branding.logo = base64;
+
+    saveStoreSettings(settings);
+    loadBrandingSettings();
+
+    showToast("Logo saved successfully.", "success");
+});
+
+document.getElementById("storeFaviconUpload")?.addEventListener("change", async function () {
+    const file = this.files?.[0];
+    if (!file) return;
+
+    const base64 = await readFileAsBase64(file);
+
+    const settings = getStoreSettings();
+    settings.branding = settings.branding || {};
+    settings.branding.favicon = base64;
+
+    saveStoreSettings(settings);
+    loadBrandingSettings();
+
+    showToast("Favicon saved successfully.", "success");
+});
+
+loadBrandingSettings();

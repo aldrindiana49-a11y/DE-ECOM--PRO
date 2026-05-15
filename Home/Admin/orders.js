@@ -16,6 +16,11 @@ let adminOrders = [];
 let currentOrderFilter = "ALL";
 let expandedOrderItems = {};
 
+const cancelledOrdersTableBody =
+  document.getElementById("cancelledOrdersTableBody");
+
+let cancelledOrders = [];
+
 /* ===============================
    SAFE TEXT HELPERS
 ================================ */
@@ -179,26 +184,25 @@ function renderAdminOrders() {
 
         <div class="warehouse-order-grid">
           <div class="warehouse-items-list">
-            ${
-              visibleItems.length
-                ? visibleItems.map(item => {
-                    const itemName =
-                      item.name ||
-                      item.product_name ||
-                      item.title ||
-                      "Product";
+            ${visibleItems.length
+        ? visibleItems.map(item => {
+          const itemName =
+            item.name ||
+            item.product_name ||
+            item.title ||
+            "Product";
 
-                    const itemQty = item.quantity || item.qty || 1;
+          const itemQty = item.quantity || item.qty || 1;
 
-                    const itemImage =
-                      item.image ||
-                      item.img ||
-                      item.photo ||
-                      "https://via.placeholder.com/70?text=No+Image";
+          const itemImage =
+            item.image ||
+            item.img ||
+            item.photo ||
+            "https://via.placeholder.com/70?text=No+Image";
 
-                    const itemVariant = getItemVariant(item);
+          const itemVariant = getItemVariant(item);
 
-                    return `
+          return `
                       <div class="warehouse-item">
                         <img
                           src="${escapeAttribute(itemImage)}"
@@ -210,11 +214,10 @@ function renderAdminOrders() {
                             ${escapeHtml(itemName)}
                           </div>
 
-                          ${
-                            itemVariant
-                              ? `<div class="warehouse-item-variant">Variation: ${escapeHtml(itemVariant)}</div>`
-                              : ""
-                          }
+                          ${itemVariant
+              ? `<div class="warehouse-item-variant">Variation: ${escapeHtml(itemVariant)}</div>`
+              : ""
+            }
 
                           <div class="warehouse-item-qty">
                             Qty: ${escapeHtml(itemQty)}
@@ -222,13 +225,12 @@ function renderAdminOrders() {
                         </div>
                       </div>
                     `;
-                  }).join("")
-                : `<div class="empty-box">No item details found.</div>`
-            }
+        }).join("")
+        : `<div class="empty-box">No item details found.</div>`
+      }
 
-            ${
-              items.length > 3
-                ? `
+            ${items.length > 3
+        ? `
                   <button
                     class="show-more-items-btn"
                     type="button"
@@ -237,8 +239,8 @@ function renderAdminOrders() {
                     ${isExpanded ? "Show Less" : "Show All Orders"}
                   </button>
                 `
-                : ""
-            }
+        : ""
+      }
           </div>
 
           <div class="warehouse-order-info">
@@ -322,7 +324,10 @@ async function loadAdminOrders() {
       throw new Error("Invalid orders response");
     }
 
-    adminOrders = data.orders;
+    /* REMOVE CANCELLED ORDERS FROM MAIN DASHBOARD */
+    adminOrders = data.orders.filter(order => {
+      return order.order_status !== "Cancelled";
+    });
 
     renderAdminOrders();
     updateOrdersSummary();
@@ -518,6 +523,9 @@ function openTracking(orderId) {
 ================================ */
 
 window.loadAdminOrders = loadAdminOrders;
+window.loadCancelledOrders = loadCancelledOrders;
+window.undoCancelledOrder = undoCancelledOrder;
+window.permanentDeleteOrder = permanentDeleteOrder;
 window.openOrderModal = openOrderModal;
 window.closeOrderModal = closeOrderModal;
 window.cancelOrder = cancelOrder;
@@ -531,3 +539,230 @@ window.toggleShowAllOrderItems = toggleShowAllOrderItems;
 ================================ */
 
 loadAdminOrders();
+
+/* ===============================
+   CANCELLED ORDERS
+================================ */
+
+async function loadCancelledOrders() {
+  if (!cancelledOrdersTableBody) return;
+
+  try {
+
+    cancelledOrdersTableBody.innerHTML = `
+      <div class="empty-box">
+        Loading cancelled orders...
+      </div>
+    `;
+
+    const res = await fetch(
+      "https://de-ecom-pro.onrender.com/api/orders/cancelled"
+    );
+
+    const data = await res.json();
+
+    cancelledOrders = Array.isArray(data.orders)
+      ? data.orders
+      : [];
+
+    renderCancelledOrders();
+
+  } catch (error) {
+
+    console.error(error);
+
+    cancelledOrdersTableBody.innerHTML = `
+      <div class="empty-box">
+        Cannot load cancelled orders.
+      </div>
+    `;
+  }
+}
+
+function renderCancelledOrders() {
+
+  if (!cancelledOrdersTableBody) return;
+
+  if (!cancelledOrders.length) {
+
+    cancelledOrdersTableBody.innerHTML = `
+      <div class="empty-box">
+        No cancelled orders yet.
+      </div>
+    `;
+
+    return;
+  }
+
+  cancelledOrdersTableBody.innerHTML =
+    cancelledOrders.map(order => {
+
+      const orderId =
+        order.external_id ||
+        order.id ||
+        "";
+
+      return `
+        <div class="warehouse-order-card">
+
+          <div class="warehouse-order-head">
+
+            <span>
+              <strong>${escapeHtml(orderId)}</strong>
+              <br>
+              ${escapeHtml(order.customer_name || "Customer")}
+            </span>
+
+            <span class="status-badge status-inactive">
+              Cancelled
+            </span>
+
+          </div>
+
+          <div class="warehouse-order-info">
+
+            <div>
+              <span>Amount</span>
+
+              <strong>
+                ₱${Number(order.amount || 0)
+                  .toLocaleString("en-PH")}
+              </strong>
+            </div>
+
+            <div>
+              <span>Payment</span>
+
+              <strong>
+                ${escapeHtml(order.status || "-")}
+              </strong>
+            </div>
+
+          </div>
+
+          <div class="warehouse-order-actions">
+
+            <button
+              class="small-btn"
+              type="button"
+              onclick="undoCancelledOrder('${escapeAttribute(orderId)}')"
+            >
+              Undo
+            </button>
+
+            <button
+              class="danger-btn"
+              type="button"
+              onclick="permanentDeleteOrder('${escapeAttribute(orderId)}')"
+            >
+              Permanent Delete
+            </button>
+
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+}
+
+async function undoCancelledOrder(orderId) {
+
+  const ok = await showConfirmModal(
+    "Undo Cancelled Order",
+    "Restore this order back to Processing?"
+  );
+
+  if (!ok) return;
+
+  try {
+
+    const res = await fetch(
+      "https://de-ecom-pro.onrender.com/api/orders/update",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          orderId,
+          order_status: "Processing"
+        })
+      }
+    );
+
+    const result = await res.json();
+
+    if (!result.success) {
+      showToast(
+        result.message || "Failed to restore order",
+        "error"
+      );
+      return;
+    }
+
+    showToast("Order restored", "success");
+
+    await loadCancelledOrders();
+    await loadAdminOrders();
+
+  } catch (error) {
+
+    console.error(error);
+
+    showToast(
+      "Restore order server error",
+      "error"
+    );
+  }
+}
+
+async function permanentDeleteOrder(orderId) {
+
+  const ok = await showConfirmModal(
+    "Permanent Delete",
+    "This action cannot be undone."
+  );
+
+  if (!ok) return;
+
+  try {
+
+    const res = await fetch(
+      `https://de-ecom-pro.onrender.com/api/orders/${orderId}/delete`,
+      {
+        method: "DELETE"
+      }
+    );
+
+    const result = await res.json();
+
+    if (!result.success) {
+
+      showToast(
+        result.message || "Failed to delete order",
+        "error"
+      );
+
+      return;
+    }
+
+    showToast(
+      "Order permanently deleted",
+      "success"
+    );
+
+    await loadCancelledOrders();
+
+  } catch (error) {
+
+    console.error(error);
+
+    showToast(
+      "Delete order server error",
+      "error"
+    );
+  }
+}

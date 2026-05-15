@@ -582,10 +582,29 @@ app.post("/api/create-maya-payment", async (req, res) => {
   }
 });
 
-// ================= VIEW ORDERS =================
+// ================= VIEW ACTIVE ORDERS =================
 app.get("/api/orders", (req, res) => {
-  const orders = readOrders();
-  res.json({ success: true, orders });
+  try {
+    const orders = readOrders();
+
+    // Hide cancelled orders from main dashboard
+    const activeOrders = orders.filter(order => {
+      return order.order_status !== "Cancelled";
+    });
+
+    res.json({
+      success: true,
+      orders: activeOrders
+    });
+
+  } catch (err) {
+    console.error("GET ORDERS ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to load orders"
+    });
+  }
 });
 
 // ================= UPDATE ORDER =================
