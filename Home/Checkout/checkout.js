@@ -20,13 +20,18 @@ const phoneInput = document.getElementById("custPhone");
 
 const API_BASE_URL = "https://de-ecom-pro.onrender.com";
 
+
 let cartItems = JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
+
+if (!cartItems.length) {
+  window.location.replace("../index.html");
+}
+
 let currentShippingFee = null;
 let currentShippingQuote = null;
 let currentParcelInfo = null;
 let shippingQuoteTimer = null;
 let selectedCourier = "";
-
 /*
   TEST ADDRESS DATA ONLY.
   Add more Province > City > Barangay here as needed.
@@ -797,22 +802,12 @@ async function placeOrder() {
 
     clearCheckedCartItems();
 
-    /* REMOVE ORDERED ITEMS FROM CART */
-    let cart = JSON.parse(localStorage.getItem("drinCart")) || [];
-
-    cart = cart.filter(item => !item.selected);
-
-    localStorage.setItem("drinCart", JSON.stringify(cart));
-
-    /* CLEAR CHECKOUT SESSION */
-    localStorage.removeItem("drinCheckoutItems");
-
     showOrderModal(
       "Thank You!",
       `Your order has been placed successfully.`
     );
     setTimeout(() => {
-      window.location.href = "../index.html";
+      window.location.replace("../index.html");
     }, 1200);
     return;
   }
