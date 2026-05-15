@@ -551,8 +551,12 @@ function clearCheckedCartItems() {
   localStorage.removeItem("drinCheckoutItems");
 
   let cart = JSON.parse(localStorage.getItem("drinCart")) || [];
+
   cart = cart.filter((item) => !item.selected);
+
   localStorage.setItem("drinCart", JSON.stringify(cart));
+
+  window.dispatchEvent(new Event("storage"));
 }
 
 function getSelectedAddress() {
