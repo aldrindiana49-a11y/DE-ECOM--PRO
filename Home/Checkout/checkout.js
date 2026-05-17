@@ -43,141 +43,28 @@ let currentShippingQuote = null;
 let currentParcelInfo = null;
 let shippingQuoteTimer = null;
 let selectedCourier = "";
-/*
-  TEST ADDRESS DATA ONLY.
-  Add more Province > City > Barangay here as needed.
-  ZIP is auto-filled by city.
-*/
+
 const ADDRESS_DATA = {
   "Metro Manila": {
     areaGroup: "Metro Manila",
     cities: {
-      "Quezon City": {
-        zip: "1100",
-        barangays: ["Bagong Pag-asa", "Commonwealth", "Fairview", "Novaliches Proper", "Tandang Sora"],
-        couriers: ["SPX", "J&T", "Flash Express", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
-      },
-      "Makati City": {
-        zip: "1200",
-        barangays: ["Bel-Air", "Poblacion", "San Antonio", "San Lorenzo", "Valenzuela"],
-        couriers: ["SPX", "J&T", "Flash Express", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
-      },
-      "Taguig City": {
-        zip: "1630",
-        barangays: ["Bagumbayan", "Fort Bonifacio", "Pinagsama", "Ususan", "Western Bicutan"],
-        couriers: ["SPX", "J&T", "Flash Express", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
-      }
-    }
-  },
-
-  "Cavite": {
-    areaGroup: "South Luzon",
-    cities: {
-      "Dasmariñas City": {
-        zip: "4114",
-        barangays: ["Burol", "Paliparan I", "Paliparan II", "Salawag", "Sampaloc I"],
-        couriers: ["SPX", "J&T", "Flash Express", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
-      },
-      "Bacoor City": {
-        zip: "4102",
-        barangays: ["Bayanan", "Mambog", "Molino I", "Molino II", "Talaba"],
-        couriers: ["SPX", "J&T", "Flash Express", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
-      }
-    }
-  },
-
-  "Laguna": {
-    areaGroup: "South Luzon",
-    cities: {
-      "Calamba City": {
-        zip: "4027",
-        barangays: ["Bañadero", "Canlubang", "Halang", "Real", "Turbina"],
-        couriers: ["SPX", "J&T", "Flash Express", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
-      },
-      "Santa Rosa City": {
-        zip: "4026",
-        barangays: ["Balibago", "Dila", "Don Jose", "Pulong Santa Cruz", "Tagapo"],
-        couriers: ["SPX", "J&T", "Flash Express", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
-      }
-    }
-  },
-
-  "Cebu": {
-    areaGroup: "Visayas",
-    cities: {
-      "Cebu City": {
-        zip: "6000",
-        barangays: ["Apas", "Banilad", "Guadalupe", "Lahug", "Mabolo"],
-        couriers: ["SPX", "J&T", "Flash Express", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
-      },
-      "Mandaue City": {
-        zip: "6014",
-        barangays: ["Banilad", "Cabancalan", "Centro", "Looc", "Subangdaku"],
-        couriers: ["J&T", "Flash Express", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
-      }
-    }
-  },
-
-  "Bohol": {
-    areaGroup: "Visayas",
-    cities: {
-      "Tagbilaran City": {
-        zip: "6300",
-        barangays: ["Bool", "Cogon", "Dao", "Poblacion I", "Poblacion II"],
-        couriers: ["J&T", "Flash Express", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
-      }
-    }
-  },
-
-  "South Cotabato": {
-    areaGroup: "Mindanao",
-    cities: {
-      "Koronadal City": {
-        zip: "9506",
-        barangays: ["Avanceña", "Carpenter Hill", "General Paulino Santos", "Mabini", "Zone I", "Zone II", "Zone III", "Zone IV"],
-        couriers: ["SPX", "J&T", "Flash Express", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
-      },
-      "Polomolok": {
-        zip: "9504",
-        barangays: ["Cannery Site", "Glamang", "Magsaysay", "Poblacion", "Silway 7"],
-        couriers: ["J&T", "Flash Express", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
-      },
-      "Tupi": {
-        zip: "9505",
-        barangays: ["Cebuano", "Kablon", "Linan", "Poblacion", "Simbo"],
-        couriers: ["J&T", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
-      }
-    }
-  },
-
-  "Sarangani": {
-    areaGroup: "Mindanao",
-    cities: {
-      "Alabel": {
-        zip: "9501",
-        barangays: ["Alegria", "Bagacay", "Baluntay", "Maribulan", "Poblacion"],
-        couriers: ["J&T", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
-      }
-    }
-  },
-
-  "Davao Del Sur": {
-    areaGroup: "Mindanao",
-    cities: {
-      "Davao City": {
-        zip: "8000",
-        barangays: ["Agdao", "Buhangin", "Matina", "Poblacion", "Talomo"],
-        couriers: ["SPX", "J&T", "Flash Express", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
-      },
-      "Digos City": {
-        zip: "8002",
-        barangays: ["Aplaya", "Dawis", "Matti", "San Jose", "Zone I"],
-        couriers: ["J&T", "Flash Express", "Lalamove / Same Day", "Pick Up", "Manual Delivery"]
+      "Metro Manila": {
+        zip: "1002",
+        barangays: [
+          "Intramuros",
+          "Binondo",
+          "Quiapo",
+          "Tondo"
+        ],
+        couriers: [
+          "SPX",
+          "Same Day Delivery / Lalamove",
+          "Pick Up / Walk In"
+        ]
       }
     }
   }
 };
-
 const AREA_GROUPS = ["Metro Manila", "North Luzon", "South Luzon", "Visayas", "Mindanao"];
 
 function cleanPrice(value) {
@@ -721,6 +608,10 @@ async function calculateShippingFee() {
     const data = await res.json();
 
     if (!res.ok || !data.success) {
+
+      console.log("SPX ERROR RESPONSE:", data);
+      alert(JSON.stringify(data));
+
       selectedCourier = getFallbackCourier();
       currentShippingFee = estimateFallbackShippingFee(selectedCourier);
       currentShippingQuote = {

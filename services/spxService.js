@@ -29,17 +29,35 @@ async function spxPost(endpoint, payload) {
     payloadString
   );
 
-  const response = await axios.post(`${BASE_URL}${endpoint}`, payloadString, {
-    headers: {
-      "app-id": appId,
-      "check-sign": checkSign,
-      timestamp,
-      "random-num": randomNum,
-      "Content-Type": "application/json"
-    }
-  });
+  try {
 
-  return response.data;
+    const response = await axios.post(
+      `${BASE_URL}${endpoint}`,
+      payloadString,
+      {
+        headers: {
+          "app-id": appId,
+          "check-sign": checkSign,
+          timestamp,
+          "random-num": randomNum,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    console.log("SPX RESPONSE:", response.data);
+
+    return response.data;
+
+  } catch (error) {
+
+    console.log(
+      "SPX FULL ERROR:",
+      error.response?.data || error.message
+    );
+
+    throw error;
+  }
 }
 
 async function verifyAccount() {
@@ -103,8 +121,22 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
           collect_type: Number(process.env.SPX_COLLECT_TYPE || 2),
           ...(voucherCode ? { voucher_code: voucherCode } : {})
         },
-        deliver_info: delivery,
-        parcel_info: parcel
+        deliver_info: {
+          ...delivery,
+          deliver_name: "Test Customer",
+          deliver_phone: "09171234567"
+        },
+
+        parcel_info: {
+          parcel_weight: 1,
+          parcel_length: 10,
+          parcel_width: 10,
+          parcel_height: 20,
+          parcel_item_name: "Electronics",
+          parcel_item_quantity: 1,
+          express_insured_value: Number(amount || 0),
+          parcel_item_type: "Electronics"
+        }
       }
     ]
   });
