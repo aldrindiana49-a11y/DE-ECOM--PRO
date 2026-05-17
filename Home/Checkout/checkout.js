@@ -357,7 +357,7 @@ function loadProvinces() {
   resetSelect(provinceSelect);
   resetSelect(citySelect);
   resetSelect(barangaySelect);
-  resetSelect(courierSelect, "Auto select courier");
+  courierSelect.innerHTML = "";
 
   if (zipCodeInput) zipCodeInput.value = "";
   selectedCourier = "";
@@ -381,7 +381,7 @@ function loadProvinces() {
 function loadCities() {
   resetSelect(citySelect);
   resetSelect(barangaySelect);
-  resetSelect(courierSelect, "Auto select courier");
+  resetSelect(courierSelect);
 
   if (zipCodeInput) zipCodeInput.value = "";
   selectedCourier = "";
@@ -404,7 +404,7 @@ function loadCities() {
 
 function loadBarangays() {
   resetSelect(barangaySelect);
-  resetSelect(courierSelect, "Auto select courier");
+  resetSelect(courierSelect);
 
   const province = provinceSelect.value;
   const city = citySelect.value;
@@ -424,13 +424,16 @@ function loadBarangays() {
 }
 
 function updateCourierOptions() {
-  resetSelect(courierSelect, "Auto select courier");
 
-  const province = provinceSelect.value;
-  const city = citySelect.value;
-  const cityData = ADDRESS_DATA[province]?.cities?.[city];
+  const currentValue = courierSelect?.value || "";
 
-  const couriers = cityData?.couriers || ["Manual Delivery"];
+  resetSelect(courierSelect);
+
+  const couriers = [
+    "SPX",
+    "Same Day Delivery / Lalamove",
+    "Pick Up / Walk In"
+  ];
 
   couriers.forEach((courier) => {
     const opt = document.createElement("option");
@@ -439,24 +442,16 @@ function updateCourierOptions() {
     courierSelect.appendChild(opt);
   });
 
-  selectedCourier = chooseBestCourier(couriers);
-  if (courierSelect) courierSelect.value = selectedCourier;
+  if (currentValue) {
+    courierSelect.value = currentValue;
+    selectedCourier = currentValue;
+  }
 
   if (courierStatus) {
     courierStatus.textContent = selectedCourier
-      ? `${selectedCourier} selected based on address coverage.`
-      : "Courier will be selected based on address coverage.";
+      ? `${selectedCourier} selected`
+      : "Please select courier";
   }
-}
-
-function chooseBestCourier(couriers = []) {
-  if (couriers.includes("SPX")) return "SPX";
-  if (couriers.includes("J&T")) return "J&T";
-  if (couriers.includes("Flash Express")) return "Flash Express";
-  if (couriers.includes("Lalamove / Same Day")) return "Lalamove / Same Day";
-  if (couriers.includes("Pick Up")) return "Pick Up";
-  if (couriers.includes("Manual Delivery")) return "Manual Delivery";
-  return couriers[0] || "";
 }
 
 function showOrderModal(title, message) {
@@ -637,6 +632,7 @@ function scheduleShippingQuote() {
 
   currentShippingFee = null;
   currentShippingQuote = null;
+
   updateTotalsDisplay();
 
   if (!cartItems.length) {
@@ -651,38 +647,56 @@ function scheduleShippingQuote() {
     return;
   }
 
-  if (selectedCourier !== "SPX") {
-    currentShippingFee = estimateFallbackShippingFee(selectedCourier);
+  // PICK UP / WALK IN
+  if (selectedCourier === "Pick Up / Walk In") {
+
+    currentShippingFee = 0;
+
     currentShippingQuote = {
       success: true,
       courier: selectedCourier,
       fallback: true,
-      message: `${selectedCourier} fallback estimate`,
+      message: "Free pickup selected",
     };
 
     setShippingUI(
       "ready",
-      `${selectedCourier} selected. Shipping fee is estimated.`,
+      "Pick Up / Walk In selected",
       currentShippingFee
     );
+
     return;
   }
 
+  // SAME DAY / LALAMOVE
+  if (selectedCourier === "Same Day Delivery / Lalamove") {
+
+    currentShippingFee = 0;
+
+    currentShippingQuote = {
+      success: true,
+      courier: selectedCourier,
+      fallback: true,
+      message: "Same day delivery selected",
+    };
+
+    setShippingUI(
+      "ready",
+      "Shipping fee will be paid upon delivery.",
+      null
+    );
+
+    return;
+  }
+
+  // REAL SPX API
   setShippingUI("loading", "Calculating SPX shipping fee...", null);
+
   shippingQuoteTimer = setTimeout(calculateShippingFee, 650);
 }
 
 function estimateFallbackShippingFee(courier) {
-  const area = areaGroupSelect.value;
-
-  if (courier === "Pick Up") return 0;
-  if (courier === "Manual Delivery") return 0;
-  if (courier === "Lalamove / Same Day") return 250;
-  if (area === "Metro Manila") return 120;
-  if (area === "South Luzon" || area === "North Luzon") return 160;
-  if (area === "Visayas") return 190;
-  if (area === "Mindanao") return 200;
-  return 180;
+  return 0;
 }
 
 async function calculateShippingFee() {
@@ -774,6 +788,8 @@ async function placeOrder() {
   const name = nameInput?.value.trim() || "";
   const phone = phoneInput?.value.trim() || "";
   const paymentMain = document.querySelector('input[name="payment"]:checked')?.value || "ONLINE";
+  const selectedCourierNow =
+    courierSelect?.value || selectedCourier || "";
 
   if (!cartItems.length) {
     showOrderModal("No Items", "Please select items first.");
@@ -800,11 +816,46 @@ async function placeOrder() {
   }
 
   const subtotalNumber = getCheckoutTotal();
-  const handlingFee = paymentMain !== "COD" ? 25 : 0;
+  const handlingFee = 25;
 
   const shippingFeeNumber =
     (Number(currentShippingFee) || 0) + handlingFee;
   const totalNumber = subtotalNumber + shippingFeeNumber;
+
+
+  if (
+    paymentMain === "COD" &&
+    (
+      selectedCourierNow === "Pick Up / Walk In" ||
+      selectedCourierNow === "Same Day Delivery / Lalamove"
+    )
+  ) {
+
+    const modalMessage =
+      selectedCourierNow === "Pick Up / Walk In"
+        ? "Pick Up orders require advance payment before preparation.\n\nPick Up Schedule: 10:00 AM - 4:00 PM.\n\nPlease use Online Payment or select ★ SPX Courier ★ for COD."
+        : "COD is only available for ★ SPX Courier ★\n\nPress OK and select SPX to continue.";
+
+    showOrderModal(
+      selectedCourierNow === "Pick Up / Walk In"
+        ? "Pick Up Policy"
+        : "COD Not Available",
+      modalMessage
+    );
+
+    const okBtn = document.getElementById("orderModalOk");
+    if (okBtn) {
+      okBtn.style.display = "inline-block";
+      okBtn.onclick = closeOrderModal;
+    }
+
+    const closeBtn = document.getElementById("orderModalClose");
+    if (closeBtn) {
+      closeBtn.style.display = "inline-block";
+    }
+
+    return;
+  }
 
   if (paymentMain === "COD" && totalNumber < 200) {
     showOrderModal(
@@ -815,10 +866,23 @@ async function placeOrder() {
   }
 
   if (paymentMain === "COD" && totalNumber > 8000) {
+
     showOrderModal(
       "COD Limit Reached",
-      "Cash on Delivery is only available up to ₱8,000 total including shipping."
+      "Cash on Delivery is only available up to ₱8,000 total including shipping.\n\nPlease select Online Payment to continue."
     );
+
+    const okBtn = document.getElementById("orderModalOk");
+    if (okBtn) {
+      okBtn.style.display = "inline-block";
+      okBtn.onclick = closeOrderModal;
+    }
+
+    const closeBtn = document.getElementById("orderModalClose");
+    if (closeBtn) {
+      closeBtn.style.display = "inline-block";
+    }
+
     return;
   }
 
@@ -963,6 +1027,13 @@ barangaySelect?.addEventListener("change", scheduleShippingQuote);
 fullAddressInput?.addEventListener("input", scheduleShippingQuote);
 courierSelect?.addEventListener("change", function () {
   selectedCourier = this.value;
+
+  if (courierStatus) {
+    courierStatus.textContent = selectedCourier
+      ? `${selectedCourier} selected`
+      : "Please select courier";
+  }
+
   scheduleShippingQuote();
 });
 

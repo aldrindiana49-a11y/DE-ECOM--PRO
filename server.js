@@ -211,6 +211,7 @@ app.post("/api/spx/check-shipping-fee", async (req, res) => {
   }
 });
 
+
 // ================= SPX CREATE ORDER =================
 app.post("/api/spx/create", async (req, res) => {
   try {
@@ -938,62 +939,43 @@ app.post("/api/maya/webhook", (req, res) => {
 });
 
 // ================= SPX ADDRESS FILE DOWNLOAD =================
+
 app.get("/api/spx/address-file", async (req, res) => {
   try {
-    const result = await spxPost("/open/api/address/get_address_download_url", {});
-    const fileUrl = result?.data?.address_download_url;
+
+    const result = await spxPost(
+      "/open/api/address/get_address_download_url",
+      {}
+    );
+
+    const fileUrl =
+      result?.data?.address_download_url ||
+      result?.data?.download_url ||
+      result?.data?.url;
 
     if (!fileUrl) {
       return res.status(400).json({
         success: false,
-        message: "No address file URL returned"
+        message: "No address file URL returned",
+        spx: result
       });
     }
 
-    const response = await axios({
-      method: "GET",
-      url: fileUrl,
-      responseType: "stream"
-    });
+    return res.redirect(fileUrl);
 
-    const savePath = path.join(__dirname, "data", "spx-address.xlsx");
-    const writer = fs.createWriteStream(savePath);
-
-    response.data.pipe(writer);
-
-    writer.on("finish", () => {
-      return res.json({
-        success: true,
-        message: "SPX address file downloaded",
-        path: savePath
-      });
-    });
-
-    writer.on("error", (streamErr) => {
-      console.error("SPX ADDRESS FILE WRITE ERROR:", streamErr.message);
-
-      if (!res.headersSent) {
-        return res.status(500).json({
-          success: false,
-          message: "SPX address file save failed",
-          error: streamErr.message
-        });
-      }
-    });
   } catch (err) {
+
     console.error(
       "SPX ADDRESS FILE ERROR:",
-      err.response?.status,
-      err.response?.statusText || err.message
+      err.response?.data || err.message
     );
 
     return res.status(500).json({
       success: false,
       message: "SPX address file download failed",
-      status: err.response?.status || null,
-      statusText: err.response?.statusText || null,
-      error: err.message
+      error: err.response?.data || err.message
     });
+
   }
 });
 
