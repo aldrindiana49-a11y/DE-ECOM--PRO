@@ -303,7 +303,7 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
       deliverCity: savedAddress.city || "Metro Manila",
       deliverDistrict: savedAddress.barangay || "Intramuros",
       deliverStreet: savedAddress.barangay || "Barangay 654",
-      deliverPostCode: savedAddress.postCode || "1002",
+      deliverPostCode: savedAddress.postCode || savedAddress.zipCode || "1002",
 
       parcelWeight: savedParcel.parcelWeight || 1,
       parcelLength: savedParcel.parcelLength || 10,

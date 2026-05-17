@@ -116,8 +116,8 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
           sender_detail_address: process.env.SPX_SENDER_ADDRESS || "Drin Electronics Warehouse"
         },
         fulfillment_info: {
-          cod_collection: paymentMethod === "COD" ? 1 : 0,
-          cod_amount: paymentMethod === "COD" ? Number(amount || 0) : 0,
+          cod_collection: 0,
+          cod_amount: 0,
           collect_type: Number(process.env.SPX_COLLECT_TYPE || 2),
           ...(voucherCode ? { voucher_code: voucherCode } : {})
         },
