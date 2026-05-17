@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout - Drin Electronics</title>
+  <link rel="stylesheet" href="checkout.css" />
+</head>
+
+<body>
+  <nav class="checkout-navbar">
+    <a href="#" class="back-link" onclick="smartBack('../Cart/index.html'); return false;">
+      ← Back
+    </a>
+    <h1>Checkout</h1>
+  </nav>
+
+  <main class="checkout-page">
+    <section class="checkout-form">
+      <h2>Customer Information</h2>
+
+      <div class="form-group">
+        <label for="custName">Full Name</label>
+        <input type="text" id="custName" maxlength="50" placeholder="Juan Dela Cruz" />
+      </div>
+
+      <div class="form-group">
+        <label for="custPhone">Phone Number</label>
+        <input type="text" id="custPhone" maxlength="11" inputmode="numeric" placeholder="09XXXXXXXXX" />
+      </div>
+
+      <h3>Delivery Address</h3>
+
+      <div class="form-group">
+        <label>Country</label>
+        <input type="text" value="Philippines" disabled />
+      </div>
+
+      <div class="form-group">
+        <label for="areaGroup">Area Group</label>
+        <select id="areaGroup">
+          <option value="">- choose -</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="province">Province / SPX Area</label>
+        <select id="province">
+          <option value="">- choose -</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="city">City / Municipality</label>
+        <select id="city">
+          <option value="">- choose -</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="barangay">Barangay</label>
+        <select id="barangay">
+          <option value="">- choose -</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="zipCode">ZIP Code</label>
+        <input type="text" id="zipCode" placeholder="Auto fill" readonly />
+      </div>
+
+      <div class="form-group">
+        <label for="fullAddress">House No. / Street / Landmark</label>
+        <textarea id="fullAddress" maxlength="200" placeholder="House No., Street, Landmark"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="courierSelect">Courier</label>
+        <select id="courierSelect">
+          <option value="">Auto select courier</option>
+        </select>
+        <small class="helper-text" id="courierStatus">Courier will be selected based on address coverage.</small>
+      </div>
+
+      <h3>Payment Method</h3>
+
+      <div class="payment-options">
+        <label>
+          <input type="radio" name="payment" value="COD" checked />
+          <div>
+            <strong>Cash on Delivery</strong>
+          </div>
+        </label>
+
+        <label>
+          <input type="radio" name="payment" value="ONLINE" />
+          <div>
+            <strong>Online Payment</strong>
+            <p class="payment-sub">Credit / Debit • E-Wallet • QR • OTC</p>
+          </div>
+        </label>
+      </div>
+    </section>
+
+    <aside class="checkout-summary">
+      <h2>Order Summary</h2>
+
+      <div id="checkoutItems" class="checkout-items"></div>
+
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <strong id="checkoutSubtotal">₱0</strong>
+      </div>
+
+      <div class="summary-row shipping-row">
+        <div>
+          <span>Shipping Fee</span>
+          <small id="shippingStatus">Complete address to calculate</small>
+        </div>
+        <strong id="checkoutShippingFee">To be confirmed</strong>
+      </div>
+
+      <div class="summary-row parcel-row">
+        <div>
+          <span>Parcel Estimate</span>
+          <small id="parcelEstimate">Weight and size will be calculated from cart items</small>
+        </div>
+      </div>
+
+      <div class="summary-row total-row">
+        <span>Total</span>
+        <strong id="checkoutTotal">₱0</strong>
+      </div>
+
+      <button type="button" class="place-order-btn" onclick="placeOrder()">
+        Place Order
+      </button>
+    </aside>
+  </main>
+
+  <div id="orderModal" class="order-modal">
+    <div class="order-modal-card">
+      <h3 id="orderModalTitle">Notice</h3>
+      <p id="orderModalMessage">Message here</p>
+      <button type="button" onclick="closeOrderModal()">OK</button>
+    </div>
+  </div>
+
+  <script src="checkout.js?v=10008" defer></script>
+</body>
+
+</html>

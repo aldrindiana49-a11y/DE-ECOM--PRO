@@ -1,0 +1,561 @@
+/* ===============================
+   CART COUNT BADGE
+   Purpose: Update cart count display sa navbar/badge
+================================ */
+function updateCartCount() {
+  const cart = JSON.parse(localStorage.getItem("drinCart")) || [];
+
+  const totalItems = cart.reduce((sum, item) => {
+    return sum + (Number(item.quantity) || 0);
+  }, 0);
+
+  const badge = document.getElementById("cartCount");
+
+  if (badge) {
+    badge.textContent = totalItems;
+  }
+}
+
+/* ===============================
+   DOM ELEMENTS
+   Purpose: Kunin lahat ng HTML elements na ginagamit ng cart page
+================================ */
+const cartList = document.getElementById("cartList");
+const cartTotal = document.getElementById("cartTotal");
+const checkoutBtn = document.getElementById("checkoutBtn");
+const selectedCount = document.getElementById("selectedCount");
+
+/* ===============================
+   CART STORAGE
+   Purpose: Kunin saved cart items from localStorage
+================================ */
+let cart = JSON.parse(localStorage.getItem("drinCart")) || [];
+
+/* ===============================
+   HELPER FUNCTIONS
+   Purpose: Safe conversion, escaping, formatting
+================================ */
+function safeText(value, fallback = "") {
+  if (value === undefined || value === null) return fallback;
+  return String(value);
+}
+
+function safeNumber(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function escapeHtml(text) {
+  return String(text ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function escapeAttribute(text) {
+  return String(text ?? "").replaceAll('"', "&quot;");
+}
+
+function formatPrice(value) {
+  return `₱${safeNumber(value, 0).toLocaleString("en-PH")}`;
+}
+
+/* ===============================
+   PRODUCT / STOCK HELPERS
+   Purpose: Kunin item ID, stock, at limit quantity based sa stock
+================================ */
+function getItemId(item) {
+  return item.id || item.productId;
+}
+
+function saveCart() {
+  localStorage.setItem("drinCart", JSON.stringify(cart));
+  updateCartCount();
+}
+
+function getProducts() {
+  return JSON.parse(localStorage.getItem("drinProducts")) || [];
+}
+
+function getProductStock(productId, cartItem = null) {
+  const products = getProducts();
+  const product = products.find((item) => String(item.id) === String(productId));
+
+  if (product) {
+    return safeNumber(product.stock, -1);
+  }
+
+  if (cartItem && cartItem.stock !== undefined) {
+    return safeNumber(cartItem.stock, -1);
+  }
+
+  return -1;
+}
+
+function clampQty(productId, qty, cartItem = null) {
+  const stock = getProductStock(productId, cartItem);
+
+  if (qty < 0) return 0;
+  if (stock === -1) return qty;
+  if (qty > stock) return stock;
+
+  return qty;
+}
+
+/* ===============================
+   SELECTED CART
+   Purpose: Kunin lang selected items na may quantity
+================================ */
+function getSelectedCart() {
+  return cart.filter((item) => {
+    return item.selected && Number(item.quantity) > 0;
+  });
+}
+
+/* ===============================
+   RENDER CART
+   Purpose: I-display lahat ng cart items sa cart page
+================================ */
+function renderCart() {
+  if (!cartList || !cartTotal) return;
+
+  cartList.innerHTML = "";
+
+  if (!Array.isArray(cart) || cart.length === 0) {
+    cartList.innerHTML = `
+      <div class="empty-cart">
+        <h3>Your cart is empty</h3>
+        <p>Add products first before checkout.</p>
+        <a href="../index.html">Go back to shop</a>
+      </div>
+    `;
+
+    cartTotal.textContent = "₱0";
+
+    if (selectedCount) selectedCount.textContent = "0";
+    if (checkoutBtn) checkoutBtn.disabled = true;
+
+    return;
+  }
+
+  let totalAmount = 0;
+
+  cart.forEach((item, index) => {
+    if (item.selected === undefined) {
+      item.selected = true;
+    }
+
+    const stock = getProductStock(getItemId(item), item);
+
+    let quantity = safeNumber(item.quantity, 1);
+    quantity = clampQty(getItemId(item), quantity, item);
+    cart[index].quantity = quantity;
+
+    const isZeroQty = quantity === 0;
+    const isOutOfStock = stock === 0;
+
+    if (isZeroQty || isOutOfStock) {
+      cart[index].selected = false;
+      item.selected = false;
+    }
+
+    const price = safeNumber(item.price, 0);
+    const itemTotal = quantity * price;
+
+    if (item.selected && quantity > 0) {
+      totalAmount += itemTotal;
+    }
+
+    const card = document.createElement("div");
+    card.className = `cart-item ${item.selected ? "selected" : "unselected"} ${isZeroQty || isOutOfStock ? "unavailable" : ""
+      }`;
+
+    card.innerHTML = `
+      <div class="cart-check">
+        <input
+          type="checkbox"
+          ${item.selected ? "checked" : ""}
+          ${isZeroQty || isOutOfStock ? "disabled" : ""}
+          onchange="toggleSelect(${index})"
+        />
+      </div>
+
+      <div class="cart-item-image">
+  <img
+  src="${escapeAttribute(item.image || "../Image/no-image.png")}"
+  alt="${escapeHtml(safeText(item.name, "Product"))}"
+  onerror="this.onerror=null; this.src='../Image/no-image.png'"
+/>
+</div>
+
+      <div class="cart-item-info">
+        <span class="cart-item-category">
+          ${escapeHtml(safeText(item.category, "General"))}
+        </span>
+
+        <h3 class="cart-item-title">
+          ${escapeHtml(safeText(item.name, "Unnamed Product"))}
+          ${item.variantLabel
+        ? `<br><small>Variation: ${escapeHtml(item.variantLabel)}</small>`
+        : ""
+      }
+        </h3>
+
+        <p class="cart-item-price">${formatPrice(price)}</p>
+
+        <p class="cart-item-stock ${isOutOfStock ? "out-stock" : stock !== -1 && quantity >= stock ? "max-stock" : ""
+      }">
+          ${isZeroQty
+        ? "Qty is 0"
+        : isOutOfStock
+          ? "Out of stock"
+          : stock !== -1 && quantity >= stock
+            ? "Maximum stock reached"
+            : stock === -1
+              ? "Stock: Available"
+              : "Stock: " + stock
+      }
+        </p>
+
+        <div class="cart-item-actions">
+          <div class="qty-box">
+            <button
+              type="button"
+              onclick="decreaseQty(${index})"
+              ${isZeroQty ? "disabled" : ""}
+            >
+              −
+            </button>
+
+            <input
+              type="number"
+              class="qty-input"
+              value="${quantity}"
+              min="0"
+              ${stock === -1 ? "" : `max="${stock}"`}
+              oninput="manualQty(${index}, this.value)"
+            />
+
+            <button
+              type="button"
+              onclick="increaseQty(${index})"
+              ${stock !== -1 && quantity >= stock ? "disabled" : ""}
+            >
+              +
+            </button>
+          </div>
+
+          <div class="item-total">${formatPrice(itemTotal)}</div>
+
+          <button type="button" class="remove-btn" onclick="removeItem(${index})">
+            Remove
+          </button>
+        </div>
+      </div>
+    `;
+
+    cartList.appendChild(card);
+  });
+
+  saveCart();
+  cartTotal.textContent = formatPrice(totalAmount);
+
+  const selectedItems = getSelectedCart();
+
+  if (selectedCount) {
+    selectedCount.textContent = selectedItems.reduce((sum, item) => {
+      return sum + (Number(item.quantity) || 0);
+    }, 0);
+  }
+
+  if (checkoutBtn) {
+    checkoutBtn.disabled = selectedItems.length === 0;
+  }
+
+  const selectAll = document.getElementById("selectAll");
+
+  if (selectAll) {
+    const selectableItems = cart.filter((item) => {
+      const qty = Number(item.quantity) || 0;
+      const stock = getProductStock(getItemId(item), item);
+      return qty > 0 && stock !== 0;
+    });
+
+    selectAll.checked =
+      selectableItems.length > 0 &&
+      selectedItems.length === selectableItems.length;
+  }
+}
+
+/* ===============================
+   SELECT / UNSELECT ITEMS
+   Purpose: Toggle selected cart item or select all items
+================================ */
+function toggleSelect(index) {
+  if (!cart[index]) return;
+
+  const qty = safeNumber(cart[index].quantity, 0);
+  const stock = getProductStock(getItemId(cart[index]), cart[index]);
+
+  if (qty <= 0 || stock === 0) {
+    cart[index].selected = false;
+    saveCart();
+    renderCart();
+    return;
+  }
+
+  cart[index].selected = !cart[index].selected;
+  saveCart();
+  renderCart();
+}
+
+function toggleSelectAll(checkbox) {
+  cart.forEach((item) => {
+    const qty = Number(item.quantity) || 0;
+    const stock = getProductStock(getItemId(item), item);
+
+    item.selected = checkbox.checked && qty > 0 && stock !== 0;
+  });
+
+  saveCart();
+  renderCart();
+}
+
+/* ===============================
+   QUANTITY CONTROLS
+   Purpose: Increase, decrease, manual input quantity
+================================ */
+function increaseQty(index) {
+  if (!cart[index]) return;
+
+  const currentQty = safeNumber(cart[index].quantity, 0);
+  const stock = getProductStock(getItemId(cart[index]), cart[index]);
+
+  if (stock !== -1 && currentQty >= stock) return;
+
+  cart[index].quantity = currentQty + 1;
+
+  if (cart[index].quantity > 0 && stock !== 0) {
+    cart[index].selected = true;
+  }
+
+  saveCart();
+  renderCart();
+}
+
+function decreaseQty(index) {
+  if (!cart[index]) return;
+
+  const currentQty = safeNumber(cart[index].quantity, 0);
+
+  if (currentQty > 0) {
+    cart[index].quantity = currentQty - 1;
+  }
+
+  if (cart[index].quantity <= 0) {
+    cart[index].quantity = 0;
+    cart[index].selected = false;
+  }
+
+  saveCart();
+  renderCart();
+}
+
+function manualQty(index, value) {
+  if (!cart[index]) return;
+
+  let qty = safeNumber(value, 0);
+  qty = clampQty(getItemId(cart[index]), qty, cart[index]);
+
+  cart[index].quantity = qty;
+
+  const stock = getProductStock(getItemId(cart[index]), cart[index]);
+
+  if (qty <= 0 || stock === 0) {
+    cart[index].selected = false;
+  }
+
+  saveCart();
+  renderCart();
+}
+
+/* ===============================
+   REMOVE ITEM + UNDO
+   Purpose: Remove cart item with undo toast support
+================================ */
+let lastRemovedItem = null;
+let lastRemovedIndex = null;
+let undoTimer = null;
+
+function removeItem(index) {
+  if (!cart[index]) return;
+
+  const itemCard = document.querySelectorAll(".cart-item")[index];
+
+  if (itemCard) {
+    itemCard.classList.add("removing");
+  }
+
+  lastRemovedItem = { ...cart[index] };
+  lastRemovedIndex = index;
+
+  setTimeout(() => {
+    cart.splice(index, 1);
+    saveCart();
+    renderCart();
+    showUndoToast(lastRemovedItem.name || "Item");
+  }, 250);
+}
+
+function showUndoToast(itemName) {
+  const toast = document.getElementById("cartToast");
+  const toastText = document.getElementById("cartToastText");
+
+  if (!toast || !toastText) return;
+
+  toastText.textContent = `${itemName} removed`;
+  toast.classList.add("show");
+
+  clearTimeout(undoTimer);
+
+  undoTimer = setTimeout(() => {
+    toast.classList.remove("show");
+    lastRemovedItem = null;
+    lastRemovedIndex = null;
+  }, 4000);
+}
+
+function undoRemove() {
+  if (!lastRemovedItem || lastRemovedIndex === null) return;
+
+  cart.splice(lastRemovedIndex, 0, lastRemovedItem);
+  saveCart();
+  renderCart();
+
+  const toast = document.getElementById("cartToast");
+  if (toast) toast.classList.remove("show");
+
+  lastRemovedItem = null;
+  lastRemovedIndex = null;
+  clearTimeout(undoTimer);
+}
+
+/* ===============================
+   CHECKOUT VALIDATION
+   Purpose: Limit checkout to max 50 items and max ₱50,000
+================================ */
+function goToCheckout() {
+  const selectedItems = getSelectedCart();
+
+  const MAX_CHECKOUT_ITEMS = 50;
+  const MAX_ORDER_VALUE = 50000;
+
+  const totalQty = selectedItems.reduce((sum, item) => {
+    return sum + (Number(item.quantity) || 0);
+  }, 0);
+
+  const totalValue = selectedItems.reduce((sum, item) => {
+    return sum + ((Number(item.price) || 0) * (Number(item.quantity) || 0));
+  }, 0);
+
+  if (selectedItems.length === 0) {
+    alert("Please select at least one item to checkout.");
+    return;
+  }
+
+  if (totalQty > MAX_CHECKOUT_ITEMS) {
+    alert("Maximum 50 items per checkout only. Please create another order.");
+    return;
+  }
+
+  if (totalValue > MAX_ORDER_VALUE) {
+    alert("Maximum ₱50,000 per checkout only. Please create another order.");
+    return;
+  }
+
+  const checkoutItems = selectedItems.map(item => {
+    const safeImage =
+      item.variant_image ||
+      item.product_image ||
+      item.image ||
+      item.img ||
+      item.photo ||
+      "";
+
+    const finalImage =
+      String(safeImage).startsWith("data:")
+        ? ""
+        : safeImage;
+
+    return {
+      ...item,
+      image: finalImage,
+      variant_image: finalImage,
+      product_image: finalImage,
+    };
+  });
+
+  localStorage.setItem("drinCheckoutItems", JSON.stringify(checkoutItems));
+
+  window.location.href = "../Checkout/checkout.html";
+}
+/* ===============================
+   INIT
+   Purpose: Initial render when page loads
+================================ */
+renderCart();
+
+/* ===============================
+   GLOBAL FUNCTIONS
+   Purpose: Expose functions for inline HTML onclick/onchange
+================================ */
+window.increaseQty = increaseQty;
+window.decreaseQty = decreaseQty;
+window.manualQty = manualQty;
+window.removeItem = removeItem;
+window.goToCheckout = goToCheckout;
+window.toggleSelect = toggleSelect;
+window.toggleSelectAll = toggleSelectAll;
+window.undoRemove = undoRemove;
+
+function goBackProduct() {
+
+  const productId =
+    localStorage.getItem("selectedProductId");
+
+  if (productId) {
+
+    window.location.href =
+      `../Product/index.html?id=${productId}`;
+
+  } else {
+
+    history.back();
+
+  }
+
+}
+
+function smartBack(fallback = "../index.html") {
+
+  if (
+    document.referrer &&
+    document.referrer !== window.location.href
+  ) {
+    window.history.back();
+  } else {
+    window.location.href = fallback;
+  }
+
+}
+
+window.addEventListener("pageshow", function () {
+
+  cart = JSON.parse(localStorage.getItem("drinCart")) || [];
+
+  renderCart();
+  updateCartCount();
+
+});

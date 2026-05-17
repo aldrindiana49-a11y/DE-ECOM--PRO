@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <link rel="icon" type="image/png" id="siteFavicon" href="Image/favicon.png" />
+
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Drin Electronics</title>
+
+  <meta name="description" content="Drin Electronics - Amplifiers, electronic parts, and repair services." />
+
+  <!-- SOCIAL MEDIA PREVIEW -->
+
+  <meta property="og:title" content="Drin Electronics" />
+
+  <meta property="og:description" content="Reliable Parts & Quality Audio Equipment You Can Trust." />
+
+  <meta property="og:image" content="https://drinelectronicsph.com/Image/social-preview.png" />
+
+  <meta property="og:url" content="https://www.drinelectronicsph.com/" />
+
+  <meta property="og:type" content="website" />
+
+  <!-- TWITTER / X -->
+
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <meta name="twitter:image" content="https://drinelectronicsph.com/Image/social-preview.png" />
+
+  <meta name="theme-color" content="#00bcd4" />
+
+  <link rel="stylesheet" href="style.css?v=10002" />
+
+  <style>
+    .voucher-list {
+      display: flex !important;
+      gap: 14px !important;
+      overflow-x: auto !important;
+      padding-bottom: 10px !important;
+      flex-wrap: nowrap !important;
+    }
+
+    .voucher-card {
+      min-width: 170px !important;
+      max-width: 170px !important;
+      flex-shrink: 0 !important;
+    }
+  </style>
+
+</head>
+
+<body>
+  <nav class="navbar">
+    <div class="nav-left">
+      <button class="menu-btn" type="button" id="menuBtn" aria-label="Open Menu">☰</button>
+      <a href="./index.html" class="home-link" aria-label="Home">
+        <span class="nav-logo-box">
+          <img id="navLogo" src="" alt="" />
+        </span>
+      </a>
+    </div>
+
+    <div class="nav-center">
+      <div class="desktop-search">
+
+        <input type="text" id="desktopSearchInput" placeholder="Search products..." aria-label="Search products" />
+
+        <button type="button" id="clearSearchBtn" class="clear-search-btn">
+          ✕
+        </button>
+
+        <button type="button" id="desktopSearchBtn" class="search-submit-btn">
+          🔍
+        </button>
+
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <button class="icon-btn mobile-search-btn" type="button" id="mobileSearchToggleBtn" aria-label="Open Search">
+        🔍
+      </button>
+
+      <button class="icon-btn notification-btn desktop-only" type="button" aria-label="Notifications">
+        🔔
+        <span class="notif-badge">0</span>
+      </button>
+
+      <button class="icon-btn cart-btn" type="button" aria-label="Cart"
+        onclick="window.location.href='./Cart/index.html'">
+        🛒
+        <span class="cart-badge" id="cartCount">0</span>
+      </button>
+
+      <div class="account-menu">
+        <button id="accountBtn" class="icon-btn" type="button" aria-label="Account">👤</button>
+
+        <div class="account-dropdown" id="accountDropdown">
+          <a href="/login/">Login</a>
+          <a href="/signup/">Sign Up</a>
+        </div>
+      </div>
+    </div>
+
+  </nav>
+
+  <div class="mobile-search-panel" id="mobileSearchPanel">
+    <div class="mobile-search-inner">
+      <button class="mobile-search-back" type="button" id="closeMobileSearchBtn" aria-label="Close Search">
+        ←
+      </button>
+
+      <input type="text" id="mobileSearchInput" placeholder="Search products..." aria-label="Search products" />
+
+      <button class="mobile-search-clear" type="button" id="clearMobileSearchBtn" aria-label="Clear Search">
+        ✕
+      </button>
+    </div>
+
+  </div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-top-row">
+        <div class="sidebar-mini-brand">
+          <h2>Drin Electronics</h2>
+          <p>Find your parts fast</p>
+        </div>
+
+        <button class="sidebar-close-btn" type="button" onclick="closeSidebar()">✕</button>
+      </div>
+    </div>
+
+    <div class="sidebar-body">
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">🛒 Shop</h3>
+        <ul class="sidebar-links">
+
+          <li>
+            <a href="#" onclick="renderHomepageProducts(products); closeSidebar(); return false;">
+              All Products
+            </a>
+          </li>
+
+          <li>
+            <a href="#" id="toggleCategoryMenu">
+              📂 Categories ▾
+            </a>
+
+            <ul id="sidebarCategoryList" style="display:none; padding-left: 12px;"></ul>
+          </li>
+
+        </ul>
+      </div>
+
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">👤 Account</h3>
+        <ul class="sidebar-links">
+          <li><a href="#">Notifications</a></li>
+          <li><a href="#">Profile</a></li>
+          <li><a href="/login/">Login</a></li>
+          <li><a href="/signup/">Sign Up</a></li>
+        </ul>
+      </div>
+
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">🏢 Company</h3>
+        <ul class="sidebar-links">
+          <li><a href="#">Branch Locator</a></li>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+  <main class="main-content">
+    <section class="banner-section">
+      <div class="banner-shell" id="bannerShell" role="button" tabindex="0" aria-label="Homepage Banner">
+        <div class="banner-track" id="bannerTrack"></div>
+
+        <button class="banner-arrow banner-arrow-left" id="bannerPrevBtn" type="button" aria-label="Previous Banner">
+          ‹
+        </button>
+
+        <button class="banner-arrow banner-arrow-right" id="bannerNextBtn" type="button" aria-label="Next Banner">
+          ›
+        </button>
+
+        <div class="banner-dots" id="bannerDots"></div>
+      </div>
+    </section>
+
+    <section class="shortcut-section" id="categorySection">
+      <div class="shortcut-header">
+        <h2>Shop by Category</h2>
+
+        <a href="/categories/" class="shortcut-view-all">
+          See More →
+        </a>
+      </div>
+
+      <div class="shortcut-grid">
+        <a href="#" class="shortcut-item" onclick="filterByCategory('Speaker & Tweeter'); return false;">
+          <div class="shortcut-icon">🔊</div>
+          <span class="shortcut-label">Speaker</span>
+        </a>
+
+        <a href="#" class="shortcut-item" onclick="filterByCategory('Power Amplifier'); return false;">
+          <div class="shortcut-icon">⚡</div>
+          <span class="shortcut-label">Amplifier</span>
+        </a>
+
+        <a href="#" class="shortcut-item" onclick="filterByCategory('Transistor / MOSFET'); return false;">
+          <div class="shortcut-icon">🔧</div>
+          <span class="shortcut-label">MOSFET</span>
+        </a>
+
+        <a href="#" class="shortcut-item" onclick="filterByCategory('PCB / Boards'); return false;">
+          <div class="shortcut-icon">📦</div>
+          <span class="shortcut-label">PCB</span>
+        </a>
+
+        <a href="#" class="shortcut-item" onclick="filterByCategory('Audio Processor'); return false;">
+          <div class="shortcut-icon">🎛️</div>
+          <span class="shortcut-label">Processor</span>
+        </a>
+
+        <a href="#" class="shortcut-item" onclick="filterByCategory('Capacitor'); return false;">
+          <div class="shortcut-icon">🔋</div>
+          <span class="shortcut-label">Capacitor</span>
+        </a>
+
+        <a href="#" class="shortcut-item" onclick="filterByCategory('Connectors & Terminals'); return false;">
+          <div class="shortcut-icon">🔌</div>
+          <span class="shortcut-label">Connector</span>
+        </a>
+
+        <a href="#" class="shortcut-item" onclick="filterByCategory('Wires & Cables'); return false;">
+          <div class="shortcut-icon">📡</div>
+          <span class="shortcut-label">Cables</span>
+        </a>
+
+        <a href="#" class="shortcut-item extra-category" onclick="filterByCategory('Relay'); return false;">
+          <div class="shortcut-icon">🔁</div>
+          <span class="shortcut-label">Relay</span>
+        </a>
+
+        <a href="#" class="shortcut-item extra-category" onclick="filterByCategory('Others'); return false;">
+          <div class="shortcut-icon">🧩</div>
+          <span class="shortcut-label">Others</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- START DYNAMIC VOUCHERS -->
+    <section class="voucher-section" id="voucherSection">
+
+      <div class="voucher-header">
+        <h2>🎟️ Vouchers</h2>
+      </div>
+
+      <div class="voucher-list" id="voucherList">
+        <!-- Dynamic vouchers from admin -->
+      </div>
+
+    </section>
+    <!-- END DYNAMIC VOUCHERS -->
+
+    </section>
+    <section class="homepage-products" id="productsSection">
+      <div class="section-title">
+        <h2>Recommended For You</h2>
+      </div>
+
+      <div id="homepageProductList" class="homepage-product-grid"></div>
+    </section>
+
+  </main>
+
+  <div class="product-modal" id="productModal">
+    <div class="product-modal-overlay" onclick="closeProductModal()"></div>
+
+    <div class="product-modal-content">
+      <button class="product-modal-close" type="button" onclick="closeProductModal()">✕</button>
+
+      <div class="product-modal-grid">
+        <div class="product-modal-image-wrap">
+          <img id="modalProductImage" src="" alt="Product Image" class="product-modal-image" />
+        </div>
+
+        <div class="product-modal-info">
+          <span id="modalProductCategory" class="product-modal-category">Category</span>
+          <h2 id="modalProductName">Product Name</h2>
+          <div id="modalProductStars" class="product-rating"></div>
+          <div id="modalProductPricing" class="product-pricing-block"></div>
+          <p id="modalProductStock" class="product-stock-line">Stock: 0</p>
+          <p id="modalProductDescription" class="product-modal-description">Product description goes here.</p>
+
+          <div class="product-modal-actions">
+            <button id="modalAddToCartBtn" class="add-cart-btn" type="button">Add to Cart</button>
+            <button id="modalBuyNowBtn" class="buy-now-btn" type="button">Buy Now</button>
+            <button class="view-btn" type="button" onclick="closeProductModal()">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <a href="#" class="messenger-float" aria-label="Messenger">💬</a>
+
+  <div id="cartToast" class="cart-toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="Admin/supabase.js"></script>
+
+ 
+  <div class="mobile-bottom-nav">
+
+    <button class="mobile-nav-item active" onclick="goHome()">
+      <div class="mobile-nav-icon home-icon">
+        <img id="mobileNavLogo" alt="Logo" class="mobile-nav-logo" />
+      </div>
+      <span>Shop</span>
+    </button>
+
+    <button class="mobile-nav-item" onclick="goMessage()">
+      <div class="mobile-nav-icon chat-icon">💬</div>
+      <span>Chat</span>
+    </button>
+
+    <button class="mobile-nav-item" onclick="goCart()">
+
+      <div class="mobile-nav-icon cart-icon">
+
+        🛒
+
+        <span class="cart-badge" id="mobileCartCount">0</span>
+
+      </div>
+
+      <span>Cart</span>
+
+    </button>
+
+    <button class="mobile-nav-item" onclick="toggleAccountMenu()">
+      <div class="mobile-nav-icon home-icon">👤</div>
+      <span>Account</span>
+    </button>
+
+  </div>
+
+  <!-- WELCOME VOUCHER POPUP -->
+  <div id="welcomePopup" class="welcome-popup">
+
+    <div class="welcome-box">
+
+      <button class="welcome-close" onclick="closeWelcomePopup()">
+
+        ×
+
+      </button>
+
+      <div class="welcome-badge">
+        🎁 CLAIM YOUR NEW CUSTOMER VOUCHER
+      </div>
+
+      <h2>
+        🎉 Welcome To Drin Electronics!
+      </h2>
+
+      <p class="welcome-main">
+        Loading voucher...
+      </p>
+
+      <p class="welcome-sub">
+        Please wait...
+      </p>
+
+      <div class="welcome-actions">
+
+        <button onclick="claimWelcomeVoucher()" class="claim-btn">
+
+          🎁 Claim Voucher
+
+        </button>
+
+        <button onclick="closeWelcomePopup()" class="shop-btn">
+
+          Continue as Guest
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    function renderFavicon() {
+
+      const settings =
+        JSON.parse(localStorage.getItem("drinStoreSettings")) || {};
+
+      const logo =
+        settings?.branding?.logo || "";
+
+      const favicon =
+        document.getElementById("siteFavicon");
+
+      if (favicon && logo) {
+        favicon.href = logo;
+      }
+
+    }
+
+    renderFavicon();
+  </script>
+
+ <script src="script.js?v=10002"></script>
+</body>
+
+</html>

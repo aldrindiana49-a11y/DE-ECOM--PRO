@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categories | Drin Electronics</title>
+
+  <link rel="stylesheet" href="../home/style.css">
+  <link rel="stylesheet" href="categories.css">
+</head>
+
+<body>
+
+<!-- COPY NAVBAR FROM INDEX -->
+<nav class="navbar">
+  <div class="nav-left">
+    <button class="menu-btn" id="menuBtn">☰</button>
+
+    <a href="../home/index.html" class="home-link">
+      <span class="nav-logo-box">
+        <span id="navLogoFallback">DE</span>
+      </span>
+      <span>Home</span>
+    </a>
+  </div>
+
+  <div class="nav-center">
+    <div class="desktop-search">
+      <input type="text" placeholder="Search products...">
+      <button class="search-submit-btn">Search</button>
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <button class="icon-btn cart-btn" onclick="location.href='../cart/cart.html'">
+      🛒 <span class="cart-badge" id="cartCount">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- SIDEBAR (copy mo EXACT sa index mo para safe) -->
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="overlay" id="overlay"></div>
+
+<main class="main-content">
+
+  <!-- BACK -->
+  <div class="category-header">
+    <button onclick="location.href='../home/index.html'" class="back-btn">← Back</button>
+    <h2>All Products</h2>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div id="categoryProductList" class="homepage-product-grid"></div>
+
+  <!-- SEE MORE -->
+  <button id="seeMoreBtn" class="see-more-btn">See More</button>
+
+</main>
+
+<div class="mobile-bottom-nav">
+  <button onclick="location.href='../home/index.html'">🏠<span>Home</span></button>
+  <button onclick="location.href='../cart/cart.html'">🛒<span>Cart</span></button>
+</div>
+
+<script src="categories.js"></script>
+
+</body>
+</html>
