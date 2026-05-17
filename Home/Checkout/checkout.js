@@ -471,6 +471,22 @@ function showOrderModal(title, message) {
 
   modalTitle.textContent = title;
   modalMessage.textContent = message;
+
+  // DISABLE CLOSE
+  modal.onclick = null;
+
+  // HIDE OK BUTTON
+  const okBtn = document.getElementById("orderModalOk");
+  if (okBtn) {
+    okBtn.style.display = "none";
+  }
+
+  // HIDE CLOSE/X BUTTON
+  const closeBtn = document.getElementById("orderModalClose");
+  if (closeBtn) {
+    closeBtn.style.display = "none";
+  }
+
   modal.classList.add("show");
 }
 
@@ -784,8 +800,35 @@ async function placeOrder() {
   }
 
   const subtotalNumber = getCheckoutTotal();
-  const shippingFeeNumber = Number(currentShippingFee) || 0;
+  const handlingFee = paymentMain !== "COD" ? 25 : 0;
+
+  const shippingFeeNumber =
+    (Number(currentShippingFee) || 0) + handlingFee;
   const totalNumber = subtotalNumber + shippingFeeNumber;
+
+  if (paymentMain === "COD" && totalNumber < 200) {
+    showOrderModal(
+      "COD Minimum Order",
+      "Cash on Delivery requires a minimum total order of ₱200 including shipping."
+    );
+    return;
+  }
+
+  if (paymentMain === "COD" && totalNumber > 8000) {
+    showOrderModal(
+      "COD Limit Reached",
+      "Cash on Delivery is only available up to ₱8,000 total including shipping."
+    );
+    return;
+  }
+
+  if (paymentMain !== "COD" && totalNumber < 100) {
+    showOrderModal(
+      "Minimum Online Payment",
+      "Online payment requires a minimum total order of ₱100 including shipping."
+    );
+    return;
+  }
 
   if (subtotalNumber <= 0) {
     showOrderModal("Invalid Total", "Order total must be greater than ₱0.");
@@ -859,15 +902,12 @@ async function placeOrder() {
   }
 
   try {
-    const isMaya = totalNumber < 1000;
-    const paymentUrl = isMaya
-      ? `${API_BASE_URL}/api/create-maya-payment`
-      : `${API_BASE_URL}/api/create-payment`;
-
+    const paymentUrl = `${API_BASE_URL}/api/create-payment`;
     showOrderModal(
-      "Processing",
-      isMaya ? "Redirecting to Maya payment..." : "Redirecting to Xendit payment..."
+      "Please Wait",
+      "Redirecting to secure payment gateway... Please do not close this window."
     );
+
 
     const res = await fetch(paymentUrl, {
       method: "POST",
@@ -879,7 +919,7 @@ async function placeOrder() {
         shippingFee: shippingFeeNumber,
         customerName: name,
         customerPhone: phone,
-        paymentMethod: isMaya ? "MAYA" : "XENDIT",
+        paymentMethod: "XENDIT",
         courier: order.courier,
         address,
         parcelInfo: currentParcelInfo,
@@ -896,8 +936,18 @@ async function placeOrder() {
       data.redirectUrl;
 
     if (redirectUrl) {
-      window.location.href = redirectUrl;
+
+      clearCheckedCartItems();
+
+      localStorage.removeItem("drinCart");
+      localStorage.removeItem("drinCheckoutItems");
+
+      sessionStorage.setItem("paymentStarted", "true");
+
+      window.location.replace(redirectUrl);
+
     } else {
+
       showOrderModal("Payment Error", data.message || "Checkout failed.");
     }
   } catch (error) {
