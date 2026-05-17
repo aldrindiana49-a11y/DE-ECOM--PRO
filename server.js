@@ -957,7 +957,7 @@ app.get("/api/spx/address-file", async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "No address file URL returned",
-        spx: result
+        fullSpxResponse: result
       });
     }
 
