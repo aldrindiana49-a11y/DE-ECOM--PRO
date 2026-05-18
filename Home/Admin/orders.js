@@ -135,7 +135,7 @@ function getItemVariant(item) {
 function renderAdminOrders() {
   if (!adminOrdersTableBody) return;
 
-  let filteredOrders = [...adminOrders];
+ let filteredOrders = [...adminOrders];
 
   if (currentOrderFilter !== "ALL") {
     filteredOrders = filteredOrders.filter(order =>
@@ -507,28 +507,6 @@ function openTracking(orderId) {
 }
 
 /* ===============================
-   GLOBALS
-================================ */
-
-window.loadAdminOrders = loadAdminOrders;
-window.loadCancelledOrders = loadCancelledOrders;
-window.undoCancelledOrder = undoCancelledOrder;
-window.permanentDeleteOrder = permanentDeleteOrder;
-window.openOrderModal = openOrderModal;
-window.closeOrderModal = closeOrderModal;
-window.cancelOrder = cancelOrder;
-window.createSPXShipment = createSPXShipment;
-window.openAWB = openAWB;
-window.openTracking = openTracking;
-window.toggleShowAllOrderItems = toggleShowAllOrderItems;
-
-/* ===============================
-   INIT
-================================ */
-
-loadAdminOrders();
-
-/* ===============================
    CANCELLED ORDERS
 ================================ */
 
@@ -754,3 +732,24 @@ async function permanentDeleteOrder(orderId) {
     );
   }
 }
+
+/* ===============================
+   GLOBALS
+================================ */
+
+window.loadAdminOrders = loadAdminOrders;
+window.loadCancelledOrders = loadCancelledOrders;
+window.undoCancelledOrder = undoCancelledOrder;
+window.permanentDeleteOrder = permanentDeleteOrder;
+window.openOrderModal = openOrderModal;
+window.closeOrderModal = closeOrderModal;
+window.cancelOrder = cancelOrder;
+window.createSPXShipment = createSPXShipment;
+window.openAWB = openAWB;
+window.openTracking = openTracking;
+window.toggleShowAllOrderItems = toggleShowAllOrderItems;
+
+/* ===============================
+   INIT
+================================ */
+loadAdminOrders();

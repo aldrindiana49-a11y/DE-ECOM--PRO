@@ -508,89 +508,96 @@
 
       <!-- END MARKETING CENTER -->
 
-      <section class="content-section active-section" id="ordersSection"></section>
-      <div class="section-header">
-        <h2>Orders</h2>
-        <p>Manage customer orders, payment status, and fulfillment.</p>
-      </div>
 
-      <div class="orders-summary-grid">
-        <div class="orders-summary-card">
-          <span>Total Orders</span>
-          <strong id="ordersTotalCount">0</strong>
+
+      <section class="content-section active-section" id="ordersSection">
+
+        <div class="section-header">
+          <h2>Orders</h2>
+          <p>Manage customer orders, payment status, and fulfillment.</p>
         </div>
-        <div class="orders-summary-card">
-          <span>Pending Payment</span>
-          <strong id="ordersPendingCount">0</strong>
-        </div>
-        <div class="orders-summary-card">
-          <span>Paid</span>
-          <strong id="ordersPaidCount">0</strong>
-        </div>
-        <div class="orders-summary-card">
-          <span>To Ship</span>
-          <strong id="ordersToShipCount">0</strong>
-        </div>
-      </div>
 
+        <div class="orders-summary-grid">
 
-      <div class="orders-toolbar">
+          <div class="orders-summary-card">
+            <span>Total Orders</span>
+            <strong id="ordersTotalCount">0</strong>
+          </div>
 
-        <div class="orders-toolbar-left">
+          <div class="orders-summary-card">
+            <span>Pending Payment</span>
+            <strong id="ordersPendingCount">0</strong>
+          </div>
 
-          <button class="order-filter-btn active" data-filter="ALL">
-            All
-          </button>
+          <div class="orders-summary-card">
+            <span>Paid</span>
+            <strong id="ordersPaidCount">0</strong>
+          </div>
 
-          <button class="order-filter-btn" data-filter="Pending Payment">
-            Pending
-          </button>
-
-          <button class="order-filter-btn" data-filter="PAID">
-            Paid
-          </button>
-
-          <button class="order-filter-btn" data-filter="Processing">
-            Processing
-          </button>
-
-          <button class="order-filter-btn" data-filter="Shipped">
-            Shipped
-          </button>
-
-          <button class="order-filter-btn" data-filter="Delivered">
-            Delivered
-          </button>
+          <div class="orders-summary-card">
+            <span>To Ship</span>
+            <strong id="ordersToShipCount">0</strong>
+          </div>
 
         </div>
 
-        <div class="orders-toolbar-right">
+        <div class="orders-toolbar">
 
-          <button class="secondary-btn" type="button">
-            Select Orders
-          </button>
+          <div class="orders-toolbar-left">
 
-          <button class="small-btn" type="button">
-            Mark Packed
-          </button>
+            <button class="order-filter-btn active" data-filter="ALL">
+              All
+            </button>
 
-          <button class="primary-btn" type="button">
-            Arrange Shipment
-          </button>
+            <button class="order-filter-btn" data-filter="Pending Payment">
+              Pending
+            </button>
 
-          <button class="primary-btn" type="button">
-            Print Waybill
-          </button>
+            <button class="order-filter-btn" data-filter="PAID">
+              Paid
+            </button>
 
-          <button class="secondary-btn" type="button" onclick="loadAdminOrders()">
-            Refresh
-          </button>
+            <button class="order-filter-btn" data-filter="Processing">
+              Processing
+            </button>
+
+            <button class="order-filter-btn" data-filter="Shipped">
+              Shipped
+            </button>
+
+            <button class="order-filter-btn" data-filter="Delivered">
+              Delivered
+            </button>
+
+          </div>
+
+          <div class="orders-toolbar-right">
+
+            <button class="secondary-btn" type="button">
+              Select Orders
+            </button>
+
+            <button class="small-btn" type="button">
+              Mark Packed
+            </button>
+
+            <button class="primary-btn" type="button">
+              Arrange Shipment
+            </button>
+
+            <button class="primary-btn" type="button">
+              Print Waybill
+            </button>
+
+            <button class="secondary-btn" type="button" onclick="loadAdminOrders()">
+              Refresh
+            </button>
+
+          </div>
 
         </div>
 
-      </div>
-
-      <div id="adminOrdersTableBody" class="admin-orders-list"></div>
+        <div id="adminOrdersTableBody" class="admin-orders-list"></div>
 
       </section>
 

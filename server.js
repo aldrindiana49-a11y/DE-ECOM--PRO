@@ -14,7 +14,12 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
+const { createClient } = require("@supabase/supabase-js");
 
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 const app = express();
 
 app.use(cors());
@@ -30,21 +35,35 @@ function ensureOrdersFile() {
   if (!fs.existsSync(ORDERS_FILE)) fs.writeFileSync(ORDERS_FILE, "[]");
 }
 
-function readOrders() {
-  ensureOrdersFile();
-  try {
-    return JSON.parse(fs.readFileSync(ORDERS_FILE, "utf8") || "[]");
-  } catch {
+async function readOrders() {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("SUPABASE READ ORDERS ERROR:", error);
     return [];
+  }
+
+  return data || [];
+}
+
+async function saveOrders(orders) {
+  for (const order of orders) {
+    const { error } = await supabase
+      .from("orders")
+      .upsert(order, {
+        onConflict: "external_id"
+      });
+
+    if (error) {
+      console.error("SUPABASE SAVE ORDER ERROR:", error);
+    }
   }
 }
 
-function saveOrders(orders) {
-  ensureOrdersFile();
-  fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2));
-}
-
-function savePendingOrder({
+async function savePendingOrder({
   orderId,
   amount,
   subtotal,
@@ -58,7 +77,7 @@ function savePendingOrder({
   parcelInfo,
   courier
 }) {
-  let orders = readOrders();
+  let orders = await readOrders();
 
   const orderData = {
     external_id: orderId,
@@ -274,7 +293,7 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    let orders = readOrders();
+    let orders = await readOrders();
     const index = orders.findIndex(
       order => String(order.external_id) === String(orderId)
     );
@@ -383,7 +402,7 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
 });
 
 // ================= COD ORDER SAVE =================
-app.post("/api/orders/cod", (req, res) => {
+app.post("/api/orders/cod", async (req, res) => {
   try {
     const {
       orderId,
@@ -398,7 +417,7 @@ app.post("/api/orders/cod", (req, res) => {
       courier
     } = req.body;
 
-    const order = savePendingOrder({
+    const order = await savePendingOrder({
       orderId,
       amount,
       subtotal,
@@ -413,7 +432,7 @@ app.post("/api/orders/cod", (req, res) => {
       courier
     });
 
-    let orders = readOrders();
+    let orders = await readOrders();
     const index = orders.findIndex(item => item.external_id === orderId);
 
     if (index !== -1) {
@@ -476,7 +495,7 @@ app.post("/api/create-payment", async (req, res) => {
       });
     }
 
-    const order = savePendingOrder({
+    const order = await savePendingOrder({
       orderId,
       amount,
       customerName,
@@ -558,7 +577,7 @@ app.post("/api/create-maya-payment", async (req, res) => {
       });
     }
 
-    const order = savePendingOrder({
+    const order = await savePendingOrder({
       orderId,
       amount,
       customerName,
@@ -584,9 +603,9 @@ app.post("/api/create-maya-payment", async (req, res) => {
 });
 
 // ================= VIEW ACTIVE ORDERS =================
-app.get("/api/orders", (req, res) => {
+app.get("/api/orders", async (req, res) => {
   try {
-    const orders = readOrders();
+    const orders = await readOrders();
 
     // Hide cancelled orders from main dashboard
     const activeOrders = orders.filter(order => {
@@ -609,11 +628,11 @@ app.get("/api/orders", (req, res) => {
 });
 
 // ================= UPDATE ORDER =================
-app.post("/api/orders/update", (req, res) => {
+app.post("/api/orders/update", async (req, res) => {
   try {
     const { orderId, order_status, tracking_number, courier } = req.body;
 
-    let orders = readOrders();
+    let orders = await readOrders();
     const index = orders.findIndex(
       order => String(order.external_id) === String(orderId)
     );
@@ -647,11 +666,11 @@ app.post("/api/orders/update", (req, res) => {
 });
 
 // ================= CANCEL ORDER =================
-app.post("/api/orders/:orderId/cancel", (req, res) => {
+app.post("/api/orders/:orderId/cancel", async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    let orders = readOrders();
+    let orders = await readOrders();
 
     const index = orders.findIndex(
       order => String(order.external_id) === String(orderId)
@@ -687,9 +706,9 @@ app.post("/api/orders/:orderId/cancel", (req, res) => {
 });
 
 // ================= GET CANCELLED ORDERS =================
-app.get("/api/orders/cancelled", (req, res) => {
+app.get("/api/orders/cancelled", async (req, res) => {
   try {
-    const orders = readOrders();
+    const orders = await readOrders();
 
     const cancelledOrders = orders.filter(order =>
       order.order_status === "Cancelled"
@@ -711,11 +730,11 @@ app.get("/api/orders/cancelled", (req, res) => {
 });
 
 // ================= DELETE ORDER PERMANENT =================
-app.delete("/api/orders/:orderId/delete", (req, res) => {
+app.delete("/api/orders/:orderId/delete", async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    let orders = readOrders();
+    let orders = await readOrders();
 
     const index = orders.findIndex(
       order => String(order.external_id) === String(orderId)
@@ -790,7 +809,7 @@ function respondWebhookOk(res, extra = {}) {
 }
 
 // ================= MAYA WEBHOOK =================
-app.post("/webhook", (req, res) => {
+app.post("/webhook", async (req, res) => {
   try {
     const data = req.body || {};
     console.log("MAYA WEBHOOK RECEIVED:", data);
@@ -809,7 +828,7 @@ app.post("/webhook", (req, res) => {
       });
     }
 
-    let orders = readOrders();
+    let orders = await readOrders();
     const index = findOrderIndex(orders, orderId);
 
     if (index === -1) {
@@ -852,7 +871,7 @@ app.post("/webhook", (req, res) => {
 });
 
 // ================= XENDIT WEBHOOK =================
-app.post("/api/xendit/webhook", (req, res) => {
+app.post("/api/xendit/webhook", async (req, res) => {
   try {
     const data = req.body || {};
     console.log("XENDIT WEBHOOK RECEIVED:", data);
@@ -873,7 +892,7 @@ app.post("/api/xendit/webhook", (req, res) => {
       });
     }
 
-    let orders = readOrders();
+    let orders = await readOrders();
     const index = findOrderIndex(orders, orderId);
 
     if (index === -1) {
