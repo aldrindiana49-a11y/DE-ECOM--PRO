@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Signup | Drin Electronics</title>
+
+    <link rel="stylesheet" href="signup.css" />
+
+</head>
+
+<body>
+
+    <div class="signup-container">
+
+        <a href="/Home/" class="back-btn">
+            ← Back to Home
+        </a>
+
+        <div class="signup-card">
+
+            <h1>Create Account</h1>
+
+            <p class="subtitle">
+                Join Drin Electronics today.
+            </p>
+
+            <button id="googleSignupBtn" class="google-btn">
+
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
+
+                Continue with Google
+
+            </button>
+
+            <div class="divider">
+                <span>OR</span>
+            </div>
+
+            <form id="signupForm">
+
+                <input type="text" id="name" placeholder="Full Name" required />
+
+                <input type="email" id="email" placeholder="Email Address" required />
+
+                <input type="password" id="password" placeholder="Password" required />
+
+                <button type="submit" class="signup-btn">
+                    Create Account
+                </button>
+
+            </form>
+
+            <div class="signup-links">
+
+                <a href="#">
+                    Forgot Password?
+                </a>
+
+                <a href="/login/">
+                    Already have an account? Login
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="/Home/Admin/supabase.js"></script>
+    <script src="signup.js"></script>
+
+</body>
+
+</html>
