@@ -12,7 +12,7 @@ googleSignupBtn.addEventListener("click", async () => {
             provider: "google",
 
             options: {
-                redirectTo: "https://drinelectronicsph.com"
+                redirectTo: "https://drinelectronicsph.com/"
             }
 
         });
