@@ -109,7 +109,7 @@ async function savePendingOrder({
     orders.push(orderData);
   }
 
-  saveOrders(orders);
+  await saveOrders(orders);
   return orderData;
 }
 
@@ -358,7 +358,7 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
       orders[index].spx_error = result.data?.fail_list?.[0]?.message || "SPX failed";
       orders[index].updated_at = new Date().toISOString();
 
-      saveOrders(orders);
+     await saveOrders(orders);
 
       return res.status(400).json({
         success: false,
@@ -382,7 +382,7 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
     orders[index].order_status = "Ready to Ship";
     orders[index].updated_at = new Date().toISOString();
 
-    saveOrders(orders);
+   await saveOrders(orders);
 
     res.json({
       success: true,
@@ -439,7 +439,7 @@ app.post("/api/orders/cod", async (req, res) => {
       orders[index].status = "COD";
       orders[index].order_status = "To Ship";
       orders[index].updated_at = new Date().toISOString();
-      saveOrders(orders);
+      await saveOrders(orders);
     }
 
     res.json({ success: true, order: index !== -1 ? orders[index] : order });
@@ -650,7 +650,7 @@ app.post("/api/orders/update", async (req, res) => {
 
     orders[index].updated_at = new Date().toISOString();
 
-    saveOrders(orders);
+    await saveOrders(orders);
 
     res.json({
       success: true,
@@ -687,7 +687,7 @@ app.post("/api/orders/:orderId/cancel", async (req, res) => {
     orders[index].cancelled_at = new Date().toISOString();
     orders[index].updated_at = new Date().toISOString();
 
-    saveOrders(orders);
+    await saveOrders(orders);
 
     res.json({
       success: true,
@@ -751,7 +751,7 @@ app.delete("/api/orders/:orderId/delete", async (req, res) => {
 
     orders.splice(index, 1);
 
-    saveOrders(orders);
+    await saveOrders(orders);
 
     res.json({
       success: true,
@@ -852,7 +852,7 @@ app.post("/webhook", async (req, res) => {
       markOrderPaymentFailed(orders[index], "MAYA", mayaStatus, meta);
     }
 
-    saveOrders(orders);
+    await saveOrders(orders);
 
     return respondWebhookOk(res, {
       provider: "MAYA",
@@ -933,7 +933,7 @@ app.post("/api/xendit/webhook", async (req, res) => {
       orders[index].updated_at = new Date().toISOString();
     }
 
-    saveOrders(orders);
+    await saveOrders(orders);
 
     return respondWebhookOk(res, {
       provider: "XENDIT",
