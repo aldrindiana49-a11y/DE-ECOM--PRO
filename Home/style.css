@@ -1231,26 +1231,53 @@ body {
 
 .account-menu {
   position: relative;
+
+  display: flex;
+  align-items: center;
+
+  padding-bottom: 18px;
+  margin-bottom: -18px;
 }
 
 .account-dropdown {
   position: absolute;
-  top: 50px;
+
+  top: 58px;
   right: 0;
+
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  display: none;
-  flex-direction: column;
-  min-width: 140px;
+
+  border-radius: 12px;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, .12);
+
+  min-width: 170px;
+
   overflow: hidden;
+
   z-index: 2000;
+
+  opacity: 0;
+  visibility: hidden;
+
+  transform: translateY(10px);
+
+  transition:
+    opacity .22s ease,
+    transform .22s ease,
+    visibility .22s;
 }
 
 
 .account-menu:hover .account-dropdown,
 .account-dropdown.show {
+
   display: flex;
+
+  opacity: 1;
+  visibility: visible;
+
+  transform: translateY(0);
 }
 
 .account-dropdown a {
@@ -2002,36 +2029,32 @@ body {
 }
 
 .mobile-nav-icon.home-icon {
-  background: linear-gradient(
-    135deg,
-    #00bcd4,
-    #0097a7
-  );
+  background: linear-gradient(135deg,
+      #00bcd4,
+      #0097a7);
 
-  box-shadow: 0 4px 14px rgba(0,188,212,0.35);
+  box-shadow: 0 4px 14px rgba(0, 188, 212, 0.35);
 
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .mobile-nav-icon.home-icon {
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
 
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
 
-  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
 .mobile-nav-icon.chat-icon,
 .mobile-nav-icon.cart-icon {
-  background: linear-gradient(
-    135deg,
-    #00bcd4,
-    #0097a7
-  );
+  background: linear-gradient(135deg,
+      #00bcd4,
+      #0097a7);
 
-  box-shadow: 0 4px 14px rgba(0,188,212,0.35);
+  box-shadow: 0 4px 14px rgba(0, 188, 212, 0.35);
 
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .mobile-nav-logo[src=""],
@@ -2042,13 +2065,11 @@ body {
 .mobile-nav-icon.home-icon,
 .mobile-nav-icon.chat-icon,
 .mobile-nav-icon.cart-icon {
-  background: linear-gradient(
-    135deg,
-    #00bcd4,
-    #0097a7
-  );
+  background: linear-gradient(135deg,
+      #00bcd4,
+      #0097a7);
 
-  box-shadow: 0 4px 14px rgba(0,188,212,0.35);
+  box-shadow: 0 4px 14px rgba(0, 188, 212, 0.35);
 
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }

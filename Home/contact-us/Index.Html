@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Contact Us | Drin Electronics</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+
+            background:
+                linear-gradient(135deg,
+                    #06131a 0%,
+                    #0f172a 45%,
+                    #111827 100%);
+
+            color: #fff;
+
+            min-height: 100vh;
+
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+
+            margin: auto;
+
+            background: rgba(17, 24, 39, .96);
+
+            border-radius: 24px;
+
+            padding: 40px;
+
+            box-shadow: 0 20px 50px rgba(0, 0, 0, .35);
+        }
+
+        .back-btn {
+            display: inline-block;
+
+            margin-bottom: 28px;
+
+            text-decoration: none;
+
+            color: #67e8f9;
+
+            font-weight: 700;
+        }
+
+        h1 {
+            color: #06b6d4;
+
+            margin-bottom: 20px;
+
+            font-size: 42px;
+        }
+
+        .subtitle {
+            color: #dbeafe;
+
+            margin-bottom: 36px;
+
+            line-height: 1.8;
+        }
+
+        .contact-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(260px, 1fr));
+
+            gap: 24px;
+        }
+
+        .contact-card {
+            background: rgba(30, 41, 59, .85);
+
+            border-radius: 20px;
+
+            padding: 28px;
+
+            border: 1px solid rgba(103, 232, 249, .12);
+
+            transition: .2s;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-4px);
+
+            border-color: rgba(103, 232, 249, .28);
+        }
+
+        .contact-card h2 {
+            color: #67e8f9;
+
+            margin-bottom: 16px;
+
+            font-size: 22px;
+
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .contact-card p {
+            color: #dbeafe;
+
+            line-height: 1.9;
+
+            margin-bottom: 12px;
+        }
+
+        .contact-card a {
+            color: #67e8f9;
+
+            text-decoration: none;
+
+            word-break: break-word;
+        }
+
+        .contact-card a:hover {
+            text-decoration: underline;
+        }
+
+        .fa-facebook {
+            color: #1877f2;
+        }
+
+        .fa-envelope {
+            color: #06b6d4;
+        }
+
+        .fa-phone {
+            color: #22c55e;
+        }
+
+        .fa-globe {
+            color: #f59e0b;
+        }
+
+        .support-note {
+            margin-top: 40px;
+
+            padding: 24px;
+
+            border-radius: 18px;
+
+            background: rgba(6, 182, 212, .08);
+
+            border: 1px solid rgba(103, 232, 249, .14);
+        }
+
+        .support-note h3 {
+            color: #67e8f9;
+
+            margin-bottom: 14px;
+        }
+
+        .support-note p {
+            color: #dbeafe;
+
+            line-height: 1.9;
+        }
+
+        @media(max-width:768px) {
+
+            .container {
+                padding: 28px;
+            }
+
+            h1 {
+                font-size: 34px;
+            }
+
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <a href="../" class="back-btn">
+            ← Back to Home
+        </a>
+
+        <h1>Contact Us</h1>
+
+        <p class="subtitle">
+            We’re here to help with electronics products,
+            amplifier solutions, ecommerce support,
+            technical inquiries, and customer assistance.
+        </p>
+
+        <div class="contact-grid">
+
+            <div class="contact-card">
+
+                <h2>
+                    <i class="fa-solid fa-envelope"></i>
+                    Email Support
+                </h2>
+
+                <p>
+                    For customer support,
+                    order concerns,
+                    and general inquiries:
+                </p>
+
+                <a href="mailto:support@drinelectronicsph.com">
+                    support@drinelectronicsph.com
+                </a>
+
+            </div>
+
+            <div class="contact-card">
+
+                <h2>
+                    <i class="fa-solid fa-envelope"></i>
+                    Business & Sales
+                </h2>
+
+                <p>
+                    For reseller inquiries,
+                    partnerships,
+                    and business opportunities:
+                </p>
+
+                <a href="mailto:sales@drinelectronicsph.com">
+                    sales@drinelectronicsph.com
+                </a>
+
+            </div>
+
+            <div class="contact-card">
+
+                <h2>
+                    <i class="fa-solid fa-phone"></i>
+                    Phone Support
+                </h2>
+
+                <p>
+                    Landline:
+                    <br>
+                    (+63 83) 320-8239
+                    <br>
+                    (+63 83) 320-5488
+                </p>
+
+                <p>
+                    Globe:
+                    <br>
+                    +63 915 776 5642
+                </p>
+
+                <p>
+                    Smart:
+                    <br>
+                    +63 920 678 0409
+                </p>
+
+            </div>
+
+            <div class="contact-card">
+
+                <h2>
+                    <i class="fa-solid fa-globe"></i>
+                    Official Website
+                </h2>
+
+                <p>
+                    Visit our official ecommerce platform:
+                </p>
+
+                <a href="https://drinelectronicsph.com" target="_blank">
+                    drinelectronicsph.com
+                </a>
+
+            </div>
+
+            <div class="contact-card">
+
+                <h2>
+                    <i class="fa-brands fa-facebook"></i>
+                    Koronadal Branch
+                </h2>
+
+                <p>
+                    South Cotabato, Philippines
+                </p>
+
+                <a href="https://www.facebook.com/drinlexkoronadal" target="_blank">
+
+                    facebook.com/drinlexkoronadal
+
+                </a>
+
+            </div>
+
+            <div class="contact-card">
+
+                <h2>
+                    <i class="fa-brands fa-facebook"></i>
+                    Pasig Branch
+                </h2>
+
+                <p>
+                    NCR, Philippines
+                </p>
+
+                <a href="https://www.facebook.com/DrinElectronics" target="_blank">
+
+                    facebook.com/DrinElectronics
+
+                </a>
+
+            </div>
+
+        </div>
+
+        <div class="support-note">
+
+            <h3>Customer Support Hours</h3>
+
+            <p>
+                Our support team aims to respond
+                to customer inquiries as quickly as possible
+                during business hours.
+                Response times may vary depending on
+                inquiry volume and operational schedules.
+            </p>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

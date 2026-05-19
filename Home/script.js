@@ -1288,3 +1288,49 @@ function renderFavicon() {
 }
 
 renderFavicon();
+
+async function updateAuthUI() {
+
+  const {
+    data: { user }
+  } = await supabaseClient.auth.getUser();
+
+  const accountDropdown =
+    document.getElementById("accountDropdown");
+
+  if (!accountDropdown) return;
+
+  // NOT LOGGED IN
+  if (!user) {
+
+    accountDropdown.innerHTML = `
+      <a href="./login/">Login</a>
+      <a href="./signup/">Sign Up</a>
+    `;
+
+    return;
+  }
+
+  // LOGGED IN
+  accountDropdown.innerHTML = `
+    <a href="./profile/">
+      My Profile
+    </a>
+
+    <a href="#"
+       onclick="logoutUser()">
+       Logout
+    </a>
+  `;
+
+}
+
+async function logoutUser() {
+
+  await supabaseClient.auth.signOut();
+
+  window.location.href = "/";
+
+}
+
+updateAuthUI();

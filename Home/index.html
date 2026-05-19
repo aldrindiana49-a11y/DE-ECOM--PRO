@@ -97,11 +97,16 @@
       </button>
 
       <div class="account-menu">
-        <button id="accountBtn" class="icon-btn" type="button" aria-label="Account">👤</button>
+        <button id="accountBtn" class="icon-btn" type="button" aria-label="Account"
+          onclick="window.location.href='./login/'">
+
+          👤
+
+        </button>
 
         <div class="account-dropdown" id="accountDropdown">
-          <a href="/login/">Login</a>
-          <a href="/signup/">Sign Up</a>
+          <a href="./login/">Login</a>
+          <a href="./signup/">Sign Up</a>
         </div>
       </div>
     </div>
@@ -137,9 +142,7 @@
 
     <div class="sidebar-body">
       <div class="sidebar-section">
-        <h3 class="sidebar-title">🛒 Shop</h3>
         <ul class="sidebar-links">
-
           <li>
             <a href="#" onclick="renderHomepageProducts(products); closeSidebar(); return false;">
               All Products
@@ -160,10 +163,14 @@
       <div class="sidebar-section">
         <h3 class="sidebar-title">👤 Account</h3>
         <ul class="sidebar-links">
-          <li><a href="#">Notifications</a></li>
           <li><a href="#">Profile</a></li>
-          <li><a href="/login/">Login</a></li>
-          <li><a href="/signup/">Sign Up</a></li>
+          <li><a href="./login/">Login</a></li>
+          <li><a href="./signup/">Sign Up</a></li>
+          <li>
+            <a href="./orders/">
+              My Orders
+            </a>
+          </li>
         </ul>
       </div>
 
@@ -171,8 +178,18 @@
         <h3 class="sidebar-title">🏢 Company</h3>
         <ul class="sidebar-links">
           <li><a href="#">Branch Locator</a></li>
-          <li><a href="About/">About Us</a></li>
-          <li><a href="#">Contact Us</a></li>
+          <li>
+            <a href="./About/">
+              About Us
+            </a>
+          </li>
+
+          <li>
+            <a href="./contact-us/">
+              Contact Us
+            </a>
+          </li>
+          </a>
         </ul>
       </div>
     </div>
@@ -322,7 +339,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script src="Admin/supabase.js"></script>
 
- 
+
   <div class="mobile-bottom-nav">
 
     <button class="mobile-nav-item active" onclick="goHome()">
@@ -351,9 +368,14 @@
 
     </button>
 
-    <button class="mobile-nav-item" onclick="toggleAccountMenu()">
-      <div class="mobile-nav-icon home-icon">👤</div>
+    <button class="mobile-nav-item" onclick="window.location.href='./signup/'">
+
+      <div class="mobile-nav-icon home-icon">
+        👤
+      </div>
+
       <span>Account</span>
+
     </button>
 
   </div>
@@ -426,7 +448,7 @@
     renderFavicon();
   </script>
 
- <script src="script.js?v=10002"></script>
+  <script src="script.js?v=10002"></script>
 </body>
 
 </html>
