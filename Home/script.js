@@ -1298,32 +1298,96 @@ async function updateAuthUI() {
   const accountDropdown =
     document.getElementById("accountDropdown");
 
-  if (!accountDropdown) return;
+  const sidebarAccountLinks =
+    document.getElementById("sidebarAccountLinks");
 
+  // =========================
   // NOT LOGGED IN
+  // =========================
+
   if (!user) {
 
-    accountDropdown.innerHTML = `
-      <a href="./login/">Login</a>
-      <a href="./signup/">Sign Up</a>
-    `;
+    if (accountDropdown) {
+
+      accountDropdown.innerHTML = `
+        <a href="./login/">
+          Login
+        </a>
+
+        <a href="./signup/">
+          Sign Up
+        </a>
+      `;
+    }
+
+    if (sidebarAccountLinks) {
+
+      sidebarAccountLinks.innerHTML = `
+        <li>
+          <a href="./login/">
+            Login
+          </a>
+        </li>
+
+        <li>
+          <a href="./signup/">
+            Sign Up
+          </a>
+        </li>
+      `;
+    }
 
     return;
   }
 
+  // =========================
   // LOGGED IN
-  accountDropdown.innerHTML = `
-    <a href="./profile/">
-      My Profile
-    </a>
+  // =========================
 
-    <a href="#"
-       onclick="logoutUser()">
-       Logout
-    </a>
-  `;
+  if (accountDropdown) {
+
+    accountDropdown.innerHTML = `
+      <a href="./profile/">
+        My Profile
+      </a>
+
+      <a href="#"
+         onclick="logoutUser()">
+
+         Logout
+
+      </a>
+    `;
+  }
+
+  if (sidebarAccountLinks) {
+
+    sidebarAccountLinks.innerHTML = `
+      <li>
+        <a href="./orders/">
+          My Orders
+        </a>
+      </li>
+
+      <li>
+        <a href="./profile/">
+          Profile
+        </a>
+      </li>
+
+      <li>
+        <a href="#"
+           onclick="logoutUser()">
+
+           Logout
+
+        </a>
+      </li>
+    `;
+  }
 
 }
+
 
 async function logoutUser() {
 
@@ -1334,3 +1398,21 @@ async function logoutUser() {
 }
 
 updateAuthUI();
+
+async function goAccount() {
+
+  const {
+    data: { user }
+  } = await supabaseClient.auth.getUser();
+
+  if (user) {
+
+    window.location.href = "./profile/";
+
+  } else {
+
+    window.location.href = "./login/";
+
+  }
+
+}

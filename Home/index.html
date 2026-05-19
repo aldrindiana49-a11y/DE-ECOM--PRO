@@ -161,17 +161,15 @@
       </div>
 
       <div class="sidebar-section">
-        <h3 class="sidebar-title">👤 Account</h3>
-        <ul class="sidebar-links">
-          <li><a href="#">Profile</a></li>
-          <li><a href="./login/">Login</a></li>
-          <li><a href="./signup/">Sign Up</a></li>
-          <li>
-            <a href="./orders/">
-              My Orders
-            </a>
-          </li>
+
+        <h3 class="sidebar-title">
+          👤 Account
+        </h3>
+
+        <ul class="sidebar-links" id="sidebarAccountLinks">
+
         </ul>
+
       </div>
 
       <div class="sidebar-section">
@@ -368,7 +366,7 @@
 
     </button>
 
-    <button class="mobile-nav-item" onclick="window.location.href='./signup/'">
+    <button class="mobile-nav-item" onclick="goAccount()">
 
       <div class="mobile-nav-icon home-icon">
         👤
