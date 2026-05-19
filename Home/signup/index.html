@@ -11,6 +11,11 @@
 
     <link rel="stylesheet" href="signup.css" />
 
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
 </head>
 
 <body>
@@ -47,7 +52,27 @@
 
                 <input type="email" id="email" placeholder="Email Address" required />
 
-                <input type="password" id="password" placeholder="Password" required />
+                <div class="password-group">
+
+                    <input type="password" id="password" placeholder="Password (Minimum 8 characters)" minlength="8"
+                        required />
+
+                    <span class="toggle-password" onclick="togglePassword('password', this)">
+                        <i class="fa-solid fa-eye-slash"></i>
+                    </span>
+
+                </div>
+
+                <div class="password-group">
+
+                    <input type="password" id="confirmPassword" placeholder="Re-enter Password" minlength="8"
+                        required />
+
+                    <span class="toggle-password" onclick="togglePassword('confirmPassword', this)">
+                        <i class="fa-solid fa-eye-slash"></i>
+                    </span>
+
+                </div>
 
                 <button type="submit" class="signup-btn">
                     Create Account
@@ -74,6 +99,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="/Home/Admin/supabase.js"></script>
     <script src="signup.js"></script>
+
 </body>
 
 </html>

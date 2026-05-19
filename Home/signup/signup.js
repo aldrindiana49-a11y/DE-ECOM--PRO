@@ -36,7 +36,7 @@ signupForm.addEventListener("submit", async (e) => {
     const password =
         document.getElementById("password").value;
 
-    const { data, error } =
+    const { error } =
         await supabaseClient.auth.signUp({
 
             email,
@@ -45,7 +45,10 @@ signupForm.addEventListener("submit", async (e) => {
             options: {
                 data: {
                     full_name: name
-                }
+                },
+
+                emailRedirectTo:
+                    "https://drinelectronicsph.com/"
             }
 
         });
@@ -57,6 +60,7 @@ signupForm.addEventListener("submit", async (e) => {
 
     alert("Signup successful! Please check your email.");
 
-    window.location.href = "/";
+    window.location.href =
+        "https://drinelectronicsph.com/";
 
 });
