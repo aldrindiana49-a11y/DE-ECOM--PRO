@@ -125,8 +125,8 @@ async function continuePayment(orderId) {
     }
 
     showOrderModal(
-        "Please Wait",
-        "Redirecting to secure payment gateway..."
+        "Secure Payment Processing",
+        "Please wait while we redirect you to our secure payment gateway.\n\nDo not close this window or press the back button."
     );
 
     const res = await fetch("https://de-ecom-pro.onrender.com/api/create-payment", {
