@@ -83,7 +83,9 @@ async function loadOrders() {
         const expiryTime = createdTime + 60 * 60 * 1000;
         const remainingMs = expiryTime - Date.now();
 
-        const isPendingPayment = statusText.includes("pending payment");
+        const isPendingPayment =
+            statusText.includes("pending payment");
+
         const isExpired = isPendingPayment && remainingMs <= 0;
 
         card.innerHTML = `
