@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>My Orders | Drin Electronics</title>
+
+  <link rel="stylesheet" href="orders.css?v=1" />
+</head>
+
+<body>
+
+  <div class="orders-page">
+
+    <a href="/" class="back-btn">
+      ← Back to Home
+    </a>
+
+    <div class="orders-header">
+      <h1>My Orders</h1>
+      <p>Track your purchases, payment status, and shipping updates.</p>
+    </div>
+
+    <div id="ordersList" class="orders-list">
+      <div class="loading">Loading your orders...</div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="../Admin/supabase.js?v=10004"></script>
+  <script src="orders.js?v=1"></script>
+
+</body>
+
+</html>

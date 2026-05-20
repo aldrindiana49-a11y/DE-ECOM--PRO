@@ -1360,7 +1360,7 @@ async function updateAuthUI() {
   if (accountDropdown) {
 
     accountDropdown.innerHTML = `
-      <a href="./profile/">
+      <a href="/homeprofile/">
         My Profile
       </a>
 
@@ -1383,8 +1383,8 @@ async function updateAuthUI() {
       </li>
 
       <li>
-        <a href="./profile/">
-          Profile
+        <a href="/homeprofile/">
+          My Profile
         </a>
       </li>
 
@@ -1420,7 +1420,7 @@ async function goAccount() {
 
   if (user) {
 
-    window.location.href = "./profile/";
+    window.location.href = "/homeprofile/";
 
   } else {
 
