@@ -487,6 +487,13 @@ async function syncOrderToSupabase(order) {
     throw new Error("Customer not logged in.");
   }
 
+  console.log("SAVING ORDER TO SUPABASE:", {
+    user_id: user.id,
+    external_id: order.id,
+    items: order.items,
+    amount: order.total
+  });
+
   const { error } = await supabaseClient
     .from("orders")
     .insert([
