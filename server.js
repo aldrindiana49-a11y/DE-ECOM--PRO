@@ -93,7 +93,9 @@ async function savePendingOrder({
     courier: courier || "",
     checkout_url: checkoutUrl || "",
     status: "Pending Payment",
-    order_status: "Processing",
+    order_status: paymentProvider === "COD"
+      ? "Pending COD"
+      : "Pending Payment",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   };
@@ -358,7 +360,7 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
       orders[index].spx_error = result.data?.fail_list?.[0]?.message || "SPX failed";
       orders[index].updated_at = new Date().toISOString();
 
-     await saveOrders(orders);
+      await saveOrders(orders);
 
       return res.status(400).json({
         success: false,
@@ -382,7 +384,7 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
     orders[index].order_status = "Ready to Ship";
     orders[index].updated_at = new Date().toISOString();
 
-   await saveOrders(orders);
+    await saveOrders(orders);
 
     res.json({
       success: true,
