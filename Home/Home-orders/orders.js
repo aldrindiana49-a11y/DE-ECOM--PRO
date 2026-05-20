@@ -81,7 +81,10 @@ async function loadOrders() {
         card.innerHTML = `
       <div class="order-top">
         <div>
-          <div class="order-id">Order #${order.id}</div>
+          <div class="order-id">
+  Order #${order.external_id || order.externalId || order.order_id || order.orderId || order.id}
+</div>
+
           <div class="order-date">${new Date(order.created_at).toLocaleString()}</div>
         </div>
         <div class="order-status">${order.order_status || "Processing"}</div>
@@ -133,7 +136,12 @@ async function continuePayment(orderId) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            orderId: String(order.id),
+            orderId:
+                order.external_id ||
+                order.externalId ||
+                order.order_id ||
+                order.orderId ||
+                String(order.id),
             amount: order.amount,
             subtotal: order.subtotal || 0,
             shippingFee: order.shipping_fee || 0,
