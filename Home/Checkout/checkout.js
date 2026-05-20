@@ -1,3 +1,11 @@
+const SUPABASE_URL = "https://zdinvxowzpkolbfzpcac.supabase.co";
+
+const SUPABASE_ANON_KEY = "sb_publishable_yWOmkaQzsh7sInJPhDOFWw_tyjALAuP";
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 const checkoutItems = document.getElementById("checkoutItems");
 const checkoutSubtotal = document.getElementById("checkoutSubtotal");
 const checkoutShippingFee = document.getElementById("checkoutShippingFee");
@@ -850,10 +858,9 @@ async function placeOrder() {
     await syncOrderToSupabase(order);
   } catch (error) {
 
-    showOrderModal(
-      "Order Sync Error",
-      "Failed to sync order to My Orders page."
-    );
+    console.error("ORDER SYNC REAL ERROR:", error);
+
+    alert(error.message || JSON.stringify(error));
 
     return;
   }
