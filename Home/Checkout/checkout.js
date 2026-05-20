@@ -495,7 +495,6 @@ async function syncOrderToSupabase(order) {
         items: order.items,
         amount: order.total,
         order_status: order.status,
-        payment_method: order.payment.method,
         courier: order.courier,
         address: order.address,
         customer_name: order.customer.name,
