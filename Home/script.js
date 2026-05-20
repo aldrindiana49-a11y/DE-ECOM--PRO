@@ -1377,7 +1377,7 @@ async function updateAuthUI() {
 
     sidebarAccountLinks.innerHTML = `
       <li>
-        <a href="./orders/">
+        <a href="/Home-orders/">
           My Orders
         </a>
       </li>
