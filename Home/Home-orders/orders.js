@@ -97,7 +97,7 @@ async function continuePayment(orderId) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            orderId: order.id,
+            orderId: String(order.id),
             amount: order.amount,
             subtotal: order.subtotal || 0,
             shippingFee: order.shipping_fee || 0,
