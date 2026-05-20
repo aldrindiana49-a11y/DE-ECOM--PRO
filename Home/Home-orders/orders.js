@@ -1,15 +1,10 @@
 const ordersList = document.getElementById("ordersList");
 
 function showOrderModal(title, message) {
-
-    const modal =
-        document.getElementById("orderModal");
-
-    const modalTitle =
-        document.getElementById("orderModalTitle");
-
-    const modalMessage =
-        document.getElementById("orderModalMessage");
+    const modal = document.getElementById("orderModal");
+    const modalTitle = document.getElementById("orderModalTitle");
+    const modalMessage = document.getElementById("orderModalMessage");
+    const okBtn = document.getElementById("orderModalOk");
 
     if (!modal) {
         alert(message);
@@ -18,6 +13,10 @@ function showOrderModal(title, message) {
 
     modalTitle.textContent = title;
     modalMessage.textContent = message;
+
+    if (okBtn) {
+        okBtn.style.display = "none";
+    }
 
     modal.classList.add("show");
 }
@@ -121,7 +120,7 @@ async function continuePayment(orderId) {
         .single();
 
     if (error || !order) {
-        alert("Order not found.");
+        showOrderModal("Order Error", "Order not found.");
         return;
     }
 
@@ -153,7 +152,12 @@ async function continuePayment(orderId) {
 
     if (!res.ok) {
         console.log("CONTINUE PAYMENT ERROR:", data);
-        alert(JSON.stringify(data));
+
+        showOrderModal(
+            "Payment Error",
+            data.message || "Payment request failed."
+        );
+
         return;
     }
 
@@ -164,11 +168,16 @@ async function continuePayment(orderId) {
         data.redirectUrl;
 
     if (!redirectUrl) {
-        alert(data.message || "Cannot continue payment.");
+        showOrderModal(
+            "Payment Error",
+            data.message || "Cannot continue payment."
+        );
+
         return;
     }
 
-    window.location.href = redirectUrl;
+    window.location.replace(redirectUrl);
+
 }
 
 loadOrders();
