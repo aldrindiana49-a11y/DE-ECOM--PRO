@@ -67,16 +67,24 @@ async function loadOrders() {
         const items = Array.isArray(order.items) ? order.items : [];
 
         const itemsHtml = items.map(item => `
-      <div class="order-item">
-        <img src="${item.image || 'https://via.placeholder.com/100'}" alt="${item.name || 'Product'}" />
-        <div>
-          <div class="order-item-name">${item.name || 'Product'}</div>
-          <div class="order-item-price">
-            Qty: ${item.quantity || 1} • ₱${Number(item.price || 0).toLocaleString()}
-          </div>
-        </div>
+  <div class="order-item">
+    <img src="${item.image || 'https://via.placeholder.com/100'}" alt="${item.name || 'Product'}" />
+    <div>
+      <div class="order-item-name">${item.name || 'Product'}</div>
+      <div class="order-item-price">
+        Qty: ${item.quantity || 1} • ₱${Number(item.price || 0).toLocaleString()}
       </div>
-    `).join("");
+    </div>
+  </div>
+`).join("");
+
+        const statusText = String(order.order_status || "").toLowerCase();
+        const createdTime = new Date(order.created_at).getTime();
+        const expiryTime = createdTime + 60 * 60 * 1000;
+        const remainingMs = expiryTime - Date.now();
+
+        const isPendingPayment = statusText.includes("pending payment");
+        const isExpired = isPendingPayment && remainingMs <= 0;
 
         card.innerHTML = `
       <div class="order-top">
@@ -104,10 +112,29 @@ async function loadOrders() {
                 : ""
             }
 
-        ${order.order_status === "Pending Payment"
-                ? `<button class="track-btn" onclick="continuePayment('${order.id}')">Continue Payment</button>`
+        ${isPendingPayment && !isExpired
+                ? `
+      <div class="payment-countdown" data-expiry="${expiryTime}">
+        Payment expires in:
+        <strong>--:--:--</strong>
+      </div>
+
+      <button class="track-btn" onclick="continuePayment('${order.id}')">
+        Complete Payment
+      </button>
+    `
                 : ""
             }
+
+${isExpired
+                ? `
+      <button class="track-btn expired-btn">
+        Payment Expired
+      </button>
+    `
+                : ""
+            }
+
       </div>
     `;
 
@@ -188,4 +215,43 @@ async function continuePayment(orderId) {
 
 }
 
+function updatePaymentCountdowns() {
+
+    document.querySelectorAll(".payment-countdown")
+        .forEach(timer => {
+
+            const expiry =
+                Number(timer.dataset.expiry);
+
+            const remaining =
+                expiry - Date.now();
+
+            const text =
+                timer.querySelector("strong");
+
+            if (remaining <= 0) {
+
+                text.textContent = "Expired";
+
+                return;
+            }
+
+            const hours =
+                Math.floor(remaining / 3600000);
+
+            const minutes =
+                Math.floor((remaining % 3600000) / 60000);
+
+            const seconds =
+                Math.floor((remaining % 60000) / 1000);
+
+            text.textContent =
+                `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+        });
+}
+
+setInterval(updatePaymentCountdowns, 1000);
+
 loadOrders();
+
+updatePaymentCountdowns();
