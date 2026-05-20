@@ -1007,7 +1007,20 @@ async function loadProductsFromSupabase() {
     };
   });
 
-  renderHomepageProducts(products);
+  const selectedCategory =
+    localStorage.getItem("selectedCategory");
+
+  if (selectedCategory) {
+
+    filterByCategory(selectedCategory);
+
+    localStorage.removeItem("selectedCategory");
+
+  } else {
+
+    renderHomepageProducts(products);
+
+  }
 }
 
 applyTheme();
@@ -1412,6 +1425,26 @@ async function goAccount() {
   } else {
 
     window.location.href = "./login/";
+
+  }
+
+}
+
+function showAllProducts() {
+
+  localStorage.removeItem("selectedCategory");
+
+  renderHomepageProducts(products);
+
+  const section =
+    document.getElementById("productsSection");
+
+  if (section) {
+
+    section.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
 
   }
 
