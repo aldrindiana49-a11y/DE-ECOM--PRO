@@ -479,12 +479,13 @@ function saveOrder(order) {
 }
 
 async function syncOrderToSupabase(order) {
+
   const {
     data: { user }
   } = await supabaseClient.auth.getUser();
 
   if (!user) {
-    throw new Error("Customer not logged in.");
+    throw new Error("Please login or create an account before checkout.");
   }
 
   console.log("SAVING ORDER TO SUPABASE:", {
@@ -494,7 +495,7 @@ async function syncOrderToSupabase(order) {
     amount: order.total
   });
 
-  const { data, error } = await supabaseClient
+  const { error } = await supabaseClient
     .from("orders")
     .insert([
       {
@@ -510,10 +511,8 @@ async function syncOrderToSupabase(order) {
         subtotal: order.subtotal,
         shipping_fee: order.shippingFee,
       }
-    ])
-    .select();
+    ]);
 
-  console.log("SUPABASE INSERT RESULT:", data);
   console.log("SUPABASE INSERT ERROR:", error);
 
   if (error) {
