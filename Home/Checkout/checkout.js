@@ -502,7 +502,6 @@ async function syncOrderToSupabase(order) {
         customer_phone: order.customer.phone,
         subtotal: order.subtotal,
         shipping_fee: order.shippingFee,
-        local_order_id: order.id
       }
     ]);
 
