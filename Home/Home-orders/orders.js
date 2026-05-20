@@ -91,6 +91,7 @@ async function loadOrders() {
         <div>
           <div class="order-id">
   Order #${order.external_id || order.externalId || order.order_id || order.orderId || order.id}
+  
 </div>
 
           <div class="order-date">${new Date(order.created_at).toLocaleString()}</div>
@@ -103,30 +104,34 @@ async function loadOrders() {
       </div>
 
       <div class="order-bottom">
-        <div class="order-total">
-          Total: ₱${Number(order.amount || 0).toLocaleString()}
-        </div>
+  <div class="order-total">
+    Total: ₱${Number(order.amount || 0).toLocaleString()}
+  </div>
 
-        ${order.tracking_link
-                ? `<button class="track-btn" onclick="window.open('${order.tracking_link}')">Track Order</button>`
+  ${order.tracking_link
+                ? `<button class="track-btn"
+          onclick="window.open('${order.tracking_link}')">
+          Track Order
+        </button>`
                 : ""
             }
 
-        ${isPendingPayment && !isExpired
+  ${isPendingPayment && !isExpired
                 ? `
       <div class="payment-countdown" data-expiry="${expiryTime}">
         Payment expires in:
         <strong>--:--:--</strong>
       </div>
 
-      <button class="track-btn" onclick="continuePayment('${order.id}')">
+      <button class="track-btn"
+        onclick="continuePayment('${order.id}')">
         Complete Payment
       </button>
     `
                 : ""
             }
 
-${isExpired
+  ${isExpired
                 ? `
       <button class="track-btn expired-btn">
         Payment Expired
@@ -135,7 +140,13 @@ ${isExpired
                 : ""
             }
 
-      </div>
+  <button class="track-btn buy-again-btn"
+    onclick="window.location.href='../Products/index.html'">
+    Buy Again
+  </button>
+
+</div>
+
     `;
 
         ordersList.appendChild(card);
