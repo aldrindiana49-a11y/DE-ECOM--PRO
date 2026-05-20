@@ -470,6 +470,40 @@ function saveOrder(order) {
   }
 }
 
+async function syncOrderToSupabase(order) {
+  const {
+    data: { user }
+  } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+    throw new Error("Customer not logged in.");
+  }
+
+  const { error } = await supabaseClient
+    .from("orders")
+    .insert([
+      {
+        user_id: user.id,
+        items: order.items,
+        amount: order.total,
+        order_status: order.status,
+        payment_method: order.payment.method,
+        courier: order.courier,
+        address: order.address,
+        customer_name: order.customer.name,
+        customer_phone: order.customer.phone,
+        subtotal: order.subtotal,
+        shipping_fee: order.shippingFee,
+        local_order_id: order.id
+      }
+    ]);
+
+  if (error) {
+    console.error("SUPABASE ORDER SYNC ERROR:", error);
+    throw error;
+  }
+}
+
 function clearCheckedCartItems() {
   const checkedOutItems =
     JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
@@ -811,6 +845,18 @@ async function placeOrder() {
   };
 
   saveOrder(order);
+
+  try {
+    await syncOrderToSupabase(order);
+  } catch (error) {
+
+    showOrderModal(
+      "Order Sync Error",
+      "Failed to sync order to My Orders page."
+    );
+
+    return;
+  }
 
   if (paymentMain === "COD") {
 
