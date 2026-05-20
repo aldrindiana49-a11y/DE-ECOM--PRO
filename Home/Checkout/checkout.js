@@ -508,7 +508,7 @@ async function syncOrderToSupabase(order) {
 
   if (error) {
     console.error("SUPABASE ORDER SYNC ERROR:", error);
-    throw error;
+    throw new Error(error.message);
   }
 }
 
