@@ -115,7 +115,8 @@ async function continuePayment(orderId) {
     const data = await res.json();
 
     if (!res.ok) {
-        alert(data.message || "Payment request failed.");
+        console.log("CONTINUE PAYMENT ERROR:", data);
+        alert(JSON.stringify(data));
         return;
     }
 
