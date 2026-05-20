@@ -492,6 +492,7 @@ async function syncOrderToSupabase(order) {
     .insert([
       {
         user_id: user.id,
+        external_id: order.id,
         items: order.items,
         amount: order.total,
         order_status: order.status,
