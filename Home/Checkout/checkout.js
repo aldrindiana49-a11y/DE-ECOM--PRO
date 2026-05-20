@@ -494,7 +494,7 @@ async function syncOrderToSupabase(order) {
     amount: order.total
   });
 
-  const { error } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from("orders")
     .insert([
       {
@@ -510,7 +510,11 @@ async function syncOrderToSupabase(order) {
         subtotal: order.subtotal,
         shipping_fee: order.shippingFee,
       }
-    ]);
+    ])
+    .select();
+
+  console.log("SUPABASE INSERT RESULT:", data);
+  console.log("SUPABASE INSERT ERROR:", error);
 
   if (error) {
     console.error("SUPABASE ORDER SYNC ERROR:", error);
