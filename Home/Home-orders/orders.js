@@ -1,5 +1,37 @@
 const ordersList = document.getElementById("ordersList");
 
+function showOrderModal(title, message) {
+
+    const modal =
+        document.getElementById("orderModal");
+
+    const modalTitle =
+        document.getElementById("orderModalTitle");
+
+    const modalMessage =
+        document.getElementById("orderModalMessage");
+
+    if (!modal) {
+        alert(message);
+        return;
+    }
+
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+
+    modal.classList.add("show");
+}
+
+function closeOrderModal() {
+
+    const modal =
+        document.getElementById("orderModal");
+
+    if (modal) {
+        modal.classList.remove("show");
+    }
+}
+
 async function loadOrders() {
     const {
         data: { user }
@@ -92,6 +124,11 @@ async function continuePayment(orderId) {
         alert("Order not found.");
         return;
     }
+
+    showOrderModal(
+        "Please Wait",
+        "Redirecting to secure payment gateway..."
+    );
 
     const res = await fetch("https://de-ecom-pro.onrender.com/api/create-payment", {
         method: "POST",
