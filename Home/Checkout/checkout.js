@@ -656,7 +656,6 @@ function scheduleShippingQuote() {
 function estimateFallbackShippingFee(courier) {
   return 0;
 }
-
 async function calculateShippingFee() {
   try {
     currentParcelInfo = calculateParcelInfo();
@@ -679,26 +678,23 @@ async function calculateShippingFee() {
     const data = await res.json();
 
     if (!res.ok || !data.success) {
-
       console.log("SPX ERROR RESPONSE:", data);
       alert(JSON.stringify(data));
 
-      selectedCourier = getFallbackCourier();
-      currentShippingFee = estimateFallbackShippingFee(selectedCourier);
+      currentShippingFee = null;
       currentShippingQuote = {
-        success: true,
+        success: false,
         courier: selectedCourier,
-        fallback: true,
+        fallback: false,
         spxError: data,
       };
 
-      if (courierSelect) courierSelect.value = selectedCourier;
-
       setShippingUI(
-        "ready",
-        `SPX unavailable. ${selectedCourier} fallback selected.`,
-        currentShippingFee
+        "failed",
+        "SPX error. Check console for details.",
+        null
       );
+
       return;
     }
 
@@ -710,33 +706,31 @@ async function calculateShippingFee() {
       : "SPX shipping fee calculated";
 
     setShippingUI("ready", etaText, currentShippingFee);
+
   } catch (error) {
     console.error("SHIPPING FEE ERROR:", error);
 
-    selectedCourier = getFallbackCourier();
-    currentShippingFee = estimateFallbackShippingFee(selectedCourier);
+    currentShippingFee = null;
     currentShippingQuote = {
-      success: true,
+      success: false,
       courier: selectedCourier,
-      fallback: true,
+      fallback: false,
       error: error.message,
     };
 
-    if (courierSelect) courierSelect.value = selectedCourier;
-
     setShippingUI(
-      "ready",
-      `SPX error. ${selectedCourier} fallback selected.`,
-      currentShippingFee
+      "failed",
+      "SPX connection error. Check console.",
+      null
     );
   }
 }
 
 function getFallbackCourier() {
 
-  return "Same Day Delivery / Lalamove";
+return "Same Day Delivery / Lalamove";
 
-}
+  }
 
 async function placeOrder() {
   const name = nameInput?.value.trim() || "";

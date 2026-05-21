@@ -89,12 +89,12 @@ function normalizeAddress(address = {}) {
       "Metro Manila",
 
     deliver_city:
-      address.province ||
+      address.areaGroup ||
       address.deliverCity ||
-      "Manila",
+      "Metro Manila",
 
     deliver_district:
-      address.city ||
+      address.province ||
       address.deliverDistrict ||
       "Binondo",
 
