@@ -136,12 +136,12 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
           vas_info: {}
         },
         sender_info: {
-          sender_state: process.env.SPX_SENDER_STATE || "Metro Manila",
-          sender_city: process.env.SPX_SENDER_CITY || "Manila",
-          sender_district: process.env.SPX_SENDER_DISTRICT || "Binondo",
-          sender_street: process.env.SPX_SENDER_STREET || "Barangay 287",
-          sender_post_code: process.env.SPX_SENDER_POST_CODE || "1006",
-          sender_detail_address: process.env.SPX_SENDER_ADDRESS || "Drin Electronics Warehouse"
+          sender_state: "Metro Manila",
+          sender_city: "Metro Manila",
+          sender_district: "Binondo",
+          sender_street: "Barangay 294",
+          sender_post_code: "115",
+          sender_detail_address: "1",
         },
         fulfillment_info: {
           cod_collection: 0,
