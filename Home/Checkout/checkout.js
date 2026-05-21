@@ -58,7 +58,8 @@ let ADDRESS_DATA = {};
 const AREA_GROUPS = ["Metro Manila", "North Luzon", "South Luzon", "Visayas", "Mindanao"];
 
 async function loadSPXAddresses() {
-  const res = await fetch("/Data/spx-addresses.json");
+  const res = await fetch("spx-addresses.json");
+
   SPX_ADDRESSES = await res.json();
 
   ADDRESS_DATA = {};
