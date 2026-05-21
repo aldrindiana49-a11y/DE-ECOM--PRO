@@ -88,6 +88,9 @@ async function loadOrders() {
 
         const isExpired = isPendingPayment && remainingMs <= 0;
 
+        const isPaid =
+            statusText.includes("processing");
+
         card.innerHTML = `
       <div class="order-top">
         <div>
@@ -142,6 +145,16 @@ async function loadOrders() {
                 : ""
             }
 
+            ${isPaid
+                ? `
+      <button class="track-btn"
+        style="background:#22c55e;">
+        Paid ✓
+      </button>
+    `
+                : ""
+            }
+
   <button class="track-btn buy-again-btn"
     onclick="window.location.href='../Products/index.html'">
     Buy Again
@@ -168,8 +181,8 @@ async function continuePayment(orderId) {
     }
 
     showOrderModal(
-        "Secure Payment Processing",
-        "Please wait while we redirect you to our secure payment gateway.\n\nDo not close this window or press the back button."
+        "Secure Checkout",
+        "Preparing secure checkout...\n\nPlease do not refresh or close this page."
     );
 
     const res = await fetch("https://de-ecom-pro.onrender.com/api/create-payment", {
