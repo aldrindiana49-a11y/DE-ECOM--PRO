@@ -127,16 +127,8 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
           deliver_phone: "09171234567"
         },
 
-        parcel_info: {
-          parcel_weight: 1,
-          parcel_length: 10,
-          parcel_width: 10,
-          parcel_height: 20,
-          parcel_item_name: "Electronics",
-          parcel_item_quantity: 1,
-          express_insured_value: Number(amount || 0),
-          parcel_item_type: "Electronics"
-        }
+        parcel_info: parcel
+
       }
     ]
   });

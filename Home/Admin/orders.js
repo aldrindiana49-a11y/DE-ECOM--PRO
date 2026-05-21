@@ -13,7 +13,7 @@ const dashboardShipped = document.getElementById("dashboardShipped");
 const dashboardDelivered = document.getElementById("dashboardDelivered");
 
 let adminOrders = [];
-let currentOrderFilter = "ALL";
+let currentOrderFilter = "Processing";
 let expandedOrderItems = {};
 
 const cancelledOrdersTableBody =
@@ -135,13 +135,36 @@ function getItemVariant(item) {
 function renderAdminOrders() {
   if (!adminOrdersTableBody) return;
 
- let filteredOrders = [...adminOrders];
+  let filteredOrders = [...adminOrders];
 
   if (currentOrderFilter !== "ALL") {
-    filteredOrders = filteredOrders.filter(order =>
-      order.status === currentOrderFilter ||
-      order.order_status === currentOrderFilter
-    );
+
+    filteredOrders = filteredOrders.filter(order => {
+
+      const status =
+        String(order.order_status || "").toLowerCase();
+
+      const createdTime =
+        new Date(order.created_at).getTime();
+
+      const expiryTime =
+        createdTime + 60 * 60 * 1000;
+
+      const isExpired =
+        status.includes("pending payment") &&
+        Date.now() > expiryTime;
+
+      if (currentOrderFilter === "Expired") {
+        return isExpired;
+      }
+
+      return (
+        order.status === currentOrderFilter ||
+        order.order_status === currentOrderFilter
+      );
+
+    });
+
   }
 
   filteredOrders.reverse();
@@ -166,7 +189,11 @@ function renderAdminOrders() {
       <div class="warehouse-order-card">
         <div class="warehouse-order-head">
           <label class="order-select-wrap">
-            <input type="checkbox" class="order-select-checkbox">
+            <input
+  type="checkbox"
+  class="order-select-checkbox"
+  value="${escapeAttribute(orderId)}"
+>
             <span>
               <strong>${escapeHtml(orderId || "-")}</strong><br>
               ${escapeHtml(order.customer_name || "Customer")}
@@ -360,8 +387,8 @@ function openOrderModal(orderId) {
 
     <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
       <button type="button" onclick="createSPXShipment('${escapeAttribute(orderId)}', this)">
-        Create SPX
-      </button>
+  Arrange Shipment
+</button>
 
       <button type="button" onclick="openAWB('${escapeAttribute(orderId)}')">
         Print AWB
@@ -447,7 +474,7 @@ async function createSPXShipment(orderId, btn) {
   try {
     if (btn) {
       btn.disabled = true;
-      btn.innerText = "Creating SPX...";
+      btn.innerText = "Arranging Shipment...";
     }
 
     const res = await fetch(
@@ -465,7 +492,7 @@ async function createSPXShipment(orderId, btn) {
       return;
     }
 
-    showToast("SPX shipment created!", "success");
+    showToast("Shipment arranged successfully!", "success");
     await loadAdminOrders();
 
   } catch (err) {
@@ -475,7 +502,7 @@ async function createSPXShipment(orderId, btn) {
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerText = "Create SPX";
+      btn.innerText = "Arrange Shipment";
     }
   }
 }
@@ -733,10 +760,50 @@ async function permanentDeleteOrder(orderId) {
   }
 }
 
+function getSelectedOrderIds() {
+
+  return Array
+    .from(document.querySelectorAll(".order-select-checkbox:checked"))
+
+    .map(checkbox => checkbox.value)
+
+    .filter(Boolean);
+
+}
+
+async function bulkArrangeShipment() {
+
+  const selectedOrders =
+    getSelectedOrderIds();
+
+  if (!selectedOrders.length) {
+
+    showToast(
+      "Select orders first.",
+      "error"
+    );
+
+    return;
+  }
+
+  for (const orderId of selectedOrders) {
+
+    await createSPXShipment(orderId);
+
+  }
+
+  showToast(
+    "Bulk shipment arrangement complete.",
+    "success"
+  );
+
+}
+
 /* ===============================
    GLOBALS
 ================================ */
 
+window.bulkArrangeShipment = bulkArrangeShipment;
 window.loadAdminOrders = loadAdminOrders;
 window.loadCancelledOrders = loadCancelledOrders;
 window.undoCancelledOrder = undoCancelledOrder;
@@ -752,4 +819,29 @@ window.toggleShowAllOrderItems = toggleShowAllOrderItems;
 /* ===============================
    INIT
 ================================ */
+document
+  .querySelectorAll(".order-filter-btn")
+
+  .forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      document
+        .querySelectorAll(".order-filter-btn")
+
+        .forEach(btn =>
+          btn.classList.remove("active")
+        );
+
+      button.classList.add("active");
+
+      currentOrderFilter =
+        button.dataset.filter;
+
+      renderAdminOrders();
+
+    });
+
+  });
+
 loadAdminOrders();

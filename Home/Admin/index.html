@@ -545,8 +545,12 @@
 
           <div class="orders-toolbar-left">
 
-            <button class="order-filter-btn active" data-filter="ALL">
+            <button class="order-filter-btn" data-filter="ALL">
               All
+            </button>
+
+            <button class="order-filter-btn" data-filter="Expired">
+              Expired
             </button>
 
             <button class="order-filter-btn" data-filter="Pending Payment">
@@ -557,7 +561,7 @@
               Paid
             </button>
 
-            <button class="order-filter-btn" data-filter="Processing">
+            <button class="order-filter-btn active" data-filter="Processing">
               Processing
             </button>
 
@@ -581,7 +585,7 @@
               Mark Packed
             </button>
 
-            <button class="primary-btn" type="button">
+            <button class="primary-btn" type="button" onclick="bulkArrangeShipment()">
               Arrange Shipment
             </button>
 

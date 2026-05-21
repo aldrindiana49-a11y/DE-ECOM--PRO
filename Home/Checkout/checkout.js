@@ -585,6 +585,12 @@ function scheduleShippingQuote() {
     return;
   }
 
+  if (!selectedCourier) {
+    setShippingUI("", "Please select courier", null);
+    return;
+  }
+
+
   // PICK UP / WALK IN
   if (selectedCourier === "Pick Up / Walk In") {
 
@@ -626,6 +632,7 @@ function scheduleShippingQuote() {
 
     return;
   }
+
 
   // REAL SPX API
   setShippingUI("loading", "Calculating SPX shipping fee...", null);
@@ -713,17 +720,9 @@ async function calculateShippingFee() {
 }
 
 function getFallbackCourier() {
-  const province = provinceSelect.value;
-  const city = citySelect.value;
-  const couriers = ADDRESS_DATA[province]?.cities?.[city]?.couriers || ["Pick Up", "Manual Delivery"];
 
-  if (couriers.includes("J&T")) return "J&T";
-  if (couriers.includes("Flash Express")) return "Flash Express";
-  if (couriers.includes("Lalamove / Same Day")) return "Lalamove / Same Day";
-  if (couriers.includes("Pick Up")) return "Pick Up";
-  if (couriers.includes("Manual Delivery")) return "Manual Delivery";
+  return "Same Day Delivery / Lalamove";
 
-  return couriers.find((courier) => courier !== "SPX") || "Manual Delivery";
 }
 
 async function placeOrder() {
