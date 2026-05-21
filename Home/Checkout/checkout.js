@@ -878,9 +878,7 @@ async function placeOrder() {
 
     console.error("ORDER SYNC REAL ERROR:", error);
 
-    alert(error.message || JSON.stringify(error));
-
-    return;
+    // continue kahit may Supabase issue
   }
 
   if (paymentMain === "COD") {
