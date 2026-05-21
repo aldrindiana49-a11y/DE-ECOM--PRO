@@ -179,12 +179,13 @@ async function createOrder(order) {
         sender_info: {
           sender_state: "Metro Manila",
           sender_city: "Metro Manila",
-          sender_district: "Binondo",
-          sender_street: "Barangay 294",
-          sender_post_code: "115",
-          sender_name: "Drin Electronics",
-          sender_phone: "639123456789",
-          sender_detail_address: "1"
+          sender_district: "Pasig City",
+          sender_street: "Pinagbuhatan",
+          sender_post_code: "1600",
+          sender_name: "DRIN ELECTRONICS PASIG",
+          sender_phone: "639206780409",
+          sender_detail_address:
+            "PINALAD RD CAMACHILI ST CENTENNIAL 2A NAGPAYONG"
         },
 
         fulfillment_info: {
@@ -195,14 +196,20 @@ async function createOrder(order) {
         },
 
         deliver_info: {
-          deliver_state: order.deliverState,
-          deliver_city: order.deliverCity,
-          deliver_district: order.deliverDistrict,
-          deliver_street: order.deliverStreet,
-          deliver_post_code: order.deliverPostCode,
+          deliver_state: order.address?.areaGroup || "Metro Manila",
+          deliver_city: order.address?.areaGroup || "Metro Manila",
+          deliver_district: order.address?.province || "Intramuros",
+          deliver_street: order.address?.barangay || "Barangay 658",
+          deliver_post_code:
+            order.address?.zipCode ||
+            order.address?.postCode ||
+            "1002",
+
           deliver_name: order.customerName,
           deliver_phone: order.phone,
-          deliver_detail_address: order.address,
+          deliver_detail_address:
+            order.address?.fullAddress || order.address || "",
+
           deliver_instruction: order.note || ""
         },
 
