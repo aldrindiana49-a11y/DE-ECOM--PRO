@@ -106,7 +106,7 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
         order_id: `QUOTE-${Date.now()}`,
         base_info: {
           service_type: 1,
-          product_id: Number(process.env.SPX_PRODUCT_ID || 1)
+          product_id: process.env.SPX_PRODUCT_ID || "1"
         },
         sender_info: {
           sender_state: process.env.SPX_SENDER_STATE || "Metro Manila",
