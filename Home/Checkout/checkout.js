@@ -65,22 +65,22 @@ async function loadSPXAddresses() {
   ADDRESS_DATA = {};
 
   SPX_ADDRESSES.forEach((row) => {
-    if (!ADDRESS_DATA[row.city]) {
-      ADDRESS_DATA[row.city] = {
+    if (!ADDRESS_DATA[row.district]) {
+      ADDRESS_DATA[row.district] = {
         areaGroup: row.state,
         cities: {}
       };
     }
 
-    if (!ADDRESS_DATA[row.city].cities[row.district]) {
-      ADDRESS_DATA[row.city].cities[row.district] = {
+    if (!ADDRESS_DATA[row.district].cities[row.district]) {
+      ADDRESS_DATA[row.district].cities[row.district] = {
         zip: "",
         barangays: [],
         couriers: ["SPX", "Same Day Delivery / Lalamove", "Pick Up / Walk In"]
       };
     }
 
-    ADDRESS_DATA[row.city].cities[row.district].barangays.push(row.street);
+    ADDRESS_DATA[row.district].cities[row.district].barangays.push(row.street);
   });
 }
 
@@ -271,6 +271,10 @@ function loadProvinces() {
   const provinces = Object.keys(ADDRESS_DATA)
     .filter((province) => ADDRESS_DATA[province].areaGroup === selectedArea)
     .sort((a, b) => a.localeCompare(b));
+
+  console.log("Selected area:", selectedArea);
+  console.log("Province options:", provinces.slice(0, 30));
+
   provinces.forEach((province) => {
     const opt = document.createElement("option");
     opt.value = province;
