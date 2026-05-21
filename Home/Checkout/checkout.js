@@ -678,9 +678,7 @@ async function calculateShippingFee() {
     const data = await res.json();
 
     if (!res.ok || !data.success) {
-      console.log("SPX ERROR RESPONSE:", data);
-
-      window.lastSPXResponse = data;
+      console.log("SPX ERROR RESPONSE:", window.lastSPXResponse = data);
       alert(JSON.stringify(data));
 
       currentShippingFee = null;
