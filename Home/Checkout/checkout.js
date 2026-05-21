@@ -679,6 +679,8 @@ async function calculateShippingFee() {
 
     if (!res.ok || !data.success) {
       console.log("SPX ERROR RESPONSE:", data);
+
+      window.lastSPXResponse = data;
       alert(JSON.stringify(data));
 
       currentShippingFee = null;
@@ -728,9 +730,9 @@ async function calculateShippingFee() {
 
 function getFallbackCourier() {
 
-return "Same Day Delivery / Lalamove";
+  return "Same Day Delivery / Lalamove";
 
-  }
+}
 
 async function placeOrder() {
   const name = nameInput?.value.trim() || "";
