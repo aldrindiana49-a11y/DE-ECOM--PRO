@@ -141,7 +141,9 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
           sender_district: "Binondo",
           sender_street: "Barangay 294",
           sender_post_code: "115",
-          sender_detail_address: "1",
+          sender_name: "Drin Electronics",
+          sender_phone: "639123456789",
+          sender_detail_address: "1"
         },
         fulfillment_info: {
           cod_collection: 0,
@@ -175,14 +177,14 @@ async function createOrder(order) {
         },
 
         sender_info: {
-          sender_state: process.env.SPX_SENDER_STATE || "Metro Manila",
-          sender_city: process.env.SPX_SENDER_CITY || "Metro Manila",
-          sender_district: process.env.SPX_SENDER_DISTRICT || "Binondo",
-          sender_street: process.env.SPX_SENDER_STREET || "Barangay 287",
-          sender_post_code: process.env.SPX_SENDER_POST_CODE || "1006",
-          sender_name: process.env.SPX_SENDER_NAME || "Drin Electronics",
-          sender_phone: process.env.SPX_SENDER_PHONE || "639123456789",
-          sender_detail_address: process.env.SPX_SENDER_ADDRESS || "Drin Electronics Warehouse"
+          sender_state: "Metro Manila",
+          sender_city: "Metro Manila",
+          sender_district: "Binondo",
+          sender_street: "Barangay 294",
+          sender_post_code: "115",
+          sender_name: "Drin Electronics",
+          sender_phone: "639123456789",
+          sender_detail_address: "1"
         },
 
         fulfillment_info: {

@@ -882,6 +882,10 @@ async function placeOrder() {
   }
 
   if (paymentMain === "COD") {
+    showOrderModal(
+      "Processing COD Order...",
+      "Please wait while we save your order."
+    );
 
     try {
       await fetch(`${API_BASE_URL}/api/orders/cod`, {
@@ -919,7 +923,7 @@ async function placeOrder() {
     );
 
     setTimeout(() => {
-      window.location.href = "../index.html";
+      window.location.href = "/home-orders";
     }, 1200);
 
     return;
