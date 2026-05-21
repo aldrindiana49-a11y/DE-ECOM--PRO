@@ -52,28 +52,36 @@ let currentParcelInfo = null;
 let shippingQuoteTimer = null;
 let selectedCourier = "";
 
-const ADDRESS_DATA = {
-  "Metro Manila": {
-    areaGroup: "Metro Manila",
-    cities: {
-      "Manila": {
-        zip: "1002",
-        barangays: [
-          "Intramuros",
-          "Binondo",
-          "Quiapo",
-          "Tondo"
-        ],
-        couriers: [
-          "SPX",
-          "Same Day Delivery / Lalamove",
-          "Pick Up / Walk In"
-        ]
-      }
-    }
-  }
-};
+let SPX_ADDRESSES = [];
+let ADDRESS_DATA = {};
+
 const AREA_GROUPS = ["Metro Manila", "North Luzon", "South Luzon", "Visayas", "Mindanao"];
+
+async function loadSPXAddresses() {
+  const res = await fetch("/Data/spx-addresses.json");
+  SPX_ADDRESSES = await res.json();
+
+  ADDRESS_DATA = {};
+
+  SPX_ADDRESSES.forEach((row) => {
+    if (!ADDRESS_DATA[row.city]) {
+      ADDRESS_DATA[row.city] = {
+        areaGroup: row.state,
+        cities: {}
+      };
+    }
+
+    if (!ADDRESS_DATA[row.city].cities[row.district]) {
+      ADDRESS_DATA[row.city].cities[row.district] = {
+        zip: "",
+        barangays: [],
+        couriers: ["SPX", "Same Day Delivery / Lalamove", "Pick Up / Walk In"]
+      };
+    }
+
+    ADDRESS_DATA[row.city].cities[row.district].barangays.push(row.street);
+  });
+}
 
 function cleanPrice(value) {
   return Number(String(value || "0").replace(/[^\d.]/g, "")) || 0;
@@ -259,7 +267,7 @@ function loadProvinces() {
 
   const selectedArea = areaGroupSelect.value;
 
-  const provinces = ["Metro Manila"]
+  const provinces = Object.keys(ADDRESS_DATA)
     .filter((province) => ADDRESS_DATA[province].areaGroup === selectedArea)
     .sort((a, b) => a.localeCompare(b));
   provinces.forEach((province) => {
@@ -993,11 +1001,14 @@ document.querySelectorAll('input[name="payment"]').forEach((input) => {
   input.addEventListener("change", scheduleShippingQuote);
 });
 
-renderCheckout();
-loadAreaGroups();
-updateParcelEstimate();
-updateTotalsDisplay();
-scheduleShippingQuote();
+(async function initCheckout() {
+  await loadSPXAddresses();
+  renderCheckout();
+  loadAreaGroups();
+  updateParcelEstimate();
+  updateTotalsDisplay();
+  scheduleShippingQuote();
+})();
 
 window.loadProvinces = loadProvinces;
 window.loadCities = loadCities;

@@ -82,12 +82,37 @@ function normalizeParcelInfo(parcelInfo = {}) {
 
 function normalizeAddress(address = {}) {
   return {
-    deliver_state: address.province || address.deliverState || "Metro Manila",
-    deliver_city: address.city || address.deliverCity || "Metro Manila",
-    deliver_district: address.barangay || address.deliverDistrict || "Intramuros",
-    deliver_street: address.barangay || address.deliverStreet || "Barangay 654",
-    deliver_post_code: address.postCode || address.deliverPostCode || "1002",
-    deliver_detail_address: address.fullAddress || address.deliverDetailAddress || "Test address"
+    deliver_state:
+      address.areaGroup ||
+      address.province ||
+      address.deliverState ||
+      "Metro Manila",
+
+    deliver_city:
+      address.province ||
+      address.deliverCity ||
+      "Manila",
+
+    deliver_district:
+      address.city ||
+      address.deliverDistrict ||
+      "Binondo",
+
+    deliver_street:
+      address.barangay ||
+      address.deliverStreet ||
+      "Barangay 293",
+
+    deliver_post_code:
+      address.postCode ||
+      address.zipCode ||
+      address.deliverPostCode ||
+      "1002",
+
+    deliver_detail_address:
+      address.fullAddress ||
+      address.deliverDetailAddress ||
+      "Test address"
   };
 }
 
