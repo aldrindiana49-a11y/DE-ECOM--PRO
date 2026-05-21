@@ -56,7 +56,7 @@ const ADDRESS_DATA = {
   "Metro Manila": {
     areaGroup: "Metro Manila",
     cities: {
-      "Metro Manila": {
+      "Manila": {
         zip: "1002",
         barangays: [
           "Intramuros",
@@ -258,10 +258,10 @@ function loadProvinces() {
   selectedCourier = "";
 
   const selectedArea = areaGroupSelect.value;
-  const provinces = Object.keys(ADDRESS_DATA)
+
+  const provinces = ["Metro Manila"]
     .filter((province) => ADDRESS_DATA[province].areaGroup === selectedArea)
     .sort((a, b) => a.localeCompare(b));
-
   provinces.forEach((province) => {
     const opt = document.createElement("option");
     opt.value = province;
