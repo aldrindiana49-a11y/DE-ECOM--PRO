@@ -112,7 +112,7 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
         },
         sender_info: {
           sender_state: process.env.SPX_SENDER_STATE || "Metro Manila",
-          sender_city: process.env.SPX_SENDER_CITY || "Metro Manila",
+          sender_city: process.env.SPX_SENDER_CITY || "Manila",
           sender_district: process.env.SPX_SENDER_DISTRICT || "Binondo",
           sender_street: process.env.SPX_SENDER_STREET || "Barangay 287",
           sender_post_code: process.env.SPX_SENDER_POST_CODE || "1006",
