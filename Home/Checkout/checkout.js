@@ -381,13 +381,13 @@ function showOrderModal(title, message) {
   // HIDE OK BUTTON
   const okBtn = document.getElementById("orderModalOk");
   if (okBtn) {
-    okBtn.style.display = "none";
+    // okBtn.style.display = "none";
   }
 
   // HIDE CLOSE/X BUTTON
   const closeBtn = document.getElementById("orderModalClose");
   if (closeBtn) {
-    closeBtn.style.display = "none";
+    // closeBtn.style.display = "none";
   }
 
   modal.classList.add("show");
@@ -678,11 +678,11 @@ async function calculateShippingFee() {
     const data = await res.json();
 
     window.lastSPXResponse = data;
-    console.log("FULL SPX RESPONSE:", data);
+    // console.log("FULL SPX RESPONSE:", data);
 
     if (!res.ok || !data.success) {
       console.log("SPX ERROR RESPONSE:", window.lastSPXResponse = data);
-      alert(JSON.stringify(data));
+      // alert(JSON.stringify(data));
 
       currentShippingFee = null;
       currentShippingQuote = {
