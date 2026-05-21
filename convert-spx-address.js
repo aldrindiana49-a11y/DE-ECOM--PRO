@@ -8,7 +8,7 @@ const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {
   header: 1
 });
 
-// skip first row/header row
+// skip report row and header row
 const cleanRows = rows.slice(2)
   .filter(row => row[0] && row[1] && row[2] && row[3])
   .map(row => ({
