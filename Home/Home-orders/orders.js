@@ -18,6 +18,13 @@ function showOrderModal(title, message) {
         document.getElementById("paymentLoader");
 
     if (loader) {
+        loader.style.display = "block";
+    }
+
+    const loader =
+        document.getElementById("paymentLoader");
+
+    if (loader) {
         loader.style.display = "none";
     }
 

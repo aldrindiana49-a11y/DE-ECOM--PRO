@@ -304,6 +304,48 @@ ${hasOrderRequest ? `
             </div>
           </div>
 
+
+${hasOrderRequest ? `
+
+  <div class="order-request-panel">
+
+    <div class="order-request-title">
+      Customer Request
+    </div>
+
+    <div class="order-request-reason">
+      ${escapeHtml(order.order_request_reason || "-")}
+    </div>
+
+    <div class="order-request-actions">
+
+      <button
+        class="approve-request-btn"
+        type="button"
+        onclick="approveOrderRequest('${escapeAttribute(orderId)}')"
+      >
+        Approve Request
+      </button>
+
+      <button
+        class="reject-request-btn"
+        type="button"
+        onclick="rejectOrderRequest('${escapeAttribute(orderId)}')"
+      >
+        Reject Request
+      </button>
+
+    </div>
+
+  </div>
+
+` : `
+
+  <div class="order-request-panel no-request">
+    No pending customer requests
+  </div>
+
+`}
           <div class="warehouse-order-actions">
             <button class="primary-btn" type="button" onclick="openOrderModal('${escapeAttribute(orderId)}')">
               Pack & Print
@@ -529,6 +571,43 @@ function openAWB(orderId) {
   }
 
   window.open(order.awb_link, "_blank");
+}
+
+async function approveOrderRequest(orderId) {
+  const ok = confirm("Approve this customer request?");
+
+  if (!ok) return;
+
+  showToast("Request approved. Please update the order manually if needed.", "success");
+
+  await updateOrderRequestStatus(orderId, "Approved");
+}
+
+async function rejectOrderRequest(orderId) {
+  const ok = confirm("Reject this customer request?");
+
+  if (!ok) return;
+
+  await updateOrderRequestStatus(orderId, "Rejected");
+
+  showToast("Request rejected.", "success");
+}
+
+async function updateOrderRequestStatus(orderId, status) {
+  const { error } = await supabaseClient
+    .from("orders")
+    .update({
+      order_request_status: status
+    })
+    .or(`external_id.eq.${orderId},id.eq.${orderId}`);
+
+  if (error) {
+    console.error(error);
+    showToast("Failed to update request status.", "error");
+    return;
+  }
+
+  await loadAdminOrders();
 }
 
 function openTracking(orderId) {
@@ -814,6 +893,9 @@ async function bulkArrangeShipment() {
    GLOBALS
 ================================ */
 
+window.approveOrderRequest = approveOrderRequest;
+window.rejectOrderRequest = rejectOrderRequest;
+window.updateOrderRequestStatus = updateOrderRequestStatus;
 window.bulkArrangeShipment = bulkArrangeShipment;
 window.loadAdminOrders = loadAdminOrders;
 window.loadCancelledOrders = loadCancelledOrders;
