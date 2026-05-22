@@ -429,7 +429,7 @@ body {
   width: 52px;
   height: 52px;
 
-  border: 4px solid rgba(255, 255, 255, .18);
+  border: 4px solid #d1d5db;
   border-top: 4px solid #06b6d4;
 
   border-radius: 50%;
@@ -458,5 +458,28 @@ body {
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+.shipping-row.loading {
+  opacity: 0.75;
+}
+
+.shipping-row.loading small::after {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border: 2px solid #d1d5db;
+  border-top: 2px solid #00bcd4;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 8px;
+  vertical-align: middle;
+  animation: spinShipping 0.8s linear infinite;
+}
+
+@keyframes spinShipping {
+  to {
+    transform: rotate(360deg);
   }
 }

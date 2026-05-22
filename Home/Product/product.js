@@ -10,6 +10,13 @@ const minusBtn = document.getElementById("minusBtn");
 const addToCartBtn = document.getElementById("addToCartBtn");
 const message = document.getElementById("message");
 
+let productsLoading = true;
+
+if (addToCartBtn) {
+  addToCartBtn.disabled = true;
+  addToCartBtn.textContent = "Loading...";
+}
+
 const variantContainer = document.getElementById("variantContainer");
 let selectedVariant = null;
 
@@ -264,6 +271,13 @@ async function loadProductsFromSupabase() {
   updateCartCount();
 }
 
+productsLoading = false;
+
+if (addToCartBtn) {
+  addToCartBtn.disabled = false;
+  addToCartBtn.textContent = "Add to Cart";
+}
+
 loadProductsFromSupabase();
 
 function renderProduct() {
@@ -496,6 +510,7 @@ minusBtn.addEventListener("click", () => {
 quantityInput.addEventListener("input", validateQuantity);
 
 addToCartBtn.addEventListener("click", () => {
+  if (productsLoading) return;
   const stock = getProductStock(product);
   const qty = validateQuantity();
   const variants = getVariants(product);

@@ -377,7 +377,7 @@ function updateCourierOptions() {
   }
 }
 
-function showOrderModal(title, message) {
+function showOrderModal(title, message, showLoader = false) {
   const modal = document.getElementById("orderModal");
   const modalTitle = document.getElementById("orderModalTitle");
   const modalMessage = document.getElementById("orderModalMessage");
@@ -388,24 +388,23 @@ function showOrderModal(title, message) {
   }
 
   modalTitle.textContent = title;
-  modalMessage.innerHTML = `
-  <div class="payment-loader"></div>
-  <p>${message}</p>
-`;
+  modalMessage.innerHTML = showLoader
+    ? `<div class="payment-loader"></div><p>${message}</p>`
+    : `<p>${message}</p>`;
 
   // DISABLE CLOSE
   modal.onclick = null;
 
-  // HIDE OK BUTTON
   const okBtn = document.getElementById("orderModalOk");
+  const closeBtn = document.getElementById("orderModalClose");
+
   if (okBtn) {
-    // okBtn.style.display = "none";
+    okBtn.style.display = showLoader ? "none" : "inline-block";
+    okBtn.onclick = closeOrderModal;
   }
 
-  // HIDE CLOSE/X BUTTON
-  const closeBtn = document.getElementById("orderModalClose");
   if (closeBtn) {
-    // closeBtn.style.display = "none";
+    closeBtn.style.display = showLoader ? "none" : "inline-block";
   }
 
   modal.classList.add("show");
@@ -666,7 +665,7 @@ function scheduleShippingQuote() {
 
 
   // REAL SPX API
-  setShippingUI("loading", "Calculating SPX shipping fee...", null);
+  setShippingUI("loading", "Checking delivery availability and shipping fee...", null);
 
   shippingQuoteTimer = setTimeout(calculateShippingFee, 650);
 }
@@ -701,6 +700,27 @@ async function calculateShippingFee() {
     if (!res.ok || !data.success) {
       console.log("SPX ERROR RESPONSE:", window.lastSPXResponse = data);
       // alert(JSON.stringify(data));
+
+      const isUnsupportedArea =
+        JSON.stringify(data).includes("NotSupportDeliverAddressErrorCode");
+
+      if (isUnsupportedArea) {
+
+        currentShippingFee = null;
+
+        currentShippingQuote = {
+          success: false,
+          unsupportedArea: true
+        };
+
+        setShippingUI(
+          "failed",
+          "SPX is not available in this area.",
+          null
+        );
+
+        return;
+      }
 
       currentShippingFee = null;
       currentShippingQuote = {
@@ -754,6 +774,9 @@ function getFallbackCourier() {
 }
 
 async function placeOrder() {
+  if (window.isPlacingOrder) return;
+  window.isPlacingOrder = true;
+
   const name = nameInput?.value.trim() || "";
   const phone = phoneInput?.value.trim() || "";
   const paymentMain = document.querySelector('input[name="payment"]:checked')?.value || "ONLINE";
@@ -782,6 +805,16 @@ async function placeOrder() {
 
   if (currentShippingFee === null) {
     await calculateShippingFee();
+  }
+
+  if (currentShippingQuote?.unsupportedArea) {
+
+    showOrderModal(
+      "Delivery Not Available",
+      "SPX delivery is currently unavailable in this area.\n\nPlease contact our support team for manual shipping assistance."
+    );
+
+    return;
   }
 
   const subtotalNumber = getCheckoutTotal();
@@ -872,6 +905,16 @@ async function placeOrder() {
   const address = getSelectedAddress();
   currentParcelInfo = calculateParcelInfo();
 
+  if (currentShippingQuote?.unsupportedArea) {
+
+    showOrderModal(
+      "Delivery Not Available",
+      "SPX delivery is currently unavailable in this area.\n\nPlease contact our support team for manual shipping assistance."
+    );
+
+    return;
+  }
+
   const order = {
     id: "ORD-" + Date.now(),
     customer: { name, phone },
@@ -902,7 +945,8 @@ async function placeOrder() {
   if (paymentMain === "COD") {
     showOrderModal(
       "Processing COD Order...",
-      "Please wait while we save your order."
+      "Please wait while we save your order.",
+      true
     );
 
     try {
@@ -935,6 +979,8 @@ async function placeOrder() {
 
     localStorage.removeItem("drinCheckoutItems");
 
+    closeOrderModal();
+
     showOrderModal(
       "Thank You!",
       `Your order has been placed successfully.`
@@ -951,7 +997,8 @@ async function placeOrder() {
     const paymentUrl = `${API_BASE_URL}/api/create-payment`;
     showOrderModal(
       "Please Wait",
-      "Redirecting to secure payment gateway... Please do not close this window."
+      "Redirecting to secure payment gateway... Please do not close this window.",
+      true
     );
 
 
