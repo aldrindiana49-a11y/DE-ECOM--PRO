@@ -195,6 +195,7 @@ async function loadProductsFromSupabase() {
 
   products = (data || []).map((item) => {
 
+
     const firstVariation =
       Array.isArray(item.variations) && item.variations.length
         ? item.variations[0]
@@ -235,7 +236,14 @@ async function loadProductsFromSupabase() {
           }
         ];
 
+
     return {
+
+      weight: safeNumber(item.weight || firstVariation.weight, 0),
+      length: safeNumber(item.length || firstVariation.length, 0),
+      width: safeNumber(item.width || firstVariation.width, 0),
+      height: safeNumber(item.height || firstVariation.height, 0),
+
       id: item.id,
       name: item.title,
       brand: item.brand || "",
@@ -590,6 +598,12 @@ addToCartBtn.addEventListener("click", () => {
 
   } else {
     cartData.push({
+
+      weight: selectedVariant?.weight || product.weight || 0.5,
+      length: selectedVariant?.length || product.length || 10,
+      width: selectedVariant?.width || product.width || 10,
+      height: selectedVariant?.height || product.height || 10,
+
       id: product.id,
       name: product.name,
       variantLabel: selectedVariantLabel,

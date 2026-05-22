@@ -852,6 +852,9 @@ if (productForm) {
           : "Single SKU",
         variations: variants,
         weight: safeNumber(firstVariant.weight, 0),
+        length: safeNumber(firstVariant.length, 0),
+        width: safeNumber(firstVariant.width, 0),
+        height: safeNumber(firstVariant.height, 0),
       };
 
       if (!productData.title) {

@@ -47,6 +47,7 @@ window.addEventListener("pageshow", function () {
 
 
 let currentShippingFee = null;
+const HANDLING_FEE = 25;
 let currentShippingQuote = null;
 let currentParcelInfo = null;
 let shippingQuoteTimer = null;
@@ -207,11 +208,21 @@ function setShippingUI(status, message, fee = null) {
 }
 
 function updateTotalsDisplay() {
-  const subtotal = getCheckoutTotal();
-  const grandTotal = subtotal + (Number(currentShippingFee) || 0);
 
-  if (checkoutSubtotal) checkoutSubtotal.textContent = formatPrice(subtotal);
-  if (checkoutTotal) checkoutTotal.textContent = formatPrice(grandTotal);
+  const subtotal = getCheckoutTotal();
+
+  const grandTotal =
+    subtotal +
+    (Number(currentShippingFee) || 0) +
+    HANDLING_FEE;
+
+  if (checkoutSubtotal) {
+    checkoutSubtotal.textContent = formatPrice(subtotal);
+  }
+
+  if (checkoutTotal) {
+    checkoutTotal.textContent = formatPrice(grandTotal);
+  }
 }
 
 function renderCheckout() {
@@ -638,7 +649,6 @@ function scheduleShippingQuote() {
       "Pick Up / Walk In selected",
       currentShippingFee
     );
-
     return;
   }
 
@@ -659,7 +669,6 @@ function scheduleShippingQuote() {
       "Shipping fee will be paid upon delivery.",
       null
     );
-
     return;
   }
 
@@ -718,7 +727,6 @@ async function calculateShippingFee() {
           "SPX is not available in this area.",
           null
         );
-
         return;
       }
 
@@ -735,7 +743,6 @@ async function calculateShippingFee() {
         "SPX error. Check console for details.",
         null
       );
-
       return;
     }
 
@@ -774,9 +781,7 @@ function getFallbackCourier() {
 }
 
 async function placeOrder() {
-  if (window.isPlacingOrder) return;
-  window.isPlacingOrder = true;
-
+  
   const name = nameInput?.value.trim() || "";
   const phone = phoneInput?.value.trim() || "";
   const paymentMain = document.querySelector('input[name="payment"]:checked')?.value || "ONLINE";
@@ -813,7 +818,6 @@ async function placeOrder() {
       "Delivery Not Available",
       "SPX delivery is currently unavailable in this area.\n\nPlease contact our support team for manual shipping assistance."
     );
-
     return;
   }
 
@@ -855,7 +859,6 @@ async function placeOrder() {
     if (closeBtn) {
       closeBtn.style.display = "inline-block";
     }
-
     return;
   }
 
@@ -884,7 +887,6 @@ async function placeOrder() {
     if (closeBtn) {
       closeBtn.style.display = "inline-block";
     }
-
     return;
   }
 
@@ -911,7 +913,6 @@ async function placeOrder() {
       "Delivery Not Available",
       "SPX delivery is currently unavailable in this area.\n\nPlease contact our support team for manual shipping assistance."
     );
-
     return;
   }
 
@@ -989,7 +990,6 @@ async function placeOrder() {
     setTimeout(() => {
       window.location.href = "/home-orders";
     }, 1200);
-
     return;
   }
 
