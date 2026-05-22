@@ -21,13 +21,6 @@ function showOrderModal(title, message) {
         loader.style.display = "block";
     }
 
-    const loader =
-        document.getElementById("paymentLoader");
-
-    if (loader) {
-        loader.style.display = "none";
-    }
-
     if (okBtn) {
         okBtn.style.display = "inline-block";
     }
