@@ -14,8 +14,15 @@ function showOrderModal(title, message) {
     modalTitle.textContent = title;
     modalMessage.textContent = message;
 
+    const loader =
+        document.getElementById("paymentLoader");
+
+    if (loader) {
+        loader.style.display = "none";
+    }
+
     if (okBtn) {
-        okBtn.style.display = "none";
+        okBtn.style.display = "inline-block";
     }
 
     modal.classList.add("show");
@@ -363,6 +370,13 @@ async function continuePayment(orderId) {
         return;
     }
 
+    const loader =
+        document.getElementById("paymentLoader");
+
+    if (loader) {
+        loader.style.display = "block";
+    }
+
     showOrderModal(
         "Secure Checkout",
         "Preparing secure checkout...\n\nPlease do not refresh or close this page."
@@ -522,7 +536,6 @@ async function requestOrderChange(orderId) {
         "Your request has been sent. Please wait for admin approval before any order changes are made."
     );
 
-    loadOrders();
 }
 
 setInterval(updatePaymentCountdowns, 1000);

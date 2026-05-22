@@ -399,3 +399,7 @@ body {
 
     color: #fff;
 }
+
+#paymentLoader {
+    display: none;
+}
