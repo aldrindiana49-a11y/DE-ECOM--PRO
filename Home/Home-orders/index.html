@@ -47,6 +47,27 @@
         </div>
     </div>
 
+    <div id="cancelRequestModal" class="cancel-request-modal">
+        <div class="cancel-request-card">
+            <h3>Request Cancellation</h3>
+
+            <select id="cancelRequestReason">
+                <option value="">Select reason</option>
+                <option>Ordered by mistake</option>
+                <option>Wrong address</option>
+                <option>Found cheaper elsewhere</option>
+                <option>Duplicate order</option>
+                <option>Change payment method</option>
+                <option>Other</option>
+            </select>
+
+            <div class="cancel-request-actions">
+                <button onclick="submitCancelRequest()">Submit</button>
+                <button onclick="closeCancelRequestModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="../Admin/supabase.js?v=10005"></script>
     <script src="./orders.js?v=300000"></script>

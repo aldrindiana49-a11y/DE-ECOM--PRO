@@ -517,7 +517,7 @@ document.addEventListener("click", e => {
 
 async function requestOrderChange(orderId) {
 
-    const reason = prompt(
+    const reasonText = prompt(
         `Select cancellation reason:
 
 1. Ordered by mistake
@@ -525,48 +525,48 @@ async function requestOrderChange(orderId) {
 3. Found cheaper elsewhere
 4. Duplicate order
 5. Change payment method
-6. Other`
+6. Other
+
+Type number only.`
     );
 
-    if (!reason || !reason.trim()) {
+    if (!reasonText) return;
+
+    const reasons = {
+        "1": "Ordered by mistake",
+        "2": "Wrong address",
+        "3": "Found cheaper elsewhere",
+        "4": "Duplicate order",
+        "5": "Change payment method",
+        "6": "Other"
+    };
+
+    const finalReason =
+        reasons[reasonText.trim()];
+
+    if (!finalReason) {
+
+        showOrderModal(
+            "Invalid Selection",
+            "Please select numbers 1-6 only."
+        );
+
         return;
-    }
-
-    let finalReason = "";
-
-    switch (reason.trim()) {
-
-        case "1":
-            finalReason = "Ordered by mistake";
-            break;
-
-        case "2":
-            finalReason = "Wrong address";
-            break;
-
-        case "3":
-            finalReason = "Found cheaper elsewhere";
-            break;
-
-        case "4":
-            finalReason = "Duplicate order";
-            break;
-
-        case "5":
-            finalReason = "Change payment method";
-            break;
-
-        default:
-            finalReason = "Other";
     }
 
     const { error } = await supabaseClient
         .from("orders")
         .update({
-            order_request_status: "Pending Admin Approval",
-            order_request_reason: finalReason,
-            order_request_date: new Date().toISOString()
+            order_request_status:
+                "Pending Admin Approval",
+
+            order_request_reason:
+                finalReason,
+
+            order_request_date:
+                new Date().toISOString()
         })
+
         .eq("id", orderId);
 
     if (error) {
@@ -575,7 +575,7 @@ async function requestOrderChange(orderId) {
 
         showOrderModal(
             "Request Error",
-            "Failed to submit request. Please try again."
+            "Failed to submit request."
         );
 
         return;
@@ -583,11 +583,11 @@ async function requestOrderChange(orderId) {
 
     showOrderModal(
         "Request Submitted",
-        "Your request has been sent. Please wait for admin approval before any order changes are made."
+        "Cancellation request submitted successfully."
     );
 
+    loadOrders();
 }
-
 setInterval(updatePaymentCountdowns, 1000);
 
 loadOrders();
