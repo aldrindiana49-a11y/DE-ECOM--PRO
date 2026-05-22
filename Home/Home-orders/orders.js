@@ -22,7 +22,7 @@ function showOrderModal(title, message) {
     }
 
     if (okBtn) {
-        okBtn.style.display = "inline-block";
+        okBtn.style.display = "none";
     }
 
     modal.classList.add("show");
@@ -213,6 +213,8 @@ async function loadOrders() {
         const canRequestChange =
             !statusText.includes("packed") &&
             !statusText.includes("shipped") &&
+            !statusText.includes("delivered") &&
+            !statusText.includes("cancelled") &&
             !(isXendit && isPaidPayment);
 
         card.innerHTML = `
@@ -225,7 +227,21 @@ async function loadOrders() {
 
           <div class="order-date">${new Date(order.created_at).toLocaleString()}</div>
         </div>
-        <div class="order-status">${order.order_status || "Processing"}</div>
+       
+<div class="order-status
+  ${String(order.order_status).includes("Cancelled")
+                ? "cancelled-status"
+                : ""}
+">
+
+  ${order.order_status || "Processing"}
+
+  ${order.cancel_reason ? `
+    • ${order.cancel_reason}
+  ` : ""}
+
+</div>
+
       </div>
 
       <div class="order-items">
@@ -341,7 +357,7 @@ async function loadOrders() {
 ${canRequestChange ? `
     <button class="track-btn request-change-btn"
         onclick="requestOrderChange('${order.id}')">
-        Request Cancel / Modify
+        Request Cancellation
     </button>
 ` : ""}
 
@@ -501,20 +517,54 @@ document.addEventListener("click", e => {
 
 async function requestOrderChange(orderId) {
 
-    const reason =
-        prompt(
-            "Reason for request:\n\n1. Cancel order\n2. Change delivery address\n3. Change item\n4. Add items\n\nPlease type your reason:"
-        );
+    const reason = prompt(
+        `Select cancellation reason:
+
+1. Ordered by mistake
+2. Wrong address
+3. Found cheaper elsewhere
+4. Duplicate order
+5. Change payment method
+6. Other`
+    );
 
     if (!reason || !reason.trim()) {
         return;
+    }
+
+    let finalReason = "";
+
+    switch (reason.trim()) {
+
+        case "1":
+            finalReason = "Ordered by mistake";
+            break;
+
+        case "2":
+            finalReason = "Wrong address";
+            break;
+
+        case "3":
+            finalReason = "Found cheaper elsewhere";
+            break;
+
+        case "4":
+            finalReason = "Duplicate order";
+            break;
+
+        case "5":
+            finalReason = "Change payment method";
+            break;
+
+        default:
+            finalReason = "Other";
     }
 
     const { error } = await supabaseClient
         .from("orders")
         .update({
             order_request_status: "Pending Admin Approval",
-            order_request_reason: reason.trim(),
+            order_request_reason: finalReason,
             order_request_date: new Date().toISOString()
         })
         .eq("id", orderId);

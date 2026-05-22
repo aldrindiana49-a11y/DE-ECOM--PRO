@@ -741,10 +741,6 @@ body {
   color: #b91c1c;
 }
 
-.compact-btn {
-  padding: 8px 10px;
-  font-size: 12px;
-}
 
 .modal-overlay {
   position: fixed;
@@ -1169,9 +1165,9 @@ body {
 
 .warehouse-order-grid {
   display: grid;
-  grid-template-columns: 1.5fr 0.7fr 0.7fr;
-  gap: 18px;
-  padding: 18px;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  padding: 14px;
 }
 
 .warehouse-items-list {
@@ -1236,15 +1232,6 @@ body {
   margin-bottom: 4px;
 }
 
-.warehouse-order-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.warehouse-order-actions button {
-  width: 100%;
-}
 
 @media (max-width: 1000px) {
   .warehouse-order-grid {
@@ -1278,8 +1265,16 @@ body {
 .order-request-panel.no-request {
   background: #f9fafb;
   border: 1px dashed #d1d5db;
+
   color: #6b7280;
+
   font-weight: 600;
+
+  padding: 10px 12px;
+
+  font-size: 12px;
+
+  border-radius: 10px;
 }
 
 .order-request-title {
@@ -1295,26 +1290,73 @@ body {
   margin-bottom: 12px;
 }
 
-.order-request-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
 
-.approve-request-btn,
-.reject-request-btn {
+
+
+
+.mini-manage-btn {
   border: none;
+  background: #06b6d4;
   color: white;
-  padding: 10px 14px;
-  border-radius: 10px;
+
+  padding: 6px 10px;
+
+  border-radius: 8px;
+
+  font-size: 11px;
   font-weight: 700;
+
   cursor: pointer;
+
+  white-space: nowrap;
+
+  height: fit-content;
 }
 
-.approve-request-btn {
-  background: #22c55e;
+.mini-manage-btn:hover {
+  background: #0891b2;
 }
 
-.reject-request-btn {
-  background: #ef4444;
+.mini-summary-btn {
+  border: none;
+  background: #64748b;
+  color: white;
+
+  padding: 6px 10px;
+
+  border-radius: 8px;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+
+  height: fit-content;
+}
+
+.mini-summary-btn:hover {
+  background: #475569;
+}
+
+.order-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 12px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.order-status:has-text("Cancelled") {
+  background: #fee2e2;
+  color: #dc2626;
 }

@@ -403,3 +403,11 @@ body {
 #paymentLoader {
     display: none;
 }
+
+.cancelled-status {
+    background: #fee2e2;
+
+    color: #dc2626;
+
+    border: 1px solid #fecaca;
+}

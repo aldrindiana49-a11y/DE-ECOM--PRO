@@ -307,60 +307,67 @@ ${hasOrderRequest ? `
 
 ${hasOrderRequest ? `
 
-  <div class="order-request-panel">
+<div class="order-request-panel">
+
+  <div
+    style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:8px;
+    "
+  >
 
     <div class="order-request-title">
       Customer Request
     </div>
 
-    <div class="order-request-reason">
-      ${escapeHtml(order.order_request_reason || "-")}
-    </div>
-
-    <div class="order-request-actions">
-
-      <button
-        class="approve-request-btn"
-        type="button"
-        onclick="approveOrderRequest('${escapeAttribute(orderId)}')"
-      >
-        Approve Request
-      </button>
-
-      <button
-        class="reject-request-btn"
-        type="button"
-        onclick="rejectOrderRequest('${escapeAttribute(orderId)}')"
-      >
-        Reject Request
-      </button>
-
-    </div>
+    <button
+      class="mini-manage-btn"
+      type="button"
+      onclick="openOrderModal('${escapeAttribute(orderId)}')"
+    >
+      Manage Order
+    </button>
 
   </div>
 
-` : `
-
-  <div class="order-request-panel no-request">
-    No pending customer requests
+  <div class="order-request-reason">
+    ${escapeHtml(order.order_request_reason || "-")}
   </div>
 
-`}
-          <div class="warehouse-order-actions">
-            <button class="primary-btn" type="button" onclick="openOrderModal('${escapeAttribute(orderId)}')">
-              Pack & Print
-            </button>
+</div>
 
-            <button class="secondary-btn" type="button" onclick="openOrderModal('${escapeAttribute(orderId)}')">
-              View Order
-            </button>
+` : ``}
 
-            <button class="danger-btn" type="button" onclick="cancelOrder('${escapeAttribute(orderId)}', this)">
-              Cancel Order
-            </button>
-          </div>
-        </div>
-      </div>
+<div
+  style="
+    display:flex;
+    gap:8px;
+    justify-content:flex-end;
+    margin-top:10px;
+  "
+>
+
+  <button
+    class="mini-summary-btn"
+    type="button"
+    onclick="openOrderModal('${escapeAttribute(orderId)}')"
+  >
+    Order Summary
+  </button>
+
+  <button
+    class="mini-manage-btn"
+    type="button"
+    onclick="openOrderModal('${escapeAttribute(orderId)}')"
+  >
+    Manage Order
+  </button>
+
+</div>
+          
     `;
   }).join("");
 }
@@ -439,26 +446,68 @@ function openOrderModal(orderId) {
     <p><strong>Tracking:</strong> ${escapeHtml(order.tracking_number || "-")}</p>
 
     <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
-      <button type="button" onclick="createSPXShipment('${escapeAttribute(orderId)}', this)">
+      
+<button
+  class="primary-btn"
+  type="button"
+  onclick="createSPXShipment('${escapeAttribute(orderId)}', this)"
+>
   Arrange Shipment
 </button>
 
-      <button type="button" onclick="openAWB('${escapeAttribute(orderId)}')">
-        Print AWB
-      </button>
+<button
+  class="secondary-btn"
+  type="button"
+  onclick="openAWB('${escapeAttribute(orderId)}')"
+>
+  Print AWB
+</button>
 
-      <button type="button" onclick="openTracking('${escapeAttribute(orderId)}')">
-        Track
-      </button>
+<button
+  class="secondary-btn"
+  type="button"
+  onclick="openTracking('${escapeAttribute(orderId)}')"
+>
+  Track Order
+</button>
 
-      <button type="button" onclick="cancelOrder('${escapeAttribute(orderId)}', this)">
-        Cancel Order
-      </button>
+${order.order_request_status ? `
 
-      <button type="button" onclick="closeOrderModal()">
-        Close
-      </button>
-    </div>
+<button
+  class="small-btn"
+  type="button"
+  onclick="handleOrderRequestAction('${escapeAttribute(orderId)}')"
+>
+  Customer Request
+</button>
+
+` : ""}
+
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+
+  <select
+    id="cancelReason-${escapeAttribute(orderId)}"
+    class="cancel-reason-dropdown"
+  >
+    <option value="">Select reason</option>
+
+    <option>Out of stock</option>
+    <option>Price error</option>
+    <option>Wrong item listing</option>
+    <option>Cannot fulfill order</option>
+    <option>Customer unreachable</option>
+    <option>Other reason</option>
+  </select>
+
+  <button
+    class="danger-btn"
+    type="button"
+    onclick="cancelOrder('${escapeAttribute(orderId)}', this)"
+  >
+    Cancel Order
+  </button>
+
+</div>
   `;
 
   modal.style.display = "flex";
@@ -478,6 +527,22 @@ function closeOrderModal() {
 ================================ */
 
 async function cancelOrder(orderId, btn) {
+
+  const reasonSelect =
+    document.getElementById(`cancelReason-${orderId}`);
+
+  const cancelReason =
+    reasonSelect?.value || "";
+
+  if (!cancelReason) {
+
+    showToast(
+      "Please select cancellation reason.",
+      "error"
+    );
+
+    return;
+  }
   const confirmCancel = confirm("Cancel this order?");
 
   if (!confirmCancel) return;
@@ -492,8 +557,22 @@ async function cancelOrder(orderId, btn) {
       `https://de-ecom-pro.onrender.com/api/orders/${orderId}/cancel`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
+
+        body: JSON.stringify({
+          orderId,
+          order_status: "Cancelled",
+          cancel_type: "Seller Forced Cancel",
+          cancel_reason: cancelReason,
+          cancelled_by: "seller",
+          cancelled_at: new Date().toISOString(),
+
+          order_request_status: null,
+          order_request_reason: null
+        })
+
       }
+
     );
 
     const result = await res.json();
@@ -505,7 +584,9 @@ async function cancelOrder(orderId, btn) {
 
     showToast("Order cancelled", "success");
     closeOrderModal();
+
     await loadAdminOrders();
+    await loadCancelledOrders();
 
   } catch (error) {
     console.error(error);
@@ -608,6 +689,33 @@ async function updateOrderRequestStatus(orderId, status) {
   }
 
   await loadAdminOrders();
+}
+
+async function handleOrderRequestAction(orderId) {
+
+  const action = prompt(
+    `Customer Request Action
+
+Type:
+1 = Approve
+2 = Reject`
+  );
+
+  if (!action) return;
+
+  if (action === "1") {
+
+    await approveOrderRequest(orderId);
+
+  } else if (action === "2") {
+
+    await rejectOrderRequest(orderId);
+
+  } else {
+
+    showToast("Invalid action selected.", "error");
+
+  }
 }
 
 function openTracking(orderId) {
@@ -722,28 +830,6 @@ function renderCancelledOrders() {
             </div>
 
           </div>
-
-          <div class="warehouse-order-actions">
-
-            <button
-              class="small-btn"
-              type="button"
-              onclick="undoCancelledOrder('${escapeAttribute(orderId)}')"
-            >
-              Undo
-            </button>
-
-            <button
-              class="danger-btn"
-              type="button"
-              onclick="permanentDeleteOrder('${escapeAttribute(orderId)}')"
-            >
-              Permanent Delete
-            </button>
-
-          </div>
-
-        </div>
       `;
 
     }).join("");
@@ -893,6 +979,7 @@ async function bulkArrangeShipment() {
    GLOBALS
 ================================ */
 
+window.handleOrderRequestAction = handleOrderRequestAction;
 window.approveOrderRequest = approveOrderRequest;
 window.rejectOrderRequest = rejectOrderRequest;
 window.updateOrderRequestStatus = updateOrderRequestStatus;
