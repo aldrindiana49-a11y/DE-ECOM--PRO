@@ -185,6 +185,10 @@ function renderAdminOrders() {
     const isExpanded = expandedOrderItems[orderId];
     const visibleItems = isExpanded ? items : items.slice(0, 3);
 
+    const hasOrderRequest =
+      order.order_request_status &&
+      String(order.order_request_status).trim() !== "";
+
     return `
       <div class="warehouse-order-card">
         <div class="warehouse-order-head">
@@ -203,6 +207,13 @@ function renderAdminOrders() {
           <span class="status-badge ${getOrderStatusClass(orderStatus)}">
             ${escapeHtml(orderStatus)}
           </span>
+
+${hasOrderRequest ? `
+  <span class="status-badge" style="background:#f97316;color:#fff;">
+    ${escapeHtml(order.order_request_status)}
+  </span>
+` : ""}
+
         </div>
 
         <div class="warehouse-order-grid">
