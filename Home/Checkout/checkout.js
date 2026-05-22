@@ -65,22 +65,32 @@ async function loadSPXAddresses() {
   ADDRESS_DATA = {};
 
   SPX_ADDRESSES.forEach((row) => {
-    if (!ADDRESS_DATA[row.district]) {
-      ADDRESS_DATA[row.district] = {
+
+    const province = row.city;
+    const city = row.district;
+    const barangay = row.street;
+
+    if (!ADDRESS_DATA[province]) {
+      ADDRESS_DATA[province] = {
         areaGroup: row.state,
         cities: {}
       };
     }
 
-    if (!ADDRESS_DATA[row.district].cities[row.district]) {
-      ADDRESS_DATA[row.district].cities[row.district] = {
+    if (!ADDRESS_DATA[province].cities[city]) {
+      ADDRESS_DATA[province].cities[city] = {
         zip: "",
         barangays: [],
-        couriers: ["SPX", "Same Day Delivery / Lalamove", "Pick Up / Walk In"]
+        couriers: [
+          "SPX",
+          "Same Day Delivery / Lalamove",
+          "Pick Up / Walk In"
+        ]
       };
     }
 
-    ADDRESS_DATA[row.district].cities[row.district].barangays.push(row.street);
+    ADDRESS_DATA[province].cities[city].barangays.push(barangay);
+
   });
 }
 
@@ -373,7 +383,10 @@ function showOrderModal(title, message) {
   }
 
   modalTitle.textContent = title;
-  modalMessage.textContent = message;
+  modalMessage.innerHTML = `
+  <div class="payment-loader"></div>
+  <p>${message}</p>
+`;
 
   // DISABLE CLOSE
   modal.onclick = null;
