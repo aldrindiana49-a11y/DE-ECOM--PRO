@@ -81,6 +81,8 @@ function normalizeParcelInfo(parcelInfo = {}) {
 }
 
 function normalizeAddress(address = {}) {
+  const isMetroManila = address.areaGroup === "Metro Manila";
+
   return {
     deliver_state:
       address.areaGroup ||
@@ -88,14 +90,14 @@ function normalizeAddress(address = {}) {
       "Metro Manila",
 
     deliver_city:
-      address.province ||
-      address.deliverCity ||
-      "Metro Manila",
+      isMetroManila
+        ? "Metro Manila"
+        : address.province || address.deliverCity || "Metro Manila",
 
     deliver_district:
-      address.city ||
-      address.deliverDistrict ||
-      "Binondo",
+      isMetroManila
+        ? address.province || address.city || address.deliverDistrict || "Binondo"
+        : address.city || address.deliverDistrict || "Binondo",
 
     deliver_street:
       address.barangay ||
