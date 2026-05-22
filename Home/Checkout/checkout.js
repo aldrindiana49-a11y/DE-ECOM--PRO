@@ -66,8 +66,13 @@ async function loadSPXAddresses() {
 
   SPX_ADDRESSES.forEach((row) => {
 
-    const province = row.city;
+    const province =
+      row.state === "Metro Manila"
+        ? row.district
+        : row.city;
+
     const city = row.district;
+
     const barangay = row.street;
 
     if (!ADDRESS_DATA[province]) {

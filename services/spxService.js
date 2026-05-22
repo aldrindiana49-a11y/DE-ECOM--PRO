@@ -84,17 +84,16 @@ function normalizeAddress(address = {}) {
   return {
     deliver_state:
       address.areaGroup ||
-      address.province ||
       address.deliverState ||
       "Metro Manila",
 
     deliver_city:
-      address.areaGroup ||
+      address.province ||
       address.deliverCity ||
       "Metro Manila",
 
     deliver_district:
-      address.province ||
+      address.city ||
       address.deliverDistrict ||
       "Binondo",
 
