@@ -683,6 +683,12 @@ function estimateFallbackShippingFee(courier) {
   return 0;
 }
 async function calculateShippingFee() {
+  showOrderModal(
+    "Checking SPX Shipping Fee",
+    "Please wait while we calculate the best shipping rate for your address...",
+    true
+  );
+
   try {
     currentParcelInfo = calculateParcelInfo();
     const address = getSelectedAddress();
@@ -727,6 +733,8 @@ async function calculateShippingFee() {
           "SPX is not available in this area.",
           null
         );
+        closeOrderModal();
+
         return;
       }
 
@@ -743,6 +751,7 @@ async function calculateShippingFee() {
         "SPX error. Check console for details.",
         null
       );
+      closeOrderModal();
       return;
     }
 
@@ -754,6 +763,7 @@ async function calculateShippingFee() {
       : "SPX shipping fee calculated";
 
     setShippingUI("ready", etaText, currentShippingFee);
+    closeOrderModal();
 
   } catch (error) {
     console.error("SHIPPING FEE ERROR:", error);
