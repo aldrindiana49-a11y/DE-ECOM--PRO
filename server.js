@@ -482,7 +482,7 @@ app.post("/api/create-payment", async (req, res) => {
           given_names: customerName || "Customer",
           mobile_number: customerPhone || ""
         },
-        success_redirect_url: "https://drinelectronicsph.com/Home/index.html",
+       success_redirect_url: "https://drinelectronicsph.com/home-orders/",
         failure_redirect_url: "https://drinelectronicsph.com/Checkout/checkout.html"
       })
     });
