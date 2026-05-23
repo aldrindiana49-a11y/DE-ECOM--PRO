@@ -515,71 +515,52 @@ document.addEventListener("click", e => {
     }
 });
 
-async function requestOrderChange(orderId) {
+let selectedCancelOrderId = null;
 
-    const reasonText = prompt(
-        `Select cancellation reason:
+function requestOrderChange(orderId) {
+    selectedCancelOrderId = orderId;
 
-1. Ordered by mistake
-2. Wrong address
-3. Found cheaper elsewhere
-4. Duplicate order
-5. Change payment method
-6. Other
+    document
+        .getElementById("cancelRequestModal")
+        .classList.add("show");
+}
 
-Type number only.`
-    );
+function closeCancelRequestModal() {
+    document
+        .getElementById("cancelRequestModal")
+        .classList.remove("show");
 
-    if (!reasonText) return;
+    selectedCancelOrderId = null;
+}
 
-    const reasons = {
-        "1": "Ordered by mistake",
-        "2": "Wrong address",
-        "3": "Found cheaper elsewhere",
-        "4": "Duplicate order",
-        "5": "Change payment method",
-        "6": "Other"
-    };
+async function submitCancelRequest() {
+    const reason =
+        document.getElementById("cancelRequestReason").value;
 
-    const finalReason =
-        reasons[reasonText.trim()];
-
-    if (!finalReason) {
-
+    if (!reason) {
         showOrderModal(
-            "Invalid Selection",
-            "Please select numbers 1-6 only."
+            "Required",
+            "Please select cancellation reason."
         );
-
         return;
     }
 
     const { error } = await supabaseClient
         .from("orders")
         .update({
-            order_request_status:
-                "Pending Admin Approval",
-
-            order_request_reason:
-                finalReason,
-
-            order_request_date:
-                new Date().toISOString()
+            order_request_status: "Pending Admin Approval",
+            order_request_reason: reason,
+            order_request_date: new Date().toISOString()
         })
-
-        .eq("id", orderId);
+        .eq("id", selectedCancelOrderId);
 
     if (error) {
-
         console.error(error);
-
-        showOrderModal(
-            "Request Error",
-            "Failed to submit request."
-        );
-
+        showOrderModal("Request Error", "Failed to submit request.");
         return;
     }
+
+    closeCancelRequestModal();
 
     showOrderModal(
         "Request Submitted",
@@ -588,8 +569,5 @@ Type number only.`
 
     loadOrders();
 }
-setInterval(updatePaymentCountdowns, 1000);
-
-loadOrders();
 
 updatePaymentCountdowns();
