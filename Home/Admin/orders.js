@@ -167,7 +167,9 @@ function renderAdminOrders() {
 
   }
 
-  filteredOrders.reverse();
+  filteredOrders.sort((a, b) =>
+    new Date(b.created_at) - new Date(a.created_at)
+  );
 
   if (!filteredOrders.length) {
     adminOrdersTableBody.innerHTML = `<div class="empty-box">No orders found.</div>`;
@@ -183,7 +185,10 @@ function renderAdminOrders() {
 
     const items = getOrderItems(order);
     const isExpanded = expandedOrderItems[orderId];
-    const visibleItems = isExpanded ? items : items.slice(0, 3);
+    const visibleItems =
+      isExpanded
+        ? items
+        : items.slice(0, 2);
 
     const hasOrderRequest =
       order.order_request_status &&
@@ -366,6 +371,9 @@ ${hasOrderRequest ? `
     Manage Order
   </button>
 
+</div>
+
+</div>
 </div>
           
     `;
@@ -1072,3 +1080,7 @@ document
   });
 
 loadAdminOrders();
+
+setTimeout(() => {
+  loadCancelledOrders();
+}, 1000);

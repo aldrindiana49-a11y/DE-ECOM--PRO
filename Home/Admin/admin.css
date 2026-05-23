@@ -27,6 +27,13 @@ body {
   color: var(--text);
 }
 
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
 .admin-layout {
   display: flex;
   min-height: 100vh;
@@ -40,10 +47,10 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  height: 100vh;
+  height: 100dvh;
   overflow-y: auto;
   z-index: 1000;
-  transition: transform 0.3s ease;
+  transition: left 0.3s ease;
 }
 
 .sidebar-top {
@@ -1138,8 +1145,14 @@ body {
   background: white;
   border-radius: 16px;
   border: 1px solid var(--border);
-  overflow: hidden;
-  box-shadow: var(--shadow);
+  overflow: visible;
+  box-shadow: none;
+  width: 100%;
+  position: relative;
+  clear: both;
+
+  transform: translateZ(0);
+  will-change: auto;
 }
 
 .warehouse-order-head {
@@ -1200,6 +1213,7 @@ body {
 .warehouse-item-title {
   display: -webkit-box;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
   font-weight: 700;
@@ -1354,11 +1368,6 @@ body {
 
   background: #f3f4f6;
   color: #111827;
-}
-
-.order-status:has-text("Cancelled") {
-  background: #fee2e2;
-  color: #dc2626;
 }
 
 .order-request-title::before {

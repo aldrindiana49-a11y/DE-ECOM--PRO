@@ -30,7 +30,7 @@
 <body>
   <nav class="navbar">
     <div class="nav-left">
-      <button class="menu-btn" type="button" id="menuBtn" aria-label="Open Menu">☰</button>
+      <button class="menu-btn" style="display:none;" type="button" id="menuBtn" aria-label="Open Menu">☰</button>
       <button class="mobile-nav-item active home-mobile-btn" onclick="goHome()">
 
         <div class="mobile-nav-icon home-icon">
@@ -86,8 +86,8 @@
         <button id="accountBtn" class="icon-btn" type="button" aria-label="Account">👤</button>
 
         <div class="account-dropdown" id="accountDropdown">
-          <a href="../home/login.html">Login</a>
-          <a href="../home/signup.html">Sign Up</a>
+          <a href="../login/">Login</a>
+          <a href="../signup/">Sign Up</a>
         </div>
       </div>
     </div>
@@ -119,45 +119,40 @@
       </div>
     </div>
 
-    <div class="sidebar-body">
-      <div class="sidebar-section">
-        <h3 class="sidebar-title">Shop</h3>
-        <ul class="sidebar-links">
-          <li><a href="../home/index.html">All Products</a></li>
-          <li><a href="../home/index.html">Power Amplifier</a></li>
-          <li><a href="../home/index.html">Speaker & Tweeter</a></li>
-          <li><a href="../home/index.html">Audio Processor</a></li>
-          <li><a href="../home/index.html">Transistor / MOSFET</a></li>
-          <li><a href="../home/index.html">Capacitor</a></li>
-          <li><a href="../home/index.html">Diode</a></li>
-          <li><a href="../home/index.html">Resistor</a></li>
-          <li><a href="../home/index.html">Integrated Circuits (IC)</a></li>
-          <li><a href="../home/index.html">PCB / Boards</a></li>
-          <li><a href="../home/index.html">Connectors & Terminals</a></li>
-          <li><a href="../home/index.html">Wires & Cables</a></li>
-          <li><a href="../home/index.html">Relay</a></li>
-          <li><a href="../home/index.html">Others</a></li>
-        </ul>
-      </div>
+    <div class="sidebar-section">
 
-      <div class="sidebar-section">
-        <h3 class="sidebar-title">Account</h3>
-        <ul class="sidebar-links">
-          <li><a href="#">Notifications</a></li>
-          <li><a href="#">Profile</a></li>
-          <li><a href="../home/login.html">Login</a></li>
-          <li><a href="../home/signup.html">Sign Up</a></li>
-        </ul>
-      </div>
+      <h3 class="sidebar-title">Shop</h3>
 
-      <div class="sidebar-section">
-        <h3 class="sidebar-title">Company</h3>
-        <ul class="sidebar-links">
-          <li><a href="#">Branch Locator</a></li>
-          <li><a href="#">About Us</a></li>
-          <li><a href="#">Contact Us</a></li>
-        </ul>
-      </div>
+      <ul class="sidebar-links" id="dynamicSidebarCategories">
+
+        <li>
+          <a href="../home/index.html">
+            All Products
+          </a>
+        </li>
+
+      </ul>
+
+    </div>
+
+    <div class="sidebar-section">
+      <h3 class="sidebar-title">Account</h3>
+      <ul class="sidebar-links">
+        <li><a href="#">Notifications</a></li>
+        <li><a href="#">Profile</a></li>
+        <li><a href="../home/login.html">Login</a></li>
+        <li><a href="../home/signup.html">Sign Up</a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-section">
+      <h3 class="sidebar-title">Company</h3>
+      <ul class="sidebar-links">
+        <li><a href="#">Branch Locator</a></li>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Contact Us</a></li>
+      </ul>
+    </div>
     </div>
   </aside>
 
@@ -413,7 +408,7 @@
     </div>
 
   </div>
-  
+
 
   <script src="product.js?v=10002"></script>
 

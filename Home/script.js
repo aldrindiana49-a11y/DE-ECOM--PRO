@@ -1027,7 +1027,24 @@ applyTheme();
 renderBranding();
 renderNavbarLogo();
 renderBanner();
+
 loadProductsFromSupabase();
+
+const selectedCategory =
+  localStorage.getItem("selectedCategory");
+
+if (selectedCategory) {
+
+  setTimeout(() => {
+
+    filterByCategory(selectedCategory);
+
+    localStorage.removeItem("selectedCategory");
+
+  }, 1200);
+
+}
+
 loadVouchersFromSupabase();
 updateCartCount();
 

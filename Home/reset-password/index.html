@@ -1,0 +1,96 @@
+< !DOCTYPE html>
+    <html lang="en">
+
+    <head>
+
+        <meta charset="UTF-8" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>
+            Reset Password | Drin Electronics
+        </title>
+
+        <link rel="stylesheet" href="reset-password.css" />
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    </head>
+
+    <body>
+
+        <div class="reset-container">
+
+            <div class="reset-card">
+
+                <a href="../login/" class="back-btn">
+
+                    ← Back to Login
+
+                </a>
+
+                <div class="reset-icon">
+                    🔐
+                </div>
+
+                <h1>
+                    Create New Password
+                </h1>
+
+                <p class="subtitle">
+
+                    Enter your new password below.
+
+                </p>
+
+                <form id="resetPasswordForm">
+
+                    <div class="password-group">
+
+                        <input type="password" id="newPassword" placeholder="New Password" minlength="8" required />
+
+                        <span class="toggle-password" onclick="togglePassword('newPassword', this)">
+                            <i class="fa-solid fa-eye-slash"></i>
+                        </span>
+
+                    </div>
+
+                    <div class="password-group">
+
+                        <input type="password" id="confirmPassword" placeholder="Confirm New Password" minlength="8"
+                            required />
+
+                        <span class="toggle-password" onclick="togglePassword('confirmPassword', this)">
+                            <i class="fa-solid fa-eye-slash"></i>
+                        </span>
+
+                    </div>
+
+                    <button type="submit" class="reset-btn" id="resetBtn">
+
+                        Update Password
+
+                    </button>
+
+                </form>
+
+                <p class="reset-note">
+
+                    Your password must contain at least
+                    8 characters.
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+        <script src="../Admin/supabase.js?v=10006"></script>
+
+        <script src="reset-password.js"></script>
+
+    </body>
+
+    </html>

@@ -277,6 +277,7 @@ async function loadProductsFromSupabase() {
   renderSuggestedProducts();
   loadProductVouchers();
   updateCartCount();
+  renderDynamicSidebarCategories();
 }
 
 productsLoading = false;
@@ -1150,6 +1151,7 @@ document.getElementById("mobileCartBtn")
   });
 
 renderStoreBranding();
+renderDynamicSidebarCategories();
 
 function renderStoreBranding() {
   const mobileNavLogo =
@@ -1505,3 +1507,156 @@ function openWebsiteChat() {
 
   messages.scrollTop = messages.scrollHeight;
 }
+
+function renderDynamicSidebarCategories() {
+
+  const sidebar =
+    document.getElementById("dynamicSidebarCategories");
+
+  if (!sidebar) return;
+
+  const categories = [
+    ...new Set(
+      products
+        .map(p => p.category)
+        .filter(Boolean)
+    )
+  ];
+
+  sidebar.innerHTML = `
+    <li>
+      <a href="../index.html">
+        All Products
+      </a>
+    </li>
+
+    ${categories.map(category => `
+      <li>
+        <a
+          href="../index.html"
+          onclick="
+            localStorage.setItem(
+              'selectedCategory',
+              '${category}'
+            );
+          "
+        >
+          ${category}
+        </a>
+      </li>
+    `).join("")}
+  `;
+}
+
+const desktopSearchInput =
+  document.getElementById("desktopSearchInput");
+
+const desktopSearchBtn =
+  document.getElementById("desktopSearchBtn");
+
+function handleProductSearch() {
+
+  const keyword =
+    desktopSearchInput?.value
+      .trim()
+      .toLowerCase();
+
+  if (!keyword) return;
+
+  const filtered =
+    products.filter(product => {
+
+      return (
+        String(product.name || "").toLowerCase().includes(keyword) ||
+        String(product.category || "").toLowerCase().includes(keyword) ||
+        String(product.description || "").toLowerCase().includes(keyword)
+      );
+
+    });
+
+  renderSearchResults(filtered);
+  document
+  .getElementById("suggestedProducts")
+  ?.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+desktopSearchBtn?.addEventListener(
+  "click",
+  handleProductSearch
+);
+
+desktopSearchInput?.addEventListener(
+  "keydown",
+  (e) => {
+
+    if (e.key === "Enter") {
+
+      handleProductSearch();
+
+    }
+
+  }
+);
+
+function renderSearchResults(list) {
+
+  const container =
+    document.getElementById("suggestedProducts");
+
+  if (!container) return;
+
+  if (!list.length) {
+
+    container.innerHTML = `
+      <div class="suggested-card">
+        <h3>No products found</h3>
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML = list.map(item => `
+    <div
+      class="homepage-product-card"
+      onclick="openSuggestedProduct('${item.id}')"
+    >
+
+      <div class="homepage-product-image">
+        <img
+          src="${getProductImage(item)}"
+          alt="${item.name}"
+        >
+      </div>
+
+      <div class="homepage-product-info">
+
+        <h3>${item.name}</h3>
+
+        <div class="homepage-product-pricing">
+          <span class="current-price">
+            ${formatPrice(getProductPrice(item))}
+          </span>
+        </div>
+
+      </div>
+
+    </div>
+  `).join("");
+}
+
+document
+  .getElementById("clearSearchBtn")
+  ?.addEventListener("click", () => {
+    const input = document.getElementById("desktopSearchInput");
+
+    if (input) {
+      input.value = "";
+      input.focus();
+    }
+
+    renderSuggestedProducts();
+  });
