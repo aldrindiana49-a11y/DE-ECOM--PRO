@@ -689,6 +689,24 @@ async function calculateShippingFee() {
     true
   );
 
+  const slowShippingTimer = setTimeout(() => {
+
+    const modalMessage =
+      document.getElementById("orderModalMessage");
+
+    if (modalMessage) {
+
+      modalMessage.innerHTML = `
+      <div class="payment-loader"></div>
+      <p>
+        Shipping calculation is taking longer than usual.<br><br>
+        Please wait while we check courier availability...
+      </p>
+    `;
+    }
+
+  }, 15000);
+
   try {
     currentParcelInfo = calculateParcelInfo();
     const address = getSelectedAddress();
@@ -733,6 +751,7 @@ async function calculateShippingFee() {
           "SPX is not available in this area.",
           null
         );
+        clearTimeout(slowShippingTimer);
         closeOrderModal();
 
         return;
@@ -751,6 +770,7 @@ async function calculateShippingFee() {
         "SPX error. Check console for details.",
         null
       );
+      clearTimeout(slowShippingTimer);
       closeOrderModal();
       return;
     }
@@ -763,6 +783,7 @@ async function calculateShippingFee() {
       : "SPX shipping fee calculated";
 
     setShippingUI("ready", etaText, currentShippingFee);
+    clearTimeout(slowShippingTimer);
     closeOrderModal();
 
   } catch (error) {
@@ -781,6 +802,10 @@ async function calculateShippingFee() {
       "SPX connection error. Check console.",
       null
     );
+
+    clearTimeout(slowShippingTimer);
+    closeOrderModal();
+
   }
 }
 
@@ -1086,6 +1111,10 @@ document.querySelectorAll('input[name="payment"]').forEach((input) => {
 
 (async function initCheckout() {
   await loadSPXAddresses();
+
+  fetch(`${API_BASE_URL}/api/spx/verify`)
+    .catch(() => { });
+
   renderCheckout();
   loadAreaGroups();
   updateParcelEstimate();
