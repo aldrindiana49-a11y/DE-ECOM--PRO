@@ -223,11 +223,17 @@ async function loadOrders() {
         const isPaidPayment =
             paymentStatus.includes("paid");
 
+        const hasPendingRequest =
+            String(order.order_request_status || "")
+                .toLowerCase()
+                .includes("pending");
+
         const canRequestChange =
             !statusText.includes("packed") &&
             !statusText.includes("shipped") &&
             !statusText.includes("delivered") &&
             !statusText.includes("cancelled") &&
+            !hasPendingRequest &&
             !(isXendit && isPaidPayment);
 
         card.innerHTML = `
@@ -394,9 +400,9 @@ ${canRequestChange ? `
 ` : ""}
 
   <button class="track-btn buy-again-btn"
-    onclick="window.location.href='../Products/index.html'">
-    Buy Again
-  </button>
+  onclick="window.location.href='/'">
+  Buy Again
+</button>
 
 </div>
 

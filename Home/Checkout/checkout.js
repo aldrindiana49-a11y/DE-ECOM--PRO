@@ -781,7 +781,7 @@ function getFallbackCourier() {
 }
 
 async function placeOrder() {
-  
+
   const name = nameInput?.value.trim() || "";
   const phone = phoneInput?.value.trim() || "";
   const paymentMain = document.querySelector('input[name="payment"]:checked')?.value || "ONLINE";
@@ -825,8 +825,12 @@ async function placeOrder() {
   const handlingFee = 25;
 
   const shippingFeeNumber =
-    (Number(currentShippingFee) || 0) + handlingFee;
-  const totalNumber = subtotalNumber + shippingFeeNumber;
+    Number(currentShippingFee) || 0;
+
+  const totalNumber =
+    subtotalNumber +
+    shippingFeeNumber +
+    handlingFee;
 
 
   if (

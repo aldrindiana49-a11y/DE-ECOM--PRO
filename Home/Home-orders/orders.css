@@ -303,8 +303,12 @@ body {
     cursor: not-allowed;
 }
 
-.buy-again-btn {
-    background: #ef4444;
+.buy-again-btn,
+.buy-again-btn:focus,
+.buy-again-btn:active {
+    background: #ef4444 !important;
+    border-color: #ef4444 !important;
+    color: #fff !important;
 }
 
 .cod-btn {
@@ -354,10 +358,10 @@ body {
     border-radius: 18px;
 
     background:
-        rgba(255,255,255,.05);
+        rgba(255, 255, 255, .05);
 
     border:
-        1px solid rgba(255,255,255,.08);
+        1px solid rgba(255, 255, 255, .08);
 }
 
 .summary-row {
@@ -391,7 +395,7 @@ body {
     padding-top: 14px;
 
     border-top:
-        1px solid rgba(255,255,255,.1);
+        1px solid rgba(255, 255, 255, .1);
 
     font-size: 18px;
 
@@ -415,7 +419,7 @@ body {
 .cancel-request-modal {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.55);
+    background: rgba(0, 0, 0, .55);
     display: none;
     align-items: center;
     justify-content: center;
