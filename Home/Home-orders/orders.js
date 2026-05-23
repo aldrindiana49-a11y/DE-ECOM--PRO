@@ -1,5 +1,9 @@
 const ordersList = document.getElementById("ordersList");
 
+console.log("orders.js loaded");
+console.log("supabaseClient:", typeof supabaseClient);
+
+
 function showOrderModal(title, message) {
     const modal = document.getElementById("orderModal");
     const modalTitle = document.getElementById("orderModalTitle");
@@ -570,4 +574,8 @@ async function submitCancelRequest() {
     loadOrders();
 }
 
-updatePaymentCountdowns();
+document.addEventListener("DOMContentLoaded", () => {
+    loadOrders();
+    updatePaymentCountdowns();
+    setInterval(updatePaymentCountdowns, 1000);
+});
