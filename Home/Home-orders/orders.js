@@ -206,7 +206,13 @@ async function loadOrders() {
             statusText.includes("processing");
 
         const paymentMethod =
-            String(order.payment_method || order.paymentMethod || "").toUpperCase();
+            String(
+                order.payment_method ||
+                order.paymentMethod ||
+                order.payment_provider ||
+                order.paymentProvider ||
+                ""
+            ).toUpperCase();
 
         const paymentStatus =
             String(order.payment_status || order.paymentStatus || "").toLowerCase();
@@ -242,16 +248,12 @@ async function loadOrders() {
 ">
 
   ${order.order_status || "Processing"}
-${String(order.order_status || "").includes("Cancelled") && order.cancel_type
+${String(order.order_status || "").toLowerCase().includes("cancelled") && order.cancel_type
                 ? ` • ${order.cancel_type}`
                 : ""}
-${String(order.order_status || "").includes("Cancelled") && order.cancel_reason
+${String(order.order_status || "").toLowerCase().includes("cancelled") && order.cancel_reason
                 ? ` • ${order.cancel_reason}`
                 : ""}
-
-  ${order.cancel_reason ? `
-    • ${order.cancel_reason}
-  ` : ""}
 
 </div>
 

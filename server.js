@@ -672,6 +672,12 @@ app.post("/api/orders/:orderId/cancel", async (req, res) => {
   try {
     const { orderId } = req.params;
 
+    const {
+      cancel_reason,
+      cancel_type,
+      cancelled_by
+    } = req.body;
+
     let orders = await readOrders();
 
     const index = orders.findIndex(
@@ -686,8 +692,21 @@ app.post("/api/orders/:orderId/cancel", async (req, res) => {
     }
 
     orders[index].order_status = "Cancelled";
-    orders[index].cancelled_at = new Date().toISOString();
-    orders[index].updated_at = new Date().toISOString();
+
+    orders[index].cancel_type =
+      cancel_type || "Seller Forced Cancel";
+
+    orders[index].cancel_reason =
+      cancel_reason || "No reason provided";
+
+    orders[index].cancelled_by =
+      cancelled_by || "seller";
+
+    orders[index].cancelled_at =
+      new Date().toISOString();
+
+    orders[index].updated_at =
+      new Date().toISOString();
 
     await saveOrders(orders);
 
