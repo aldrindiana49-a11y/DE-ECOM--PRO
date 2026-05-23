@@ -75,7 +75,7 @@ async function loadOrders() {
         const subtotal =
             Number(order.subtotal || 0);
 
-        const shippingFee =
+        const rawShippingFee =
             Number(order.shipping_fee || 0);
 
         const serviceFee =
@@ -83,8 +83,13 @@ async function loadOrders() {
                 order.service_fee ||
                 order.handling_fee ||
                 order.packaging_fee ||
-                0
+                25
             );
+
+        const shippingFee =
+            rawShippingFee > serviceFee
+                ? rawShippingFee - serviceFee
+                : rawShippingFee;
 
         const finalTotal =
             Number(order.amount || 0);
@@ -237,6 +242,12 @@ async function loadOrders() {
 ">
 
   ${order.order_status || "Processing"}
+${String(order.order_status || "").includes("Cancelled") && order.cancel_type
+                ? ` • ${order.cancel_type}`
+                : ""}
+${String(order.order_status || "").includes("Cancelled") && order.cancel_reason
+                ? ` • ${order.cancel_reason}`
+                : ""}
 
   ${order.cancel_reason ? `
     • ${order.cancel_reason}
@@ -282,19 +293,22 @@ async function loadOrders() {
 
     ${serviceFee > 0 ? `
 
-        <div class="summary-row">
+    <div class="summary-row">
 
-            <span>
-                Service / Handling Fee
-            </span>
+        <span>
+            Service / Handling Fee
+            <small style="display:block;color:#94a3b8;font-size:12px;margin-top:3px;">
+                Includes packaging materials and secure payment processing
+            </small>
+        </span>
 
-            <span>
-                ₱${serviceFee.toLocaleString()}
-            </span>
+        <span>
+            ₱${serviceFee.toLocaleString()}
+        </span>
 
-        </div>
+    </div>
 
-    ` : ""}
+` : ""}
 
     ${discountsHtml}
 
@@ -309,6 +323,20 @@ async function loadOrders() {
         </span>
 
     </div>
+<div class="summary-row">
+
+    <span>
+        Payment Mode
+    </span>
+
+    <span>
+        ${paymentMethod === "XENDIT"
+                ? "Online Payment"
+                : "COD"}
+    </span>
+
+</div>
+
 
 </div>
 

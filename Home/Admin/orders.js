@@ -13,7 +13,7 @@ const dashboardShipped = document.getElementById("dashboardShipped");
 const dashboardDelivered = document.getElementById("dashboardDelivered");
 
 let adminOrders = [];
-let currentOrderFilter = "Processing";
+let currentOrderFilter = "ALL";
 let expandedOrderItems = {};
 
 const cancelledOrdersTableBody =
@@ -849,8 +849,11 @@ function renderCancelledOrders() {
             </span>
 
             <span class="status-badge status-inactive">
-              Cancelled
-            </span>
+  Cancelled
+  ${order.cancel_type
+          ? `• ${escapeHtml(order.cancel_type)}`
+          : ""}
+</span>
 
           </div>
 
