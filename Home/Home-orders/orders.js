@@ -4,11 +4,12 @@ console.log("orders.js loaded");
 console.log("supabaseClient:", typeof supabaseClient);
 
 
-function showOrderModal(title, message) {
+function showOrderModal(title, message, showLoader = false) {
     const modal = document.getElementById("orderModal");
     const modalTitle = document.getElementById("orderModalTitle");
     const modalMessage = document.getElementById("orderModalMessage");
     const okBtn = document.getElementById("orderModalOk");
+    const loader = document.getElementById("paymentLoader");
 
     if (!modal) {
         alert(message);
@@ -18,15 +19,12 @@ function showOrderModal(title, message) {
     modalTitle.textContent = title;
     modalMessage.textContent = message;
 
-    const loader =
-        document.getElementById("paymentLoader");
-
     if (loader) {
-        loader.style.display = "block";
+        loader.style.display = showLoader ? "block" : "none";
     }
 
     if (okBtn) {
-        okBtn.style.display = "none";
+        okBtn.style.display = showLoader ? "none" : "inline-block";
     }
 
     modal.classList.add("show");
@@ -399,7 +397,8 @@ async function continuePayment(orderId) {
 
     showOrderModal(
         "Secure Checkout",
-        "Preparing secure checkout...\n\nPlease do not refresh or close this page."
+        "Preparing secure checkout...\n\nPlease do not refresh or close this page.",
+        true
     );
 
     const res = await fetch("https://de-ecom-pro.onrender.com/api/create-payment", {

@@ -1360,3 +1360,29 @@ body {
   background: #fee2e2;
   color: #dc2626;
 }
+
+.order-request-title::before {
+  content: "⚠️";
+  margin-right: 6px;
+}
+
+.order-request-panel {
+  position: relative;
+}
+
+.order-request-panel::before {
+  content: "!";
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 26px;
+  height: 26px;
+  background: #f97316;
+  color: #fff;
+  border-radius: 50%;
+  font-weight: 900;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

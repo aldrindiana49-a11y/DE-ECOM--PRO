@@ -655,14 +655,58 @@ function openAWB(orderId) {
 }
 
 async function approveOrderRequest(orderId) {
-  const ok = confirm("Approve this customer request?");
+  const ok = confirm("Approve customer cancellation request and cancel this order?");
 
   if (!ok) return;
 
-  showToast("Request approved. Please update the order manually if needed.", "success");
+  const order = adminOrders.find(o =>
+    String(o.external_id || o.id) === String(orderId)
+  );
 
-  await updateOrderRequestStatus(orderId, "Approved");
+  const reason =
+    order?.order_request_reason ||
+    "Customer cancellation request approved";
+
+  try {
+    const res = await fetch(
+      `https://de-ecom-pro.onrender.com/api/orders/${orderId}/cancel`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+
+        body: JSON.stringify({
+          orderId,
+          order_status: "Cancelled",
+          cancel_type: "Customer Requested Cancel",
+          cancel_reason: reason,
+          cancelled_by: "customer_request",
+          cancelled_at: new Date().toISOString(),
+
+          order_request_status: "Approved",
+          order_request_reason: reason
+        })
+      }
+    );
+
+    const result = await res.json();
+
+    if (!result.success) {
+      showToast(result.message || "Failed to approve cancellation.", "error");
+      return;
+    }
+
+    showToast("Cancellation request approved. Order cancelled.", "success");
+
+    closeOrderModal();
+    await loadAdminOrders();
+    await loadCancelledOrders();
+
+  } catch (error) {
+    console.error(error);
+    showToast("Approve request server error.", "error");
+  }
 }
+
 
 async function rejectOrderRequest(orderId) {
   const ok = confirm("Reject this customer request?");
