@@ -1,128 +1,128 @@
-< !DOCTYPE html>
-    <html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 
-    <head>
+<head>
 
-        <meta charset="UTF-8" />
+    <meta charset="UTF-8" />
 
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <title>
-            Reset Password | Drin Electronics
-        </title>
+    <title>
+        Reset Password | Drin Electronics
+    </title>
 
-        <link rel="stylesheet" href="reset-password.css" />
+    <link rel="stylesheet" href="reset-password.css" />
 
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-    </head>
+</head>
 
-    <body>
+<body>
 
-        <div class="reset-container">
+    <div class="reset-container">
 
-            <div class="reset-card">
+        <div class="reset-card">
 
-                <a href="../login/" class="back-btn">
+            <a href="../login/" class="back-btn">
 
-                    ← Back to Login
+                ← Back to Login
 
-                </a>
+            </a>
 
-                <div class="reset-icon">
-                    🔐
+            <div class="reset-icon">
+                🔐
+            </div>
+
+            <h1>
+                Create New Password
+            </h1>
+
+            <p class="subtitle">
+
+                Enter your new password below.
+
+            </p>
+
+            <form id="resetPasswordForm">
+
+                <div class="password-group">
+
+                    <input type="password" id="newPassword" placeholder="New Password" minlength="8" required />
+
+                    <span class="toggle-password" onclick="togglePassword('newPassword', this)">
+                        <i class="fa-solid fa-eye-slash"></i>
+                    </span>
+
                 </div>
 
-                <h1>
-                    Create New Password
-                </h1>
+                <div class="password-group">
 
-                <p class="subtitle">
+                    <input type="password" id="confirmPassword" placeholder="Confirm New Password" minlength="8"
+                        required />
 
-                    Enter your new password below.
+                    <span class="toggle-password" onclick="togglePassword('confirmPassword', this)">
+                        <i class="fa-solid fa-eye-slash"></i>
+                    </span>
 
-                </p>
+                </div>
 
-                <form id="resetPasswordForm">
+                <button type="submit" class="reset-btn" id="resetBtn">
 
-                    <div class="password-group">
+                    Update Password
 
-                        <input type="password" id="newPassword" placeholder="New Password" minlength="8" required />
+                </button>
 
-                        <span class="toggle-password" onclick="togglePassword('newPassword', this)">
-                            <i class="fa-solid fa-eye-slash"></i>
-                        </span>
+            </form>
 
-                    </div>
+            <p class="reset-note">
 
-                    <div class="password-group">
+                Your password must contain at least
+                8 characters.
 
-                        <input type="password" id="confirmPassword" placeholder="Confirm New Password" minlength="8"
-                            required />
+            </p>
 
-                        <span class="toggle-password" onclick="togglePassword('confirmPassword', this)">
-                            <i class="fa-solid fa-eye-slash"></i>
-                        </span>
+        </div>
 
-                    </div>
+    </div>
 
-                    <button type="submit" class="reset-btn" id="resetBtn">
+    <div id="premiumAlert" class="premium-alert">
 
-                        Update Password
+        <div class="premium-alert-box">
 
-                    </button>
+            <div class="premium-alert-icon">
+                🔐
+            </div>
 
-                </form>
+            <h3 id="premiumAlertTitle">
+                Reset Password
+            </h3>
 
-                <p class="reset-note">
+            <p id="premiumAlertMessage">
+                Message here
+            </p>
 
-                    Your password must contain at least
-                    8 characters.
+            <div class="premium-alert-actions">
 
-                </p>
+                <button id="premiumAlertCancel">
+                    Cancel
+                </button>
+
+                <button id="premiumAlertConfirm">
+                    OK
+                </button>
 
             </div>
 
         </div>
 
-        <div id="premiumAlert" class="premium-alert">
+    </div>
 
-            <div class="premium-alert-box">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
-                <div class="premium-alert-icon">
-                    🔐
-                </div>
+    <script src="../Admin/supabase.js?v=10006"></script>
 
-                <h3 id="premiumAlertTitle">
-                    Reset Password
-                </h3>
+    <script src="reset-password.js"></script>
 
-                <p id="premiumAlertMessage">
-                    Message here
-                </p>
+</body>
 
-                <div class="premium-alert-actions">
-
-                    <button id="premiumAlertCancel">
-                        Cancel
-                    </button>
-
-                    <button id="premiumAlertConfirm">
-                        OK
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-        <script src="../Admin/supabase.js?v=10006"></script>
-
-        <script src="reset-password.js"></script>
-
-    </body>
-
-    </html>
+</html>
