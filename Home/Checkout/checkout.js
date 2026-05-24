@@ -91,7 +91,6 @@ async function loadSPXAddresses() {
         couriers: [
           "SPX",
           "Same Day Delivery / Lalamove",
-          "Pick Up / Walk In"
         ]
       };
     }
@@ -435,7 +434,6 @@ function updateCourierOptions() {
   const couriers = [
     "SPX",
     "Same Day Delivery / Lalamove",
-    "Pick Up / Walk In"
   ];
 
   couriers.forEach((courier) => {
@@ -704,26 +702,6 @@ function scheduleShippingQuote() {
   }
 
 
-  // PICK UP / WALK IN
-  if (selectedCourier === "Pick Up / Walk In") {
-
-    currentShippingFee = 0;
-
-    currentShippingQuote = {
-      success: true,
-      courier: selectedCourier,
-      fallback: true,
-      message: "Free pickup selected",
-    };
-
-    setShippingUI(
-      "ready",
-      "Pick Up / Walk In selected",
-      currentShippingFee
-    );
-    return;
-  }
-
   // SAME DAY / LALAMOVE
   if (selectedCourier === "Same Day Delivery / Lalamove") {
 
@@ -943,22 +921,9 @@ async function placeOrder() {
   if (
     paymentMain === "COD" &&
     (
-      selectedCourierNow === "Pick Up / Walk In" ||
       selectedCourierNow === "Same Day Delivery / Lalamove"
     )
   ) {
-
-    const modalMessage =
-      selectedCourierNow === "Pick Up / Walk In"
-        ? "Pick Up orders require advance payment before preparation.\n\nPick Up Schedule: 10:00 AM - 4:00 PM.\n\nPlease use Online Payment or select ★ SPX Courier ★ for COD."
-        : "COD is only available for ★ SPX Courier ★\n\nPress OK and select SPX to continue.";
-
-    showOrderModal(
-      selectedCourierNow === "Pick Up / Walk In"
-        ? "Pick Up Policy"
-        : "COD Not Available",
-      modalMessage
-    );
 
     const okBtn = document.getElementById("orderModalOk");
     if (okBtn) {
@@ -1214,11 +1179,6 @@ async function placeOrder() {
   }
 }
 
-areaGroupSelect?.addEventListener("change", loadProvinces);
-provinceSelect?.addEventListener("change", loadCities);
-citySelect?.addEventListener("change", loadBarangays);
-barangaySelect?.addEventListener("change", scheduleShippingQuote);
-fullAddressInput?.addEventListener("input", scheduleShippingQuote);
 [
   nameInput,
   phoneInput,
@@ -1226,25 +1186,39 @@ fullAddressInput?.addEventListener("input", scheduleShippingQuote);
   areaGroupSelect,
   provinceSelect,
   citySelect,
-  barangaySelect
+  barangaySelect,
+  courierSelect
 ].forEach((input) => {
 
   if (!input) return;
 
-  input.addEventListener("input", saveCustomerCheckoutInfo);
-  input.addEventListener("change", saveCustomerCheckoutInfo);
+  input.addEventListener(
+    "input",
+    saveCustomerCheckoutInfo
+  );
+
+  input.addEventListener(
+    "change",
+    saveCustomerCheckoutInfo
+  );
 
 });
+
 courierSelect?.addEventListener("change", function () {
+
   selectedCourier = this.value;
 
   if (courierStatus) {
-    courierStatus.textContent = selectedCourier
-      ? `${selectedCourier} selected`
-      : "Please select courier";
+
+    courierStatus.textContent =
+      selectedCourier
+        ? `${selectedCourier} selected`
+        : "Please select courier";
+
   }
 
   scheduleShippingQuote();
+
 });
 
 document.querySelectorAll('input[name="payment"]').forEach((input) => {
@@ -1287,13 +1261,10 @@ async function loadClaimedVoucher() {
     .catch(() => { });
 
   renderCheckout();
-
   loadAreaGroups();
-  loadCustomerCheckoutInfo();
+  await loadCustomerCheckoutInfo();
   updateParcelEstimate();
-
   updateTotalsDisplay();
-
   scheduleShippingQuote();
 
 })();
@@ -1327,7 +1298,8 @@ function saveCustomerCheckoutInfo() {
     city: citySelect?.value || "",
     barangay: barangaySelect?.value || "",
     zipCode: zipCodeInput?.value || "",
-    fullAddress: fullAddressInput?.value || ""
+    fullAddress: fullAddressInput?.value || "",
+    courier: courierSelect?.value || ""
   };
 
   localStorage.setItem(
@@ -1381,19 +1353,106 @@ function enableCustomerEdit() {
   if (btn) btn.textContent = "Show Less";
 }
 
-function loadCustomerCheckoutInfo() {
-  const saved =
-    JSON.parse(localStorage.getItem("drinCustomerCheckoutInfo")) || {};
+async function loadCustomerCheckoutInfo() {
 
-  if (nameInput) nameInput.value = saved.name || "";
-  if (phoneInput) phoneInput.value = saved.phone || "";
-  if (fullAddressInput) fullAddressInput.value = saved.fullAddress || "";
+  const saved =
+    JSON.parse(
+      localStorage.getItem(
+        "drinCustomerCheckoutInfo"
+      )
+    ) || {};
+
+  if (nameInput) {
+    nameInput.value = saved.name || "";
+  }
+
+  if (phoneInput) {
+    phoneInput.value = saved.phone || "";
+  }
+
+  if (fullAddressInput) {
+    fullAddressInput.value =
+      saved.fullAddress || "";
+  }
+
+  if (
+    areaGroupSelect &&
+    saved.areaGroup
+  ) {
+
+    areaGroupSelect.value =
+      saved.areaGroup;
+
+    loadProvinces();
+
+  }
+
+  if (
+    provinceSelect &&
+    saved.province
+  ) {
+
+    provinceSelect.value =
+      saved.province;
+
+    loadCities();
+
+  }
+
+  if (
+    citySelect &&
+    saved.city
+  ) {
+
+    citySelect.value =
+      saved.city;
+
+    loadBarangays();
+
+  }
+
+  if (
+    barangaySelect &&
+    saved.barangay
+  ) {
+
+    barangaySelect.value =
+      saved.barangay;
+
+  }
+
+  if (
+    courierSelect &&
+    saved.courier
+  ) {
+
+    updateCourierOptions();
+
+    courierSelect.value =
+      saved.courier;
+
+    selectedCourier =
+      saved.courier;
+
+  }
 
   updateCustomerQuickView();
 
-  const body = document.getElementById("customerDetailsBody");
+  const body =
+    document.getElementById(
+      "customerDetailsBody"
+    );
 
-  if (saved.name && saved.phone && body) {
-    body.classList.add("collapsed");
+  if (
+    saved.name &&
+    saved.phone &&
+    body
+  ) {
+
+    body.classList.add(
+      "collapsed"
+    );
+
   }
+
 }
