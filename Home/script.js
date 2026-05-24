@@ -316,72 +316,95 @@ function applyTheme() {
   }
 }
 
-function renderBranding() {
-  const settings = getStoreSettings();
-  const branding = settings.branding || {};
-  const logo = safeText(branding.logo);
+async function renderBranding() {
 
-  if (storeName) storeName.textContent = safeText(branding.storeName, "Drin Electronics");
+  const { data, error } =
+    await supabaseClient
+      .from("store_settings")
+      .select("logo_url, store_name")
+      .eq("id", 1)
+      .single();
+
+  if (error) return;
+
+  const logo =
+    safeText(data?.logo_url);
+
+  if (storeName) {
+
+    storeName.textContent =
+      data?.store_name || "Drin Electronics";
+  }
 
   if (storeTagline) {
-    storeTagline.textContent = safeText(
-      branding.tagline,
-      "Quality amplifier parts and electronics"
-    );
+
+    storeTagline.textContent =
+      "Quality amplifier parts and electronics";
   }
 
   if (logo && sidebarLogo) {
+
     sidebarLogo.src = logo;
+
     sidebarLogo.classList.add("show");
-    if (sidebarLogoFallback) sidebarLogoFallback.style.display = "none";
+
+    if (sidebarLogoFallback) {
+
+      sidebarLogoFallback.style.display = "none";
+    }
+
   } else {
+
     if (sidebarLogo) {
+
       sidebarLogo.classList.remove("show");
+
       sidebarLogo.removeAttribute("src");
     }
-    if (sidebarLogoFallback) sidebarLogoFallback.style.display = "grid";
+
+    if (sidebarLogoFallback) {
+
+      sidebarLogoFallback.style.display = "grid";
+    }
+
   }
+
 }
 
-function renderNavbarLogo() {
+async function renderNavbarLogo() {
 
   const mobileNavLogo =
     document.getElementById("mobileNavLogo");
 
-  const settings =
-    getStoreSettings();
+  const { data, error } =
+    await supabaseClient
+      .from("store_settings")
+      .select("logo_url")
+      .eq("id", 1)
+      .single();
+
+  if (error || !data?.logo_url) return;
 
   const logo =
-    safeText(settings?.branding?.logo, "");
+    data.logo_url;
 
   if (logo) {
 
     if (navLogo) {
+
       navLogo.src = logo;
+
       navLogo.classList.add("show");
     }
 
     if (mobileNavLogo) {
+
       mobileNavLogo.src = logo;
     }
 
     if (navLogoFallback) {
+
       navLogoFallback.style.display = "none";
-    }
-
-  } else {
-
-    if (navLogo) {
-      navLogo.classList.remove("show");
-      navLogo.removeAttribute("src");
-    }
-
-    if (mobileNavLogo) {
-      mobileNavLogo.removeAttribute("src");
-    }
-
-    if (navLogoFallback) {
-      navLogoFallback.style.display = "inline-flex";
     }
 
   }
@@ -1300,19 +1323,22 @@ window.addEventListener("pageshow", () => {
 });
 
 
-function renderFavicon() {
-
-  const settings =
-    JSON.parse(localStorage.getItem("drinStoreSettings")) || {};
-
-  const logo =
-    settings?.branding?.logo || "";
+async function renderFavicon() {
 
   const favicon =
     document.getElementById("siteFavicon");
 
-  if (favicon && logo) {
-    favicon.href = logo;
+  const { data, error } =
+    await supabaseClient
+      .from("store_settings")
+      .select("logo_url")
+      .eq("id", 1)
+      .single();
+
+  if (error || !data?.logo_url) return;
+
+  if (favicon) {
+    favicon.href = data.logo_url;
   }
 
 }

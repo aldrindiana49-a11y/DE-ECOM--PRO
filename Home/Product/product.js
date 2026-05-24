@@ -1249,27 +1249,46 @@ document.getElementById("mobileCartBtn")
 renderStoreBranding();
 renderDynamicSidebarCategories();
 
-function renderStoreBranding() {
+async function renderStoreBranding() {
+
   const mobileNavLogo =
     document.getElementById("mobileNavLogo");
-  const settings =
-    JSON.parse(localStorage.getItem("drinStoreSettings")) || {};
 
-  const logo = settings?.branding?.logo || "";
+  const navLogo =
+    document.getElementById("navLogo");
 
-  const navLogo = document.getElementById("navLogo");
-  const navLogoFallback = document.getElementById("navLogoFallback");
+  const navLogoFallback =
+    document.getElementById("navLogoFallback");
 
-  if (navLogo && logo) {
+  const { data, error } =
+    await supabaseClient
+      .from("store_settings")
+      .select("logo_url")
+      .eq("id", 1)
+      .single();
+
+  if (error || !data?.logo_url) return;
+
+  const logo =
+    data.logo_url;
+
+  if (navLogo) {
+
     navLogo.src = logo;
+
     navLogo.style.display = "block";
-    if (mobileNavLogo) {
-      mobileNavLogo.src = logo;
-    }
-    if (navLogoFallback) {
-      navLogoFallback.style.display = "none";
-    }
   }
+
+  if (mobileNavLogo) {
+
+    mobileNavLogo.src = logo;
+  }
+
+  if (navLogoFallback) {
+
+    navLogoFallback.style.display = "none";
+  }
+
 }
 
 renderStoreBranding();
@@ -1757,7 +1776,7 @@ document
     renderSuggestedProducts();
   });
 
-  const shareBtn =
+const shareBtn =
   document.getElementById("shareBtn");
 
 shareBtn?.addEventListener(
