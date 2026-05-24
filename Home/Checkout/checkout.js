@@ -942,6 +942,35 @@ async function placeOrder() {
     return;
   }
 
+  const {
+    data: { user }
+  } = await supabaseClient.auth.getUser();
+
+  const voucherCode =
+    localStorage.getItem("claimedVoucherCode");
+
+  if (voucherCode && user) {
+
+    const { data: existingUsage } =
+      await supabaseClient
+        .from("voucher_usage")
+        .select("*")
+        .eq("voucher_code", voucherCode)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    if (existingUsage) {
+
+      showOrderModal(
+        "Voucher Already Used",
+        "This voucher has already been used on your account."
+      );
+
+      return;
+    }
+
+  }
+
   const normalizedItems = normalizeOrderItems(cartItems);
   const address = getSelectedAddress();
   currentParcelInfo = calculateParcelInfo();
@@ -974,74 +1003,46 @@ async function placeOrder() {
   saveOrder(order);
 
   try {
+
     await syncOrderToSupabase(order);
+
+    if (voucherCode && user) {
+
+      await supabaseClient
+        .from("voucher_usage")
+        .insert({
+
+          voucher_code: voucherCode,
+
+          user_id: user.id
+
+        });
+
+      localStorage.removeItem(
+        "claimedVoucherCode"
+      );
+
+    }
+
   } catch (error) {
 
-    console.error("ORDER SYNC REAL ERROR:", error);
+    console.error(
+      "ORDER SYNC REAL ERROR:",
+      error
+    );
 
     // continue kahit may Supabase issue
   }
 
-  if (paymentMain === "COD") {
-    showOrderModal(
-      "Processing COD Order...",
-      "Please wait while we save your order.",
-      true
-    );
-
-    try {
-      await fetch(`${API_BASE_URL}/api/orders/cod`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId: order.id,
-          amount: totalNumber,
-          subtotal: subtotalNumber,
-          shippingFee: shippingFeeNumber,
-          customerName: name,
-          customerPhone: phone,
-          paymentMethod: "COD",
-          courier: order.courier,
-          address,
-          parcelInfo: currentParcelInfo,
-          items: order.items,
-        }),
-      });
-
-    } catch (error) {
-
-      console.warn("COD backend save failed:", error);
-
-    }
-
-    clearCheckedCartItems();
-    localStorage.removeItem("drinCart");
-
-    localStorage.removeItem("drinCheckoutItems");
-
-    closeOrderModal();
-
-    showOrderModal(
-      "Thank You!",
-      `Your order has been placed successfully.`
-    );
-
-    setTimeout(() => {
-      window.location.href = "/home-orders";
-    }, 1200);
-    return;
-  }
+if (paymentMain === "COD") {
+  showOrderModal(
+    "Processing COD Order...",
+    "Please wait while we save your order.",
+    true
+  );
 
   try {
-    const paymentUrl = `${API_BASE_URL}/api/create-payment`;
-    showOrderModal(
-      "Please Wait",
-      "Redirecting to secure payment gateway... Please do not close this window.",
-      true
-    );
-
-
-    const res = await fetch(paymentUrl, {
+    await fetch(`${API_BASE_URL}/api/orders/cod`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1051,7 +1052,7 @@ async function placeOrder() {
         shippingFee: shippingFeeNumber,
         customerName: name,
         customerPhone: phone,
-        paymentMethod: "XENDIT",
+        paymentMethod: "COD",
         courier: order.courier,
         address,
         parcelInfo: currentParcelInfo,
@@ -1059,33 +1060,84 @@ async function placeOrder() {
       }),
     });
 
-    const data = await res.json();
-
-    const redirectUrl =
-      data.checkoutUrl ||
-      data.checkout_url ||
-      data.invoice_url ||
-      data.redirectUrl;
-
-    if (redirectUrl) {
-
-      clearCheckedCartItems();
-
-      localStorage.removeItem("drinCart");
-      localStorage.removeItem("drinCheckoutItems");
-
-      sessionStorage.setItem("paymentStarted", "true");
-
-      window.location.replace(redirectUrl);
-
-    } else {
-
-      showOrderModal("Payment Error", data.message || "Checkout failed.");
-    }
   } catch (error) {
-    console.error("CHECKOUT ERROR:", error);
-    showOrderModal("Server Error", "Cannot connect to payment server.");
+
+    console.warn("COD backend save failed:", error);
+
   }
+
+  clearCheckedCartItems();
+  localStorage.removeItem("drinCart");
+
+  localStorage.removeItem("drinCheckoutItems");
+
+  closeOrderModal();
+
+  showOrderModal(
+    "Thank You!",
+    `Your order has been placed successfully.`
+  );
+
+  setTimeout(() => {
+    window.location.href = "/home-orders";
+  }, 1200);
+  return;
+}
+
+try {
+  const paymentUrl = `${API_BASE_URL}/api/create-payment`;
+  showOrderModal(
+    "Please Wait",
+    "Redirecting to secure payment gateway... Please do not close this window.",
+    true
+  );
+
+
+  const res = await fetch(paymentUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      orderId: order.id,
+      amount: totalNumber,
+      subtotal: subtotalNumber,
+      shippingFee: shippingFeeNumber,
+      customerName: name,
+      customerPhone: phone,
+      paymentMethod: "XENDIT",
+      courier: order.courier,
+      address,
+      parcelInfo: currentParcelInfo,
+      items: order.items,
+    }),
+  });
+
+  const data = await res.json();
+
+  const redirectUrl =
+    data.checkoutUrl ||
+    data.checkout_url ||
+    data.invoice_url ||
+    data.redirectUrl;
+
+  if (redirectUrl) {
+
+    clearCheckedCartItems();
+
+    localStorage.removeItem("drinCart");
+    localStorage.removeItem("drinCheckoutItems");
+
+    sessionStorage.setItem("paymentStarted", "true");
+
+    window.location.replace(redirectUrl);
+
+  } else {
+
+    showOrderModal("Payment Error", data.message || "Checkout failed.");
+  }
+} catch (error) {
+  console.error("CHECKOUT ERROR:", error);
+  showOrderModal("Server Error", "Cannot connect to payment server.");
+}
 }
 
 areaGroupSelect?.addEventListener("change", loadProvinces);

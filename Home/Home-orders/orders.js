@@ -87,9 +87,7 @@ async function loadOrders() {
             );
 
         const shippingFee =
-            rawShippingFee > serviceFee
-                ? rawShippingFee - serviceFee
-                : rawShippingFee;
+            rawShippingFee;
 
         const finalTotal =
             Number(order.amount || 0);

@@ -920,9 +920,25 @@ async function loadProductVouchers() {
 
 }
 
-function claimProductVoucher(code, btn) {
+async function claimProductVoucher(code, btn) {
 
-  localStorage.setItem("claimedVoucherCode", code);
+  const {
+    data: { user }
+  } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+
+    alert("Please login first to claim this voucher.");
+
+    window.location.href = "../login/";
+
+    return;
+  }
+
+  localStorage.setItem(
+    "claimedVoucherCode",
+    code
+  );
 
   document.querySelectorAll(".voucher-card")
     .forEach(card => card.classList.remove("active"));

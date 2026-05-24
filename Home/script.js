@@ -951,8 +951,26 @@ async function loadVouchersFromSupabase() {
   }).join("");
 }
 
-function claimVoucher(code) {
-  localStorage.setItem("claimedVoucherCode", code);
+async function claimVoucher(code) {
+
+  const {
+    data: { user }
+  } = await supabaseClient.auth.getUser();
+
+  if (!user) {
+
+    alert("Please login first to claim this voucher.");
+
+    window.location.href = "./login/";
+
+    return;
+  }
+
+  localStorage.setItem(
+    "claimedVoucherCode",
+    code
+  );
+
   alert(`Voucher ${code} claimed!`);
 }
 
