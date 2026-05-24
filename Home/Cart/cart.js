@@ -335,6 +335,14 @@ function increaseQty(index) {
 
   if (stock !== -1 && currentQty >= stock) return;
 
+
+  if (currentQty >= 50) {
+    showCartNotice(
+      "Quantity Limit",
+      "Maximum 50 pcs per variant only."
+    );
+    return;
+  }
   cart[index].quantity = currentQty + 1;
 
   if (cart[index].quantity > 0 && stock !== 0) {
@@ -367,6 +375,10 @@ function manualQty(index, value) {
   if (!cart[index]) return;
 
   let qty = safeNumber(value, 0);
+  if (qty > 50) {
+    qty = 50;
+  }
+
   qty = clampQty(getItemId(cart[index]), qty, cart[index]);
 
   cart[index].quantity = qty;
@@ -449,12 +461,9 @@ function undoRemove() {
 function goToCheckout() {
   const selectedItems = getSelectedCart();
 
-  const MAX_CHECKOUT_ITEMS = 50;
-  const MAX_ORDER_VALUE = 50000;
+  const MAX_CHECKOUT_ROWS = 50;
+  const MAX_ORDER_VALUE = 30000;
 
-  const totalQty = selectedItems.reduce((sum, item) => {
-    return sum + (Number(item.quantity) || 0);
-  }, 0);
 
   const totalValue = selectedItems.reduce((sum, item) => {
     return sum + ((Number(item.price) || 0) * (Number(item.quantity) || 0));
@@ -465,13 +474,12 @@ function goToCheckout() {
     return;
   }
 
-  if (totalQty > MAX_CHECKOUT_ITEMS) {
-    alert("Maximum 50 items per checkout only. Please create another order.");
+  if (selectedItems.length > MAX_CHECKOUT_ROWS) {
     return;
   }
 
   if (totalValue > MAX_ORDER_VALUE) {
-    alert("Maximum ₱50,000 per checkout only. Please create another order.");
+    alert("Maximum ₱30,000 per checkout only. Please create another order.");
     return;
   }
 
@@ -549,6 +557,26 @@ function smartBack(fallback = "../index.html") {
     window.location.href = fallback;
   }
 
+}
+
+function showCartNotice(title, message) {
+  const modal = document.createElement("div");
+
+  modal.className = "cart-premium-modal";
+
+  modal.innerHTML = `
+    <div class="cart-premium-card">
+      <h3>${title}</h3>
+      <p>${message}</p>
+      <button type="button">OK</button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.querySelector("button").onclick = () => {
+    modal.remove();
+  };
 }
 
 window.addEventListener("pageshow", function () {

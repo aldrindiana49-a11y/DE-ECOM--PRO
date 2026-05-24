@@ -483,3 +483,50 @@ body {
     transform: rotate(360deg);
   }
 }
+
+.checkout-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.customer-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.customer-actions button {
+  border: 1px solid #dbe2ea;
+  background: white;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.customer-quick-view {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.customer-quick-view strong {
+  font-size: 15px;
+}
+
+.customer-quick-view span,
+.customer-quick-view small {
+  color: #64748b;
+}
+
+#customerDetailsBody.collapsed {
+  display: none;
+}

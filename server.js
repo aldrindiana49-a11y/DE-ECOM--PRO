@@ -199,8 +199,8 @@ app.post("/api/spx/check-shipping-fee", async (req, res) => {
       });
     }
 
-    const orderFee = result.data?.orders?.[0];
-    const fail = result.data?.fail_list?.[0];
+    const orderFee = result?.data?.orders?.[0];
+    const fail = result?.data?.fail_list?.[0];
 
     if (!orderFee) {
       return res.status(400).json({
@@ -482,7 +482,7 @@ app.post("/api/create-payment", async (req, res) => {
           given_names: customerName || "Customer",
           mobile_number: customerPhone || ""
         },
-       success_redirect_url: "https://drinelectronicsph.com/home-orders/",
+        success_redirect_url: "https://drinelectronicsph.com/home-orders/",
         failure_redirect_url: "https://drinelectronicsph.com/Checkout/checkout.html"
       })
     });

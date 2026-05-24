@@ -164,12 +164,24 @@ function calculateParcelInfo(items = cartItems) {
   let stackedHeight = 0;
 
   items.forEach((item) => {
+
     const quantity = cleanQty(item.quantity);
+
+    if (quantity > 50) {
+      showOrderModal(
+        "Quantity Limit",
+        "Maximum 50 pcs only per SKU / variation."
+      );
+
+      throw new Error("SKU quantity limit exceeded");
+    }
+
     totalQuantity += quantity;
     totalWeight += getItemWeight(item) * quantity;
     maxLength = Math.max(maxLength, getItemLength(item));
     maxWidth = Math.max(maxWidth, getItemWidth(item));
-    stackedHeight += getItemHeight(item) * quantity;
+    stackedHeight = Math.max(stackedHeight, getItemHeight(item));
+
   });
 
   return {
@@ -299,6 +311,7 @@ function renderCheckout() {
   cartItems.forEach((item) => {
     const price = cleanPrice(item.price);
     const quantity = cleanQty(item.quantity);
+
     const itemTotal = price * quantity;
 
     const div = document.createElement("div");
@@ -1206,6 +1219,22 @@ provinceSelect?.addEventListener("change", loadCities);
 citySelect?.addEventListener("change", loadBarangays);
 barangaySelect?.addEventListener("change", scheduleShippingQuote);
 fullAddressInput?.addEventListener("input", scheduleShippingQuote);
+[
+  nameInput,
+  phoneInput,
+  fullAddressInput,
+  areaGroupSelect,
+  provinceSelect,
+  citySelect,
+  barangaySelect
+].forEach((input) => {
+
+  if (!input) return;
+
+  input.addEventListener("input", saveCustomerCheckoutInfo);
+  input.addEventListener("change", saveCustomerCheckoutInfo);
+
+});
 courierSelect?.addEventListener("change", function () {
   selectedCourier = this.value;
 
@@ -1260,7 +1289,7 @@ async function loadClaimedVoucher() {
   renderCheckout();
 
   loadAreaGroups();
-
+  loadCustomerCheckoutInfo();
   updateParcelEstimate();
 
   updateTotalsDisplay();
@@ -1289,3 +1318,82 @@ function smartBack(fallback = "../Cart/index.html") {
 
 }
 
+function saveCustomerCheckoutInfo() {
+  const data = {
+    name: nameInput?.value || "",
+    phone: phoneInput?.value || "",
+    areaGroup: areaGroupSelect?.value || "",
+    province: provinceSelect?.value || "",
+    city: citySelect?.value || "",
+    barangay: barangaySelect?.value || "",
+    zipCode: zipCodeInput?.value || "",
+    fullAddress: fullAddressInput?.value || ""
+  };
+
+  localStorage.setItem(
+    "drinCustomerCheckoutInfo",
+    JSON.stringify(data)
+  );
+
+  updateCustomerQuickView();
+}
+
+function updateCustomerQuickView() {
+  const name = document.getElementById("quickCustomerName");
+  const phone = document.getElementById("quickCustomerPhone");
+  const address = document.getElementById("quickCustomerAddress");
+
+  if (name) name.textContent = nameInput?.value || "Customer Name";
+  if (phone) phone.textContent = phoneInput?.value || "Phone Number";
+
+  if (address) {
+    address.textContent = [
+      barangaySelect?.value,
+      citySelect?.value,
+      provinceSelect?.value
+    ].filter(Boolean).join(", ") || "Address summary";
+  }
+}
+
+function toggleCustomerDetails() {
+  const body = document.getElementById("customerDetailsBody");
+  const btn = document.getElementById("toggleCustomerBtn");
+
+  if (!body) return;
+
+  body.classList.toggle("collapsed");
+
+  if (btn) {
+    btn.textContent = body.classList.contains("collapsed")
+      ? "Read More"
+      : "Show Less";
+  }
+}
+
+function enableCustomerEdit() {
+  const body = document.getElementById("customerDetailsBody");
+
+  if (body) {
+    body.classList.remove("collapsed");
+  }
+
+  const btn = document.getElementById("toggleCustomerBtn");
+  if (btn) btn.textContent = "Show Less";
+}
+
+function loadCustomerCheckoutInfo() {
+  const saved =
+    JSON.parse(localStorage.getItem("drinCustomerCheckoutInfo")) || {};
+
+  if (nameInput) nameInput.value = saved.name || "";
+  if (phoneInput) phoneInput.value = saved.phone || "";
+  if (fullAddressInput) fullAddressInput.value = saved.fullAddress || "";
+
+  updateCustomerQuickView();
+
+  const body = document.getElementById("customerDetailsBody");
+
+  if (saved.name && saved.phone && body) {
+    body.classList.add("collapsed");
+  }
+}

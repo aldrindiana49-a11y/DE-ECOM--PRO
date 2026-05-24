@@ -18,69 +18,126 @@
 
   <main class="checkout-page">
     <section class="checkout-form">
-      <h2>Customer Information</h2>
 
-      <div class="form-group">
-        <label for="custName">Full Name</label>
-        <input type="text" id="custName" maxlength="50" placeholder="Juan Dela Cruz" />
+      <div class="checkout-section-head">
+        <h2>Customer Information</h2>
+
+        <div class="customer-actions">
+
+          <button type="button" id="editCustomerBtn" onclick="enableCustomerEdit()">
+            Edit
+          </button>
+
+          <button type="button" id="toggleCustomerBtn" onclick="toggleCustomerDetails()">
+            Read More
+          </button>
+
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="custPhone">Phone Number</label>
-        <input type="text" id="custPhone" maxlength="11" inputmode="numeric" placeholder="09XXXXXXXXX" />
+      <div id="customerQuickView" class="customer-quick-view">
+        <strong id="quickCustomerName">
+          Customer Name
+        </strong>
+
+        <span id="quickCustomerPhone">
+          Phone Number
+        </span>
+
+        <small id="quickCustomerAddress">
+          Address summary
+        </small>
       </div>
 
-      <h3>Delivery Address</h3>
+      <div id="customerDetailsBody">
 
-      <div class="form-group">
-        <label>Country</label>
-        <input type="text" value="Philippines" disabled />
-      </div>
+        <div class="form-group">
+          <label for="custName">Full Name</label>
+          <input type="text" id="custName" maxlength="50" placeholder="Juan Dela Cruz" />
+        </div>
 
-      <div class="form-group">
-        <label for="areaGroup">Area Group</label>
-        <select id="areaGroup">
-          <option value="">- choose -</option>
-        </select>
-      </div>
+        <div class="form-group">
+          <label for="custPhone">Phone Number</label>
+          <input type="text" id="custPhone" maxlength="11" inputmode="numeric" placeholder="09XXXXXXXXX" />
+        </div>
 
-      <div class="form-group">
-        <label for="province">Province / SPX Area</label>
-        <select id="province">
-          <option value="">- choose -</option>
-        </select>
-      </div>
+        <h3>Delivery Address</h3>
 
-      <div class="form-group">
-        <label for="city">City / Municipality</label>
-        <select id="city">
-          <option value="">- choose -</option>
-        </select>
-      </div>
+        <div class="form-group">
+          <label>Country</label>
+          <input type="text" value="Philippines" disabled />
+        </div>
 
-      <div class="form-group">
-        <label for="barangay">Barangay</label>
-        <select id="barangay">
-          <option value="">- choose -</option>
-        </select>
-      </div>
+        <div class="form-group">
+          <label for="areaGroup">
+            Area Group
+          </label>
 
-      <div class="form-group">
-        <label for="zipCode">ZIP Code</label>
-        <input type="text" id="zipCode" placeholder="Auto fill" readonly />
-      </div>
+          <select id="areaGroup">
+            <option value="">- choose -</option>
+          </select>
+        </div>
 
-      <div class="form-group">
-        <label for="fullAddress">House No. / Street / Landmark</label>
-        <textarea id="fullAddress" maxlength="200" placeholder="House No., Street, Landmark"></textarea>
-      </div>
+        <div class="form-group">
+          <label for="province">
+            Province / SPX Area
+          </label>
 
-      <div class="form-group">
-        <label for="courierSelect"> Select Courier</label>
-        <select id="courierSelect">
-          <option value=""></option>
-        </select>
-        <small class="helper-text" id="courierStatus">Courier will be selected based on address coverage.</small>
+          <select id="province">
+            <option value="">- choose -</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="city">
+            City / Municipality
+          </label>
+
+          <select id="city">
+            <option value="">- choose -</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="barangay">
+            Barangay
+          </label>
+
+          <select id="barangay">
+            <option value="">- choose -</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="zipCode">
+            ZIP Code
+          </label>
+
+          <input type="text" id="zipCode" placeholder="Auto fill" readonly />
+        </div>
+
+        <div class="form-group">
+          <label for="fullAddress">
+            House No. / Street / Landmark
+          </label>
+
+          <textarea id="fullAddress" maxlength="200" placeholder="House No., Street, Landmark"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="courierSelect">
+            Select Courier
+          </label>
+
+          <select id="courierSelect">
+            <option value=""></option>
+          </select>
+
+          <small class="helper-text" id="courierStatus">
+            Courier will be selected based on address coverage.
+          </small>
+        </div>
+
       </div>
 
       <h3>Payment Method</h3>
