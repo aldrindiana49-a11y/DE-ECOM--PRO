@@ -1234,9 +1234,6 @@ saveCustomerBtn?.addEventListener("click", () => {
 
     saveCustomerCheckoutInfo();
 
-    updateCustomerQuickView();
-
-    scheduleShippingQuote();
 
     [
       nameInput,
@@ -1410,6 +1407,8 @@ function saveCustomerCheckoutInfo() {
   updateCustomerQuickView();
 }
 
+
+
 function updateCustomerQuickView() {
   const name = document.getElementById("quickCustomerName");
   const phone = document.getElementById("quickCustomerPhone");
@@ -1527,16 +1526,11 @@ function loadCustomerCheckoutInfo() {
 
         }
 
-        if (
-          courierSelect &&
-          saved.courier
-        ) {
+        if (courierSelect) {
 
-          courierSelect.value =
-            saved.courier;
+          courierSelect.value = "";
 
-          selectedCourier =
-            saved.courier;
+          selectedCourier = "";
 
         }
 
@@ -1570,7 +1564,15 @@ function loadCustomerCheckoutInfo() {
     saved.phone &&
     saved.fullAddress
   ) {
+    const toggleBtn =
+      document.getElementById(
+        "toggleCustomerBtn"
+      );
 
+    if (toggleBtn) {
+      toggleBtn.textContent =
+        "Show More";
+    }
     customerSaved = true;
 
     saveCustomerBtn.textContent = "Edit";
