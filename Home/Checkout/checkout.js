@@ -355,19 +355,19 @@ function loadProvinces() {
   resetSelect(provinceSelect);
   resetSelect(citySelect);
   resetSelect(barangaySelect);
-  courierSelect.innerHTML = "";
+  resetSelect(courierSelect);
 
   if (zipCodeInput) zipCodeInput.value = "";
+
   selectedCourier = "";
+  currentShippingFee = null;
+  currentShippingQuote = null;
 
   const selectedArea = areaGroupSelect.value;
 
   const provinces = Object.keys(ADDRESS_DATA)
     .filter((province) => ADDRESS_DATA[province].areaGroup === selectedArea)
     .sort((a, b) => a.localeCompare(b));
-
-  console.log("Selected area:", selectedArea);
-  console.log("Province options:", provinces.slice(0, 30));
 
   provinces.forEach((province) => {
     const opt = document.createElement("option");
@@ -377,7 +377,6 @@ function loadProvinces() {
   });
 
   updateCourierOptions();
-  scheduleShippingQuote();
 }
 
 function loadCities() {
@@ -386,7 +385,10 @@ function loadCities() {
   resetSelect(courierSelect);
 
   if (zipCodeInput) zipCodeInput.value = "";
+
   selectedCourier = "";
+  currentShippingFee = null;
+  currentShippingQuote = null;
 
   const province = provinceSelect.value;
   const cities = ADDRESS_DATA[province]?.cities || {};
@@ -401,18 +403,23 @@ function loadCities() {
     });
 
   updateCourierOptions();
-  scheduleShippingQuote();
 }
 
 function loadBarangays() {
   resetSelect(barangaySelect);
   resetSelect(courierSelect);
 
+  selectedCourier = "";
+  currentShippingFee = null;
+  currentShippingQuote = null;
+
   const province = provinceSelect.value;
   const city = citySelect.value;
   const cityData = ADDRESS_DATA[province]?.cities?.[city];
 
-  if (zipCodeInput) zipCodeInput.value = cityData?.zip || "";
+  if (zipCodeInput) {
+    zipCodeInput.value = cityData?.zip || "";
+  }
 
   (cityData?.barangays || []).forEach((barangay) => {
     const opt = document.createElement("option");
@@ -422,21 +429,14 @@ function loadBarangays() {
   });
 
   updateCourierOptions();
-  scheduleShippingQuote();
 }
 
 function updateCourierOptions() {
-
   const currentValue = courierSelect?.value || "";
 
   resetSelect(courierSelect);
 
-  const couriers = [
-    "SPX",
-    "Same Day Delivery / Lalamove",
-  ];
-
-  couriers.forEach((courier) => {
+  ["SPX", "Same Day Delivery / Lalamove"].forEach((courier) => {
     const opt = document.createElement("option");
     opt.value = courier;
     opt.textContent = courier;
@@ -689,8 +689,6 @@ function scheduleShippingQuote() {
     return;
   }
 
-  updateCourierOptions();
-
   if (!isAddressComplete()) {
     setShippingUI("", "Complete address to calculate", null);
     return;
@@ -865,7 +863,32 @@ function getFallbackCourier() {
 
 }
 
+
 async function placeOrder() {
+
+  if (isPlacingOrder) return;
+
+  isPlacingOrder = true;
+
+  if (!customerSaved) {
+
+    enableCustomerEdit();
+
+    showOrderModal(
+      "Customer Details Required",
+      "Please fill up and save your customer details first."
+    );
+
+    document
+      .getElementById("customerDetailsBody")
+      ?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+    isPlacingOrder = false;
+    return;
+  }
 
   const name = nameInput?.value.trim() || "";
   const phone = phoneInput?.value.trim() || "";
@@ -1179,30 +1202,6 @@ async function placeOrder() {
   }
 }
 
-[
-  nameInput,
-  phoneInput,
-  fullAddressInput,
-  areaGroupSelect,
-  provinceSelect,
-  citySelect,
-  barangaySelect,
-  courierSelect
-].forEach((input) => {
-
-  if (!input) return;
-
-  input.addEventListener(
-    "input",
-    saveCustomerCheckoutInfo
-  );
-
-  input.addEventListener(
-    "change",
-    saveCustomerCheckoutInfo
-  );
-
-});
 
 courierSelect?.addEventListener("change", function () {
 
@@ -1218,6 +1217,104 @@ courierSelect?.addEventListener("change", function () {
   }
 
   scheduleShippingQuote();
+
+});
+
+const saveCustomerBtn =
+  document.getElementById("saveCustomerBtn");
+
+let customerSaved = false;
+
+let isPlacingOrder = false;
+
+
+saveCustomerBtn?.addEventListener("click", () => {
+
+  if (!customerSaved) {
+
+    saveCustomerCheckoutInfo();
+
+    updateCustomerQuickView();
+
+    scheduleShippingQuote();
+
+    [
+      nameInput,
+      phoneInput,
+      fullAddressInput,
+      areaGroupSelect,
+      provinceSelect,
+      citySelect,
+      barangaySelect,
+    ].forEach(input => {
+
+      if (input) {
+        input.disabled = true;
+      }
+
+    });
+
+    saveCustomerBtn.textContent = "Edit";
+    const toggleBtn =
+      document.getElementById(
+        "toggleCustomerBtn"
+      );
+
+    if (toggleBtn) {
+      toggleBtn.textContent =
+        "Show More";
+    }
+
+    customerSaved = true;
+
+    const body =
+      document.getElementById(
+        "customerDetailsBody"
+      );
+
+    if (body) {
+
+      body.classList.add(
+        "collapsed"
+      );
+
+    }
+
+  } else {
+
+    [
+      nameInput,
+      phoneInput,
+      fullAddressInput,
+      areaGroupSelect,
+      provinceSelect,
+      citySelect,
+      barangaySelect,
+    ].forEach(input => {
+
+      if (input) {
+        input.disabled = false;
+      }
+
+    });
+
+    saveCustomerBtn.textContent = "Save";
+
+    customerSaved = false;
+    enableCustomerEdit();
+  }
+
+});
+
+areaGroupSelect?.addEventListener("change", loadProvinces);
+
+provinceSelect?.addEventListener("change", loadCities);
+
+citySelect?.addEventListener("change", loadBarangays);
+
+barangaySelect?.addEventListener("change", () => {
+
+  saveCustomerCheckoutInfo();
 
 });
 
@@ -1262,10 +1359,12 @@ async function loadClaimedVoucher() {
 
   renderCheckout();
   loadAreaGroups();
-  await loadCustomerCheckoutInfo();
+
+  loadCustomerCheckoutInfo();
+
   updateParcelEstimate();
   updateTotalsDisplay();
-  scheduleShippingQuote();
+  // scheduleShippingQuote();
 
 })();
 
@@ -1288,6 +1387,7 @@ function smartBack(fallback = "../Cart/index.html") {
   }
 
 }
+
 
 function saveCustomerCheckoutInfo() {
   const data = {
@@ -1347,13 +1447,22 @@ function enableCustomerEdit() {
 
   if (body) {
     body.classList.remove("collapsed");
+    const toggleBtn =
+      document.getElementById(
+        "toggleCustomerBtn"
+      );
+
+    if (toggleBtn) {
+      toggleBtn.textContent =
+        "Show Less";
+    }
   }
 
   const btn = document.getElementById("toggleCustomerBtn");
   if (btn) btn.textContent = "Show Less";
 }
 
-async function loadCustomerCheckoutInfo() {
+function loadCustomerCheckoutInfo() {
 
   const saved =
     JSON.parse(
@@ -1375,10 +1484,7 @@ async function loadCustomerCheckoutInfo() {
       saved.fullAddress || "";
   }
 
-  if (
-    areaGroupSelect &&
-    saved.areaGroup
-  ) {
+  if (areaGroupSelect && saved.areaGroup) {
 
     areaGroupSelect.value =
       saved.areaGroup;
@@ -1387,56 +1493,60 @@ async function loadCustomerCheckoutInfo() {
 
   }
 
-  if (
-    provinceSelect &&
-    saved.province
-  ) {
+  setTimeout(() => {
 
-    provinceSelect.value =
-      saved.province;
+    if (provinceSelect && saved.province) {
 
-    loadCities();
+      provinceSelect.value =
+        saved.province;
 
-  }
+      loadCities();
 
-  if (
-    citySelect &&
-    saved.city
-  ) {
+    }
 
-    citySelect.value =
-      saved.city;
+    setTimeout(() => {
 
-    loadBarangays();
+      if (citySelect && saved.city) {
 
-  }
+        citySelect.value =
+          saved.city;
 
-  if (
-    barangaySelect &&
-    saved.barangay
-  ) {
+        loadBarangays();
 
-    barangaySelect.value =
-      saved.barangay;
+      }
 
-  }
+      setTimeout(() => {
 
-  if (
-    courierSelect &&
-    saved.courier
-  ) {
+        if (
+          barangaySelect &&
+          saved.barangay
+        ) {
 
-    updateCourierOptions();
+          barangaySelect.value =
+            saved.barangay;
 
-    courierSelect.value =
-      saved.courier;
+        }
 
-    selectedCourier =
-      saved.courier;
+        if (
+          courierSelect &&
+          saved.courier
+        ) {
 
-  }
+          courierSelect.value =
+            saved.courier;
 
-  updateCustomerQuickView();
+          selectedCourier =
+            saved.courier;
+
+        }
+
+        updateCustomerQuickView();
+
+      }, 100);
+
+    }, 100);
+
+  }, 100);
 
   const body =
     document.getElementById(
@@ -1452,6 +1562,34 @@ async function loadCustomerCheckoutInfo() {
     body.classList.add(
       "collapsed"
     );
+
+  }
+
+  if (
+    saved.name &&
+    saved.phone &&
+    saved.fullAddress
+  ) {
+
+    customerSaved = true;
+
+    saveCustomerBtn.textContent = "Edit";
+
+    [
+      nameInput,
+      phoneInput,
+      fullAddressInput,
+      areaGroupSelect,
+      provinceSelect,
+      citySelect,
+      barangaySelect,
+    ].forEach(input => {
+
+      if (input) {
+        input.disabled = true;
+      }
+
+    });
 
   }
 
