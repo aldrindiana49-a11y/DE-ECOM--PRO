@@ -1046,12 +1046,25 @@ async function loadProductsFromSupabase() {
   }
 }
 
-applyTheme();
-renderBranding();
-renderNavbarLogo();
-renderBanner();
+(async () => {
 
-loadProductsFromSupabase();
+  applyTheme();
+
+  await renderBranding();
+
+  await renderNavbarLogo();
+
+  await renderFavicon();
+
+  renderBanner();
+
+  loadProductsFromSupabase();
+
+  loadVouchersFromSupabase();
+
+  updateCartCount();
+
+})();
 
 const selectedCategory =
   localStorage.getItem("selectedCategory");

@@ -1246,9 +1246,6 @@ document.getElementById("mobileCartBtn")
     window.location.href = "../cart/cart.html";
   });
 
-renderStoreBranding();
-renderDynamicSidebarCategories();
-
 async function renderStoreBranding() {
 
   const mobileNavLogo =
@@ -1292,6 +1289,9 @@ async function renderStoreBranding() {
 }
 
 renderStoreBranding();
+
+renderDynamicSidebarCategories();
+
 
 function smartBack(fallback = "../index.html") {
 
