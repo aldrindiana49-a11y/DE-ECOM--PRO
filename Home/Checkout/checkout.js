@@ -607,6 +607,9 @@ async function syncOrderToSupabase(order) {
         customer_phone: order.customer.phone,
         subtotal: order.subtotal,
         shipping_fee: order.shippingFee,
+        voucher_code: order.voucherCode,
+        voucher_discount: order.voucherDiscount,
+
       }
     ]);
 
@@ -919,10 +922,10 @@ async function placeOrder() {
     Number(currentShippingFee) || 0;
 
   const totalNumber =
-    subtotalNumber +
+    subtotalNumber -
+    voucherDiscount +
     shippingFeeNumber +
     handlingFee;
-
 
   if (
     paymentMain === "COD" &&
@@ -1049,6 +1052,8 @@ async function placeOrder() {
     items: normalizedItems,
     subtotal: subtotalNumber,
     shippingFee: shippingFeeNumber,
+    voucherCode: voucherCode || "",
+    voucherDiscount: voucherDiscount || 0,
     parcelInfo: currentParcelInfo,
     shippingQuote: currentShippingQuote,
     total: totalNumber,
@@ -1244,37 +1249,24 @@ async function loadClaimedVoucher() {
 }
 
 (async function initCheckout() {
+
   await loadSPXAddresses();
 
-  (async function initCheckout() {
-
-    await loadSPXAddresses();
-
-    await loadClaimedVoucher();
-
-    fetch(`${API_BASE_URL}/api/spx/verify`)
-      .catch(() => { });
-
-    renderCheckout();
-
-    loadAreaGroups();
-
-    updateParcelEstimate();
-
-    updateTotalsDisplay();
-
-    scheduleShippingQuote();
-
-  })();
+  await loadClaimedVoucher();
 
   fetch(`${API_BASE_URL}/api/spx/verify`)
     .catch(() => { });
 
   renderCheckout();
+
   loadAreaGroups();
+
   updateParcelEstimate();
+
   updateTotalsDisplay();
+
   scheduleShippingQuote();
+
 })();
 
 window.loadProvinces = loadProvinces;

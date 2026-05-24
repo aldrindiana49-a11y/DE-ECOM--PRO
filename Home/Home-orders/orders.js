@@ -304,7 +304,7 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled") && order.
         <span>
             Service / Handling Fee
             <small style="display:block;color:#94a3b8;font-size:12px;margin-top:3px;">
-                Includes packaging materials and secure payment processing
+               Includes packaging materials, parcel protection, and secure payment processing
             </small>
         </span>
 
