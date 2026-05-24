@@ -626,6 +626,102 @@ addToCartBtn.addEventListener("click", () => {
   updateCartCount();
 });
 
+const buyNowBtn =
+  document.getElementById("buyNowBtn");
+
+buyNowBtn?.addEventListener("click", () => {
+
+  if (productsLoading) return;
+
+  const stock =
+    getProductStock(product);
+
+  const qty =
+    validateQuantity();
+
+  const variants =
+    getVariants(product);
+
+  if (variants.length > 1 && !selectedVariant) {
+
+    showMessage(
+      `Please select ${product.variantTitle || "variation"}.`,
+      "error"
+    );
+
+    variantContainer?.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+    return;
+  }
+
+  if (stock <= 0) {
+
+    showMessage("Out of stock.", "error");
+
+    return;
+  }
+
+  const checkoutItem = {
+    id: product.id,
+    name: product.name,
+    variantLabel: selectedVariant?.label || "",
+    price: selectedVariant
+      ? (
+        safeNumber(selectedVariant.discountPrice) > 0
+          ? safeNumber(selectedVariant.discountPrice)
+          : safeNumber(selectedVariant.price)
+      )
+      : getProductPrice(product),
+
+    image: selectedVariant?.image || getProductImage(product),
+    product_image: product.image,
+    variant_image: selectedVariant?.image || getProductImage(product),
+
+    stock: selectedVariant
+      ? safeNumber(selectedVariant.stock)
+      : stock,
+
+    quantity: qty,
+    selected: true,
+
+    weight: selectedVariant?.weight || product.weight || 0.5,
+    length: selectedVariant?.length || product.length || 10,
+    width: selectedVariant?.width || product.width || 10,
+    height: selectedVariant?.height || product.height || 10
+  };
+
+  let cartData = getCart();
+
+  const existingItem = cartData.find(item =>
+    String(item.id) === String(product.id) &&
+    String(item.variantLabel || "") === String(selectedVariant?.label || "")
+  );
+
+  if (existingItem) {
+
+    existingItem.quantity =
+      safeNumber(existingItem.quantity) + qty;
+
+    existingItem.selected = true;
+
+  } else {
+
+    cartData.push(checkoutItem);
+
+  }
+
+  saveCart(cartData);
+
+  updateCartCount();
+
+  window.location.href =
+    "../Cart/index.html";
+
+});
+
 function showMessage(text, type) {
   const toast = document.getElementById("cartToast");
 
@@ -1576,11 +1672,11 @@ function handleProductSearch() {
 
   renderSearchResults(filtered);
   document
-  .getElementById("suggestedProducts")
-  ?.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
+    .getElementById("suggestedProducts")
+    ?.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
 }
 
 desktopSearchBtn?.addEventListener(
@@ -1660,3 +1756,48 @@ document
 
     renderSuggestedProducts();
   });
+
+  const shareBtn =
+  document.getElementById("shareBtn");
+
+shareBtn?.addEventListener(
+  "click",
+  async () => {
+
+    const shareData = {
+
+      title: product.name,
+
+      text:
+        product.description ||
+        "Check this product from Drin Electronics",
+
+      url: window.location.href
+    };
+
+    try {
+
+      if (navigator.share) {
+
+        await navigator.share(shareData);
+
+      } else {
+
+        await navigator.clipboard.writeText(
+          window.location.href
+        );
+
+        showMessage(
+          "Product link copied!",
+          "success"
+        );
+      }
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+
+  }
+);
