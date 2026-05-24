@@ -217,79 +217,97 @@ function setShippingUI(status, message, fee = null) {
   if (checkoutShippingFee) checkoutShippingFee.textContent = fee === null ? "To be confirmed" : formatPrice(fee);
 
   updateTotalsDisplay();
+
+  const summary =
+    document.getElementById(
+      "checkoutSummary"
+    );
+
+  if (
+    summary &&
+    window.innerWidth <= 768
+  ) {
+
+    summary.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+
+  }
+
 }
 
 function updateTotalsDisplay() {
 
-  const subtotal =
-    getCheckoutTotal();
+const subtotal =
+  getCheckoutTotal();
 
-  const voucherRow =
-    document.getElementById(
-      "voucherSummaryRow"
+const voucherRow =
+  document.getElementById(
+    "voucherSummaryRow"
+  );
+
+const voucherLabel =
+  document.getElementById(
+    "voucherSummaryLabel"
+  );
+
+const voucherAmount =
+  document.getElementById(
+    "voucherSummaryAmount"
+  );
+
+voucherDiscount = 0;
+
+if (
+  claimedVoucher &&
+  subtotal >= Number(claimedVoucher.min_spend || 0)
+) {
+
+  voucherDiscount =
+    Number(
+      claimedVoucher.discount_amount || 0
     );
 
-  const voucherLabel =
-    document.getElementById(
-      "voucherSummaryLabel"
-    );
-
-  const voucherAmount =
-    document.getElementById(
-      "voucherSummaryAmount"
-    );
-
-  voucherDiscount = 0;
-
-  if (
-    claimedVoucher &&
-    subtotal >= Number(claimedVoucher.min_spend || 0)
-  ) {
-
-    voucherDiscount =
-      Number(
-        claimedVoucher.discount_amount || 0
-      );
-
-    if (voucherRow) {
-      voucherRow.style.display = "flex";
-    }
-
-    if (voucherLabel) {
-      voucherLabel.textContent =
-        `Voucher (${claimedVoucher.code})`;
-    }
-
-    if (voucherAmount) {
-      voucherAmount.textContent =
-        `-₱${voucherDiscount.toLocaleString()}`;
-    }
-
-  } else {
-
-    if (voucherRow) {
-      voucherRow.style.display = "none";
-    }
-
+  if (voucherRow) {
+    voucherRow.style.display = "flex";
   }
 
-  const grandTotal =
-    subtotal -
-    voucherDiscount +
-    (Number(currentShippingFee) || 0) +
-    HANDLING_FEE;
-
-  if (checkoutSubtotal) {
-
-    checkoutSubtotal.textContent =
-      formatPrice(subtotal);
+  if (voucherLabel) {
+    voucherLabel.textContent =
+      `Voucher (${claimedVoucher.code})`;
   }
 
-  if (checkoutTotal) {
-
-    checkoutTotal.textContent =
-      formatPrice(grandTotal);
+  if (voucherAmount) {
+    voucherAmount.textContent =
+      `-₱${voucherDiscount.toLocaleString()}`;
   }
+
+} else {
+
+  if (voucherRow) {
+    voucherRow.style.display = "none";
+  }
+
+}
+
+const grandTotal =
+  subtotal -
+  voucherDiscount +
+  (Number(currentShippingFee) || 0) +
+  HANDLING_FEE;
+
+if (checkoutSubtotal) {
+
+  checkoutSubtotal.textContent =
+    formatPrice(subtotal);
+}
+
+if (checkoutTotal) {
+
+  checkoutTotal.textContent =
+    formatPrice(grandTotal);
+}
 }
 
 function renderCheckout() {
