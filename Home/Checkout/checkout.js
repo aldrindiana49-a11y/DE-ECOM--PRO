@@ -917,22 +917,7 @@ function getFallbackCourier() {
 
 async function deductOrderStock(order) {
 
-  alert("deductOrderStock running");
-
   for (const item of order.items) {
-
-    alert(
-      "Product ID: " + item.id +
-      "\nVariant: " + (item.variantLabel || item.variant || "Default") +
-      "\nQty: " + item.quantity
-    );
-
-    alert(
-      "Product ID: " + item.id +
-      "\nVariant: " +
-      (item.variantLabel || item.variant || "Default") +
-      "\nQty: " + item.quantity
-    );
 
     const { error } =
       await supabaseClient.rpc(
@@ -956,15 +941,14 @@ async function deductOrderStock(order) {
 
     if (error) {
 
-      alert(
-        "RPC ERROR: " +
-        error.message
+      console.error(
+        "RPC ERROR:",
+        error
       );
 
       throw error;
     }
 
-    alert("RPC success");
   }
 }
 
@@ -1014,7 +998,6 @@ async function placeOrder() {
       ?.trim()
       ?.toUpperCase() || "ONLINE";
 
-  alert("PAYMENT: " + paymentMain);
   const selectedCourierNow = courierSelect?.value || selectedCourier || "";
 
   if (!cartItems.length) {
@@ -1038,7 +1021,7 @@ async function placeOrder() {
   }
 
   if (currentShippingFee === null) {
-    currentShippingFee = 0;
+    await calculateShippingFee();
   }
 
   if (currentShippingQuote?.unsupportedArea) {
@@ -1168,15 +1151,10 @@ async function placeOrder() {
 
     await syncOrderToSupabase(order);
 
-    alert("SYNC DONE - COD? " + paymentMain);
-
     if (paymentMain === "COD") {
-
-      alert(JSON.stringify(order.items, null, 2));
 
       await deductOrderStock(order);
 
-      alert("DEDUCT DONE");
     }
 
     if (voucherCode && user) {
