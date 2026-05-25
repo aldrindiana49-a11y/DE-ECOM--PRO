@@ -208,13 +208,6 @@ function calculateParcelInfo(items = cartItems) {
 function updateParcelEstimate() {
   currentParcelInfo = calculateParcelInfo();
 
-  currentParcelInfo = {
-    ...currentParcelInfo,
-    parcelWeight: Math.min(currentParcelInfo.parcelWeight, 2),
-    parcelLength: Math.min(currentParcelInfo.parcelLength, 20),
-    parcelWidth: Math.min(currentParcelInfo.parcelWidth, 20),
-    parcelHeight: Math.min(currentParcelInfo.parcelHeight, 20),
-  };
 
   if (!parcelEstimate) return;
 
@@ -785,13 +778,7 @@ async function calculateShippingFee() {
   try {
     currentParcelInfo = calculateParcelInfo();
 
-    currentParcelInfo = {
-      ...currentParcelInfo,
-      parcelWeight: Math.min(currentParcelInfo.parcelWeight, 2),
-      parcelLength: Math.min(currentParcelInfo.parcelLength, 20),
-      parcelWidth: Math.min(currentParcelInfo.parcelWidth, 20),
-      parcelHeight: Math.min(currentParcelInfo.parcelHeight, 20),
-    };
+
 
     const address = getSelectedAddress();
     const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || "COD";
