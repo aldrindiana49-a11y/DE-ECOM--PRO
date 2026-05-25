@@ -562,6 +562,9 @@ function normalizeOrderItems(items) {
     );
 
     return {
+
+      id: item.id || item.productId,
+      productId: item.productId || item.id,
       name: item.name || item.product_name || item.title || "Product",
       quantity: item.quantity || item.qty || 1,
       price: item.price || 0,
@@ -913,13 +916,55 @@ function getFallbackCourier() {
 }
 
 async function deductOrderStock(order) {
+
+  alert("deductOrderStock running");
+
   for (const item of order.items) {
-    await supabaseClient.rpc("deduct_stock", {
-      p_product_id: item.id,
-      p_variant_label: item.variantLabel || item.variant || "",
-      p_quantity: Number(item.quantity) || 1,
-      p_order_id: order.id
-    });
+
+    alert(
+      "Product ID: " + item.id +
+      "\nVariant: " + (item.variantLabel || item.variant || "Default") +
+      "\nQty: " + item.quantity
+    );
+
+    alert(
+      "Product ID: " + item.id +
+      "\nVariant: " +
+      (item.variantLabel || item.variant || "Default") +
+      "\nQty: " + item.quantity
+    );
+
+    const { error } =
+      await supabaseClient.rpc(
+        "deduct_stock",
+        {
+          p_product_id:
+            Number(item.id),
+
+          p_variant_label:
+            item.variantLabel ||
+            item.variant ||
+            "Default",
+
+          p_quantity:
+            Number(item.quantity) || 1,
+
+          p_order_id:
+            order.id
+        }
+      );
+
+    if (error) {
+
+      alert(
+        "RPC ERROR: " +
+        error.message
+      );
+
+      throw error;
+    }
+
+    alert("RPC success");
   }
 }
 
@@ -963,7 +1008,13 @@ async function placeOrder() {
 
   const name = nameInput?.value.trim() || "";
   const phone = phoneInput?.value.trim() || "";
-  const paymentMain = document.querySelector('input[name="payment"]:checked')?.value || "ONLINE";
+  const paymentMain =
+    document.querySelector('input[name="payment"]:checked')
+      ?.value
+      ?.trim()
+      ?.toUpperCase() || "ONLINE";
+
+  alert("PAYMENT: " + paymentMain);
   const selectedCourierNow = courierSelect?.value || selectedCourier || "";
 
   if (!cartItems.length) {
@@ -987,7 +1038,7 @@ async function placeOrder() {
   }
 
   if (currentShippingFee === null) {
-    await calculateShippingFee();
+    currentShippingFee = 0;
   }
 
   if (currentShippingQuote?.unsupportedArea) {
@@ -1117,8 +1168,15 @@ async function placeOrder() {
 
     await syncOrderToSupabase(order);
 
+    alert("SYNC DONE - COD? " + paymentMain);
+
     if (paymentMain === "COD") {
+
+      alert(JSON.stringify(order.items, null, 2));
+
       await deductOrderStock(order);
+
+      alert("DEDUCT DONE");
     }
 
     if (voucherCode && user) {
@@ -1141,12 +1199,11 @@ async function placeOrder() {
 
   } catch (error) {
 
-    console.error(
-      "ORDER SYNC REAL ERROR:",
-      error
-    );
+    console.error("ORDER SYNC REAL ERROR:", error);
 
-    // continue kahit may Supabase issue
+    alert("ORDER SYNC ERROR: " + error.message);
+
+    return resetPlaceOrder();
   }
 
   if (paymentMain === "COD") {
