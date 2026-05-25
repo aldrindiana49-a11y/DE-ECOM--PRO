@@ -127,19 +127,19 @@ function getCheckoutTotal() {
 }
 
 function getItemWeight(item) {
-  return Number(item.weight || item.parcel_weight || item.shippingWeight || 0.5) || 0.5;
+  return Number(item.weight || item.parcel_weight || item.shippingWeight || 0.1) || 0.1;
 }
 
 function getItemLength(item) {
-  return Number(item.length || item.parcel_length || item.shippingLength || 10) || 10;
+  return Number(item.length || item.parcel_length || item.shippingLength || 3) || 3;
 }
 
 function getItemWidth(item) {
-  return Number(item.width || item.parcel_width || item.shippingWidth || 10) || 10;
+  return Number(item.width || item.parcel_width || item.shippingWidth || 3) || 3;
 }
 
 function getItemHeight(item) {
-  return Number(item.height || item.parcel_height || item.shippingHeight || 10) || 10;
+  return Number(item.height || item.parcel_height || item.shippingHeight || 3) || 3;
 }
 
 function calculateParcelInfo(items = cartItems) {
@@ -584,10 +584,10 @@ function normalizeOrderItems(items) {
         item.selectedVariation ||
         item.label ||
         "",
-      weight: Number(item.weight || item.parcel_weight || item.shippingWeight || 0.5) || 0.5,
-      length: Number(item.length || item.parcel_length || item.shippingLength || 10) || 10,
-      width: Number(item.width || item.parcel_width || item.shippingWidth || 10) || 10,
-      height: Number(item.height || item.parcel_height || item.shippingHeight || 10) || 10,
+      weight: Number(item.weight || item.parcel_weight || item.shippingWeight || 0.1) || 0.1,
+      length: Number(item.length || item.parcel_length || item.shippingLength || 3) || 3,
+      width: Number(item.width || item.parcel_width || item.shippingWidth || 3) || 3,
+      height: Number(item.height || item.parcel_height || item.shippingHeight || 3) || 3,
     };
   });
 }

@@ -502,6 +502,11 @@ function goToCheckout() {
       image: finalImage,
       variant_image: finalImage,
       product_image: finalImage,
+
+      weight: Number(item.weight || item.parcel_weight || item.shippingWeight || 0.1) || 0.1,
+      length: Number(item.length || item.parcel_length || item.shippingLength || 3) || 3,
+      width: Number(item.width || item.parcel_width || item.shippingWidth || 3) || 3,
+      height: Number(item.height || item.parcel_height || item.shippingHeight || 3) || 3,
     };
   });
 
