@@ -600,10 +600,29 @@ addToCartBtn.addEventListener("click", () => {
   } else {
     cartData.push({
 
-      weight: selectedVariant?.weight || product.weight || 0.5,
-      length: selectedVariant?.length || product.length || 10,
-      width: selectedVariant?.width || product.width || 10,
-      height: selectedVariant?.height || product.height || 10,
+      weight: Number(
+        selectedVariant?.weight ??
+        product.weight ??
+        0.01
+      ),
+
+      length: Number(
+        selectedVariant?.length ??
+        product.length ??
+        1
+      ),
+
+      width: Number(
+        selectedVariant?.width ??
+        product.width ??
+        1
+      ),
+
+      height: Number(
+        selectedVariant?.height ??
+        product.height ??
+        1
+      ),
 
       id: product.id,
       name: product.name,

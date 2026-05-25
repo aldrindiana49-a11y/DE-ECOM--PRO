@@ -503,10 +503,33 @@ function goToCheckout() {
       variant_image: finalImage,
       product_image: finalImage,
 
-      weight: Number(item.weight || item.parcel_weight || item.shippingWeight || 0.1) || 0.1,
-      length: Number(item.length || item.parcel_length || item.shippingLength || 3) || 3,
-      width: Number(item.width || item.parcel_width || item.shippingWidth || 3) || 3,
-      height: Number(item.height || item.parcel_height || item.shippingHeight || 3) || 3,
+      weight: Number(
+        item.weight ??
+        item.parcel_weight ??
+        item.shippingWeight ??
+        0.01
+      ),
+
+      length: Number(
+        item.length ??
+        item.parcel_length ??
+        item.shippingLength ??
+        1
+      ),
+
+      width: Number(
+        item.width ??
+        item.parcel_width ??
+        item.shippingWidth ??
+        1
+      ),
+
+      height: Number(
+        item.height ??
+        item.parcel_height ??
+        item.shippingHeight ??
+        1
+      ),
     };
   });
 

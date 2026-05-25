@@ -1049,6 +1049,10 @@ async function loadAdminProductsFromSupabase() {
     variantTitle: item.variant_title || "Options",
     image: item.image,
     description: item.description,
+    weight: item.weight,
+    length: item.length,
+    width: item.width,
+    height: item.height,
     variants: Array.isArray(item.variations)
       ? item.variations
       : []

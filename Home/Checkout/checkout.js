@@ -18,7 +18,6 @@ const areaGroupSelect = document.getElementById("areaGroup");
 const provinceSelect = document.getElementById("province");
 const citySelect = document.getElementById("city");
 const barangaySelect = document.getElementById("barangay");
-const zipCodeInput = document.getElementById("zipCode");
 const fullAddressInput = document.getElementById("fullAddress");
 const courierSelect = document.getElementById("courierSelect");
 const courierStatus = document.getElementById("courierStatus");
@@ -127,19 +126,39 @@ function getCheckoutTotal() {
 }
 
 function getItemWeight(item) {
-  return Number(item.weight || item.parcel_weight || item.shippingWeight || 0.1) || 0.1;
+  return Number(
+    item.weight ??
+    item.parcel_weight ??
+    item.shippingWeight ??
+    0.01
+  );
 }
 
 function getItemLength(item) {
-  return Number(item.length || item.parcel_length || item.shippingLength || 3) || 3;
+  return Number(
+    item.length ??
+    item.parcel_length ??
+    item.shippingLength ??
+    1
+  );
 }
 
 function getItemWidth(item) {
-  return Number(item.width || item.parcel_width || item.shippingWidth || 3) || 3;
+  return Number(
+    item.width ??
+    item.parcel_width ??
+    item.shippingWidth ??
+    1
+  );
 }
 
 function getItemHeight(item) {
-  return Number(item.height || item.parcel_height || item.shippingHeight || 3) || 3;
+  return Number(
+    item.height ??
+    item.parcel_height ??
+    item.shippingHeight ??
+    1
+  );
 }
 
 function calculateParcelInfo(items = cartItems) {
@@ -377,8 +396,6 @@ function loadProvinces() {
   resetSelect(barangaySelect);
   resetSelect(courierSelect);
 
-  if (zipCodeInput) zipCodeInput.value = "";
-
   selectedCourier = "";
   currentShippingFee = null;
   currentShippingQuote = null;
@@ -403,8 +420,6 @@ function loadCities() {
   resetSelect(citySelect);
   resetSelect(barangaySelect);
   resetSelect(courierSelect);
-
-  if (zipCodeInput) zipCodeInput.value = "";
 
   selectedCourier = "";
   currentShippingFee = null;
@@ -436,10 +451,6 @@ function loadBarangays() {
   const province = provinceSelect.value;
   const city = citySelect.value;
   const cityData = ADDRESS_DATA[province]?.cities?.[city];
-
-  if (zipCodeInput) {
-    zipCodeInput.value = cityData?.zip || "";
-  }
 
   (cityData?.barangays || []).forEach((barangay) => {
     const opt = document.createElement("option");
@@ -679,7 +690,6 @@ function getSelectedAddress() {
     province: provinceSelect?.value || "",
     city: citySelect?.value || "",
     barangay: barangaySelect?.value || "",
-    zipCode: zipCodeInput?.value || "",
     fullAddress: fullAddressInput?.value.trim() || "",
   };
 }
@@ -1454,7 +1464,6 @@ function saveCustomerCheckoutInfo() {
     province: provinceSelect?.value || "",
     city: citySelect?.value || "",
     barangay: barangaySelect?.value || "",
-    zipCode: zipCodeInput?.value || "",
     fullAddress: fullAddressInput?.value || "",
     courier: courierSelect?.value || ""
   };
@@ -1466,7 +1475,6 @@ function saveCustomerCheckoutInfo() {
 
   updateCustomerQuickView();
 }
-
 
 
 function updateCustomerQuickView() {
