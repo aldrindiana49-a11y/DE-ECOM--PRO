@@ -232,7 +232,8 @@ async function loadOrders() {
             !statusText.includes("delivered") &&
             !statusText.includes("cancelled") &&
             !hasPendingRequest &&
-            !(isXendit && isPaidPayment);
+            !(isXendit && isPaidPayment) &&
+            !isExpired;
 
         card.innerHTML = `
       <div class="order-top">
