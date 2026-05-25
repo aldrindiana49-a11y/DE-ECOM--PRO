@@ -595,10 +595,10 @@ function normalizeOrderItems(items) {
         item.selectedVariation ||
         item.label ||
         "",
-      weight: Number(item.weight || item.parcel_weight || item.shippingWeight || 0.1) || 0.1,
-      length: Number(item.length || item.parcel_length || item.shippingLength || 3) || 3,
-      width: Number(item.width || item.parcel_width || item.shippingWidth || 3) || 3,
-      height: Number(item.height || item.parcel_height || item.shippingHeight || 3) || 3,
+      weight: Number(item.weight ?? item.parcel_weight ?? item.shippingWeight ?? 0.01),
+      length: Number(item.length ?? item.parcel_length ?? item.shippingLength ?? 1),
+      width: Number(item.width ?? item.parcel_width ?? item.shippingWidth ?? 1),
+      height: Number(item.height ?? item.parcel_height ?? item.shippingHeight ?? 1),
     };
   });
 }
@@ -912,6 +912,17 @@ function getFallbackCourier() {
 
 }
 
+async function deductOrderStock(order) {
+  for (const item of order.items) {
+    await supabaseClient.rpc("deduct_stock", {
+      p_product_id: item.id,
+      p_variant_label: item.variantLabel || item.variant || "",
+      p_quantity: Number(item.quantity) || 1,
+      p_order_id: order.id
+    });
+  }
+}
+
 async function placeOrder() {
 
   if (isPlacingOrder) return;
@@ -1105,6 +1116,10 @@ async function placeOrder() {
   try {
 
     await syncOrderToSupabase(order);
+
+    if (paymentMain === "COD") {
+      await deductOrderStock(order);
+    }
 
     if (voucherCode && user) {
 
