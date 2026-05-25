@@ -1610,6 +1610,8 @@ function loadCustomerCheckoutInfo() {
 
   }
 
+
+
   setTimeout(() => {
 
     if (provinceSelect && saved.province) {
@@ -1713,4 +1715,53 @@ function loadCustomerCheckoutInfo() {
 
   }
 
+}
+
+async function syncCheckoutProfile() {
+
+  const {
+    data: { user }
+  } = await supabaseClient.auth.getUser();
+
+  if (!user) return;
+
+  try {
+
+    await supabaseClient
+      .from("profiles")
+      .upsert({
+
+        id: user.id,
+
+        full_name:
+          nameInput?.value || "",
+
+        contact_number:
+          phoneInput?.value || "",
+
+        province:
+          provinceSelect?.value || "",
+
+        city:
+          citySelect?.value || "",
+
+        barangay:
+          barangaySelect?.value || "",
+
+        street_address:
+          fullAddressInput?.value || "",
+
+        updated_at:
+          new Date().toISOString()
+
+      });
+
+  } catch (error) {
+
+    console.error(
+      "PROFILE SYNC ERROR:",
+      error
+    );
+
+  }
 }

@@ -540,3 +540,7 @@ body {
 
     box-shadow: 0 10px 22px rgba(6, 182, 212, .18);
 }
+
+.hidden-order-item {
+    display: none;
+}
