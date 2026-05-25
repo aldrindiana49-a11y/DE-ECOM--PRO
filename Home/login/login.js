@@ -41,6 +41,18 @@ loginForm.addEventListener("submit", async (e) => {
     return;
   }
 
+  localStorage.removeItem(
+    "drinCustomerCheckoutInfo"
+  );
+
+  localStorage.removeItem(
+    "drinCheckoutItems"
+  );
+
+  localStorage.removeItem(
+    "drinCart"
+  );
+
   window.location.href = "/";
 
 });

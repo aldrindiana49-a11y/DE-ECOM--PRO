@@ -198,7 +198,7 @@ function calculateParcelInfo(items = cartItems) {
     parcelWeight: Number(Math.max(totalWeight, 0.1).toFixed(2)),
     parcelLength: Number(Math.max(maxLength, 1).toFixed(2)),
     parcelWidth: Number(Math.max(maxWidth, 1).toFixed(2)),
-    parcelHeight: Number(Math.max(stackedHeight, 1).toFixed(2)),
+    parcelHeight: Number(Math.max(Math.min(stackedHeight, 149), 1).toFixed(2)),
     itemQuantity: totalQuantity,
     itemName: items[0]?.name || "Electronics",
     itemType: "Electronics",
@@ -231,33 +231,11 @@ function setShippingUI(status, message, fee = null) {
 
   if (checkoutBtn) {
 
-    checkoutBtn.disabled =
-      status === "loading";
+    checkoutBtn.disabled = false;
+    checkoutBtn.style.pointerEvents = "auto";
+    checkoutBtn.style.opacity = "1";
 
   }
-
-  const summary =
-    document.querySelector(
-      ".checkout-summary"
-    );
-
-  if (
-    summary &&
-    window.innerWidth <= 768 &&
-    status === "ready"
-  ) {
-
-    setTimeout(() => {
-
-      summary.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-
-    }, 300);
-
-  }
-
 }
 
 function updateTotalsDisplay() {
@@ -765,7 +743,7 @@ function scheduleShippingQuote() {
   // REAL SPX API
   setShippingUI("loading", "Checking delivery availability and shipping fee...", null);
 
-  shippingQuoteTimer = setTimeout(calculateShippingFee, 650);
+  shippingQuoteTimer = setTimeout(calculateShippingFee, 200);
 }
 
 function estimateFallbackShippingFee(courier) {
@@ -802,6 +780,15 @@ async function calculateShippingFee() {
     const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || "COD";
     const subtotal = getCheckoutTotal();
 
+    const normalizedItems = normalizeOrderItems(cartItems);
+
+    const orderItems = normalizedItems.map((item) => ({
+      item_name: item.name,
+      item_quantity: Number(item.quantity) || 1,
+      item_value: Number(item.price) || 0
+    }));
+
+
     const res = await fetch(`${API_BASE_URL}/api/spx/check-shipping-fee`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -810,10 +797,17 @@ async function calculateShippingFee() {
         paymentMethod,
         address,
         parcelInfo: currentParcelInfo,
-        items: normalizeOrderItems(cartItems),
+        items: normalizedItems,
+
+        base_info: {
+          ed_item_list: orderItems
+        },
+
+        baseInfo: {
+          ed_item_list: orderItems
+        }
       }),
     });
-
     const data = await res.json();
 
     window.lastSPXResponse = data;
@@ -904,15 +898,29 @@ function getFallbackCourier() {
 
 }
 
-
 async function placeOrder() {
 
   if (isPlacingOrder) return;
 
   isPlacingOrder = true;
 
-  if (!customerSaved) {
+  const resetPlaceOrder = () => {
+    isPlacingOrder = false;
 
+    if (checkoutBtn) {
+      checkoutBtn.disabled = false;
+      checkoutBtn.style.pointerEvents = "auto";
+      checkoutBtn.style.opacity = "1";
+    }
+
+    return;
+  };
+
+  if (
+    !nameInput?.value ||
+    !phoneInput?.value ||
+    !fullAddressInput?.value
+  ) {
     enableCustomerEdit();
 
     showOrderModal(
@@ -920,41 +928,37 @@ async function placeOrder() {
       "Please fill up and save your customer details first."
     );
 
-    document
-      .getElementById("customerDetailsBody")
-      ?.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
+    document.getElementById("customerDetailsBody")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
 
-    isPlacingOrder = false;
-    return;
+    return resetPlaceOrder();
   }
 
   const name = nameInput?.value.trim() || "";
   const phone = phoneInput?.value.trim() || "";
   const paymentMain = document.querySelector('input[name="payment"]:checked')?.value || "ONLINE";
-  const selectedCourierNow =
-    courierSelect?.value || selectedCourier || "";
+  const selectedCourierNow = courierSelect?.value || selectedCourier || "";
 
   if (!cartItems.length) {
     showOrderModal("No Items", "Please select items first.");
-    return;
+    return resetPlaceOrder();
   }
 
   if (!name || name.length < 3) {
     showOrderModal("Invalid Name", "Name must be at least 3 characters.");
-    return;
+    return resetPlaceOrder();
   }
 
   if (!phone || phone.length !== 11 || !phone.startsWith("09")) {
     showOrderModal("Invalid Number", "Enter a valid 11-digit phone number (09XXXXXXXXX).");
-    return;
+    return resetPlaceOrder();
   }
 
   if (!isAddressComplete()) {
     showOrderModal("Incomplete Details", "Please complete all address fields.");
-    return;
+    return resetPlaceOrder();
   }
 
   if (currentShippingFee === null) {
@@ -962,19 +966,17 @@ async function placeOrder() {
   }
 
   if (currentShippingQuote?.unsupportedArea) {
-
     showOrderModal(
       "Delivery Not Available",
       "SPX delivery is currently unavailable in this area.\n\nPlease contact our support team for manual shipping assistance."
     );
-    return;
+
+    return resetPlaceOrder();
   }
 
   const subtotalNumber = getCheckoutTotal();
   const handlingFee = 25;
-
-  const shippingFeeNumber =
-    Number(currentShippingFee) || 0;
+  const shippingFeeNumber = Number(currentShippingFee) || 0;
 
   const totalNumber =
     subtotalNumber -
@@ -984,22 +986,14 @@ async function placeOrder() {
 
   if (
     paymentMain === "COD" &&
-    (
-      selectedCourierNow === "Same Day Delivery / Lalamove"
-    )
+    selectedCourierNow === "Same Day Delivery / Lalamove"
   ) {
+    showOrderModal(
+      "COD Not Available",
+      "COD is not available for Same Day Delivery / Lalamove. Please select Online Payment or change courier."
+    );
 
-    const okBtn = document.getElementById("orderModalOk");
-    if (okBtn) {
-      okBtn.style.display = "inline-block";
-      okBtn.onclick = closeOrderModal;
-    }
-
-    const closeBtn = document.getElementById("orderModalClose");
-    if (closeBtn) {
-      closeBtn.style.display = "inline-block";
-    }
-    return;
+    return resetPlaceOrder();
   }
 
   if (paymentMain === "COD" && totalNumber < 200) {
@@ -1007,27 +1001,17 @@ async function placeOrder() {
       "COD Minimum Order",
       "Cash on Delivery requires a minimum total order of ₱200 including shipping."
     );
-    return;
+
+    return resetPlaceOrder();
   }
 
   if (paymentMain === "COD" && totalNumber > 8000) {
-
     showOrderModal(
       "COD Limit Reached",
       "Cash on Delivery is only available up to ₱8,000 total including shipping.\n\nPlease select Online Payment to continue."
     );
 
-    const okBtn = document.getElementById("orderModalOk");
-    if (okBtn) {
-      okBtn.style.display = "inline-block";
-      okBtn.onclick = closeOrderModal;
-    }
-
-    const closeBtn = document.getElementById("orderModalClose");
-    if (closeBtn) {
-      closeBtn.style.display = "inline-block";
-    }
-    return;
+    return resetPlaceOrder();
   }
 
   if (paymentMain !== "COD" && totalNumber < 100) {
@@ -1035,23 +1019,22 @@ async function placeOrder() {
       "Minimum Online Payment",
       "Online payment requires a minimum total order of ₱100 including shipping."
     );
-    return;
+
+    return resetPlaceOrder();
   }
 
   if (subtotalNumber <= 0) {
     showOrderModal("Invalid Total", "Order total must be greater than ₱0.");
-    return;
+    return resetPlaceOrder();
   }
 
   const {
     data: { user }
   } = await supabaseClient.auth.getUser();
 
-  const voucherCode =
-    localStorage.getItem("claimedVoucherCode");
+  const voucherCode = localStorage.getItem("claimedVoucherCode");
 
   if (voucherCode && user) {
-
     const { data: existingUsage } =
       await supabaseClient
         .from("voucher_usage")
@@ -1061,15 +1044,13 @@ async function placeOrder() {
         .maybeSingle();
 
     if (existingUsage) {
-
       showOrderModal(
         "Voucher Already Used",
         "This voucher has already been used on your account."
       );
 
-      return;
+      return resetPlaceOrder();
     }
-
   }
 
   const normalizedItems = normalizeOrderItems(cartItems);
@@ -1077,13 +1058,15 @@ async function placeOrder() {
   currentParcelInfo = calculateParcelInfo();
 
   if (currentShippingQuote?.unsupportedArea) {
-
     showOrderModal(
       "Delivery Not Available",
       "SPX delivery is currently unavailable in this area.\n\nPlease contact our support team for manual shipping assistance."
     );
-    return;
+
+    return resetPlaceOrder();
   }
+
+  // dito tuloy yung existing code mo sa baba
 
   const order = {
     id: "ORD-" + Date.now(),
@@ -1233,13 +1216,17 @@ async function placeOrder() {
 
       window.location.replace(redirectUrl);
 
-    } else {
-
-      showOrderModal("Payment Error", data.message || "Checkout failed.");
     }
+
+    else {
+      showOrderModal("Payment Error", data.message || "Checkout failed.");
+      return resetPlaceOrder();
+    }
+
   } catch (error) {
     console.error("CHECKOUT ERROR:", error);
     showOrderModal("Server Error", "Cannot connect to payment server.");
+    return resetPlaceOrder();
   }
 }
 
@@ -1357,7 +1344,17 @@ barangaySelect?.addEventListener("change", () => {
 });
 
 document.querySelectorAll('input[name="payment"]').forEach((input) => {
-  input.addEventListener("change", scheduleShippingQuote);
+  input.addEventListener("change", () => {
+    isPlacingOrder = false;
+
+    if (checkoutBtn) {
+      checkoutBtn.disabled = false;
+      checkoutBtn.style.pointerEvents = "auto";
+      checkoutBtn.style.opacity = "1";
+    }
+
+    scheduleShippingQuote();
+  });
 });
 
 async function loadClaimedVoucher() {
@@ -1405,6 +1402,24 @@ async function loadClaimedVoucher() {
   // scheduleShippingQuote();
 
 })();
+
+[
+  nameInput,
+  phoneInput,
+  fullAddressInput,
+  areaGroupSelect,
+  provinceSelect,
+  citySelect,
+  barangaySelect,
+  courierSelect
+].forEach((input) => {
+
+  if (!input) return;
+
+  input.addEventListener("input", saveCustomerCheckoutInfo);
+  input.addEventListener("change", saveCustomerCheckoutInfo);
+
+});
 
 window.loadProvinces = loadProvinces;
 window.loadCities = loadCities;
