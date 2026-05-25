@@ -191,8 +191,7 @@ function calculateParcelInfo(items = cartItems) {
     );
     maxLength = Math.max(maxLength, getItemLength(item));
     maxWidth = Math.max(maxWidth, getItemWidth(item));
-    stackedHeight = Math.max(stackedHeight, getItemHeight(item));
-
+    stackedHeight += getItemHeight(item) * quantity;
   });
 
   return {
