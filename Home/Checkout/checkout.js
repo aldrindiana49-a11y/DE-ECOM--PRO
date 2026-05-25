@@ -175,7 +175,20 @@ function calculateParcelInfo(items = cartItems) {
     }
 
     totalQuantity += quantity;
-    totalWeight += getItemWeight(item) * quantity;
+    const actualWeight =
+      getItemWeight(item) * quantity;
+
+    const volumetricWeight =
+      (
+        getItemLength(item) *
+        getItemWidth(item) *
+        getItemHeight(item)
+      ) / 3500 * quantity;
+
+    totalWeight += Math.max(
+      actualWeight,
+      volumetricWeight
+    );
     maxLength = Math.max(maxLength, getItemLength(item));
     maxWidth = Math.max(maxWidth, getItemWidth(item));
     stackedHeight = Math.max(stackedHeight, getItemHeight(item));
@@ -225,26 +238,26 @@ function setShippingUI(status, message, fee = null) {
   }
 
   const summary =
-  document.querySelector(
-    ".checkout-summary"
-  );
+    document.querySelector(
+      ".checkout-summary"
+    );
 
-if (
-  summary &&
-  window.innerWidth <= 768 &&
-  status === "ready"
-) {
+  if (
+    summary &&
+    window.innerWidth <= 768 &&
+    status === "ready"
+  ) {
 
-  setTimeout(() => {
+    setTimeout(() => {
 
-    summary.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
+      summary.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
 
-  }, 300);
+    }, 300);
 
-}
+  }
 
 }
 
