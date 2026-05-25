@@ -584,3 +584,29 @@ body {
   color: white;
   font-weight: 700;
 }
+
+.cart-checkout-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.shop-more-btn {
+  flex: 1;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  background: #f1f5f9;
+  cursor: pointer;
+}
+
+.shop-more-btn:hover {
+  background: #e2e8f0;
+}
+
+.checkout-btn {
+  flex: 2;
+  margin-top: 0;
+}

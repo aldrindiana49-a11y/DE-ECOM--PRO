@@ -12,7 +12,7 @@
   <nav class="cart-navbar">
     <div class="cart-nav-left">
       <a href="#" class="back-link" onclick="smartBack('../index.html'); return false;">
-      ← Back
+        ← Back
       </a>
       <h1>Shopping Cart</h1>
     </div>
@@ -49,19 +49,24 @@
           <strong id="cartTotal">₱0</strong>
         </div>
 
-        <button id="checkoutBtn" type="button" class="checkout-btn" onclick="goToCheckout()">
-          Proceed to Checkout
-        </button>
-      </div>
-    </aside>
-  </main>
+        <div class="cart-checkout-actions">
 
-  <script src="cart.js"></script>
+          <button type="button" class="shop-more-btn" onclick="shopMoreProducts()">
+            Shop More
+          </button>
 
-  <div id="cartToast" class="cart-toast">
-    <span id="cartToastText">Item removed</span>
-    <button type="button" onclick="undoRemove()">Undo</button>
-  </div>
+          <button id="checkoutBtn" type="button" class="checkout-btn" onclick="goToCheckout()">
+            Proceed to Checkout
+          </button>
+
+        </div>
+
+        <script src="cart.js"></script>
+
+        <div id="cartToast" class="cart-toast">
+          <span id="cartToastText">Item removed</span>
+          <button type="button" onclick="undoRemove()">Undo</button>
+        </div>
 </body>
 
 </html>

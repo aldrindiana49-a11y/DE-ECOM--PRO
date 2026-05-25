@@ -579,6 +579,20 @@ function showCartNotice(title, message) {
   };
 }
 
+function shopMoreProducts() {
+
+  sessionStorage.setItem(
+    "scrollToProducts",
+    "true"
+  );
+
+  window.location.href =
+    "../index.html";
+
+}
+
+window.shopMoreProducts = shopMoreProducts;
+
 window.addEventListener("pageshow", function () {
 
   cart = JSON.parse(localStorage.getItem("drinCart")) || [];

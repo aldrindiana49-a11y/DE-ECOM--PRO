@@ -8,12 +8,12 @@ const supabaseClient = supabase.createClient(
 );
 const checkoutItems = document.getElementById("checkoutItems");
 const checkoutSubtotal = document.getElementById("checkoutSubtotal");
+const checkoutBtn = document.getElementById("checkoutBtn");
 const checkoutShippingFee = document.getElementById("checkoutShippingFee");
 const checkoutTotal = document.getElementById("checkoutTotal");
 const shippingStatus = document.getElementById("shippingStatus");
 const parcelEstimate = document.getElementById("parcelEstimate");
 const shippingRow = document.querySelector(".shipping-row");
-
 const areaGroupSelect = document.getElementById("areaGroup");
 const provinceSelect = document.getElementById("province");
 const citySelect = document.getElementById("city");
@@ -22,7 +22,6 @@ const zipCodeInput = document.getElementById("zipCode");
 const fullAddressInput = document.getElementById("fullAddress");
 const courierSelect = document.getElementById("courierSelect");
 const courierStatus = document.getElementById("courierStatus");
-
 const nameInput = document.getElementById("custName");
 const phoneInput = document.getElementById("custPhone");
 
@@ -218,96 +217,108 @@ function setShippingUI(status, message, fee = null) {
 
   updateTotalsDisplay();
 
-  const summary =
-    document.getElementById(
-      "checkoutSummary"
-    );
+  if (checkoutBtn) {
 
-  if (
-    summary &&
-    window.innerWidth <= 768
-  ) {
+    checkoutBtn.disabled =
+      status === "loading";
+
+  }
+
+  const summary =
+  document.querySelector(
+    ".checkout-summary"
+  );
+
+if (
+  summary &&
+  window.innerWidth <= 768 &&
+  status === "ready"
+) {
+
+  setTimeout(() => {
 
     summary.scrollIntoView({
       behavior: "smooth",
       block: "start"
     });
 
-  }
+  }, 300);
+
+}
 
 }
 
 function updateTotalsDisplay() {
 
-const subtotal =
-  getCheckoutTotal();
+  const subtotal =
+    getCheckoutTotal();
 
-const voucherRow =
-  document.getElementById(
-    "voucherSummaryRow"
-  );
-
-const voucherLabel =
-  document.getElementById(
-    "voucherSummaryLabel"
-  );
-
-const voucherAmount =
-  document.getElementById(
-    "voucherSummaryAmount"
-  );
-
-voucherDiscount = 0;
-
-if (
-  claimedVoucher &&
-  subtotal >= Number(claimedVoucher.min_spend || 0)
-) {
-
-  voucherDiscount =
-    Number(
-      claimedVoucher.discount_amount || 0
+  const voucherRow =
+    document.getElementById(
+      "voucherSummaryRow"
     );
 
-  if (voucherRow) {
-    voucherRow.style.display = "flex";
+  const voucherLabel =
+    document.getElementById(
+      "voucherSummaryLabel"
+    );
+
+  const voucherAmount =
+    document.getElementById(
+      "voucherSummaryAmount"
+    );
+
+  voucherDiscount = 0;
+
+  if (
+    claimedVoucher &&
+    subtotal >= Number(claimedVoucher.min_spend || 0)
+  ) {
+
+    voucherDiscount =
+      Number(
+        claimedVoucher.discount_amount || 0
+      );
+
+    if (voucherRow) {
+      voucherRow.style.display = "flex";
+    }
+
+    if (voucherLabel) {
+      voucherLabel.textContent =
+        `Voucher (${claimedVoucher.code})`;
+    }
+
+    if (voucherAmount) {
+      voucherAmount.textContent =
+        `-₱${voucherDiscount.toLocaleString()}`;
+    }
+
+  } else {
+
+    if (voucherRow) {
+      voucherRow.style.display = "none";
+    }
+
   }
 
-  if (voucherLabel) {
-    voucherLabel.textContent =
-      `Voucher (${claimedVoucher.code})`;
+  const grandTotal =
+    subtotal -
+    voucherDiscount +
+    (Number(currentShippingFee) || 0) +
+    HANDLING_FEE;
+
+  if (checkoutSubtotal) {
+
+    checkoutSubtotal.textContent =
+      formatPrice(subtotal);
   }
 
-  if (voucherAmount) {
-    voucherAmount.textContent =
-      `-₱${voucherDiscount.toLocaleString()}`;
+  if (checkoutTotal) {
+
+    checkoutTotal.textContent =
+      formatPrice(grandTotal);
   }
-
-} else {
-
-  if (voucherRow) {
-    voucherRow.style.display = "none";
-  }
-
-}
-
-const grandTotal =
-  subtotal -
-  voucherDiscount +
-  (Number(currentShippingFee) || 0) +
-  HANDLING_FEE;
-
-if (checkoutSubtotal) {
-
-  checkoutSubtotal.textContent =
-    formatPrice(subtotal);
-}
-
-if (checkoutTotal) {
-
-  checkoutTotal.textContent =
-    formatPrice(grandTotal);
-}
 }
 
 function renderCheckout() {

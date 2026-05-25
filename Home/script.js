@@ -1132,6 +1132,18 @@ async function loadWelcomeVoucherPopup() {
 
   if (!popup) return;
 
+  const alreadyClaimed =
+    localStorage.getItem(
+      "welcomeVoucherClaimed"
+    );
+
+  if (alreadyClaimed) {
+
+    popup.style.display = "none";
+    return;
+
+  }
+
   const { data, error } = await supabaseClient
     .from("vouchers")
     .select("*")
@@ -1523,3 +1535,38 @@ function showAllProducts() {
   }
 
 }
+
+window.addEventListener("load", () => {
+
+  const shouldScroll =
+    sessionStorage.getItem(
+      "scrollToProducts"
+    );
+
+  if (shouldScroll) {
+
+    sessionStorage.removeItem(
+      "scrollToProducts"
+    );
+
+    const products =
+      document.getElementById(
+        "productsSection"
+      );
+
+    if (products) {
+
+      setTimeout(() => {
+
+        products.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+
+      }, 300);
+
+    }
+
+  }
+
+});
