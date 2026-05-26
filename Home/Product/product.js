@@ -277,7 +277,7 @@ async function loadProductsFromSupabase() {
   renderSuggestedProducts();
   loadProductVouchers();
   updateCartCount();
-  // renderDynamicSidebarCategories();
+  renderDynamicSidebarCategories();
 }
 
 productsLoading = false;
