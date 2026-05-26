@@ -627,7 +627,47 @@ async function syncOrderToSupabase(order) {
   } = await supabaseClient.auth.getUser();
 
   if (!user) {
-    throw new Error("Please login or create an account before checkout.");
+
+    showOrderModal(
+      "Login Required",
+      `
+      <div class="premium-login-alert">
+
+        <div class="premium-login-icon">
+          🔒
+        </div>
+
+        <h4>
+          Secure Checkout Required
+        </h4>
+
+        <p>
+          Please login or create your account first
+          to continue with secure checkout.
+        </p>
+
+        <div class="premium-login-actions">
+
+          <button
+            type="button"
+            onclick="window.location.href='/login/'">
+            Login Account
+          </button>
+
+          <button
+            type="button"
+            class="secondary-btn"
+            onclick="window.location.href='/signup/'">
+            Create Account
+          </button>
+
+        </div>
+
+      </div>
+      `
+    );
+
+    return false;
   }
 
   console.log("SAVING ORDER TO SUPABASE:", {
@@ -654,7 +694,6 @@ async function syncOrderToSupabase(order) {
         shipping_fee: order.shippingFee,
         voucher_code: order.voucherCode,
         voucher_discount: order.voucherDiscount,
-
       }
     ]);
 
@@ -664,6 +703,8 @@ async function syncOrderToSupabase(order) {
     console.error("SUPABASE ORDER SYNC ERROR:", error);
     throw new Error(error.message);
   }
+
+  return true;
 }
 
 function clearCheckedCartItems() {
@@ -1176,8 +1217,6 @@ async function placeOrder() {
     }
 
   } catch (error) {
-
-    console.error("ORDER SYNC REAL ERROR:", error);
 
     alert("ORDER SYNC ERROR: " + error.message);
 
