@@ -580,6 +580,11 @@ addToCartBtn.addEventListener("click", () => {
     String(item.variantLabel || "") === String(selectedVariantLabel)
   );
 
+  const parcelSource =
+    selectedVariant ||
+    getBestVariant(product) ||
+    product;
+
   if (existingItem) {
     const newQty = safeNumber(existingItem.quantity) + qty;
 
@@ -600,29 +605,10 @@ addToCartBtn.addEventListener("click", () => {
   } else {
     cartData.push({
 
-      weight: Number(
-        selectedVariant?.weight ??
-        product.weight ??
-        0.01
-      ),
-
-      length: Number(
-        selectedVariant?.length ??
-        product.length ??
-        1
-      ),
-
-      width: Number(
-        selectedVariant?.width ??
-        product.width ??
-        1
-      ),
-
-      height: Number(
-        selectedVariant?.height ??
-        product.height ??
-        1
-      ),
+      weight: Number(parcelSource.weight ?? product.weight ?? 0.01),
+      length: Number(parcelSource.length ?? product.length ?? 1),
+      width: Number(parcelSource.width ?? product.width ?? 1),
+      height: Number(parcelSource.height ?? product.height ?? 1),
 
       id: product.id,
       name: product.name,
@@ -725,6 +711,11 @@ buyNowBtn?.addEventListener("click", () => {
       safeNumber(existingItem.quantity) + qty;
 
     existingItem.selected = true;
+
+    existingItem.weight = checkoutItem.weight;
+    existingItem.length = checkoutItem.length;
+    existingItem.width = checkoutItem.width;
+    existingItem.height = checkoutItem.height;
 
   } else {
 
@@ -1265,6 +1256,11 @@ document
     if (existingItem) {
       const newQty = safeNumber(existingItem.quantity) + qty;
 
+      existingItem.weight = Number(parcelSource.weight ?? product.weight ?? 0.01);
+      existingItem.length = Number(parcelSource.length ?? product.length ?? 1);
+      existingItem.width = Number(parcelSource.width ?? product.width ?? 1);
+      existingItem.height = Number(parcelSource.height ?? product.height ?? 1);
+
       if (newQty > stock) {
         existingItem.quantity = stock;
         showMessage("Cart updated to maximum available stock.", "error");
@@ -1286,6 +1282,11 @@ document
         image: selectedVariant.image || getProductImage(product),
         variant_image: selectedVariant.image || getProductImage(product),
         product_image: product.image,
+
+        weight: Number(selectedVariant?.weight ?? product.weight ?? 0.01),
+        length: Number(selectedVariant?.length ?? product.length ?? 1),
+        width: Number(selectedVariant?.width ?? product.width ?? 1),
+        height: Number(selectedVariant?.height ?? product.height ?? 1),
 
         stock: stock,
         quantity: qty,

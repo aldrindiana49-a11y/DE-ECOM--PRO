@@ -436,7 +436,7 @@ function showUndoToast(itemName) {
     toast.classList.remove("show");
     lastRemovedItem = null;
     lastRemovedIndex = null;
-  }, 4000);
+  }, 1500);
 }
 
 function undoRemove() {
