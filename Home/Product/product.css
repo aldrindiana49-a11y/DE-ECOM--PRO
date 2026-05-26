@@ -1683,7 +1683,7 @@
 
   border-radius: 50% !important;
 
-  background: rgba(255,255,255,0.88) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
 
   backdrop-filter: blur(8px);
 
@@ -1704,4 +1704,52 @@
   width: 34px !important;
   height: 34px !important;
   object-fit: contain !important;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo,
+.nav-logo,
+.navbar-logo {
+
+  flex: 0 0 auto !important;
+
+  min-width: 160px !important;
+
+  overflow: visible !important;
+}
+
+.logo img,
+.nav-logo img,
+.navbar-logo img,
+#navLogo {
+
+  width: auto !important;
+
+  height: 42px !important;
+
+  max-width: 220px !important;
+
+  object-fit: contain !important;
+
+  display: block !important;
+}
+
+#navLogo {
+  height: 34px !important;
+  width: auto !important;
+
+  object-fit: contain !important;
+
+  display: block;
+}
+
+.order-item-variant {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-bottom: 6px;
 }

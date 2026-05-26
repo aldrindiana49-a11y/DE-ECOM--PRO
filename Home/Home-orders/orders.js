@@ -145,6 +145,12 @@ async function loadOrders() {
         ${item.name || 'Product'}
       </div>
 
+      ${item.variant_name || item.variantName || item.variant || item.selected_variant ? `
+        <div class="order-item-variant">
+          Variant: ${item.variant_name || item.variantName || item.variant || item.selected_variant}
+        </div>
+      ` : ""}
+
       <div class="order-item-price">
         Qty: ${item.quantity || 1} • ₱${Number(item.price || 0).toLocaleString()}
       </div>
@@ -167,6 +173,12 @@ async function loadOrders() {
       <div class="order-item-name">
         ${item.name || 'Product'}
       </div>
+
+      ${item.variant_name || item.variantName || item.variant || item.selected_variant ? `
+        <div class="order-item-variant">
+          Variant: ${item.variant_name || item.variantName || item.variant || item.selected_variant}
+        </div>
+      ` : ""}
 
       <div class="order-item-price">
         Qty: ${item.quantity || 1} • ₱${Number(item.price || 0).toLocaleString()}
