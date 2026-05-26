@@ -1334,52 +1334,54 @@ async function renderStoreBranding() {
 
     console.log("FINAL MOBILE LOGO:", mobileNavLogo.src);
   }
-
   if (navLogoFallback) {
 
     navLogoFallback.style.display = "none";
   }
 
-  renderStoreBranding();
+}
 
-  renderDynamicSidebarCategories();
+renderStoreBranding();
 
 
-  function smartBack(fallback = "../index.html") {
+renderDynamicSidebarCategories();
 
-    if (
-      document.referrer &&
-      document.referrer !== window.location.href
-    ) {
 
-      window.history.back();
+function smartBack(fallback = "../index.html") {
 
-    } else {
+  if (
+    document.referrer &&
+    document.referrer !== window.location.href
+  ) {
 
-      window.location.href = fallback;
+    window.history.back();
 
-    }
+  } else {
+
+    window.location.href = fallback;
 
   }
 
-  function goHome() {
-    window.location.href = "../index.html";
-  }
+}
+
+function goHome() {
+  window.location.href = "../index.html";
+}
 
 
-  function openWebsiteChat() {
-    const modal = document.getElementById("websiteChatModal");
-    const messages = document.getElementById("websiteChatMessages");
+function openWebsiteChat() {
+  const modal = document.getElementById("websiteChatModal");
+  const messages = document.getElementById("websiteChatMessages");
 
-    if (!modal || !messages) return;
+  if (!modal || !messages) return;
 
-    modal.classList.add("show");
+  modal.classList.add("show");
 
-    if (!messages.dataset.loaded) {
-      const productName =
-        document.getElementById("productName")?.textContent || "this product";
+  if (!messages.dataset.loaded) {
+    const productName =
+      document.getElementById("productName")?.textContent || "this product";
 
-      messages.innerHTML = `
+    messages.innerHTML = `
       <div class="chat-message seller">
         Hello! Welcome to Drin Electronics. How can we help you?
       </div>
@@ -1393,121 +1395,121 @@ async function renderStoreBranding() {
       </div>
     `;
 
-      messages.dataset.loaded = "true";
-    }
-
-    messages.scrollTop = messages.scrollHeight;
+    messages.dataset.loaded = "true";
   }
 
-  function closeWebsiteChat() {
-    document
-      .getElementById("websiteChatModal")
-      ?.classList.remove("show");
-  }
+  messages.scrollTop = messages.scrollHeight;
+}
 
-  function sendWebsiteChatMessage() {
-    const input = document.getElementById("websiteChatInput");
-    const messages = document.getElementById("websiteChatMessages");
+function closeWebsiteChat() {
+  document
+    .getElementById("websiteChatModal")
+    ?.classList.remove("show");
+}
 
-    if (!input || !messages) return;
+function sendWebsiteChatMessage() {
+  const input = document.getElementById("websiteChatInput");
+  const messages = document.getElementById("websiteChatMessages");
 
-    const text = input.value.trim();
-    if (!text) return;
+  if (!input || !messages) return;
 
+  const text = input.value.trim();
+  if (!text) return;
+
+  messages.insertAdjacentHTML(
+    "beforeend",
+    `<div class="chat-message buyer">${text}</div>`
+  );
+
+  input.value = "";
+  messages.scrollTop = messages.scrollHeight;
+
+  setTimeout(() => {
     messages.insertAdjacentHTML(
       "beforeend",
-      `<div class="chat-message buyer">${text}</div>`
+      `<div class="chat-message seller">Salamat sir, check namo ni para nimo.</div>`
     );
 
-    input.value = "";
     messages.scrollTop = messages.scrollHeight;
+  }, 700);
+}
 
-    setTimeout(() => {
-      messages.insertAdjacentHTML(
-        "beforeend",
-        `<div class="chat-message seller">Salamat sir, check namo ni para nimo.</div>`
-      );
+document
+  .getElementById("websiteChatInput")
+  ?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      sendWebsiteChatMessage();
+    }
+  });
 
-      messages.scrollTop = messages.scrollHeight;
-    }, 700);
-  }
+function openWebsiteChat() {
+
+  const modal =
+    document.getElementById("websiteChatModal");
+
+  if (!modal) return;
+
+  modal.classList.add("show");
+}
+
+function closeWebsiteChat() {
 
   document
-    .getElementById("websiteChatInput")
-    ?.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        sendWebsiteChatMessage();
-      }
-    });
+    .getElementById("websiteChatModal")
+    ?.classList.remove("show");
+}
 
-  function openWebsiteChat() {
+function sendWebsiteChatMessage() {
 
-    const modal =
-      document.getElementById("websiteChatModal");
+  const input =
+    document.getElementById("websiteChatInput");
 
-    if (!modal) return;
+  const messages =
+    document.getElementById("websiteChatMessages");
 
-    modal.classList.add("show");
-  }
+  if (!input || !messages) return;
 
-  function closeWebsiteChat() {
+  const text = input.value.trim();
 
-    document
-      .getElementById("websiteChatModal")
-      ?.classList.remove("show");
-  }
+  if (!text) return;
 
-  function sendWebsiteChatMessage() {
-
-    const input =
-      document.getElementById("websiteChatInput");
-
-    const messages =
-      document.getElementById("websiteChatMessages");
-
-    if (!input || !messages) return;
-
-    const text = input.value.trim();
-
-    if (!text) return;
-
-    messages.insertAdjacentHTML(
-      "beforeend",
-      `
+  messages.insertAdjacentHTML(
+    "beforeend",
+    `
     <div class="chat-message buyer">
       ${text}
     </div>
     `
-    );
+  );
 
-    input.value = "";
+  input.value = "";
 
-    messages.scrollTop =
-      messages.scrollHeight;
-  }
+  messages.scrollTop =
+    messages.scrollHeight;
+}
 
-  function sendCurrentProductLink() {
+function sendCurrentProductLink() {
 
-    const productName =
-      document.getElementById("productName")?.textContent || "Product";
+  const productName =
+    document.getElementById("productName")?.textContent || "Product";
 
-    const productPrice =
-      document.getElementById("productPrice")?.textContent || "";
+  const productPrice =
+    document.getElementById("productPrice")?.textContent || "";
 
-    const productImage =
-      document.getElementById("productImg")?.src || "";
+  const productImage =
+    document.getElementById("productImg")?.src || "";
 
-    const productLink =
-      window.location.href;
+  const productLink =
+    window.location.href;
 
-    const messages =
-      document.getElementById("websiteChatMessages");
+  const messages =
+    document.getElementById("websiteChatMessages");
 
-    if (!messages) return;
+  if (!messages) return;
 
-    messages.insertAdjacentHTML(
-      "beforeend",
-      `
+  messages.insertAdjacentHTML(
+    "beforeend",
+    `
     <div class="chat-message buyer">
 
       <div class="chat-product-card">
@@ -1539,55 +1541,55 @@ async function renderStoreBranding() {
 
     </div>
     `
-    );
+  );
 
-    messages.scrollTop =
-      messages.scrollHeight;
-  }
+  messages.scrollTop =
+    messages.scrollHeight;
+}
 
-  function openChatMediaUpload() {
-
-    document
-      .getElementById("chatMediaInput")
-      ?.click();
-  }
+function openChatMediaUpload() {
 
   document
     .getElementById("chatMediaInput")
-    ?.addEventListener("change", function () {
+    ?.click();
+}
 
-      const files =
-        Array.from(this.files || []);
+document
+  .getElementById("chatMediaInput")
+  ?.addEventListener("change", function () {
 
-      const maxFiles = 3;
+    const files =
+      Array.from(this.files || []);
 
-      const maxSize =
-        5 * 1024 * 1024;
+    const maxFiles = 3;
 
-      if (files.length > maxFiles) {
+    const maxSize =
+      5 * 1024 * 1024;
 
-        alert("Maximum 3 photos only.");
+    if (files.length > maxFiles) {
 
-        this.value = "";
+      alert("Maximum 3 photos only.");
 
-        return;
-      }
+      this.value = "";
 
-      const messages =
-        document.getElementById("websiteChatMessages");
+      return;
+    }
 
-      if (!messages) return;
+    const messages =
+      document.getElementById("websiteChatMessages");
 
-      files.forEach(file => {
+    if (!messages) return;
 
-        if (file.size > maxSize) return;
+    files.forEach(file => {
 
-        const imageUrl =
-          URL.createObjectURL(file);
+      if (file.size > maxSize) return;
 
-        messages.insertAdjacentHTML(
-          "beforeend",
-          `
+      const imageUrl =
+        URL.createObjectURL(file);
+
+      messages.insertAdjacentHTML(
+        "beforeend",
+        `
         <div class="chat-message buyer">
           <img
             src="${imageUrl}"
@@ -1598,39 +1600,39 @@ async function renderStoreBranding() {
           >
         </div>
         `
-        );
-      });
-
-      messages.scrollTop =
-        messages.scrollHeight;
-
-      this.value = "";
+      );
     });
 
-  document
-    .getElementById("websiteChatInput")
-    ?.addEventListener("keydown", (e) => {
+    messages.scrollTop =
+      messages.scrollHeight;
 
-      if (e.key === "Enter") {
+    this.value = "";
+  });
 
-        sendWebsiteChatMessage();
+document
+  .getElementById("websiteChatInput")
+  ?.addEventListener("keydown", (e) => {
 
-      }
+    if (e.key === "Enter") {
 
-    });
+      sendWebsiteChatMessage();
 
-  function getSupportStatus() {
-    const now = new Date();
-    const hour = now.getHours();
+    }
 
-    return hour >= 9 && hour < 21 ? "online" : "offline";
-  }
+  });
 
-  function getAutoWelcomeMessage() {
-    const status = getSupportStatus();
+function getSupportStatus() {
+  const now = new Date();
+  const hour = now.getHours();
 
-    if (status === "online") {
-      return `
+  return hour >= 9 && hour < 21 ? "online" : "offline";
+}
+
+function getAutoWelcomeMessage() {
+  const status = getSupportStatus();
+
+  if (status === "online") {
+    return `
       👋 Welcome to Drin Electronics!<br><br>
       Our support team is currently online and ready to assist you.<br><br>
       Please send your questions about this product and we’ll reply shortly.<br><br>
@@ -1639,9 +1641,9 @@ async function renderStoreBranding() {
       📧 support@drinelectronicsph.com<br><br>
       Thank you for visiting Drin Electronics!
     `;
-    }
+  }
 
-    return `
+  return `
     👋 Welcome to Drin Electronics!<br><br>
     Our support team is currently offline.<br><br>
     Business Hours:<br>
@@ -1652,45 +1654,45 @@ async function renderStoreBranding() {
     📧 support@drinelectronicsph.com<br><br>
     Thank you for visiting Drin Electronics!
   `;
-  }
+}
 
-  function openWebsiteChat() {
-    const modal = document.getElementById("websiteChatModal");
-    const messages = document.getElementById("websiteChatMessages");
+function openWebsiteChat() {
+  const modal = document.getElementById("websiteChatModal");
+  const messages = document.getElementById("websiteChatMessages");
 
-    if (!modal || !messages) return;
+  if (!modal || !messages) return;
 
-    modal.classList.add("show");
+  modal.classList.add("show");
 
-    if (!messages.dataset.loaded) {
-      messages.innerHTML = `
+  if (!messages.dataset.loaded) {
+    messages.innerHTML = `
       <div class="chat-message seller">
         ${getAutoWelcomeMessage()}
       </div>
     `;
 
-      messages.dataset.loaded = "true";
-    }
-
-    messages.scrollTop = messages.scrollHeight;
+    messages.dataset.loaded = "true";
   }
 
-  function renderDynamicSidebarCategories() {
+  messages.scrollTop = messages.scrollHeight;
+}
 
-    const sidebar =
-      document.getElementById("dynamicSidebarCategories");
+function renderDynamicSidebarCategories() {
 
-    if (!sidebar) return;
+  const sidebar =
+    document.getElementById("dynamicSidebarCategories");
 
-    const categories = [
-      ...new Set(
-        products
-          .map(p => p.category)
-          .filter(Boolean)
-      )
-    ];
+  if (!sidebar) return;
 
-    sidebar.innerHTML = `
+  const categories = [
+    ...new Set(
+      products
+        .map(p => p.category)
+        .filter(Boolean)
+    )
+  ];
+
+  sidebar.innerHTML = `
     <li>
       <a href="../index.html">
         All Products
@@ -1713,80 +1715,80 @@ async function renderStoreBranding() {
       </li>
     `).join("")}
   `;
-  }
+}
 
-  const desktopSearchInput =
-    document.getElementById("desktopSearchInput");
+const desktopSearchInput =
+  document.getElementById("desktopSearchInput");
 
-  const desktopSearchBtn =
-    document.getElementById("desktopSearchBtn");
+const desktopSearchBtn =
+  document.getElementById("desktopSearchBtn");
 
-  function handleProductSearch() {
+function handleProductSearch() {
 
-    const keyword =
-      desktopSearchInput?.value
-        .trim()
-        .toLowerCase();
+  const keyword =
+    desktopSearchInput?.value
+      .trim()
+      .toLowerCase();
 
-    if (!keyword) return;
+  if (!keyword) return;
 
-    const filtered =
-      products.filter(product => {
+  const filtered =
+    products.filter(product => {
 
-        return (
-          String(product.name || "").toLowerCase().includes(keyword) ||
-          String(product.category || "").toLowerCase().includes(keyword) ||
-          String(product.description || "").toLowerCase().includes(keyword)
-        );
+      return (
+        String(product.name || "").toLowerCase().includes(keyword) ||
+        String(product.category || "").toLowerCase().includes(keyword) ||
+        String(product.description || "").toLowerCase().includes(keyword)
+      );
 
-      });
+    });
 
-    renderSearchResults(filtered);
-    document
-      .getElementById("suggestedProducts")
-      ?.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
-  }
+  renderSearchResults(filtered);
+  document
+    .getElementById("suggestedProducts")
+    ?.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+}
 
-  desktopSearchBtn?.addEventListener(
-    "click",
-    handleProductSearch
-  );
+desktopSearchBtn?.addEventListener(
+  "click",
+  handleProductSearch
+);
 
-  desktopSearchInput?.addEventListener(
-    "keydown",
-    (e) => {
+desktopSearchInput?.addEventListener(
+  "keydown",
+  (e) => {
 
-      if (e.key === "Enter") {
+    if (e.key === "Enter") {
 
-        handleProductSearch();
-
-      }
+      handleProductSearch();
 
     }
-  );
 
-  function renderSearchResults(list) {
+  }
+);
 
-    const container =
-      document.getElementById("suggestedProducts");
+function renderSearchResults(list) {
 
-    if (!container) return;
+  const container =
+    document.getElementById("suggestedProducts");
 
-    if (!list.length) {
+  if (!container) return;
 
-      container.innerHTML = `
+  if (!list.length) {
+
+    container.innerHTML = `
       <div class="suggested-card">
         <h3>No products found</h3>
       </div>
     `;
 
-      return;
-    }
+    return;
+  }
 
-    container.innerHTML = list.map(item => `
+  container.innerHTML = list.map(item => `
     <div
       class="homepage-product-card"
       onclick="openSuggestedProduct('${item.id}')"
@@ -1813,62 +1815,63 @@ async function renderStoreBranding() {
 
     </div>
   `).join("");
-  }
+}
 
-  document
-    .getElementById("clearSearchBtn")
-    ?.addEventListener("click", () => {
-      const input = document.getElementById("desktopSearchInput");
+document
+  .getElementById("clearSearchBtn")
+  ?.addEventListener("click", () => {
+    const input = document.getElementById("desktopSearchInput");
 
-      if (input) {
-        input.value = "";
-        input.focus();
+    if (input) {
+      input.value = "";
+      input.focus();
+    }
+
+    renderSuggestedProducts();
+  });
+
+const shareBtn =
+  document.getElementById("shareBtn");
+
+shareBtn?.addEventListener(
+  "click",
+  async () => {
+
+    const shareData = {
+
+      title: product.name,
+
+      text:
+        product.description ||
+        "Check this product from Drin Electronics",
+
+      url: window.location.href
+    };
+
+    try {
+
+      if (navigator.share) {
+
+        await navigator.share(shareData);
+
+      } else {
+
+        await navigator.clipboard.writeText(
+          window.location.href
+        );
+
+        showMessage(
+          "Product link copied!",
+          "success"
+        );
       }
 
-      renderSuggestedProducts();
-    });
+    } catch (err) {
 
-  const shareBtn =
-    document.getElementById("shareBtn");
-
-  shareBtn?.addEventListener(
-    "click",
-    async () => {
-
-      const shareData = {
-
-        title: product.name,
-
-        text:
-          product.description ||
-          "Check this product from Drin Electronics",
-
-        url: window.location.href
-      };
-
-      try {
-
-        if (navigator.share) {
-
-          await navigator.share(shareData);
-
-        } else {
-
-          await navigator.clipboard.writeText(
-            window.location.href
-          );
-
-          showMessage(
-            "Product link copied!",
-            "success"
-          );
-        }
-
-      } catch (err) {
-
-        console.log(err);
-
-      }
+      console.log(err);
 
     }
-  );
+
+  }
+);
+  }
