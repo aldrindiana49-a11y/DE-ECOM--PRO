@@ -965,7 +965,35 @@ async function claimProductVoucher(code, btn) {
   btn.closest(".voucher-card")
     .classList.add("active");
 
-  alert(`Voucher ${code} claimed!`);
+  const claimBtn =
+    btn.querySelector("button");
+
+  if (claimBtn) {
+
+    claimBtn.innerHTML =
+      "✅ Claimed";
+
+    claimBtn.disabled = true;
+
+    claimBtn.classList.add(
+      "voucher-claimed"
+    );
+
+    claimBtn.style.transform =
+      "scale(.96)";
+
+    setTimeout(() => {
+
+      claimBtn.style.transform =
+        "scale(1)";
+
+    }, 180);
+
+  }
+
+  showVoucherToast(
+    "✅ Voucher Claimed Successfully"
+  );
 }
 
 // DESKTOP + MOBILE VOUCHER DRAG SWIPE
@@ -1869,3 +1897,46 @@ shareBtn?.addEventListener(
 
   }
 );
+
+/* PRODUCT PAGE VOUCHER TOAST */
+
+function showVoucherToast(message) {
+
+  let toast =
+    document.getElementById(
+      "voucherToast"
+    );
+
+  if (!toast) {
+
+    toast =
+      document.createElement("div");
+
+    toast.id =
+      "voucherToast";
+
+    toast.className =
+      "voucher-toast";
+
+    document.body.appendChild(
+      toast
+    );
+
+  }
+
+  toast.textContent =
+    message;
+
+  toast.classList.add(
+    "show"
+  );
+
+  setTimeout(() => {
+
+    toast.classList.remove(
+      "show"
+    );
+
+  }, 2200);
+
+}
