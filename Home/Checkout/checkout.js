@@ -1089,19 +1089,19 @@ async function placeOrder() {
     return resetPlaceOrder();
   }
 
-  if (paymentMain === "COD" && totalNumber < 200) {
+  if (paymentMain === "COD" && totalNumber < 300) {
     showOrderModal(
       "COD Minimum Order",
-      "Cash on Delivery requires a minimum total order of ₱200 including shipping."
+      "Cash on Delivery requires a minimum total order of ₱300 including shipping."
     );
 
     return resetPlaceOrder();
   }
 
-  if (paymentMain === "COD" && totalNumber > 8000) {
+  if (paymentMain === "COD" && totalNumber > 10000) {
     showOrderModal(
       "COD Limit Reached",
-      "Cash on Delivery is only available up to ₱8,000 total including shipping.\n\nPlease select Online Payment to continue."
+      "Cash on Delivery is only available up to ₱10,000 total including shipping.\n\nPlease select Online Payment to continue."
     );
 
     return resetPlaceOrder();
