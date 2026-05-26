@@ -650,14 +650,14 @@ async function syncOrderToSupabase(order) {
 
           <button
             type="button"
-            onclick="window.location.href='/login/'">
+             onclick="window.location.href='/Home/login/'">
             Login Account
           </button>
 
           <button
             type="button"
             class="secondary-btn"
-            onclick="window.location.href='/signup/'">
+              onclick="window.location.href='/Home/signup/'">
             Create Account
           </button>
 
@@ -1186,11 +1186,17 @@ async function placeOrder() {
     date: new Date().toLocaleString(),
   };
 
-  saveOrder(order);
-
   try {
 
-    await syncOrderToSupabase(order);
+    const syncResult =
+      await syncOrderToSupabase(order);
+
+    if (syncResult === false) {
+      return resetPlaceOrder();
+    }
+
+
+    saveOrder(order);
 
     if (paymentMain === "COD") {
 
@@ -1218,7 +1224,10 @@ async function placeOrder() {
 
   } catch (error) {
 
-    alert("ORDER SYNC ERROR: " + error.message);
+    console.error(
+      "ORDER SYNC ERROR:",
+      error
+    );
 
     return resetPlaceOrder();
   }
