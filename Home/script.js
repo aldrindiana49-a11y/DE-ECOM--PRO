@@ -323,7 +323,8 @@ async function renderBranding() {
       .from("store_settings")
       .select("logo_url, store_name")
       .eq("id", 1)
-      .single();
+      .limit(1)
+      .maybeSingle()
 
   if (error) return;
 

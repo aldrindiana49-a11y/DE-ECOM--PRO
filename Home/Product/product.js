@@ -1295,8 +1295,9 @@ async function renderStoreBranding() {
   const { data, error } =
     await supabaseClient
       .from("store_settings")
-      .select("logo_url")
+      .select("logo_url, store_name")
       .eq("id", 1)
+      .limit(1)
       .maybeSingle()
 
   if (error || !data?.logo_url) return;
