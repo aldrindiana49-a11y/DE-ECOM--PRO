@@ -1306,14 +1306,14 @@ async function renderStoreBranding() {
 
   if (navLogo) {
 
-    navLogo.src = logo;
+    navLogo.src = logo + "?v=" + Date.now();
 
     navLogo.style.display = "block";
   }
 
   if (mobileNavLogo) {
 
-    mobileNavLogo.src = logo;
+    mobileNavLogo.src = logo + "?v=" + Date.now();
   }
 
   if (navLogoFallback) {
