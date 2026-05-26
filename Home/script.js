@@ -230,7 +230,7 @@ function renderHomepageProducts(productArray = products) {
 
   const inStockProducts = productArray.filter(hasAvailableStock);
   const outOfStockProducts = productArray.filter((product) => !hasAvailableStock(product));
-  
+
   renderProductCards(inStockProducts);
 
   if (outOfStockProducts.length > 0) {
@@ -1066,7 +1066,17 @@ async function loadProductsFromSupabase() {
       images: [item.image || "https://via.placeholder.com/400x300?text=No+Image"],
       price: mainPrice,
       discountPrice: mainDiscount,
-      stock: item.stock
+      stock: variants.reduce((total, variant) => {
+        return total + safeNumber(
+          variant.stock ??
+          variant.variant_stock ??
+          variant.variantStock ??
+          variant.qty ??
+          variant.quantity ??
+          0,
+          0
+        );
+      }, 0)
     };
   });
 
