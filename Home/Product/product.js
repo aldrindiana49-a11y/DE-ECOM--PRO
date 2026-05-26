@@ -277,7 +277,7 @@ async function loadProductsFromSupabase() {
   renderSuggestedProducts();
   loadProductVouchers();
   updateCartCount();
-  renderDynamicSidebarCategories();
+  // renderDynamicSidebarCategories();
 }
 
 productsLoading = false;
@@ -1327,6 +1327,7 @@ async function renderStoreBranding() {
 
     mobileNavLogo.style.display = "block";
     mobileNavLogo.style.visibility = "visible";
+    mobileNavLogo.style.opacity = "1";
 
     mobileNavLogo.onerror = () => {
       console.log("Mobile logo failed to load");
@@ -1334,13 +1335,7 @@ async function renderStoreBranding() {
 
     console.log("FINAL MOBILE LOGO:", mobileNavLogo.src);
   }
-  if (navLogoFallback) {
-
-    navLogoFallback.style.display = "none";
-  }
-
 }
-
 renderStoreBranding();
 
 
