@@ -220,9 +220,17 @@ function renderHomepageProducts(productArray = products) {
     return;
   }
 
-  const inStockProducts = productArray.filter((product) => safeNumber(product.stock, 0) > 0);
-  const outOfStockProducts = productArray.filter((product) => safeNumber(product.stock, 0) <= 0);
+  const hasAvailableStock = (product) => {
+    if (Array.isArray(product.variants) && product.variants.length) {
+      return product.variants.some((variant) => safeNumber(variant.stock, 0) > 0);
+    }
 
+    return safeNumber(product.stock, 0) > 0;
+  };
+
+  const inStockProducts = productArray.filter(hasAvailableStock);
+  const outOfStockProducts = productArray.filter((product) => !hasAvailableStock(product));
+  
   renderProductCards(inStockProducts);
 
   if (outOfStockProducts.length > 0) {
