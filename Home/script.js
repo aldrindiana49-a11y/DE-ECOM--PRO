@@ -392,14 +392,14 @@ async function renderNavbarLogo() {
 
     if (navLogo) {
 
-      navLogo.src = logo;
+      navLogo.src = logo + "?v=" + Date.now();
 
       navLogo.classList.add("show");
     }
 
     if (mobileNavLogo) {
 
-      mobileNavLogo.src = logo;
+      mobileNavLogo.src = logo + "?v=" + Date.now();
     }
 
     if (navLogoFallback) {
