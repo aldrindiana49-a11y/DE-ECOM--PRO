@@ -380,8 +380,8 @@ async function renderNavbarLogo() {
     await supabaseClient
       .from("store_settings")
       .select("logo_url")
-      .eq("id", 1)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
   if (error || !data?.logo_url) return;
 
@@ -1375,8 +1375,8 @@ async function renderFavicon() {
     await supabaseClient
       .from("store_settings")
       .select("logo_url")
-      .eq("id", 1)
-      .single();
+      .limit(1)
+      .maybeSingle();
 
   if (error || !data?.logo_url) return;
 
