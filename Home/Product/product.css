@@ -1696,3 +1696,12 @@
   position: relative !important;
   z-index: 99999 !important;
 }
+
+.mobile-bottom-nav .mobile-nav-logo {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 34px !important;
+  height: 34px !important;
+  object-fit: contain !important;
+}
