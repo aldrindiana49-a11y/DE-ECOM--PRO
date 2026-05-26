@@ -1299,21 +1299,40 @@ async function renderStoreBranding() {
       .limit(1)
       .maybeSingle();
 
+  console.log("LOGO DATA:", data, error);
+
   if (error || !data?.logo_url) return;
 
   const logo =
-    data.logo_url;
+    data?.logo_url ||
+    "https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/logo.png";
 
   if (navLogo) {
 
     navLogo.src = logo + "?v=" + Date.now();
 
     navLogo.style.display = "block";
+    navLogo.style.visibility = "visible";
+
+    navLogo.onerror = () => {
+      console.log("Logo failed to load");
+    };
+
+    console.log("FINAL LOGO:", navLogo.src);
   }
 
   if (mobileNavLogo) {
 
     mobileNavLogo.src = logo + "?v=" + Date.now();
+
+    mobileNavLogo.style.display = "block";
+    mobileNavLogo.style.visibility = "visible";
+
+    mobileNavLogo.onerror = () => {
+      console.log("Mobile logo failed to load");
+    };
+
+    console.log("FINAL MOBILE LOGO:", mobileNavLogo.src);
   }
 
   if (navLogoFallback) {
@@ -1321,48 +1340,46 @@ async function renderStoreBranding() {
     navLogoFallback.style.display = "none";
   }
 
-}
+  renderStoreBranding();
 
-renderStoreBranding();
-
-renderDynamicSidebarCategories();
+  renderDynamicSidebarCategories();
 
 
-function smartBack(fallback = "../index.html") {
+  function smartBack(fallback = "../index.html") {
 
-  if (
-    document.referrer &&
-    document.referrer !== window.location.href
-  ) {
+    if (
+      document.referrer &&
+      document.referrer !== window.location.href
+    ) {
 
-    window.history.back();
+      window.history.back();
 
-  } else {
+    } else {
 
-    window.location.href = fallback;
+      window.location.href = fallback;
+
+    }
 
   }
 
-}
-
-function goHome() {
-  window.location.href = "../index.html";
-}
+  function goHome() {
+    window.location.href = "../index.html";
+  }
 
 
-function openWebsiteChat() {
-  const modal = document.getElementById("websiteChatModal");
-  const messages = document.getElementById("websiteChatMessages");
+  function openWebsiteChat() {
+    const modal = document.getElementById("websiteChatModal");
+    const messages = document.getElementById("websiteChatMessages");
 
-  if (!modal || !messages) return;
+    if (!modal || !messages) return;
 
-  modal.classList.add("show");
+    modal.classList.add("show");
 
-  if (!messages.dataset.loaded) {
-    const productName =
-      document.getElementById("productName")?.textContent || "this product";
+    if (!messages.dataset.loaded) {
+      const productName =
+        document.getElementById("productName")?.textContent || "this product";
 
-    messages.innerHTML = `
+      messages.innerHTML = `
       <div class="chat-message seller">
         Hello! Welcome to Drin Electronics. How can we help you?
       </div>
@@ -1376,121 +1393,121 @@ function openWebsiteChat() {
       </div>
     `;
 
-    messages.dataset.loaded = "true";
-  }
-
-  messages.scrollTop = messages.scrollHeight;
-}
-
-function closeWebsiteChat() {
-  document
-    .getElementById("websiteChatModal")
-    ?.classList.remove("show");
-}
-
-function sendWebsiteChatMessage() {
-  const input = document.getElementById("websiteChatInput");
-  const messages = document.getElementById("websiteChatMessages");
-
-  if (!input || !messages) return;
-
-  const text = input.value.trim();
-  if (!text) return;
-
-  messages.insertAdjacentHTML(
-    "beforeend",
-    `<div class="chat-message buyer">${text}</div>`
-  );
-
-  input.value = "";
-  messages.scrollTop = messages.scrollHeight;
-
-  setTimeout(() => {
-    messages.insertAdjacentHTML(
-      "beforeend",
-      `<div class="chat-message seller">Salamat sir, check namo ni para nimo.</div>`
-    );
+      messages.dataset.loaded = "true";
+    }
 
     messages.scrollTop = messages.scrollHeight;
-  }, 700);
-}
+  }
 
-document
-  .getElementById("websiteChatInput")
-  ?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      sendWebsiteChatMessage();
-    }
-  });
+  function closeWebsiteChat() {
+    document
+      .getElementById("websiteChatModal")
+      ?.classList.remove("show");
+  }
 
-function openWebsiteChat() {
+  function sendWebsiteChatMessage() {
+    const input = document.getElementById("websiteChatInput");
+    const messages = document.getElementById("websiteChatMessages");
 
-  const modal =
-    document.getElementById("websiteChatModal");
+    if (!input || !messages) return;
 
-  if (!modal) return;
+    const text = input.value.trim();
+    if (!text) return;
 
-  modal.classList.add("show");
-}
+    messages.insertAdjacentHTML(
+      "beforeend",
+      `<div class="chat-message buyer">${text}</div>`
+    );
 
-function closeWebsiteChat() {
+    input.value = "";
+    messages.scrollTop = messages.scrollHeight;
+
+    setTimeout(() => {
+      messages.insertAdjacentHTML(
+        "beforeend",
+        `<div class="chat-message seller">Salamat sir, check namo ni para nimo.</div>`
+      );
+
+      messages.scrollTop = messages.scrollHeight;
+    }, 700);
+  }
 
   document
-    .getElementById("websiteChatModal")
-    ?.classList.remove("show");
-}
+    .getElementById("websiteChatInput")
+    ?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        sendWebsiteChatMessage();
+      }
+    });
 
-function sendWebsiteChatMessage() {
+  function openWebsiteChat() {
 
-  const input =
-    document.getElementById("websiteChatInput");
+    const modal =
+      document.getElementById("websiteChatModal");
 
-  const messages =
-    document.getElementById("websiteChatMessages");
+    if (!modal) return;
 
-  if (!input || !messages) return;
+    modal.classList.add("show");
+  }
 
-  const text = input.value.trim();
+  function closeWebsiteChat() {
 
-  if (!text) return;
+    document
+      .getElementById("websiteChatModal")
+      ?.classList.remove("show");
+  }
 
-  messages.insertAdjacentHTML(
-    "beforeend",
-    `
+  function sendWebsiteChatMessage() {
+
+    const input =
+      document.getElementById("websiteChatInput");
+
+    const messages =
+      document.getElementById("websiteChatMessages");
+
+    if (!input || !messages) return;
+
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    messages.insertAdjacentHTML(
+      "beforeend",
+      `
     <div class="chat-message buyer">
       ${text}
     </div>
     `
-  );
+    );
 
-  input.value = "";
+    input.value = "";
 
-  messages.scrollTop =
-    messages.scrollHeight;
-}
+    messages.scrollTop =
+      messages.scrollHeight;
+  }
 
-function sendCurrentProductLink() {
+  function sendCurrentProductLink() {
 
-  const productName =
-    document.getElementById("productName")?.textContent || "Product";
+    const productName =
+      document.getElementById("productName")?.textContent || "Product";
 
-  const productPrice =
-    document.getElementById("productPrice")?.textContent || "";
+    const productPrice =
+      document.getElementById("productPrice")?.textContent || "";
 
-  const productImage =
-    document.getElementById("productImg")?.src || "";
+    const productImage =
+      document.getElementById("productImg")?.src || "";
 
-  const productLink =
-    window.location.href;
+    const productLink =
+      window.location.href;
 
-  const messages =
-    document.getElementById("websiteChatMessages");
+    const messages =
+      document.getElementById("websiteChatMessages");
 
-  if (!messages) return;
+    if (!messages) return;
 
-  messages.insertAdjacentHTML(
-    "beforeend",
-    `
+    messages.insertAdjacentHTML(
+      "beforeend",
+      `
     <div class="chat-message buyer">
 
       <div class="chat-product-card">
@@ -1522,55 +1539,55 @@ function sendCurrentProductLink() {
 
     </div>
     `
-  );
+    );
 
-  messages.scrollTop =
-    messages.scrollHeight;
-}
+    messages.scrollTop =
+      messages.scrollHeight;
+  }
 
-function openChatMediaUpload() {
+  function openChatMediaUpload() {
+
+    document
+      .getElementById("chatMediaInput")
+      ?.click();
+  }
 
   document
     .getElementById("chatMediaInput")
-    ?.click();
-}
+    ?.addEventListener("change", function () {
 
-document
-  .getElementById("chatMediaInput")
-  ?.addEventListener("change", function () {
+      const files =
+        Array.from(this.files || []);
 
-    const files =
-      Array.from(this.files || []);
+      const maxFiles = 3;
 
-    const maxFiles = 3;
+      const maxSize =
+        5 * 1024 * 1024;
 
-    const maxSize =
-      5 * 1024 * 1024;
+      if (files.length > maxFiles) {
 
-    if (files.length > maxFiles) {
+        alert("Maximum 3 photos only.");
 
-      alert("Maximum 3 photos only.");
+        this.value = "";
 
-      this.value = "";
+        return;
+      }
 
-      return;
-    }
+      const messages =
+        document.getElementById("websiteChatMessages");
 
-    const messages =
-      document.getElementById("websiteChatMessages");
+      if (!messages) return;
 
-    if (!messages) return;
+      files.forEach(file => {
 
-    files.forEach(file => {
+        if (file.size > maxSize) return;
 
-      if (file.size > maxSize) return;
+        const imageUrl =
+          URL.createObjectURL(file);
 
-      const imageUrl =
-        URL.createObjectURL(file);
-
-      messages.insertAdjacentHTML(
-        "beforeend",
-        `
+        messages.insertAdjacentHTML(
+          "beforeend",
+          `
         <div class="chat-message buyer">
           <img
             src="${imageUrl}"
@@ -1581,39 +1598,39 @@ document
           >
         </div>
         `
-      );
+        );
+      });
+
+      messages.scrollTop =
+        messages.scrollHeight;
+
+      this.value = "";
     });
 
-    messages.scrollTop =
-      messages.scrollHeight;
+  document
+    .getElementById("websiteChatInput")
+    ?.addEventListener("keydown", (e) => {
 
-    this.value = "";
-  });
+      if (e.key === "Enter") {
 
-document
-  .getElementById("websiteChatInput")
-  ?.addEventListener("keydown", (e) => {
+        sendWebsiteChatMessage();
 
-    if (e.key === "Enter") {
+      }
 
-      sendWebsiteChatMessage();
+    });
 
-    }
+  function getSupportStatus() {
+    const now = new Date();
+    const hour = now.getHours();
 
-  });
+    return hour >= 9 && hour < 21 ? "online" : "offline";
+  }
 
-function getSupportStatus() {
-  const now = new Date();
-  const hour = now.getHours();
+  function getAutoWelcomeMessage() {
+    const status = getSupportStatus();
 
-  return hour >= 9 && hour < 21 ? "online" : "offline";
-}
-
-function getAutoWelcomeMessage() {
-  const status = getSupportStatus();
-
-  if (status === "online") {
-    return `
+    if (status === "online") {
+      return `
       👋 Welcome to Drin Electronics!<br><br>
       Our support team is currently online and ready to assist you.<br><br>
       Please send your questions about this product and we’ll reply shortly.<br><br>
@@ -1622,9 +1639,9 @@ function getAutoWelcomeMessage() {
       📧 support@drinelectronicsph.com<br><br>
       Thank you for visiting Drin Electronics!
     `;
-  }
+    }
 
-  return `
+    return `
     👋 Welcome to Drin Electronics!<br><br>
     Our support team is currently offline.<br><br>
     Business Hours:<br>
@@ -1635,45 +1652,45 @@ function getAutoWelcomeMessage() {
     📧 support@drinelectronicsph.com<br><br>
     Thank you for visiting Drin Electronics!
   `;
-}
+  }
 
-function openWebsiteChat() {
-  const modal = document.getElementById("websiteChatModal");
-  const messages = document.getElementById("websiteChatMessages");
+  function openWebsiteChat() {
+    const modal = document.getElementById("websiteChatModal");
+    const messages = document.getElementById("websiteChatMessages");
 
-  if (!modal || !messages) return;
+    if (!modal || !messages) return;
 
-  modal.classList.add("show");
+    modal.classList.add("show");
 
-  if (!messages.dataset.loaded) {
-    messages.innerHTML = `
+    if (!messages.dataset.loaded) {
+      messages.innerHTML = `
       <div class="chat-message seller">
         ${getAutoWelcomeMessage()}
       </div>
     `;
 
-    messages.dataset.loaded = "true";
+      messages.dataset.loaded = "true";
+    }
+
+    messages.scrollTop = messages.scrollHeight;
   }
 
-  messages.scrollTop = messages.scrollHeight;
-}
+  function renderDynamicSidebarCategories() {
 
-function renderDynamicSidebarCategories() {
+    const sidebar =
+      document.getElementById("dynamicSidebarCategories");
 
-  const sidebar =
-    document.getElementById("dynamicSidebarCategories");
+    if (!sidebar) return;
 
-  if (!sidebar) return;
+    const categories = [
+      ...new Set(
+        products
+          .map(p => p.category)
+          .filter(Boolean)
+      )
+    ];
 
-  const categories = [
-    ...new Set(
-      products
-        .map(p => p.category)
-        .filter(Boolean)
-    )
-  ];
-
-  sidebar.innerHTML = `
+    sidebar.innerHTML = `
     <li>
       <a href="../index.html">
         All Products
@@ -1696,80 +1713,80 @@ function renderDynamicSidebarCategories() {
       </li>
     `).join("")}
   `;
-}
+  }
 
-const desktopSearchInput =
-  document.getElementById("desktopSearchInput");
+  const desktopSearchInput =
+    document.getElementById("desktopSearchInput");
 
-const desktopSearchBtn =
-  document.getElementById("desktopSearchBtn");
+  const desktopSearchBtn =
+    document.getElementById("desktopSearchBtn");
 
-function handleProductSearch() {
+  function handleProductSearch() {
 
-  const keyword =
-    desktopSearchInput?.value
-      .trim()
-      .toLowerCase();
+    const keyword =
+      desktopSearchInput?.value
+        .trim()
+        .toLowerCase();
 
-  if (!keyword) return;
+    if (!keyword) return;
 
-  const filtered =
-    products.filter(product => {
+    const filtered =
+      products.filter(product => {
 
-      return (
-        String(product.name || "").toLowerCase().includes(keyword) ||
-        String(product.category || "").toLowerCase().includes(keyword) ||
-        String(product.description || "").toLowerCase().includes(keyword)
-      );
+        return (
+          String(product.name || "").toLowerCase().includes(keyword) ||
+          String(product.category || "").toLowerCase().includes(keyword) ||
+          String(product.description || "").toLowerCase().includes(keyword)
+        );
 
-    });
+      });
 
-  renderSearchResults(filtered);
-  document
-    .getElementById("suggestedProducts")
-    ?.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
-}
+    renderSearchResults(filtered);
+    document
+      .getElementById("suggestedProducts")
+      ?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+  }
 
-desktopSearchBtn?.addEventListener(
-  "click",
-  handleProductSearch
-);
+  desktopSearchBtn?.addEventListener(
+    "click",
+    handleProductSearch
+  );
 
-desktopSearchInput?.addEventListener(
-  "keydown",
-  (e) => {
+  desktopSearchInput?.addEventListener(
+    "keydown",
+    (e) => {
 
-    if (e.key === "Enter") {
+      if (e.key === "Enter") {
 
-      handleProductSearch();
+        handleProductSearch();
+
+      }
 
     }
+  );
 
-  }
-);
+  function renderSearchResults(list) {
 
-function renderSearchResults(list) {
+    const container =
+      document.getElementById("suggestedProducts");
 
-  const container =
-    document.getElementById("suggestedProducts");
+    if (!container) return;
 
-  if (!container) return;
+    if (!list.length) {
 
-  if (!list.length) {
-
-    container.innerHTML = `
+      container.innerHTML = `
       <div class="suggested-card">
         <h3>No products found</h3>
       </div>
     `;
 
-    return;
-  }
+      return;
+    }
 
-  container.innerHTML = list.map(item => `
+    container.innerHTML = list.map(item => `
     <div
       class="homepage-product-card"
       onclick="openSuggestedProduct('${item.id}')"
@@ -1796,62 +1813,62 @@ function renderSearchResults(list) {
 
     </div>
   `).join("");
-}
+  }
 
-document
-  .getElementById("clearSearchBtn")
-  ?.addEventListener("click", () => {
-    const input = document.getElementById("desktopSearchInput");
+  document
+    .getElementById("clearSearchBtn")
+    ?.addEventListener("click", () => {
+      const input = document.getElementById("desktopSearchInput");
 
-    if (input) {
-      input.value = "";
-      input.focus();
-    }
-
-    renderSuggestedProducts();
-  });
-
-const shareBtn =
-  document.getElementById("shareBtn");
-
-shareBtn?.addEventListener(
-  "click",
-  async () => {
-
-    const shareData = {
-
-      title: product.name,
-
-      text:
-        product.description ||
-        "Check this product from Drin Electronics",
-
-      url: window.location.href
-    };
-
-    try {
-
-      if (navigator.share) {
-
-        await navigator.share(shareData);
-
-      } else {
-
-        await navigator.clipboard.writeText(
-          window.location.href
-        );
-
-        showMessage(
-          "Product link copied!",
-          "success"
-        );
+      if (input) {
+        input.value = "";
+        input.focus();
       }
 
-    } catch (err) {
+      renderSuggestedProducts();
+    });
 
-      console.log(err);
+  const shareBtn =
+    document.getElementById("shareBtn");
+
+  shareBtn?.addEventListener(
+    "click",
+    async () => {
+
+      const shareData = {
+
+        title: product.name,
+
+        text:
+          product.description ||
+          "Check this product from Drin Electronics",
+
+        url: window.location.href
+      };
+
+      try {
+
+        if (navigator.share) {
+
+          await navigator.share(shareData);
+
+        } else {
+
+          await navigator.clipboard.writeText(
+            window.location.href
+          );
+
+          showMessage(
+            "Product link copied!",
+            "success"
+          );
+        }
+
+      } catch (err) {
+
+        console.log(err);
+
+      }
 
     }
-
-  }
-);
+  );

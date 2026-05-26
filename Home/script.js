@@ -328,7 +328,8 @@ async function renderBranding() {
   if (error) return;
 
   const logo =
-    safeText(data?.logo_url);
+    data?.logo_url ||
+    "https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/logo.png";
 
   if (storeName) {
 
@@ -383,6 +384,8 @@ async function renderNavbarLogo() {
       .limit(1)
       .maybeSingle();
 
+  console.log("LOGO DATA:", data, error);
+
   if (error || !data?.logo_url) return;
 
   const logo =
@@ -391,1024 +394,1029 @@ async function renderNavbarLogo() {
   if (logo) {
 
     if (navLogo) {
-
       navLogo.src = logo + "?v=" + Date.now();
 
+      navLogo.onerror = () => {
+        console.log("Logo failed to load");
+      };
+
+      console.log("FINAL LOGO:", navLogo.src);
+
+      navLogo.style.display = "block";
+      navLogo.style.visibility = "visible";
       navLogo.classList.add("show");
     }
 
     if (mobileNavLogo) {
-
       mobileNavLogo.src = logo + "?v=" + Date.now();
-    }
 
-    if (navLogoFallback) {
+      mobileNavLogo.onerror = () => {
+        console.log("Mobile logo failed to load");
+      };
 
-      navLogoFallback.style.display = "none";
+      console.log("FINAL MOBILE LOGO:", mobileNavLogo.src);
     }
 
   }
 
-}
-
-/* SIDEBAR / SEARCH */
-function openSidebar() {
-  if (!sidebar || !overlay) return;
-  sidebar.classList.add("active");
-  overlay.classList.add("active");
-}
-
-function closeSidebar() {
-  if (!sidebar || !overlay) return;
-  sidebar.classList.remove("active");
-  overlay.classList.remove("active");
-}
-
-function toggleSidebar() {
-  const isOpen = sidebar?.classList.contains("active");
-  if (isOpen) closeSidebar();
-  else {
-    closeMobileSearch();
-    openSidebar();
+  /* SIDEBAR / SEARCH */
+  function openSidebar() {
+    if (!sidebar || !overlay) return;
+    sidebar.classList.add("active");
+    overlay.classList.add("active");
   }
-}
 
-function openMobileSearch() {
-  if (!mobileSearchPanel) return;
-  mobileSearchPanel.classList.add("active");
-  closeSidebar();
+  function closeSidebar() {
+    if (!sidebar || !overlay) return;
+    sidebar.classList.remove("active");
+    overlay.classList.remove("active");
+  }
 
-  setTimeout(() => {
-    if (mobileSearchInput) mobileSearchInput.focus();
-  }, 80);
-}
-
-function closeMobileSearch() {
-  if (!mobileSearchPanel) return;
-  mobileSearchPanel.classList.remove("active");
-}
-
-function clearMobileSearch() {
-  if (!mobileSearchInput) return;
-  mobileSearchInput.value = "";
-  mobileSearchInput.focus();
-}
-
-function updateCartCount() {
-
-  const cartData =
-    JSON.parse(localStorage.getItem("drinCart")) || [];
-
-  const totalItems = cartData.reduce((sum, item) => {
-    return sum + safeNumber(item.quantity, 0);
-  }, 0);
-
-  document
-    .querySelectorAll("#cartCount, #mobileCartCount")
-    .forEach((badge) => {
-      badge.textContent = totalItems;
-    });
-}
-
-/* BANNER */
-function normalizeBannerItem(item, index) {
-  return {
-    id: safeText(item?.id, `banner-${index + 1}`),
-    image: safeText(item?.image, ""),
-    title: safeText(item?.title, "Drin Electronics"),
-    description: safeText(
-      item?.description,
-      "Quality amplifiers, electronics parts, and reliable services"
-    ),
-    link: safeText(item?.link, ""),
-    active: item?.active === undefined ? true : Boolean(item.active),
-    order: safeNumber(item?.order, index + 1)
-  };
-}
-
-function getActiveBanners() {
-  const normalized = rawBanners
-    .map(normalizeBannerItem)
-    .filter((item) => item.active && item.image)
-    .sort((a, b) => a.order - b.order)
-    .slice(0, 5);
-
-  if (normalized.length) return normalized;
-
-  return [
-    {
-      id: "default-banner-1",
-      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1400&q=80",
-      title: "Drin Electronics",
-      description: "Quality amplifiers, electronics parts, and reliable services",
-      link: "",
-      active: true,
-      order: 1
-    },
-    {
-      id: "default-banner-2",
-      image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=1400&q=80",
-      title: "Trusted Audio Components",
-      description: "Speakers, MOSFET, capacitors, and more for your projects",
-      link: "",
-      active: true,
-      order: 2
-    },
-    {
-      id: "default-banner-3",
-      image: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=1400&q=80",
-      title: "Reliable Electronics Shop",
-      description: "Built for repair, upgrade, and performance",
-      link: "",
-      active: true,
-      order: 3
+  function toggleSidebar() {
+    const isOpen = sidebar?.classList.contains("active");
+    if (isOpen) closeSidebar();
+    else {
+      closeMobileSearch();
+      openSidebar();
     }
-  ];
-}
+  }
 
-function createBannerSlide(banner) {
-  const slide = document.createElement("div");
-  slide.className = "banner-slide";
+  function openMobileSearch() {
+    if (!mobileSearchPanel) return;
+    mobileSearchPanel.classList.add("active");
+    closeSidebar();
 
-  slide.style.backgroundImage = `
+    setTimeout(() => {
+      if (mobileSearchInput) mobileSearchInput.focus();
+    }, 80);
+  }
+
+  function closeMobileSearch() {
+    if (!mobileSearchPanel) return;
+    mobileSearchPanel.classList.remove("active");
+  }
+
+  function clearMobileSearch() {
+    if (!mobileSearchInput) return;
+    mobileSearchInput.value = "";
+    mobileSearchInput.focus();
+  }
+
+  function updateCartCount() {
+
+    const cartData =
+      JSON.parse(localStorage.getItem("drinCart")) || [];
+
+    const totalItems = cartData.reduce((sum, item) => {
+      return sum + safeNumber(item.quantity, 0);
+    }, 0);
+
+    document
+      .querySelectorAll("#cartCount, #mobileCartCount")
+      .forEach((badge) => {
+        badge.textContent = totalItems;
+      });
+  }
+
+  /* BANNER */
+  function normalizeBannerItem(item, index) {
+    return {
+      id: safeText(item?.id, `banner-${index + 1}`),
+      image: safeText(item?.image, ""),
+      title: safeText(item?.title, "Drin Electronics"),
+      description: safeText(
+        item?.description,
+        "Quality amplifiers, electronics parts, and reliable services"
+      ),
+      link: safeText(item?.link, ""),
+      active: item?.active === undefined ? true : Boolean(item.active),
+      order: safeNumber(item?.order, index + 1)
+    };
+  }
+
+  function getActiveBanners() {
+    const normalized = rawBanners
+      .map(normalizeBannerItem)
+      .filter((item) => item.active && item.image)
+      .sort((a, b) => a.order - b.order)
+      .slice(0, 5);
+
+    if (normalized.length) return normalized;
+
+    return [
+      {
+        id: "default-banner-1",
+        image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1400&q=80",
+        title: "Drin Electronics",
+        description: "Quality amplifiers, electronics parts, and reliable services",
+        link: "",
+        active: true,
+        order: 1
+      },
+      {
+        id: "default-banner-2",
+        image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=1400&q=80",
+        title: "Trusted Audio Components",
+        description: "Speakers, MOSFET, capacitors, and more for your projects",
+        link: "",
+        active: true,
+        order: 2
+      },
+      {
+        id: "default-banner-3",
+        image: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=1400&q=80",
+        title: "Reliable Electronics Shop",
+        description: "Built for repair, upgrade, and performance",
+        link: "",
+        active: true,
+        order: 3
+      }
+    ];
+  }
+
+  function createBannerSlide(banner) {
+    const slide = document.createElement("div");
+    slide.className = "banner-slide";
+
+    slide.style.backgroundImage = `
     linear-gradient(to right, rgba(0,0,0,0.52), rgba(0,0,0,0.12)),
     url('${banner.image}')
   `;
 
-  slide.innerHTML = `
+    slide.innerHTML = `
     <div class="banner-content">
       <h2>${escapeHtml(banner.title || "Drin Electronics")}</h2>
       <p>${escapeHtml(
-    banner.description || "Quality amplifiers, electronics parts, and reliable services"
-  )}</p>
+      banner.description || "Quality amplifiers, electronics parts, and reliable services"
+    )}</p>
     </div>
   `;
 
-  return slide;
-}
-
-function getRealBannerIndex() {
-  if (!activeBanners.length) return 0;
-  return currentBannerIndex % activeBanners.length;
-}
-
-function renderBannerDots() {
-  if (!bannerDots) return;
-
-  bannerDots.innerHTML = "";
-
-  activeBanners.forEach((_, index) => {
-    const dot = document.createElement("button");
-    dot.type = "button";
-    dot.className = `banner-dot ${index === getRealBannerIndex() ? "active" : ""}`;
-    dot.setAttribute("aria-label", `Go to banner ${index + 1}`);
-
-    dot.addEventListener("click", (event) => {
-      event.stopPropagation();
-      goToBanner(index);
-      restartBannerAutoplay();
-    });
-
-    bannerDots.appendChild(dot);
-  });
-}
-
-function updateBannerDots() {
-  if (!bannerDots) return;
-
-  const dots = bannerDots.querySelectorAll(".banner-dot");
-  const realIndex = getRealBannerIndex();
-
-  dots.forEach((dot, index) => {
-    dot.classList.toggle("active", index === realIndex);
-  });
-}
-
-function updateBannerPosition(withTransition = true) {
-  if (!bannerTrack) return;
-
-  bannerTrack.style.transition = withTransition ? "transform 0.5s ease" : "none";
-  bannerTrack.style.transform = `translateX(-${currentBannerIndex * 100}%)`;
-
-  updateBannerDots();
-
-  if (bannerShell) {
-    const currentBanner = activeBanners[getRealBannerIndex()];
-    bannerShell.style.cursor = currentBanner?.link ? "pointer" : "default";
+    return slide;
   }
-}
 
-function goToBanner(index) {
-  if (!activeBanners.length || isBannerResetting) return;
-  currentBannerIndex = index;
-  updateBannerPosition(true);
-}
+  function getRealBannerIndex() {
+    if (!activeBanners.length) return 0;
+    return currentBannerIndex % activeBanners.length;
+  }
 
-function nextBanner() {
-  if (!activeBanners.length || isBannerResetting) return;
+  function renderBannerDots() {
+    if (!bannerDots) return;
 
-  currentBannerIndex++;
-  updateBannerPosition(true);
+    bannerDots.innerHTML = "";
 
-  if (currentBannerIndex === activeBanners.length) {
-    isBannerResetting = true;
+    activeBanners.forEach((_, index) => {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = `banner-dot ${index === getRealBannerIndex() ? "active" : ""}`;
+      dot.setAttribute("aria-label", `Go to banner ${index + 1}`);
 
-    setTimeout(() => {
-      currentBannerIndex = 0;
+      dot.addEventListener("click", (event) => {
+        event.stopPropagation();
+        goToBanner(index);
+        restartBannerAutoplay();
+      });
+
+      bannerDots.appendChild(dot);
+    });
+  }
+
+  function updateBannerDots() {
+    if (!bannerDots) return;
+
+    const dots = bannerDots.querySelectorAll(".banner-dot");
+    const realIndex = getRealBannerIndex();
+
+    dots.forEach((dot, index) => {
+      dot.classList.toggle("active", index === realIndex);
+    });
+  }
+
+  function updateBannerPosition(withTransition = true) {
+    if (!bannerTrack) return;
+
+    bannerTrack.style.transition = withTransition ? "transform 0.5s ease" : "none";
+    bannerTrack.style.transform = `translateX(-${currentBannerIndex * 100}%)`;
+
+    updateBannerDots();
+
+    if (bannerShell) {
+      const currentBanner = activeBanners[getRealBannerIndex()];
+      bannerShell.style.cursor = currentBanner?.link ? "pointer" : "default";
+    }
+  }
+
+  function goToBanner(index) {
+    if (!activeBanners.length || isBannerResetting) return;
+    currentBannerIndex = index;
+    updateBannerPosition(true);
+  }
+
+  function nextBanner() {
+    if (!activeBanners.length || isBannerResetting) return;
+
+    currentBannerIndex++;
+    updateBannerPosition(true);
+
+    if (currentBannerIndex === activeBanners.length) {
+      isBannerResetting = true;
+
+      setTimeout(() => {
+        currentBannerIndex = 0;
+        updateBannerPosition(false);
+
+        setTimeout(() => {
+          isBannerResetting = false;
+        }, 30);
+      }, 500);
+    }
+  }
+
+  function prevBanner() {
+    if (!activeBanners.length || isBannerResetting) return;
+
+    if (currentBannerIndex === 0) {
+      isBannerResetting = true;
+      currentBannerIndex = activeBanners.length;
       updateBannerPosition(false);
 
       setTimeout(() => {
-        isBannerResetting = false;
+        currentBannerIndex = activeBanners.length - 1;
+        updateBannerPosition(true);
+
+        setTimeout(() => {
+          isBannerResetting = false;
+        }, 500);
       }, 30);
-    }, 500);
-  }
-}
-
-function prevBanner() {
-  if (!activeBanners.length || isBannerResetting) return;
-
-  if (currentBannerIndex === 0) {
-    isBannerResetting = true;
-    currentBannerIndex = activeBanners.length;
-    updateBannerPosition(false);
-
-    setTimeout(() => {
-      currentBannerIndex = activeBanners.length - 1;
+    } else {
+      currentBannerIndex--;
       updateBannerPosition(true);
-
-      setTimeout(() => {
-        isBannerResetting = false;
-      }, 500);
-    }, 30);
-  } else {
-    currentBannerIndex--;
-    updateBannerPosition(true);
-  }
-}
-
-function stopBannerAutoplay() {
-  if (bannerInterval) {
-    clearInterval(bannerInterval);
-    bannerInterval = null;
-  }
-}
-
-function startBannerAutoplay() {
-  stopBannerAutoplay();
-
-  if (activeBanners.length <= 1) return;
-
-  bannerInterval = setInterval(() => {
-    nextBanner();
-  }, 4000);
-}
-
-function restartBannerAutoplay() {
-  startBannerAutoplay();
-}
-
-function handleBannerClick() {
-  const currentBanner = activeBanners[getRealBannerIndex()];
-  if (!currentBanner || !currentBanner.link) return;
-  window.location.href = currentBanner.link;
-}
-
-function renderBanner() {
-  if (!bannerTrack || !bannerShell || !bannerPrevBtn || !bannerNextBtn || !bannerDots) return;
-
-  activeBanners = getActiveBanners();
-  currentBannerIndex = 0;
-  isBannerResetting = false;
-  bannerTrack.innerHTML = "";
-  bannerDots.innerHTML = "";
-
-  activeBanners.forEach((banner) => {
-    bannerTrack.appendChild(createBannerSlide(banner));
-  });
-
-  if (activeBanners.length > 1) {
-    const firstClone = createBannerSlide(activeBanners[0]);
-    bannerTrack.appendChild(firstClone);
+    }
   }
 
-  const isSlider = activeBanners.length > 1;
-
-  bannerPrevBtn.style.display = isSlider ? "inline-flex" : "none";
-  bannerNextBtn.style.display = isSlider ? "inline-flex" : "none";
-  bannerDots.style.display = isSlider ? "flex" : "none";
-
-  if (isSlider) renderBannerDots();
-
-  updateBannerPosition(false);
-  startBannerAutoplay();
-}
-
-/* FILTER / SEARCH */
-function filterByCategory(categoryName) {
-  closeSidebar();
-
-  const filtered = products.filter(
-    (product) => safeText(product.category).toLowerCase() === categoryName.toLowerCase()
-  );
-
-  renderHomepageProducts(filtered);
-
-  const section = document.getElementById("productsSection");
-  if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-function handleSearch(keyword) {
-  const safeKeyword = safeText(keyword).trim().toLowerCase();
-
-  if (!safeKeyword) {
-    renderHomepageProducts(products);
-    updateCartCount();
-    return;
+  function stopBannerAutoplay() {
+    if (bannerInterval) {
+      clearInterval(bannerInterval);
+      bannerInterval = null;
+    }
   }
 
-  const filtered = products.filter((product) => {
-    const name = safeText(product.name).toLowerCase();
-    const brand = safeText(product.brand).toLowerCase();
-    const category = safeText(product.category).toLowerCase();
-    const description = safeText(product.description).toLowerCase();
+  function startBannerAutoplay() {
+    stopBannerAutoplay();
 
-    return (
-      name.includes(safeKeyword) ||
-      brand.includes(safeKeyword) ||
-      category.includes(safeKeyword) ||
-      description.includes(safeKeyword)
+    if (activeBanners.length <= 1) return;
+
+    bannerInterval = setInterval(() => {
+      nextBanner();
+    }, 4000);
+  }
+
+  function restartBannerAutoplay() {
+    startBannerAutoplay();
+  }
+
+  function handleBannerClick() {
+    const currentBanner = activeBanners[getRealBannerIndex()];
+    if (!currentBanner || !currentBanner.link) return;
+    window.location.href = currentBanner.link;
+  }
+
+  function renderBanner() {
+    if (!bannerTrack || !bannerShell || !bannerPrevBtn || !bannerNextBtn || !bannerDots) return;
+
+    activeBanners = getActiveBanners();
+    currentBannerIndex = 0;
+    isBannerResetting = false;
+    bannerTrack.innerHTML = "";
+    bannerDots.innerHTML = "";
+
+    activeBanners.forEach((banner) => {
+      bannerTrack.appendChild(createBannerSlide(banner));
+    });
+
+    if (activeBanners.length > 1) {
+      const firstClone = createBannerSlide(activeBanners[0]);
+      bannerTrack.appendChild(firstClone);
+    }
+
+    const isSlider = activeBanners.length > 1;
+
+    bannerPrevBtn.style.display = isSlider ? "inline-flex" : "none";
+    bannerNextBtn.style.display = isSlider ? "inline-flex" : "none";
+    bannerDots.style.display = isSlider ? "flex" : "none";
+
+    if (isSlider) renderBannerDots();
+
+    updateBannerPosition(false);
+    startBannerAutoplay();
+  }
+
+  /* FILTER / SEARCH */
+  function filterByCategory(categoryName) {
+    closeSidebar();
+
+    const filtered = products.filter(
+      (product) => safeText(product.category).toLowerCase() === categoryName.toLowerCase()
     );
-  });
 
-  renderHomepageProducts(filtered);
+    renderHomepageProducts(filtered);
 
-  const section = document.getElementById("productsSection");
-  if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
-}
+    const section = document.getElementById("productsSection");
+    if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
-/* EVENTS */
-if (menuBtn) menuBtn.addEventListener("click", toggleSidebar);
+  function handleSearch(keyword) {
+    const safeKeyword = safeText(keyword).trim().toLowerCase();
 
-if (overlay) {
-  overlay.addEventListener("click", () => {
-    closeSidebar();
-    closeMobileSearch();
-  });
-}
-
-if (mobileSearchToggleBtn) mobileSearchToggleBtn.addEventListener("click", openMobileSearch);
-if (closeMobileSearchBtn) closeMobileSearchBtn.addEventListener("click", closeMobileSearch);
-if (clearMobileSearchBtn) clearMobileSearchBtn.addEventListener("click", clearMobileSearch);
-
-if (desktopSearchBtn) {
-  desktopSearchBtn.addEventListener("click", () => {
-    handleSearch(desktopSearchInput?.value || "");
-  });
-}
-
-if (desktopSearchInput) {
-  desktopSearchInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      handleSearch(desktopSearchInput.value);
+    if (!safeKeyword) {
+      renderHomepageProducts(products);
+      updateCartCount();
+      return;
     }
-  });
-}
 
-if (mobileSearchInput) {
-  mobileSearchInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      handleSearch(mobileSearchInput.value);
+    const filtered = products.filter((product) => {
+      const name = safeText(product.name).toLowerCase();
+      const brand = safeText(product.brand).toLowerCase();
+      const category = safeText(product.category).toLowerCase();
+      const description = safeText(product.description).toLowerCase();
+
+      return (
+        name.includes(safeKeyword) ||
+        brand.includes(safeKeyword) ||
+        category.includes(safeKeyword) ||
+        description.includes(safeKeyword)
+      );
+    });
+
+    renderHomepageProducts(filtered);
+
+    const section = document.getElementById("productsSection");
+    if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  /* EVENTS */
+  if (menuBtn) menuBtn.addEventListener("click", toggleSidebar);
+
+  if (overlay) {
+    overlay.addEventListener("click", () => {
+      closeSidebar();
       closeMobileSearch();
+    });
+  }
+
+  if (mobileSearchToggleBtn) mobileSearchToggleBtn.addEventListener("click", openMobileSearch);
+  if (closeMobileSearchBtn) closeMobileSearchBtn.addEventListener("click", closeMobileSearch);
+  if (clearMobileSearchBtn) clearMobileSearchBtn.addEventListener("click", clearMobileSearch);
+
+  if (desktopSearchBtn) {
+    desktopSearchBtn.addEventListener("click", () => {
+      handleSearch(desktopSearchInput?.value || "");
+    });
+  }
+
+  if (desktopSearchInput) {
+    desktopSearchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handleSearch(desktopSearchInput.value);
+      }
+    });
+  }
+
+  if (mobileSearchInput) {
+    mobileSearchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handleSearch(mobileSearchInput.value);
+        closeMobileSearch();
+      }
+    });
+  }
+
+  if (bannerPrevBtn) {
+    bannerPrevBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      prevBanner();
+      restartBannerAutoplay();
+    });
+  }
+
+  if (bannerNextBtn) {
+    bannerNextBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      nextBanner();
+      restartBannerAutoplay();
+    });
+  }
+
+  if (bannerShell) {
+    bannerShell.addEventListener("click", handleBannerClick);
+    bannerShell.addEventListener("mouseenter", stopBannerAutoplay);
+    bannerShell.addEventListener("mouseleave", startBannerAutoplay);
+  }
+
+  /* BANNER SWIPE / DRAG */
+  let bannerStartX = 0;
+  let bannerEndX = 0;
+  let isBannerDragging = false;
+
+  if (bannerTrack) {
+    bannerTrack.addEventListener("touchstart", (event) => {
+      bannerStartX = event.touches[0].clientX;
+      bannerEndX = bannerStartX;
+      stopBannerAutoplay();
+    });
+
+    bannerTrack.addEventListener("touchmove", (event) => {
+      bannerEndX = event.touches[0].clientX;
+    });
+
+    bannerTrack.addEventListener("touchend", () => {
+      const diff = bannerStartX - bannerEndX;
+
+      if (Math.abs(diff) > 50) {
+        diff > 0 ? nextBanner() : prevBanner();
+      }
+
+      startBannerAutoplay();
+    });
+
+    bannerTrack.addEventListener("mousedown", (event) => {
+      isBannerDragging = true;
+      bannerStartX = event.clientX;
+      bannerEndX = bannerStartX;
+      stopBannerAutoplay();
+    });
+
+    bannerTrack.addEventListener("mousemove", (event) => {
+      if (!isBannerDragging) return;
+      bannerEndX = event.clientX;
+    });
+
+    bannerTrack.addEventListener("mouseup", () => {
+      if (!isBannerDragging) return;
+
+      const diff = bannerStartX - bannerEndX;
+
+      if (Math.abs(diff) > 50) {
+        diff > 0 ? nextBanner() : prevBanner();
+      }
+
+      isBannerDragging = false;
+      startBannerAutoplay();
+    });
+
+    bannerTrack.addEventListener("mouseleave", () => {
+      if (!isBannerDragging) return;
+      isBannerDragging = false;
+      startBannerAutoplay();
+    });
+  }
+
+  /* ACCOUNT */
+  if (accountBtn) {
+    accountBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      accountDropdown?.classList.toggle("show");
+    });
+  }
+
+  document.addEventListener("click", (event) => {
+    if (!accountBtn?.contains(event.target) && !accountDropdown?.contains(event.target)) {
+      accountDropdown?.classList.remove("show");
     }
   });
-}
 
-if (bannerPrevBtn) {
-  bannerPrevBtn.addEventListener("click", (event) => {
-    event.stopPropagation();
-    prevBanner();
-    restartBannerAutoplay();
-  });
-}
-
-if (bannerNextBtn) {
-  bannerNextBtn.addEventListener("click", (event) => {
-    event.stopPropagation();
-    nextBanner();
-    restartBannerAutoplay();
-  });
-}
-
-if (bannerShell) {
-  bannerShell.addEventListener("click", handleBannerClick);
-  bannerShell.addEventListener("mouseenter", stopBannerAutoplay);
-  bannerShell.addEventListener("mouseleave", startBannerAutoplay);
-}
-
-/* BANNER SWIPE / DRAG */
-let bannerStartX = 0;
-let bannerEndX = 0;
-let isBannerDragging = false;
-
-if (bannerTrack) {
-  bannerTrack.addEventListener("touchstart", (event) => {
-    bannerStartX = event.touches[0].clientX;
-    bannerEndX = bannerStartX;
-    stopBannerAutoplay();
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeSidebar();
+      closeMobileSearch();
+      accountDropdown?.classList.remove("show");
+    }
   });
 
-  bannerTrack.addEventListener("touchmove", (event) => {
-    bannerEndX = event.touches[0].clientX;
-  });
+  /* CATEGORY TOGGLE */
+  function toggleCategories() {
+    const grid = document.querySelector(".shortcut-grid");
+    const btn = document.getElementById("categoryToggleBtn");
 
-  bannerTrack.addEventListener("touchend", () => {
-    const diff = bannerStartX - bannerEndX;
+    if (!grid || !btn) return;
 
-    if (Math.abs(diff) > 50) {
-      diff > 0 ? nextBanner() : prevBanner();
+    grid.classList.toggle("expanded");
+    btn.textContent = grid.classList.contains("expanded") ? "View Less" : "View All";
+  }
+
+  function scrollToCategories() {
+    const section = document.getElementById("categorySection");
+    if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  /* ===============================
+     START DYNAMIC VOUCHERS
+     purpose: load vouchers from Supabase/Admin
+  ================================ */
+
+  async function loadVouchersFromSupabase() {
+    const voucherList = document.getElementById("voucherList");
+    const voucherSection = document.getElementById("voucherSection");
+
+    if (!voucherList) return;
+
+    const { data, error } = await supabaseClient
+      .from("vouchers")
+      .select("*")
+      .eq("is_active", true)
+      .eq("voucher_type", "regular")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Voucher load error:", error);
+      voucherList.innerHTML = "";
+      if (voucherSection) voucherSection.style.display = "none";
+      return;
     }
 
-    startBannerAutoplay();
-  });
-
-  bannerTrack.addEventListener("mousedown", (event) => {
-    isBannerDragging = true;
-    bannerStartX = event.clientX;
-    bannerEndX = bannerStartX;
-    stopBannerAutoplay();
-  });
-
-  bannerTrack.addEventListener("mousemove", (event) => {
-    if (!isBannerDragging) return;
-    bannerEndX = event.clientX;
-  });
-
-  bannerTrack.addEventListener("mouseup", () => {
-    if (!isBannerDragging) return;
-
-    const diff = bannerStartX - bannerEndX;
-
-    if (Math.abs(diff) > 50) {
-      diff > 0 ? nextBanner() : prevBanner();
+    if (!data || data.length === 0) {
+      voucherList.innerHTML = "";
+      if (voucherSection) voucherSection.style.display = "none";
+      return;
     }
 
-    isBannerDragging = false;
-    startBannerAutoplay();
-  });
+    if (voucherSection) voucherSection.style.display = "block";
 
-  bannerTrack.addEventListener("mouseleave", () => {
-    if (!isBannerDragging) return;
-    isBannerDragging = false;
-    startBannerAutoplay();
-  });
-}
+    voucherList.innerHTML = data.map((voucher) => {
+      const amount = safeNumber(voucher.discount_amount, 0);
+      const minSpend = safeNumber(voucher.min_spend, 0);
+      const code = safeText(voucher.code, "DRIN");
 
-/* ACCOUNT */
-if (accountBtn) {
-  accountBtn.addEventListener("click", (event) => {
-    event.stopPropagation();
-    accountDropdown?.classList.toggle("show");
-  });
-}
-
-document.addEventListener("click", (event) => {
-  if (!accountBtn?.contains(event.target) && !accountDropdown?.contains(event.target)) {
-    accountDropdown?.classList.remove("show");
-  }
-});
-
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    closeSidebar();
-    closeMobileSearch();
-    accountDropdown?.classList.remove("show");
-  }
-});
-
-/* CATEGORY TOGGLE */
-function toggleCategories() {
-  const grid = document.querySelector(".shortcut-grid");
-  const btn = document.getElementById("categoryToggleBtn");
-
-  if (!grid || !btn) return;
-
-  grid.classList.toggle("expanded");
-  btn.textContent = grid.classList.contains("expanded") ? "View Less" : "View All";
-}
-
-function scrollToCategories() {
-  const section = document.getElementById("categorySection");
-  if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-/* ===============================
-   START DYNAMIC VOUCHERS
-   purpose: load vouchers from Supabase/Admin
-================================ */
-
-async function loadVouchersFromSupabase() {
-  const voucherList = document.getElementById("voucherList");
-  const voucherSection = document.getElementById("voucherSection");
-
-  if (!voucherList) return;
-
-  const { data, error } = await supabaseClient
-    .from("vouchers")
-    .select("*")
-    .eq("is_active", true)
-    .eq("voucher_type", "regular")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Voucher load error:", error);
-    voucherList.innerHTML = "";
-    if (voucherSection) voucherSection.style.display = "none";
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    voucherList.innerHTML = "";
-    if (voucherSection) voucherSection.style.display = "none";
-    return;
-  }
-
-  if (voucherSection) voucherSection.style.display = "block";
-
-  voucherList.innerHTML = data.map((voucher) => {
-    const amount = safeNumber(voucher.discount_amount, 0);
-    const minSpend = safeNumber(voucher.min_spend, 0);
-    const code = safeText(voucher.code, "DRIN");
-
-    return `
+      return `
       <div class="voucher-card">
         <h4>₱${amount.toLocaleString()} OFF</h4>
         <span>Min ₱${minSpend.toLocaleString()}</span>
         <button onclick="claimVoucher('${code}')">Claim</button>
       </div>
     `;
-  }).join("");
-}
-
-async function claimVoucher(code) {
-
-  const {
-    data: { user }
-  } = await supabaseClient.auth.getUser();
-
-  if (!user) {
-
-    alert("Please login first to claim this voucher.");
-
-    window.location.href = "./login/";
-
-    return;
+    }).join("");
   }
 
-  localStorage.setItem(
-    "claimedVoucherCode",
-    code
-  );
+  async function claimVoucher(code) {
 
-  alert(`Voucher ${code} claimed!`);
-}
+    const {
+      data: { user }
+    } = await supabaseClient.auth.getUser();
 
-/* END DYNAMIC VOUCHERS */
+    if (!user) {
 
-/* INIT */
-async function loadProductsFromSupabase() {
+      alert("Please login first to claim this voucher.");
 
-  const { data, error } = await supabaseClient
-    .from("products")
-    .select("*")
-    .order("created_at", { ascending: false });
+      window.location.href = "./login/";
 
-  if (error) {
-    console.error(error);
-    return;
-  }
-  products = (data || []).map((item) => {
+      return;
+    }
 
-    const firstVariation =
-      Array.isArray(item.variations) && item.variations.length
-        ? item.variations[0]
-        : {};
-
-    const mainPrice = safeNumber(item.price || firstVariation.price, 0);
-
-    const mainDiscount = safeNumber(
-      item.discount_price ||
-      item.discountPrice ||
-      firstVariation.discountPrice ||
-      firstVariation.discount_price ||
-      0,
-      0
+    localStorage.setItem(
+      "claimedVoucherCode",
+      code
     );
 
-    const variants =
-      item.variations && item.variations.length
-        ? item.variations.map((variant) => ({
-          ...variant,
-          discountPrice:
-            variant.discountPrice ||
-            variant.discount_price ||
-            item.discount_price ||
-            item.discountPrice ||
-            0
-        }))
-        : [
-          {
-            label: "Default",
-            price: mainPrice,
-            discountPrice: mainDiscount,
-            stock: item.stock,
-            weight: item.weight,
-            length: item.length,
-            width: item.width,
-            height: item.height,
-            image: item.image
-          }
-        ];
+    alert(`Voucher ${code} claimed!`);
+  }
 
-    return {
-      id: item.id,
-      name: item.title,
-      brand: item.brand || "",
-      category: item.category,
-      description: item.description,
-      productType: variants.length > 1 ? "variant" : "single",
-      variantTitle: "Options",
-      variants,
-      image: item.image,
-      images: [item.image || "https://via.placeholder.com/400x300?text=No+Image"],
-      price: mainPrice,
-      discountPrice: mainDiscount,
-      stock: item.stock
-    };
-  });
+  /* END DYNAMIC VOUCHERS */
+
+  /* INIT */
+  async function loadProductsFromSupabase() {
+
+    const { data, error } = await supabaseClient
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+    products = (data || []).map((item) => {
+
+      const firstVariation =
+        Array.isArray(item.variations) && item.variations.length
+          ? item.variations[0]
+          : {};
+
+      const mainPrice = safeNumber(item.price || firstVariation.price, 0);
+
+      const mainDiscount = safeNumber(
+        item.discount_price ||
+        item.discountPrice ||
+        firstVariation.discountPrice ||
+        firstVariation.discount_price ||
+        0,
+        0
+      );
+
+      const variants =
+        item.variations && item.variations.length
+          ? item.variations.map((variant) => ({
+            ...variant,
+            discountPrice:
+              variant.discountPrice ||
+              variant.discount_price ||
+              item.discount_price ||
+              item.discountPrice ||
+              0
+          }))
+          : [
+            {
+              label: "Default",
+              price: mainPrice,
+              discountPrice: mainDiscount,
+              stock: item.stock,
+              weight: item.weight,
+              length: item.length,
+              width: item.width,
+              height: item.height,
+              image: item.image
+            }
+          ];
+
+      return {
+        id: item.id,
+        name: item.title,
+        brand: item.brand || "",
+        category: item.category,
+        description: item.description,
+        productType: variants.length > 1 ? "variant" : "single",
+        variantTitle: "Options",
+        variants,
+        image: item.image,
+        images: [item.image || "https://via.placeholder.com/400x300?text=No+Image"],
+        price: mainPrice,
+        discountPrice: mainDiscount,
+        stock: item.stock
+      };
+    });
+
+    const selectedCategory =
+      localStorage.getItem("selectedCategory");
+
+    if (selectedCategory) {
+
+      filterByCategory(selectedCategory);
+
+      localStorage.removeItem("selectedCategory");
+
+    } else {
+
+      renderHomepageProducts(products);
+
+    }
+  }
+
+  (async () => {
+
+    applyTheme();
+
+    await renderBranding();
+
+    await renderNavbarLogo();
+
+    await renderFavicon();
+
+    renderBanner();
+
+    loadProductsFromSupabase();
+
+    loadVouchersFromSupabase();
+
+    updateCartCount();
+
+  })();
 
   const selectedCategory =
     localStorage.getItem("selectedCategory");
 
   if (selectedCategory) {
 
-    filterByCategory(selectedCategory);
+    setTimeout(() => {
 
-    localStorage.removeItem("selectedCategory");
+      filterByCategory(selectedCategory);
 
-  } else {
+      localStorage.removeItem("selectedCategory");
 
-    renderHomepageProducts(products);
+    }, 1200);
 
   }
-}
-
-(async () => {
-
-  applyTheme();
-
-  await renderBranding();
-
-  await renderNavbarLogo();
-
-  await renderFavicon();
-
-  renderBanner();
-
-  loadProductsFromSupabase();
 
   loadVouchersFromSupabase();
-
   updateCartCount();
 
-})();
+  /* GLOBAL */
+  window.products = products;
+  window.closeSidebar = closeSidebar;
+  window.filterByCategory = filterByCategory;
+  window.renderHomepageProducts = renderHomepageProducts;
+  window.toggleCategories = toggleCategories;
+  window.scrollToCategories = scrollToCategories;
 
-const selectedCategory =
-  localStorage.getItem("selectedCategory");
+  // 📱 MOBILE BOTTOM NAV FUNCTIONS
 
-if (selectedCategory) {
-
-  setTimeout(() => {
-
-    filterByCategory(selectedCategory);
-
-    localStorage.removeItem("selectedCategory");
-
-  }, 1200);
-
-}
-
-loadVouchersFromSupabase();
-updateCartCount();
-
-/* GLOBAL */
-window.products = products;
-window.closeSidebar = closeSidebar;
-window.filterByCategory = filterByCategory;
-window.renderHomepageProducts = renderHomepageProducts;
-window.toggleCategories = toggleCategories;
-window.scrollToCategories = scrollToCategories;
-
-// 📱 MOBILE BOTTOM NAV FUNCTIONS
-
-function goAccount() {
-  const accountBtn = document.getElementById("accountBtn");
-  if (accountBtn) accountBtn.click();
-}
-
-// ===== DYNAMIC WELCOME POPUP =====
-
-let activeWelcomeVoucher = null;
-
-window.addEventListener("load", () => {
-  loadWelcomeVoucherPopup();
-});
-
-async function loadWelcomeVoucherPopup() {
-  const popup = document.getElementById("welcomePopup");
-  const mainText = document.querySelector(".welcome-main");
-  const subText = document.querySelector(".welcome-sub");
-
-  if (!popup) return;
-
-  const alreadyClaimed =
-    localStorage.getItem(
-      "welcomeVoucherClaimed"
-    );
-
-  if (alreadyClaimed) {
-
-    popup.style.display = "none";
-    return;
-
+  function goAccount() {
+    const accountBtn = document.getElementById("accountBtn");
+    if (accountBtn) accountBtn.click();
   }
 
-  const { data, error } = await supabaseClient
-    .from("vouchers")
-    .select("*")
-    .eq("is_active", true)
-    .eq("voucher_type", "welcome")
-    .eq("show_popup", true)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
+  // ===== DYNAMIC WELCOME POPUP =====
 
-  if (error || !data) {
-    popup.style.display = "none";
-    return;
+  let activeWelcomeVoucher = null;
+
+  window.addEventListener("load", () => {
+    loadWelcomeVoucherPopup();
+  });
+
+  async function loadWelcomeVoucherPopup() {
+    const popup = document.getElementById("welcomePopup");
+    const mainText = document.querySelector(".welcome-main");
+    const subText = document.querySelector(".welcome-sub");
+
+    if (!popup) return;
+
+    const alreadyClaimed =
+      localStorage.getItem(
+        "welcomeVoucherClaimed"
+      );
+
+    if (alreadyClaimed) {
+
+      popup.style.display = "none";
+      return;
+
+    }
+
+    const { data, error } = await supabaseClient
+      .from("vouchers")
+      .select("*")
+      .eq("is_active", true)
+      .eq("voucher_type", "welcome")
+      .eq("show_popup", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error || !data) {
+      popup.style.display = "none";
+      return;
+    }
+
+    activeWelcomeVoucher = data;
+
+    const amount = Number(data.discount_amount || 0).toLocaleString();
+    const minSpend = Number(data.min_spend || 0).toLocaleString();
+
+    if (mainText) {
+      mainText.innerHTML = `Get <strong>₱${amount} OFF</strong>`;
+    }
+
+    if (subText) {
+      subText.textContent = `Sign up to claim and use your ₱${amount} voucher • Min. ₱${minSpend} spend`;
+    }
+
+    popup.style.display = "flex";
   }
 
-  activeWelcomeVoucher = data;
-
-  const amount = Number(data.discount_amount || 0).toLocaleString();
-  const minSpend = Number(data.min_spend || 0).toLocaleString();
-
-  if (mainText) {
-    mainText.innerHTML = `Get <strong>₱${amount} OFF</strong>`;
+  function closeWelcomePopup() {
+    const popup = document.getElementById("welcomePopup");
+    if (popup) popup.style.display = "none";
   }
 
-  if (subText) {
-    subText.textContent = `Sign up to claim and use your ₱${amount} voucher • Min. ₱${minSpend} spend`;
+  function claimWelcomeVoucher() {
+    const box = document.querySelector(".welcome-box");
+    const badge = document.querySelector(".welcome-badge");
+    const mainText = document.querySelector(".welcome-main");
+    const subText = document.querySelector(".welcome-sub");
+
+    if (!activeWelcomeVoucher) return;
+
+    localStorage.setItem("welcomeVoucherClaimed", "true");
+    localStorage.setItem("claimedVoucherCode", activeWelcomeVoucher.code);
+
+    if (badge) badge.textContent = "VOUCHER CLAIMED";
+    if (mainText) mainText.innerHTML = `✅ ${activeWelcomeVoucher.code} Claimed!`;
+    if (subText) subText.textContent = "Your voucher is ready to use.";
+
+    if (box) {
+      box.style.transition = "0.3s ease";
+      box.style.transform = "scale(1.04)";
+    }
+
+    setTimeout(() => {
+      if (box) box.style.transform = "scale(1)";
+    }, 300);
+
+    setTimeout(() => {
+      closeWelcomePopup();
+    }, 1200);
   }
 
-  popup.style.display = "flex";
-}
+  // ===== END DYNAMIC WELCOME POPUP =====
 
-function closeWelcomePopup() {
-  const popup = document.getElementById("welcomePopup");
-  if (popup) popup.style.display = "none";
-}
+  /* ===============================
+     SIDEBAR CATEGORY DROPDOWN SYNC
+  ================================ */
 
-function claimWelcomeVoucher() {
-  const box = document.querySelector(".welcome-box");
-  const badge = document.querySelector(".welcome-badge");
-  const mainText = document.querySelector(".welcome-main");
-  const subText = document.querySelector(".welcome-sub");
+  (function () {
+    const toggleBtn = document.getElementById("toggleCategoryMenu");
+    const categoryList = document.getElementById("sidebarCategoryList");
 
-  if (!activeWelcomeVoucher) return;
+    if (!toggleBtn || !categoryList) return;
 
-  localStorage.setItem("welcomeVoucherClaimed", "true");
-  localStorage.setItem("claimedVoucherCode", activeWelcomeVoucher.code);
+    const defaultCategories = [
+      "Power Amplifier",
+      "Speaker & Tweeter",
+      "Audio Processor",
+      "Transistor / MOSFET",
+      "Capacitor",
+      "Diode",
+      "Resistor",
+      "Integrated Circuits (IC)",
+      "PCB / Boards",
+      "Connectors & Terminals",
+      "Wires & Cables",
+      "Relay",
+      "Others"
+    ];
 
-  if (badge) badge.textContent = "VOUCHER CLAIMED";
-  if (mainText) mainText.innerHTML = `✅ ${activeWelcomeVoucher.code} Claimed!`;
-  if (subText) subText.textContent = "Your voucher is ready to use.";
+    function clean(value) {
+      return String(value || "").trim();
+    }
 
-  if (box) {
-    box.style.transition = "0.3s ease";
-    box.style.transform = "scale(1.04)";
-  }
+    function getSyncedCategories() {
+      const saved = JSON.parse(localStorage.getItem("drinCategories") || "[]");
+      const names = [...defaultCategories];
 
-  setTimeout(() => {
-    if (box) box.style.transform = "scale(1)";
-  }, 300);
+      saved.forEach(cat => {
+        const name = clean(cat.name);
+        if (!name) return;
+        if (cat.status && cat.status !== "active") return;
 
-  setTimeout(() => {
-    closeWelcomePopup();
-  }, 1200);
-}
+        const exists = names.some(item => item.toLowerCase() === name.toLowerCase());
+        if (!exists) names.push(name);
+      });
 
-// ===== END DYNAMIC WELCOME POPUP =====
+      return names;
+    }
 
-/* ===============================
-   SIDEBAR CATEGORY DROPDOWN SYNC
-================================ */
+    function renderSidebarCategoryDropdown() {
+      const categories = getSyncedCategories();
 
-(function () {
-  const toggleBtn = document.getElementById("toggleCategoryMenu");
-  const categoryList = document.getElementById("sidebarCategoryList");
+      categoryList.innerHTML = "";
 
-  if (!toggleBtn || !categoryList) return;
-
-  const defaultCategories = [
-    "Power Amplifier",
-    "Speaker & Tweeter",
-    "Audio Processor",
-    "Transistor / MOSFET",
-    "Capacitor",
-    "Diode",
-    "Resistor",
-    "Integrated Circuits (IC)",
-    "PCB / Boards",
-    "Connectors & Terminals",
-    "Wires & Cables",
-    "Relay",
-    "Others"
-  ];
-
-  function clean(value) {
-    return String(value || "").trim();
-  }
-
-  function getSyncedCategories() {
-    const saved = JSON.parse(localStorage.getItem("drinCategories") || "[]");
-    const names = [...defaultCategories];
-
-    saved.forEach(cat => {
-      const name = clean(cat.name);
-      if (!name) return;
-      if (cat.status && cat.status !== "active") return;
-
-      const exists = names.some(item => item.toLowerCase() === name.toLowerCase());
-      if (!exists) names.push(name);
-    });
-
-    return names;
-  }
-
-  function renderSidebarCategoryDropdown() {
-    const categories = getSyncedCategories();
-
-    categoryList.innerHTML = "";
-
-    categories.forEach(category => {
-      const li = document.createElement("li");
-      li.innerHTML = `
+      categories.forEach(category => {
+        const li = document.createElement("li");
+        li.innerHTML = `
         <a href="#" onclick="filterByCategory('${category.replaceAll("'", "\\'")}'); closeSidebar(); return false;">
           ${category}
         </a>
       `;
-      categoryList.appendChild(li);
-    });
-  }
-
-  toggleBtn.addEventListener("click", function (e) {
-    e.preventDefault();
-
-    const isOpen = categoryList.style.display === "block";
-    categoryList.style.display = isOpen ? "none" : "block";
-    toggleBtn.innerHTML = isOpen
-      ? "📂 Categories ▾"
-      : "📂 Categories ▴";
-  });
-
-  renderSidebarCategoryDropdown();
-})();
-
-// ===============================
-// READ MORE FEATURE START
-// SAFE ZONE - DELETE FROM HERE ↓↓↓
-// ===============================
-
-(function () {
-  const LIMIT = 180;
-
-  function setupReadMore() {
-    const desc = document.getElementById("productDescription");
-    const toggle = document.getElementById("descToggle");
-
-    if (!desc || !toggle) return;
-
-    const fullText = desc.textContent.trim();
-
-    if (!fullText || fullText.length <= LIMIT) {
-      toggle.style.display = "none";
-      return;
+        categoryList.appendChild(li);
+      });
     }
 
-    let expanded = false;
+    toggleBtn.addEventListener("click", function (e) {
+      e.preventDefault();
 
-    desc.textContent = fullText.slice(0, LIMIT) + "...";
-    toggle.style.display = "block";
-    toggle.textContent = "▼ Read more";
+      const isOpen = categoryList.style.display === "block";
+      categoryList.style.display = isOpen ? "none" : "block";
+      toggleBtn.innerHTML = isOpen
+        ? "📂 Categories ▾"
+        : "📂 Categories ▴";
+    });
 
-    toggle.onclick = function () {
-      expanded = !expanded;
+    renderSidebarCategoryDropdown();
+  })();
 
-      desc.textContent = expanded
-        ? fullText
-        : fullText.slice(0, LIMIT) + "...";
+  // ===============================
+  // READ MORE FEATURE START
+  // SAFE ZONE - DELETE FROM HERE ↓↓↓
+  // ===============================
 
-      toggle.textContent = expanded
-        ? "▲ Show less"
-        : "▼ Read more";
-    };
+  (function () {
+    const LIMIT = 180;
+
+    function setupReadMore() {
+      const desc = document.getElementById("productDescription");
+      const toggle = document.getElementById("descToggle");
+
+      if (!desc || !toggle) return;
+
+      const fullText = desc.textContent.trim();
+
+      if (!fullText || fullText.length <= LIMIT) {
+        toggle.style.display = "none";
+        return;
+      }
+
+      let expanded = false;
+
+      desc.textContent = fullText.slice(0, LIMIT) + "...";
+      toggle.style.display = "block";
+      toggle.textContent = "▼ Read more";
+
+      toggle.onclick = function () {
+        expanded = !expanded;
+
+        desc.textContent = expanded
+          ? fullText
+          : fullText.slice(0, LIMIT) + "...";
+
+        toggle.textContent = expanded
+          ? "▲ Show less"
+          : "▼ Read more";
+      };
+    }
+
+    window.addEventListener("load", function () {
+      setTimeout(setupReadMore, 300);
+    });
+  })();
+
+  function goHome() {
+    window.location.href = "./index.html";
   }
 
-  window.addEventListener("load", function () {
-    setTimeout(setupReadMore, 300);
-  });
-})();
-
-function goHome() {
-  window.location.href = "./index.html";
-}
-
-function goMessage() {
-  // replace with messenger link later
-  alert("Messenger chat coming soon!");
-}
-
-window.goCart = function () {
-  window.location.href = "./Cart/index.html";
-};
-
-const searchInput = document.getElementById("desktopSearchInput");
-const clearSearchBtn = document.getElementById("clearSearchBtn");
-
-if (searchInput && clearSearchBtn) {
-
-  clearSearchBtn.addEventListener("click", () => {
-    searchInput.value = "";
-    searchInput.focus();
-  });
-
-}
-
-
-document.addEventListener("DOMContentLoaded", () => {
-  updateCartCount();
-});
-
-window.addEventListener("pageshow", () => {
-  updateCartCount();
-});
-
-
-async function renderFavicon() {
-
-  const favicon =
-    document.getElementById("siteFavicon");
-
-  const { data, error } =
-    await supabaseClient
-      .from("store_settings")
-      .select("logo_url")
-      .limit(1)
-      .maybeSingle();
-
-  if (error || !data?.logo_url) return;
-
-  if (favicon) {
-    favicon.href = data.logo_url;
+  function goMessage() {
+    // replace with messenger link later
+    alert("Messenger chat coming soon!");
   }
 
-}
+  window.goCart = function () {
+    window.location.href = "./Cart/index.html";
+  };
 
-renderFavicon();
+  const searchInput = document.getElementById("desktopSearchInput");
+  const clearSearchBtn = document.getElementById("clearSearchBtn");
 
-async function updateAuthUI() {
+  if (searchInput && clearSearchBtn) {
 
-  const {
-    data: { user }
-  } = await supabaseClient.auth.getUser();
+    clearSearchBtn.addEventListener("click", () => {
+      searchInput.value = "";
+      searchInput.focus();
+    });
 
-  const accountDropdown =
-    document.getElementById("accountDropdown");
+  }
 
-  const sidebarAccountLinks =
-    document.getElementById("sidebarAccountLinks");
 
-  // =========================
-  // NOT LOGGED IN
-  // =========================
+  document.addEventListener("DOMContentLoaded", () => {
+    updateCartCount();
+  });
 
-  if (!user) {
+  window.addEventListener("pageshow", () => {
+    updateCartCount();
+  });
 
-    if (accountDropdown) {
 
-      accountDropdown.innerHTML = `
+  async function renderFavicon() {
+
+    const favicon =
+      document.getElementById("siteFavicon");
+
+    const { data, error } =
+      await supabaseClient
+        .from("store_settings")
+        .select("logo_url")
+        .limit(1)
+        .maybeSingle();
+
+    if (error || !data?.logo_url) return;
+
+    if (favicon) {
+      favicon.href = data.logo_url;
+    }
+
+  }
+
+  renderFavicon();
+
+  async function updateAuthUI() {
+
+    const {
+      data: { user }
+    } = await supabaseClient.auth.getUser();
+
+    const accountDropdown =
+      document.getElementById("accountDropdown");
+
+    const sidebarAccountLinks =
+      document.getElementById("sidebarAccountLinks");
+
+    // =========================
+    // NOT LOGGED IN
+    // =========================
+
+    if (!user) {
+
+      if (accountDropdown) {
+
+        accountDropdown.innerHTML = `
         <a href="./login/">
           Login
         </a>
@@ -1417,11 +1425,11 @@ async function updateAuthUI() {
           Sign Up
         </a>
       `;
-    }
+      }
 
-    if (sidebarAccountLinks) {
+      if (sidebarAccountLinks) {
 
-      sidebarAccountLinks.innerHTML = `
+        sidebarAccountLinks.innerHTML = `
         <li>
           <a href="./login/">
             Login
@@ -1434,18 +1442,18 @@ async function updateAuthUI() {
           </a>
         </li>
       `;
+      }
+
+      return;
     }
 
-    return;
-  }
+    // =========================
+    // LOGGED IN
+    // =========================
 
-  // =========================
-  // LOGGED IN
-  // =========================
+    if (accountDropdown) {
 
-  if (accountDropdown) {
-
-    accountDropdown.innerHTML = `
+      accountDropdown.innerHTML = `
       <a href="/homeprofile/">
         My Profile
       </a>
@@ -1457,11 +1465,11 @@ async function updateAuthUI() {
 
       </a>
     `;
-  }
+    }
 
-  if (sidebarAccountLinks) {
+    if (sidebarAccountLinks) {
 
-    sidebarAccountLinks.innerHTML = `
+      sidebarAccountLinks.innerHTML = `
       <li>
         <a href="/Home-orders/">
           My Orders
@@ -1483,90 +1491,90 @@ async function updateAuthUI() {
         </a>
       </li>
     `;
-  }
-
-}
-
-
-async function logoutUser() {
-
-  await supabaseClient.auth.signOut();
-
-  window.location.href = "/";
-
-}
-
-updateAuthUI();
-
-async function goAccount() {
-
-  const {
-    data: { user }
-  } = await supabaseClient.auth.getUser();
-
-  if (user) {
-
-    window.location.href = "/homeprofile/";
-
-  } else {
-
-    window.location.href = "./login/";
+    }
 
   }
 
-}
 
-function showAllProducts() {
+  async function logoutUser() {
 
-  localStorage.removeItem("selectedCategory");
+    await supabaseClient.auth.signOut();
 
-  renderHomepageProducts(products);
-
-  const section =
-    document.getElementById("productsSection");
-
-  if (section) {
-
-    section.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
+    window.location.href = "/";
 
   }
 
-}
+  updateAuthUI();
 
-window.addEventListener("load", () => {
+  async function goAccount() {
 
-  const shouldScroll =
-    sessionStorage.getItem(
-      "scrollToProducts"
-    );
+    const {
+      data: { user }
+    } = await supabaseClient.auth.getUser();
 
-  if (shouldScroll) {
+    if (user) {
 
-    sessionStorage.removeItem(
-      "scrollToProducts"
-    );
+      window.location.href = "/homeprofile/";
 
-    const products =
-      document.getElementById(
-        "productsSection"
-      );
+    } else {
 
-    if (products) {
-
-      setTimeout(() => {
-
-        products.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-
-      }, 300);
+      window.location.href = "./login/";
 
     }
 
   }
 
-});
+  function showAllProducts() {
+
+    localStorage.removeItem("selectedCategory");
+
+    renderHomepageProducts(products);
+
+    const section =
+      document.getElementById("productsSection");
+
+    if (section) {
+
+      section.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+    }
+
+  }
+
+  window.addEventListener("load", () => {
+
+    const shouldScroll =
+      sessionStorage.getItem(
+        "scrollToProducts"
+      );
+
+    if (shouldScroll) {
+
+      sessionStorage.removeItem(
+        "scrollToProducts"
+      );
+
+      const products =
+        document.getElementById(
+          "productsSection"
+        );
+
+      if (products) {
+
+        setTimeout(() => {
+
+          products.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+
+        }, 300);
+
+      }
+
+    }
+
+  });
