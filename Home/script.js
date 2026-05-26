@@ -967,7 +967,14 @@ async function loadVouchersFromSupabase() {
       <div class="voucher-card">
         <h4>₱${amount.toLocaleString()} OFF</h4>
         <span>Min ₱${minSpend.toLocaleString()}</span>
-        <button onclick="claimVoucher('${code}')">Claim</button>
+       <button
+  class="voucher-claim-btn"
+  id="voucher-btn-${code}"
+  onclick="claimVoucher('${code}')">
+
+  Claim
+
+</button>
       </div>
     `;
   }).join("");
@@ -981,9 +988,16 @@ async function claimVoucher(code) {
 
   if (!user) {
 
-    alert("Please login first to claim this voucher.");
+    showVoucherToast(
+      "⚠️ Please login first"
+    );
 
-    window.location.href = "./login/";
+    setTimeout(() => {
+
+      window.location.href =
+        "./login/";
+
+    }, 1200);
 
     return;
   }
@@ -993,9 +1007,39 @@ async function claimVoucher(code) {
     code
   );
 
-  alert(`Voucher ${code} claimed!`);
-}
+  const btn =
+    document.getElementById(
+      `voucher-btn-${code}`
+    );
 
+  if (btn) {
+
+    btn.innerHTML =
+      "✅ Claimed";
+
+    btn.disabled = true;
+
+    btn.classList.add(
+      "voucher-claimed"
+    );
+
+    btn.style.transform =
+      "scale(.96)";
+
+    setTimeout(() => {
+
+      btn.style.transform =
+        "scale(1)";
+
+    }, 180);
+
+  }
+
+  showVoucherToast(
+    "✅ Voucher Claimed Successfully"
+  );
+
+}
 /* END DYNAMIC VOUCHERS */
 
 /* INIT */
@@ -1601,4 +1645,28 @@ window.addEventListener("load", () => {
 
 function goHome() {
   window.location.href = "./index.html";
+}
+
+/* PREMIUM VOUCHER TOAST */
+
+function showVoucherToast(message) {
+
+  let toast =
+    document.getElementById("voucherToast");
+
+  if (!toast) {
+
+    toast = document.createElement("div");
+    toast.id = "voucherToast";
+    toast.className = "voucher-toast";
+
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2200);
 }

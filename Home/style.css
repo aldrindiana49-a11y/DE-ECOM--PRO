@@ -2136,3 +2136,22 @@ body {
 
   object-fit: contain !important;
 }
+
+.voucher-claim-btn.voucher-claimed {
+
+  background:
+    linear-gradient(135deg,
+      #22c55e,
+      #16a34a) !important;
+
+  color: white !important;
+
+  border: none;
+
+  box-shadow:
+    0 8px 20px rgba(34, 197, 94, .28);
+
+  cursor: default;
+
+}
+

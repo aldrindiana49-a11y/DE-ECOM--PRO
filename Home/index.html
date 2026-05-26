@@ -40,6 +40,9 @@
 
   <link rel="stylesheet" href="style.css?v=50002" />
 
+  <!-- PARTNER PROGRAM CSS -->
+  <link rel="stylesheet" href="./PartnerProgram/partner-program.css?v=1">
+
   <style>
     .voucher-list {
       display: flex !important;
@@ -198,6 +201,34 @@
         </ul>
       </div>
     </div>
+
+
+    <!-- PARTNER PROGRAM SECTION START -->
+    <div class="sidebar-section seller-soon-sidebar-section">
+
+      <ul class="sidebar-links">
+
+        <li>
+          <a href="#" onclick="showPartnerSoonPopup(); return false;">
+
+            🤝 Partner With Us
+
+            <small style="
+          display:block;
+          color:#94a3b8;
+          font-size:11px;
+          margin-top:3px;
+        ">
+              Brands • Suppliers • Distributors
+            </small>
+
+          </a>
+        </li>
+
+      </ul>
+
+    </div>
+    <!-- PARTNER PROGRAM SECTION END -->
 
   </aside>
 
@@ -458,7 +489,56 @@
     renderFavicon();
   </script>
 
+  <!-- PARTNER PROGRAM POPUP -->
+  <div id="partnerSoonPopup" class="seller-soon-popup">
+
+    <div class="partner-premium-box">
+
+      <button class="partner-premium-close" onclick="closePartnerSoonPopup()">
+        ✕
+      </button>
+
+      <div class="partner-premium-glow"></div>
+
+      <div class="partner-premium-icon">
+        🤝
+      </div>
+
+      <div class="partner-premium-badge">
+        FUTURE PARTNERSHIP PROGRAM
+      </div>
+
+      <h2>
+        Partner With Drin Electronics
+      </h2>
+
+      <p>
+        We are preparing premium partnership opportunities for trusted brands,
+        suppliers, distributors, and electronics businesses nationwide.
+      </p>
+
+      <div class="partner-premium-tags">
+
+        <span>Brands</span>
+        <span>Suppliers</span>
+        <span>Distributors</span>
+
+      </div>
+
+      <button onclick="closePartnerSoonPopup()" class="partner-premium-btn">
+
+        Continue
+
+      </button>
+
+    </div>
+
+  </div>
   <script src="script.js?v=50004"></script>
+
+  <!-- PARTNER PROGRAM JS -->
+  <script src="./PartnerProgram/partner-program.js?v=1"></script>
+
 </body>
 
 </html>
