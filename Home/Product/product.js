@@ -1874,4 +1874,3 @@ shareBtn?.addEventListener(
 
   }
 );
-  }
