@@ -648,18 +648,13 @@ async function syncOrderToSupabase(order) {
 
         <div class="premium-login-actions">
 
-  <button
-    type="button"
-    onclick="window.location.href='/Home/login/'">
-    Login Account
-  </button>
+  <button type="button" onclick="window.location.href='https://drinelectronicsph.com/login/'">
+  Login Account
+</button>
 
-  <button
-    type="button"
-    class="secondary-btn"
-    onclick="window.location.href='/Home/signup/'">
-    Create Account
-  </button>
+<button type="button" class="secondary-btn" onclick="window.location.href='https://drinelectronicsph.com/signup/'">
+  Create Account
+</button>
 
 </div>
       `
