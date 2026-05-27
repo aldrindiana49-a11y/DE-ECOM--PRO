@@ -371,7 +371,11 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled") && order.
 
   ${isPendingPayment && !isExpired
                 ? `
-      <div class="payment-countdown" data-expiry="${expiryTime}">
+      <div
+  class="payment-countdown"
+  data-expiry="${expiryTime}"
+  data-expire-order-id="${order.external_id || order.id}"
+>
         Payment expires in:
         <strong>--:--:--</strong>
       </div>
@@ -522,6 +526,19 @@ function updatePaymentCountdowns() {
 
                 text.textContent = "Expired";
 
+                const orderId =
+                    timer.dataset.expireOrderId;
+
+                if (
+                    orderId &&
+                    timer.dataset.expiredSent !== "true"
+                ) {
+
+                    timer.dataset.expiredSent = "true";
+
+                    expirePaymentOrder(orderId);
+                }
+
                 return;
             }
 
@@ -537,6 +554,40 @@ function updatePaymentCountdowns() {
             text.textContent =
                 `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
         });
+}
+
+async function expirePaymentOrder(orderId) {
+
+    try {
+
+        const res = await fetch(
+            `https://de-ecom-pro.onrender.com/api/orders/${orderId}/expire-payment`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+        const result = await res.json();
+
+        console.log(
+            "EXPIRE PAYMENT RESULT:",
+            result
+        );
+
+        if (result.success) {
+            loadOrders();
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Expire payment error:",
+            error
+        );
+    }
 }
 
 document.addEventListener("click", e => {

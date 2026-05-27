@@ -550,3 +550,31 @@ body {
     font-size: 13px;
     margin-bottom: 6px;
 }
+
+@media(max-width:768px) {
+
+    .back-btn {
+
+        position: relative;
+
+        top: unset;
+        left: unset;
+
+        margin-bottom: 18px;
+
+        width: fit-content;
+    }
+
+    .orders-header {
+        margin-top: 8px;
+    }
+}
+
+.orders-nav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 14px 0 20px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(12px);
+}
