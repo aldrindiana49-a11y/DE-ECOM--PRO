@@ -478,6 +478,8 @@ app.post("/api/orders/cod", async (req, res) => {
       courier
     });
 
+    order = await reserveXenditStock(order);
+    await saveOrders([order]);
 
     let orders = await readOrders();
     const index = orders.findIndex(item => item.external_id === orderId);
