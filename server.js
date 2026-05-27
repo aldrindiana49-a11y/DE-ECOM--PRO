@@ -765,12 +765,19 @@ app.post("/api/orders/:orderId/cancel", async (req, res) => {
     orders[index].updated_at =
       new Date().toISOString();
 
-    if (
-      orders[index].stock_reserved === true &&
-      orders[index].stock_restored !== true
-    ) {
+    if (orders[index].stock_restored !== true) {
       try {
-        await restoreXenditStock(orders[index]);
+
+        await restoreXenditStock({
+          ...orders[index],
+          stock_reserved: true
+        });
+
+        orders[index].stock_reserved = false;
+        orders[index].stock_restored = true;
+        orders[index].stock_restored_at = new Date().toISOString();
+        orders[index].updated_at = new Date().toISOString();
+
       } catch (stockErr) {
         console.error("RESTORE STOCK ERROR:", stockErr);
       }
