@@ -901,24 +901,6 @@ body {
   cursor: not-allowed;
 }
 
-/* FLOAT BUTTON */
-.messenger-float {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: var(--primary);
-  color: white;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
-  z-index: 1200;
-}
 
 /* TOAST */
 .cart-toast {
@@ -1933,10 +1915,6 @@ body {
   color: #2563eb;
 }
 
-.chat-icon {
-  background: #f3e8ff;
-  color: #9333ea;
-}
 
 .cart-icon {
   background: #dcfce7;
@@ -2077,16 +2055,7 @@ body {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
-.mobile-nav-icon.chat-icon,
-.mobile-nav-icon.cart-icon {
-  background: linear-gradient(135deg,
-      #00bcd4,
-      #0097a7);
 
-  box-shadow: 0 4px 14px rgba(0, 188, 212, 0.35);
-
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
 
 .mobile-nav-logo[src=""],
 .mobile-nav-logo:not([src]) {
@@ -2094,7 +2063,6 @@ body {
 }
 
 .mobile-nav-icon.home-icon,
-.mobile-nav-icon.chat-icon,
 .mobile-nav-icon.cart-icon {
   background: linear-gradient(135deg,
       #00bcd4,
@@ -2155,3 +2123,30 @@ body {
 
 }
 
+.mobile-chat-avatar {
+  width: 40px;
+  height: 40px;
+
+  border-radius: 50%;
+  object-fit: cover;
+
+  border: 2px solid #00bcd4;
+
+  box-shadow: 0 2px 8px rgba(0, 188, 212, 0.25);
+}
+
+.messenger-float {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  cursor: pointer;
+}

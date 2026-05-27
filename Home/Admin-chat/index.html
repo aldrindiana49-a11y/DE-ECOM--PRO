@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Support Inbox | Drin Electronics</title>
+
+  <link rel="stylesheet" href="admin-chat.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="../Admin/supabase.js"></script>
+</head>
+
+<body>
+
+  <div class="chat-layout">
+
+    <aside class="conversation-sidebar">
+
+      <div class="sidebar-header">
+        <h2>💬 Support Inbox</h2>
+        <span id="unreadBadge">0</span>
+      </div>
+
+      <div id="conversationList" class="conversation-list"></div>
+
+    </aside>
+
+    <main class="chat-main">
+
+      <div id="chatHeader" class="chat-header">
+        Select a conversation
+      </div>
+
+      <div id="adminChatMessages" class="admin-chat-messages"></div>
+
+      <div id="customerTypingText" class="admin-typing-text">
+        Customer is typing...
+      </div>
+
+      <div class="admin-chat-input-row">
+
+        <input type="text" id="adminReplyInput" placeholder="Type reply...">
+
+        <button type="button" id="sendReplyBtn">
+          Send
+        </button>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script src="admin-chat.js"></script>
+
+</body>
+
+</html>

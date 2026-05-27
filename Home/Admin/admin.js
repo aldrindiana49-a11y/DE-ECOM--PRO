@@ -389,3 +389,43 @@ document.getElementById("storeFaviconUpload")?.addEventListener("change", async 
 
 loadBrandingSettings();
 
+const adminChatBadge =
+    document.getElementById("adminChatBadge");
+
+async function loadAdminChatBadge() {
+
+    if (!adminChatBadge) return;
+
+    const { count, error } = await supabaseClient
+        .from("chat_conversations")
+        .select("*", { count: "exact", head: true });
+
+    if (error) {
+        console.error(error);
+        return;
+    }
+
+    adminChatBadge.textContent =
+        count || 0;
+}
+
+loadAdminChatBadge();
+
+setInterval(loadAdminChatBadge, 5000);
+
+supabaseClient
+    .channel("admin-chat-badge")
+
+    .on(
+        "postgres_changes",
+        {
+            event: "INSERT",
+            schema: "public",
+            table: "chat_messages"
+        },
+        () => {
+            loadAdminChatBadge();
+        }
+    )
+
+    .subscribe();

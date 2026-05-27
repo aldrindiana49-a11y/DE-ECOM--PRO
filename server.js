@@ -887,6 +887,65 @@ app.post("/api/orders/:orderId/cancel", async (req, res) => {
   }
 });
 
+// ================= EXPIRE PAYMENT =================
+app.post("/api/orders/:orderId/expire-payment", async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    let orders = await readOrders();
+
+    const index = orders.findIndex(
+      order => String(order.external_id) === String(orderId) ||
+        String(order.id) === String(orderId)
+    );
+
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    if (orders[index].stock_restored !== true) {
+      try {
+        await restoreXenditStock({
+          ...orders[index],
+          stock_reserved: true
+        });
+
+        orders[index].stock_reserved = false;
+        orders[index].stock_restored = true;
+        orders[index].stock_restored_at = new Date().toISOString();
+
+      } catch (stockErr) {
+        console.error("EXPIRE PAYMENT RESTORE STOCK ERROR:", stockErr);
+      }
+    }
+
+    orders[index].status = "PAYMENT_EXPIRED";
+    orders[index].payment_status = "PAYMENT_EXPIRED";
+    orders[index].order_status = "Payment Expired";
+    orders[index].expired_at = new Date().toISOString();
+    orders[index].updated_at = new Date().toISOString();
+
+    await saveOrders(orders);
+
+    res.json({
+      success: true,
+      message: "Payment expired and stock restored",
+      order: orders[index]
+    });
+
+  } catch (err) {
+    console.error("EXPIRE PAYMENT ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Expire payment failed"
+    });
+  }
+});
+
 // ================= GET CANCELLED ORDERS =================
 app.get("/api/orders/cancelled", async (req, res) => {
   try {

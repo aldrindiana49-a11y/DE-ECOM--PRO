@@ -40,6 +40,8 @@
 
   <link rel="stylesheet" href="style.css?v=50002" />
 
+  <link rel="stylesheet" href="./chat/chat.css?v=1">
+
   <!-- PARTNER PROGRAM CSS -->
   <link rel="stylesheet" href="./PartnerProgram/partner-program.css?v=1">
 
@@ -371,7 +373,10 @@
 
   </div>
 
-  <a href="#" class="messenger-float" aria-label="Messenger">💬</a>
+  <button type="button" class="messenger-float" onclick="openWebsiteChat()" aria-label="Support Chat">
+    <img src="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/DeSupport.png"
+      alt="Support" class="chat-float-avatar">
+  </button>
 
   <div id="cartToast" class="cart-toast"></div>
 
@@ -390,9 +395,13 @@
       <span>Shop</span>
     </button>
 
-    <button class="mobile-nav-item" onclick="goMessage()">
-      <div class="mobile-nav-icon chat-icon">💬</div>
+    <button class="mobile-nav-item" onclick="openWebsiteChat()">
+
+      <img src="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/DeSupport.png"
+        alt="Support" class="mobile-chat-avatar">
+
       <span>Chat</span>
+
     </button>
 
     <button class="mobile-nav-item" onclick="goCart()">
@@ -538,7 +547,7 @@
 
   <!-- PARTNER PROGRAM JS -->
   <script src="./PartnerProgram/partner-program.js?v=1"></script>
-
+  <script src="./chat/chat.js?v=1"></script>
 </body>
 
 </html>
