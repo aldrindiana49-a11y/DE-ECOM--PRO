@@ -757,6 +757,13 @@ app.post("/api/orders/:orderId/cancel", async (req, res) => {
     orders[index].updated_at =
       new Date().toISOString();
 
+    if (
+      orders[index].stock_reserved === true &&
+      orders[index].stock_restored !== true
+    ) {
+      await restoreXenditStock(orders[index]);
+    }
+
     await saveOrders(orders);
 
     res.json({
