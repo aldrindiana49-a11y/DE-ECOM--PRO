@@ -137,7 +137,7 @@ async function reserveXenditStock(order) {
 }
 
 async function restoreXenditStock(order) {
-  if (!order || !order.stock_reserved || order.stock_restored) return order;
+  if (!order || order.stock_restored) return order;
 
   for (const item of order.items || []) {
     const { error } = await supabase.rpc("restore_stock", {
