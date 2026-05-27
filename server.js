@@ -478,9 +478,6 @@ app.post("/api/orders/cod", async (req, res) => {
       courier
     });
 
-    order = await reserveXenditStock(order);
-    await saveOrders([order]);
-
     let orders = await readOrders();
     const index = orders.findIndex(item => item.external_id === orderId);
 
@@ -488,13 +485,22 @@ app.post("/api/orders/cod", async (req, res) => {
       orders[index].status = "COD";
       orders[index].order_status = "To Ship";
       orders[index].updated_at = new Date().toISOString();
+
       await saveOrders(orders);
     }
 
-    res.json({ success: true, order: index !== -1 ? orders[index] : order });
+    res.json({
+      success: true,
+      order: index !== -1 ? orders[index] : order
+    });
+
   } catch (err) {
     console.error("COD ORDER SAVE ERROR:", err);
-    res.status(500).json({ success: false, message: "COD order save failed" });
+
+    res.status(500).json({
+      success: false,
+      message: "COD order save failed"
+    });
   }
 });
 
@@ -763,7 +769,11 @@ app.post("/api/orders/:orderId/cancel", async (req, res) => {
       orders[index].stock_reserved === true &&
       orders[index].stock_restored !== true
     ) {
-      await restoreXenditStock(orders[index]);
+      try {
+        await restoreXenditStock(orders[index]);
+      } catch (stockErr) {
+        console.error("RESTORE STOCK ERROR:", stockErr);
+      }
     }
 
     await saveOrders(orders);
