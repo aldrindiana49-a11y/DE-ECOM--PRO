@@ -114,6 +114,50 @@ async function savePendingOrder({
   await saveOrders(orders);
   return orderData;
 }
+async function reserveXenditStock(order) {
+  if (!order || order.stock_reserved) return order;
+
+  for (const item of order.items || []) {
+    const { error } = await supabase.rpc("deduct_stock", {
+      p_product_id: Number(item.id || item.productId),
+      p_variant_label: item.variantLabel || item.variant || "Default",
+      p_quantity: Number(item.quantity) || 1,
+      p_order_id: String(order.external_id || order.id)
+    });
+
+    if (error) throw error;
+  }
+
+  order.stock_reserved = true;
+  order.stock_restored = false;
+  order.stock_reserved_at = new Date().toISOString();
+  order.updated_at = new Date().toISOString();
+
+  return order;
+}
+
+async function restoreXenditStock(order) {
+  if (!order || !order.stock_reserved || order.stock_restored) return order;
+
+  for (const item of order.items || []) {
+    const { error } = await supabase.rpc("restore_stock", {
+      p_product_id: Number(item.id || item.productId),
+      p_variant_label: item.variantLabel || item.variant || "Default",
+      p_quantity: Number(item.quantity) || 1,
+      p_order_id: String(order.external_id || order.id)
+    });
+
+    if (error) throw error;
+  }
+
+  order.stock_reserved = false;
+  order.stock_restored = true;
+  order.stock_restored_at = new Date().toISOString();
+  order.updated_at = new Date().toISOString();
+
+  return order;
+}
+
 
 // ================= ROOT =================
 app.get("/", (req, res) => {
@@ -419,7 +463,7 @@ app.post("/api/orders/cod", async (req, res) => {
       courier
     } = req.body;
 
-    const order = await savePendingOrder({
+    let order = await savePendingOrder({
       orderId,
       amount,
       subtotal,
@@ -433,6 +477,7 @@ app.post("/api/orders/cod", async (req, res) => {
       parcelInfo,
       courier
     });
+
 
     let orders = await readOrders();
     const index = orders.findIndex(item => item.external_id === orderId);
@@ -497,7 +542,7 @@ app.post("/api/create-payment", async (req, res) => {
       });
     }
 
-    const order = await savePendingOrder({
+    let order = await savePendingOrder({
       orderId,
       amount,
       customerName,
@@ -510,6 +555,10 @@ app.post("/api/create-payment", async (req, res) => {
       shippingFee,
       checkoutUrl: data.invoice_url
     });
+
+    order = await reserveXenditStock(order);
+    await saveOrders([order]);
+
 
     res.json({
       success: true,
@@ -946,8 +995,11 @@ app.post("/api/xendit/webhook", async (req, res) => {
 
     if (paidStatuses.includes(xenditStatus)) {
       markOrderPaid(orders[index], "XENDIT", meta);
+
     } else if (["EXPIRED", "FAILED", "VOIDED", "CANCELLED", "CANCELED"].includes(xenditStatus)) {
       markOrderPaymentFailed(orders[index], "XENDIT", xenditStatus, meta);
+      await restoreXenditStock(orders[index]);
+
     } else {
       orders[index].xendit_status = xenditStatus;
       orders[index].xendit_raw_webhook = data;
