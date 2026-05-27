@@ -1016,8 +1016,14 @@ app.post("/api/xendit/webhook", async (req, res) => {
       markOrderPaid(orders[index], "XENDIT", meta);
 
     } else if (["EXPIRED", "FAILED", "VOIDED", "CANCELLED", "CANCELED"].includes(xenditStatus)) {
+
       markOrderPaymentFailed(orders[index], "XENDIT", xenditStatus, meta);
-      await restoreXenditStock(orders[index]);
+
+      try {
+        await restoreXenditStock(orders[index]);
+      } catch (stockErr) {
+        console.error("XENDIT RESTORE STOCK ERROR:", stockErr);
+      }
 
     } else {
       orders[index].xendit_status = xenditStatus;
