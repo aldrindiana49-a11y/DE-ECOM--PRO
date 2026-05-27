@@ -703,7 +703,28 @@ app.post("/api/orders/update", async (req, res) => {
       });
     }
 
-    if (order_status) orders[index].order_status = order_status;
+    if (order_status) {
+      orders[index].order_status = order_status;
+
+      if (
+        String(order_status).toLowerCase() === "cancelled" &&
+        orders[index].stock_restored !== true
+      ) {
+        try {
+          await restoreXenditStock({
+            ...orders[index],
+            stock_reserved: true
+          });
+
+          orders[index].stock_reserved = false;
+          orders[index].stock_restored = true;
+          orders[index].stock_restored_at = new Date().toISOString();
+
+        } catch (stockErr) {
+          console.error("UPDATE CANCEL RESTORE STOCK ERROR:", stockErr);
+        }
+      }
+    }
     if (tracking_number !== undefined) orders[index].tracking_number = tracking_number;
     if (courier !== undefined) orders[index].courier = courier;
 
