@@ -114,14 +114,47 @@ async function savePendingOrder({
   await saveOrders(orders);
   return orderData;
 }
+
 async function reserveXenditStock(order) {
   if (!order || order.stock_reserved) return order;
 
   for (const item of order.items || []) {
+
+    const finalProductId =
+      item.productId ||
+      item.product_id ||
+      item.productID ||
+      item.id;
+
+    const finalVariantLabel =
+      item.variantLabel ||
+      item.variant ||
+      item.variation ||
+      item.variant_name ||
+      item.variantName ||
+      item.option ||
+      item.label ||
+      "Default";
+
+    const finalQuantity = Number(
+      item.quantity ||
+      item.qty ||
+      item.quantityOrdered ||
+      1
+    );
+
+    console.log("STOCK DEBUG RESERVE:", {
+      orderId: order.external_id || order.id,
+      finalProductId,
+      finalVariantLabel,
+      finalQuantity,
+      item
+    });
+
     const { error } = await supabase.rpc("deduct_stock", {
-      p_product_id: Number(item.id || item.productId),
-      p_variant_label: item.variantLabel || item.variant || "Default",
-      p_quantity: Number(item.quantity) || 1,
+      p_product_id: finalProductId,
+      p_variant_label: finalVariantLabel,
+      p_quantity: finalQuantity,
       p_order_id: String(order.external_id || order.id)
     });
 
@@ -140,10 +173,42 @@ async function restoreXenditStock(order) {
   if (!order || order.stock_restored) return order;
 
   for (const item of order.items || []) {
+
+    const finalProductId =
+      item.productId ||
+      item.product_id ||
+      item.productID ||
+      item.id;
+
+    const finalVariantLabel =
+      item.variantLabel ||
+      item.variant ||
+      item.variation ||
+      item.variant_name ||
+      item.variantName ||
+      item.option ||
+      item.label ||
+      "Default";
+
+    const finalQuantity = Number(
+      item.quantity ||
+      item.qty ||
+      item.quantityOrdered ||
+      1
+    );
+
+    console.log("STOCK DEBUG RESTORE:", {
+      orderId: order.external_id || order.id,
+      finalProductId,
+      finalVariantLabel,
+      finalQuantity,
+      item
+    });
+
     const { error } = await supabase.rpc("restore_stock", {
-      p_product_id: Number(item.id || item.productId),
-      p_variant_label: item.variantLabel || item.variant || "Default",
-      p_quantity: Number(item.quantity) || 1,
+      p_product_id: finalProductId,
+      p_variant_label: finalVariantLabel,
+      p_quantity: finalQuantity,
       p_order_id: String(order.external_id || order.id)
     });
 
