@@ -129,9 +129,8 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
     user_secret: process.env.SPX_USER_SECRET,
     orders: [
       {
-        order_id: `QUOTE-${Date.now()}`,
         base_info: {
-          service_type: 1,
+          service_type: 2,
           product_id: process.env.SPX_PRODUCT_ID || "1",
           ed_item_list: [],
           vas_info: {}
@@ -153,9 +152,31 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
           ...(voucherCode ? { voucher_code: voucherCode } : {})
         },
         deliver_info: {
-          ...delivery,
-          deliver_name: "Test Customer",
-          deliver_phone: "09171234567"
+          deliver_state:
+            address?.areaGroup || "Metro Manila",
+
+          deliver_city:
+            address?.city || "Pasig",
+
+          deliver_district:
+            address?.barangay || "Unknown",
+
+          deliver_street:
+            address?.fullAddress || "",
+
+          deliver_post_code:
+            address?.zipCode ||
+            address?.postCode ||
+            "1000",
+
+          deliver_detail_address:
+            address?.fullAddress || "",
+
+          deliver_name:
+            "Test Customer",
+
+          deliver_phone:
+            "09171234567"
         },
 
         parcel_info: parcel
