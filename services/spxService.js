@@ -186,8 +186,15 @@ async function createOrder(order) {
 
         fulfillment_info: {
           payment_role: 1,
-          cod_collection: 1,
-          cod_amount: Number(order.totalAmount || 0),
+
+          cod_collection:
+            order.paymentMethod === "COD" ? 1 : 0,
+
+          cod_amount:
+            order.paymentMethod === "COD"
+              ? Number(order.totalAmount || 0)
+              : 0,
+
           collect_type: 2
         },
 
