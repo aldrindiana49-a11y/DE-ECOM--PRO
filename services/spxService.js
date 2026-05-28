@@ -117,7 +117,7 @@ function normalizeAddress(address = {}) {
   };
 }
 
-async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, voucherCode }) {
+async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, voucherCode, baseInfo }) {
   const parcel = normalizeParcelInfo({
     ...parcelInfo,
     expressInsuredValue: Number(amount || 0)
@@ -132,7 +132,7 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
         base_info: {
           service_type: 2,
           product_id: process.env.SPX_PRODUCT_ID || "1",
-          ed_item_list: [],
+          ed_item_list: baseInfo?.ed_item_list || [],
           vas_info: {}
         },
         sender_info: {

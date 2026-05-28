@@ -1,0 +1,303 @@
+[33md0cd773[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m update chat
+[33m26b391a[m Improve orders nav and auto expire payment
+[33mdef15ab[m Add stock debug logs
+[33mfabacc5[m Restore stock when admin update cancels order
+[33m6267a2f[m Allow stock restore for non-reserved COD orders
+[33m2ba1c42[m Fix stock restore for COD and Xendit cancel
+[33mf52f2b9[m Stabilize inventory restore and payment webhook handling
+[33me4342a6[m Fix cancel approval stability and COD stock handling
+[33m1eae584[m Improve inventory reserve restore and audit tracking
+[33m7c7b47f[m Add automatic stock restore on cancelled orders
+[33m0465ba8[m Add Xendit inventory reserve and restore system
+[33m8e31ba4[m Fix mobile add-to-cart parcel dimensions and cart toast animation
+[33mb11432d[m Fix mobile product nav and home logo alignment
+[33mc3166f0[m Improve voucher claim UI and partner popup
+[33m621d7bf[m Fixed variant stock visibility and updated cart badge color
+[33m4d644ba[m Update COD limits
+[33m34b8036[m Fix product card visibility for available variants
+[33m5feb97d[m Added variant display in orders summary
+[33me34e818[m Fix live auth popup routes
+[33ma555530[m Fix checkout login routes
+[33mc4933be[m Fix checkout login lock and auth routes
+[33m374942d[m Fix checkout login auth protection
+[33m41008ef[m Fix renderNavbarLogo closing brackets and mobile nav
+[33m7a3527e[m Fix branding, mobile logo, and product page stability
+[33m8fa2dd3[m Fix mobile logo fallback and navbar stability
+[33m65d72bc[m Fix mobile nav logo and product page script issues
+[33mae1073b[m Fix product page syntax and navigation functions
+[33m2e0fc4e[m Fix product branding function closure
+[33m983c5a9[m Fix navbar logo rendering and visibility
+[33mdbfbb94[m Fix remaining store_settings Supabase 406 queries
+[33m6c4c15b[m Fix Supabase branding logo query stability
+[33m57b8467[m Fix Supabase store_settings query stability
+[33meabb64e[m Fix branding cache and Supabase logo loading
+[33m2057df7[m Fix dynamic logo cache refresh across homepage and product page
+[33m75d436b[m Fix cache busting for homepage and product branding
+[33m64cf976[m Fix profile checkout redirect
+[33m3f1f7c1[m Profile checkout redirect and production checkout cleanup
+[33m75f1e40[m Upgrade profile page UI and checkout profile sync
+[33m486e65c[m Improve orders page UI and payment expiry logic
+[33m35b88bc[m Finalize COD inventory deduction and checkout cleanup
+[33m4d37a62[m Fix inventory deduction flow and Supabase auth checkout
+[33md115770[m Add real-time inventory deduction and shipping fixes
+[33md7de13f[m Fix mobile checkout shipping dimensions
+[33m11d6672[m Fix checkout item dimension fallback
+[33m820567b[m Fix SPX checkout shipping calculation
+[33md89a601[m Fix mobile SPX shipping calculation and checkout stability
+[33m2d8e9eb[m Fix checkout SPX shipping and payment lock issues
+[33m1ff7861[m Force refresh all frontend assets and clear stale cache issues
+[33m49d8890[m Clear stale checkout data after login
+[33m8744919[m Force clear frontend cache
+[33m2b7acb6[m Improve parcel stacking and multi-item shipping calculation
+[33mfb54b7e[m Add volumetric weight calculation for accurate parcel estimates
+[33m0eb6786[m Fix cart script loading and refresh cache versions
+[33m97896d4[m Prevent checkout while shipping is calculating
+[33m6c2a7e1[m Add mobile auto scroll to checkout summary
+[33m3065137[m Improve checkout customer save and courier selection flow
+[33m88b9aec[m Improve checkout UX and customer save flow
+[33m0c64837[m Improve checkout saved customer details and courier flow
+[33maa781f3[m Improve checkout customer info save and cart limits
+[33m370e411[m Finalize voucher discount in checkout and customer orders
+[33mc98d8d6[m Save voucher details in customer orders
+[33ma02adc9[m Fix shipping fee calculation and voucher system
+[33mb078b0b[m Fix product page live logo rendering
+[33m393c257[m Use Supabase store logo across homepage and product page
+[33m7c5c69d[m Update product buy now cart flow and social preview
+[33meede65d[m Add premium forgot password reset flow
+[33m80d94a8[m Add premium reset password page
+[33m2e4c927[m Add forgot password reset flow
+[33m2c8ab0a[m Improve SPX shipping calculation loading experience
+[33ma98a8c8[m Add SPX shipping calculation loading popup
+[33m9986ce3[m Final production deploy fixes
+[33me869d94[m Production ready ecommerce flow
+[33ma3a5014[m Fix payment success redirect to orders page
+[33m8b825df[m Fix cancel reason, payment mode, and fee display
+[33mb4392a7[m Fix customer order summary fees and payment mode
+[33m056fa41[m Fix request cancellation modal loading
+[33med9d0ee[m Fix orders loading issue
+[33m769b26e[m Replace cancellation prompt with dropdown modal
+[33ma446516[m Force refresh customer orders JS cache
+[33m30ff598[m Force refresh orders JS cache
+[33m0ee8a93[m Fix customer cancellation dropdown modal and cache refresh
+[33mbada959[m Add customer cancellation dropdown and seller forced cancel workflow
+[33mc5d9a88[m Added customer cancellation workflow and seller forced cancel
+[33m77b7f56[m Fix order modal loader and admin request workflow
+[33me9d6810[m Add admin order request approval panel
+[33m688a91a[m Fix order request modal spinner and payment loader flow
+[33mef26968[m Orders system upgrade with request management
+[33m71c1235[m Improve checkout flow and parcel calculation
+[33mc6f24af[m Checkout UX fixes and SPX validation improvements
+[33m8a0e798[m Add hybrid SPX nationwide mapping
+[33m7e8ce33[m Fix nationwide SPX delivery mapping
+[33md2fc318[m Enable nationwide SPX address mapping
+[33m46f7f98[m Fix SPX create order delivery and pickup mapping
+[33m0b6c3dc[m Improve COD processing modal and SPX waybill sender
+[33m5bfdf9c[m Allow COD order save even if Supabase sync fails
+[33mb1c2f9d[m Clean SPX debug and modal behavior
+[33mb521851[m Use SPX official sender route sample
+[33mc014166[m Capture full SPX response
+[33mc9096b3[m Add SPX response debug logging
+[33m4a94381[m Add SPX response debug
+[33m27afb6e[m Fix SPX address mapping
+[33m0716590[m Fix SPX Metro Manila address mapping
+[33mae721c6[m Fix SPX address JSON loading
+[33m9a2b4ba[m Force checkout cache refresh
+[33m8d05f39[m Fix SPX address validation
+[33m60db193[m Fix province loading
+[33m0c02b97[m Fix SPX sender city
+[33md8c4b6c[m Add SPX base info defaults
+[33mfc48416[m Fix SPX product id type
+[33mdf693b8[m Add SPX product id
+[33mc5dd483[m Fix SPX shipping fee integration
+[33m9076621[m Fix SPX shipping fee integration
+[33m577fbdd[m Upgrade orders UI with premium payment flow and animations
+[33me3c3eb9[m Fix pending payment order status flow
+[33mc64b261[m Force latest orders assets and payment countdown UI
+[33mf973264[m Add live payment countdown and order action buttons
+[33m858fb00[m Add live payment countdown and customer order actions
+[33m50601fe[m Add payment countdown timer to customer orders
+[33m80cab0f[m Restore login required checkout and secure orders policy
+[33m1f5c435[m Fix customer order external ID display
+[33mdf7f89d[m Force latest orders page script
+[33m0e7e601[m Debug Supabase order external ID insert
+[33m0a0650a[m Debug external order ID saving
+[33m0d04614[m Force latest checkout and orders scripts
+[33m18e4aa0[m Force latest checkout script for external order ID
+[33mcc180a5[m Fix customer orders script cache
+[33m9064e2e[m Use external order ID in customer orders
+[33m6c7bb70[m Improved continue payment modal UX
+[33mc1a664f[m Clean payment modal styles
+[33m3d17131[m Added continue payment modal and redirect improvements
+[33m54d6b85[m Added payment loading modal for continue payment
+[33mf759399[m Fix continue payment orderId string
+[33mb333cde[m Debug continue payment API error
+[33m862ff5b[m Fixed continue payment request
+[33m26405d7[m Added continue payment button
+[33m6971a59[m Remove missing payment_method column
+[33m5194d55[m Fixed Supabase checkout order sync
+[33mf3e9403[m Show exact Supabase error
+[33m60cfdd5[m Connected checkout to Supabase
+[33m0d18ad1[m Added Supabase order sync for My Orders page
+[33m7dfe853[m link my orders page
+[33m87399cd[m add buyer orders page
+[33m9c128fa[m add buyer profile page and auth navigation
+[33me5a0a2d[m add category page and google verification
+[33meff58de[m add dynamic auth menu
+[33m63e2e4c[m add auth ui login logout system
+[33m41ac846[m fix back button and add legal pages
+[33m012fb17[m fix back button and add legal pages
+[33mf3605b4[m add legal policy pages and branding updates
+[33m1eb915c[m fix live supabase path signup
+[33m27cab5c[m cache bust signup files
+[33m0470646[m improve signup password UI
+[33m570195d[m fix live signup supabase path
+[33m42a84d2[m google signup working
+[33mbad930a[m deploy signup folder
+[33m6eacd02[m signup google auth setup
+[33m33e1ea9[m final webhook async fix
+[33m5eb6499[m supabase orders working
+[33m371495b[m Disable COD
+[33mc3e401f[m Add SPX debug logs
+[33mc2e299a[m Debug SPX address response
+[33m0ba7065[m Added SPX address file download route
+[33mcd81e5b[m improve checkout payment flow
+[33m2aea52a[m resolve merge using local files
+[33mc0f965f[m fix webhook routes
+[33m2a01d80[m Refresh cart UI on browser back
+[33mef2e134[m Clear cart after successful order
+[33mdfec8e6[m Fix cart and checkout back state after order
+[33m3e3f2d5[m Fix checkout physical back redirect
+[33mfd01cb5[m Fix checkout back button after order
+[33m1c34a6a[m Fix checkout cart removal logic like Shopee
+[33mccf9e21[m Final checkout cart cleanup and mobile back protection
+[33mc7dbf16[m Fix checkout back protection and cart cleanup
+[33ma9a3f7a[m Add checkout success flow and clear cart logic
+[33md55969f[m Update mobile navigation, smart back, and cache version
+[33m38c8503[m Fix cancel routes
+[33m8c3e054[m Sync admin orders with live backend
+[33mf025dd7[m Improve mobile product UI
+[33m23cb826[m Force cache reset
+[33m694e6da[m Fix product mobile cart path
+[33m5c7685a[m Fix product cart path
+[33mfb0e020[m Update cache version to 9000
+[33m13cf6de[m Fix cart navigation and cart badge
+[33m198293b[m final ui updates
+[33mfb3d410[m force product cache refresh
+[33m28dc2bc[m cache refresh and ui update
+[33m7cf218a[m UI update branded modal and cache refresh
+[33m5c0c0d1[m UI update branded modal and cache refresh
+[33mf96af3e[m Refresh product page cache
+[33m70f3c25[m Sync product variation popup with selected option
+[33mc0956f7[m Fix mobile popup and refresh product JS cache
+[33m5f94ace[m Fix online variant popup and product JS cache
+[33m43c45fa[m Add mobile variant popup and product gallery
+[33mf467f6a[m Add product gallery swipe and variation system
+[33m819ea62[m Add customer protection section
+[33m2f6f62b[m Cleaned product page and responsive layout
+[33m802b0d0[m Upgraded mobile product navigation UI
+[33mb3a1826[m Updated product page voucher layout and mobile fixes
+[33m4e9a32e[m Removed voucher swipe hint text
+[33m1a4e21c[m Updated voucher header layout
+[33m8b6dca3[m Made voucher cards more compact on product page
+[33mb41f824[m Optimized voucher section spacing and size
+[33m0b00bc7[m Reduced voucher card size on product page
+[33mbf20d70[m Fixed mobile product action button layout
+[33maddcf41[m Added voucher navigation arrows and swipe slider
+[33mf29332e[m Added desktop drag swipe for vouchers
+[33mf6f5ff3[m Fixed full mobile responsive product page
+[33ma1270fb[m Added mobile voucher swipe carousel
+[33m67512b0[m Fixed voucher swipe carousel layout
+[33me9d49d3[m Fixed voucher swipe layout
+[33m28249d6[m Fixed voucher horizontal swipe layout
+[33mf3bd20c[m Updated product voucher swipe carousel
+[33m27a7f52[m Added swipeable voucher carousel on product page
+[33m1d0c457[m Refine product voucher swipe behavior
+[33me29bb3f[m Improve product voucher swipe layout
+[33m05013ce[m Remove duplicate search bar styles from product CSS
+[33m148b600[m Fix premium search bar CSS syntax
+[33mc8eaa28[m Add dynamic vouchers to product page
+[33m1d06958[m Update mobile bottom nav layout
+[33m9fd9acf[m Finalize premium mobile nav and homepage polish
+[33m16ae46d[m Update all mobile nav shop labels and icons
+[33m35c87f7[m Update mobile nav shop icon and label
+[33mff8a062[m Sync premium mobile bottom nav on product page
+[33m724d404[m Sync product page navbar with homepage
+[33mcf0e98f[m Add clear search button inside search bar
+[33ma768838[m Finalize integrated search bar UI
+[33me35311f[m Add account button to mobile bottom nav
+[33mb25cd0e[m Finalize mobile navbar and bottom account nav
+[33md721d8d[m Move account access to mobile bottom nav
+[33m10f0790[m Restore mobile search bar layout
+[33mfdb13f0[m Clean homepage CSS and mobile nav
+[33mf56054c[m Add search icon button styling
+[33m64a1ffd[m Improve search button UI
+[33m2044032[m Replace triangle toggles with text
+[33m55e2a45[m Force read more text update
+[33m16ce87a[m Refresh product JS cache
+[33m2ac6f48[m Clean read more text style
+[33m19f0599[m Clean read more button style
+[33m1b91bcc[m Clean product page CSS
+[33m86df63c[m Fix read more button layout
+[33m58141fe[m Fix final read more alignment
+[33m488948a[m Force align read more toggle right
+[33m06f175f[m Align read more toggle to right
+[33mfd9af2f[m Improve product page UI layout
+[33m078b98a[m Hide out of stock suggested products
+[33mfd46d76[m Hide out of stock products on product page
+[33mc3c96ff[m Fix product page CSS and routing
+[33mc7578f8[m Fix final live product route
+[33m52ee0a8[m Force refresh script cache
+[33m1995ec2[m Fix product routing and cache
+[33m1b80a33[m Force refresh homepage script cache
+[33m512063a[m Fix all product page routing paths
+[33m377f55f[m Fix category product page routing
+[33mc95dd30[m Force refresh homepage JS cache
+[33m0ada874[m Fix product page link path
+[33m8d4f051[m Connect product page to Supabase
+[33m252dc57[m Remove product CSS from homepage
+[33mf788749[m Fix live voucher layout
+[33m0746648[m Voucher system update with dynamic welcome popup
+[33m9fa89f7[m Clean employee dashboard and attendance UI
+[33m8fa0ff2[m Enable employee save and load
+[33me734529[m Fix employee dashboard and reports UI
+[33m4949e64[m Add employee dashboard UI
+[33mca45a7e[m Remove brand required validation popup
+[33m5f6a1b9[m Fix brand value on edit listing
+[33m51ccb46[m Save product brand properly
+[33ma960303[m Fix homepage discount price loading
+[33m9d1e003[m Fix homepage discount price rendering
+[33m92ffc9e[m Fix homepage discount price display
+[33ma8ce66a[m Add discount price support
+[33m16de32e[m Fix product edit update logic
+[33m34f1468[m Fix inventory localStorage and generateVariantId
+[33m273b76a[m Remove localStorage from inventory and use Supabase only
+[33mddc4347[m Improve mobile bottom navigation
+[33m2bceaf5[m Refresh social preview meta tags
+[33me733198[m Trigger fresh Netlify deploy
+[33m4043dbb[m Fix homepage CSS relative path
+[33m21ab50c[m Fix homepage product CSS path
+[33m89bd72e[m Fix homepage product mapping
+[33mfe03237[m Fix favicon path
+[33mf84f478[m Fix homepage Supabase script path
+[33mb634c1e[m Fix homepage Supabase script path
+[33m50c80ae[m Fix homepage Supabase script path
+[33m3d62193[m Fix homepage Supabase script path
+[33m3c7c598[m Fix homepage Supabase script path
+[33mf7052a3[m Connect homepage to Supabase products
+[33m64aef1e[m Fix Supabase URL path
+[33m36a4ff4[m Use Supabase publishable key
+[33ma149317[m Fix Supabase project URL
+[33md554401[m Fix Supabase connection
+[33m83656e3[m Connect Supabase products
+[33mf855b97[m Setup admin login system
+[33m3ee6145[m Restore robots.txt content
+[33mc802be7[m Add Netlify headers config
+[33m436ea4d[m Fix homepage head styles
+[33m655e199[m Add robots.txt for Facebook crawler
+[33m91f357f[m Update final social media branding
+[33mb78eae1[m Final social preview setup
+[33md6492a6[m Fix image paths and favicon
+[33mec41dde[m Update website files
+[33md6d0454[m Connect frontend to Render API
+[33mccc4e74[m Fix Maya comma
+[33md062a53[m Initial commit

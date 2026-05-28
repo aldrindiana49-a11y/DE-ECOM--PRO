@@ -290,14 +290,15 @@ app.post("/api/spx/address-download-url", async (req, res) => {
 
 app.post("/api/spx/check-shipping-fee", async (req, res) => {
   try {
-    const { amount, paymentMethod, address, parcelInfo, voucherCode } = req.body;
+    const { amount, paymentMethod, address, parcelInfo, voucherCode, baseInfo, base_info } = req.body;
 
     const result = await checkShippingFee({
       amount,
       paymentMethod,
       address,
       parcelInfo,
-      voucherCode
+      voucherCode,
+      baseInfo: baseInfo || base_info
     });
 
     if (result.ret_code !== 0) {
