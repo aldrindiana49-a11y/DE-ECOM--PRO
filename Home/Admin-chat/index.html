@@ -42,9 +42,34 @@
 
       <div class="admin-chat-input-row">
 
-        <input type="text" id="adminReplyInput" placeholder="Type reply...">
+        <button type="button" class="admin-chat-tool-btn" onclick="toggleAdminEmojiPanel()">
+          😊
+        </button>
 
-        <button type="button" id="sendReplyBtn">
+        <div id="adminEmojiPanel" class="admin-emoji-panel">
+
+          <span onclick="addAdminEmoji('😊')">😊</span>
+
+          <span onclick="addAdminEmoji('😍')">😍</span>
+
+          <span onclick="addAdminEmoji('❤️')">❤️</span>
+
+          <span onclick="addAdminEmoji('👍')">👍</span>
+
+          <span onclick="addAdminEmoji('🙏')">🙏</span>
+
+        </div>
+
+        <input type="text" id="adminReplyInput" placeholder="Type reply..." autocomplete="off">
+
+        <input type="file" id="adminChatFileInput" hidden accept="image/*,video/*">
+
+        <button type="button" class="admin-chat-tool-btn"
+          onclick="document.getElementById('adminChatFileInput').click()">
+          📎
+        </button>
+
+        <button type="button" id="sendReplyBtn" class="admin-send-btn">
           Send
         </button>
 

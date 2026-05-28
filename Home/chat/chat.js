@@ -6,6 +6,8 @@ let drinChatConversationId =
 
 let drinChatChannel = null;
 
+let drinTypingChannel = null;
+
 function ensureChatModal() {
     if (document.getElementById("websiteChatModal")) return;
 
@@ -28,14 +30,23 @@ function ensureChatModal() {
 
       <div id="emojiPanel" style="display:none; position:absolute; bottom:70px; left:10px; background:white; padding:8px; border-radius:10px;">
 
-  <span onclick="addEmoji('😊')">😊</span>
-  <span onclick="addEmoji('😢')">😢</span>
+   <span onclick="addEmoji('😢')">😢</span>
+   <span onclick="addEmoji('😊')">😊</span>
+  <span onclick="addEmoji('😍')">😍</span>
   <span onclick="addEmoji('❤️')">❤️</span>
   <span onclick="addEmoji('👍')">👍</span>
+
 
 </div>
 
       <div class="website-chat-input-row">
+
+      <input
+  type="file"
+  id="chatFileInput"
+  hidden
+  accept="image/*,video/*"
+>
 
   <button type="button" onclick="toggleEmojiPanel()">😊</button>
 
@@ -291,9 +302,9 @@ function showAdminTypingIndicator(show) {
 }
 
 function subscribeTypingStatus() {
-    if (!drinChatConversationId) return;
+    if (!drinChatConversationId || drinTypingChannel) return;
 
-    supabaseClient
+    drinTypingChannel = supabaseClient
         .channel(`typing-${drinChatConversationId}`)
         .on(
             "postgres_changes",
@@ -304,11 +315,13 @@ function subscribeTypingStatus() {
                 filter: `conversation_id=eq.${drinChatConversationId}`
             },
             (payload) => {
+
                 const row = payload.new;
 
                 if (row.sender_type === "admin") {
                     showAdminTypingIndicator(row.is_typing);
                 }
+
             }
         )
         .subscribe();
@@ -392,7 +405,20 @@ function addEmoji(emoji) {
 
 function initGlobalChat() {
     ensureChatModal();
-    injectChatButton();
 }
 
 document.addEventListener("DOMContentLoaded", initGlobalChat);
+
+document
+    .getElementById("chatFileInput")
+    ?.addEventListener("change", async function (event) {
+
+        const file = event.target.files?.[0];
+
+        if (!file) return;
+
+        await uploadChatMedia(file);
+
+        event.target.value = "";
+
+    });

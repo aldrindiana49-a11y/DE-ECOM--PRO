@@ -398,3 +398,19 @@ document.addEventListener("visibilitychange", () => {
     }
 
 });
+
+function toggleAdminEmojiPanel() {
+    const panel = document.getElementById("adminEmojiPanel");
+    if (!panel) return;
+
+    panel.style.display =
+        panel.style.display === "block" ? "none" : "block";
+}
+
+function addAdminEmoji(emoji) {
+    const input = document.getElementById("adminReplyInput");
+    if (!input) return;
+
+    input.value += emoji;
+    input.focus();
+}
