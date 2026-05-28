@@ -115,115 +115,6 @@ async function savePendingOrder({
   return orderData;
 }
 
-async function reserveXenditStock(order) {
-  if (!order || order.stock_reserved) return order;
-
-  for (const item of order.items || []) {
-
-    const finalProductId =
-      item.productId ||
-      item.product_id ||
-      item.productID ||
-      item.id;
-
-    const finalVariantLabel =
-      item.variantLabel ||
-      item.variant ||
-      item.variation ||
-      item.variant_name ||
-      item.variantName ||
-      item.option ||
-      item.label ||
-      "Default";
-
-    const finalQuantity = Number(
-      item.quantity ||
-      item.qty ||
-      item.quantityOrdered ||
-      1
-    );
-
-    console.log("STOCK DEBUG RESERVE:", {
-      orderId: order.external_id || order.id,
-      finalProductId,
-      finalVariantLabel,
-      finalQuantity,
-      item
-    });
-
-    const { error } = await supabase.rpc("deduct_stock", {
-      p_product_id: finalProductId,
-      p_variant_label: finalVariantLabel,
-      p_quantity: finalQuantity,
-      p_order_id: String(order.external_id || order.id)
-    });
-
-    if (error) throw error;
-  }
-
-  order.stock_reserved = true;
-  order.stock_restored = false;
-  order.stock_reserved_at = new Date().toISOString();
-  order.updated_at = new Date().toISOString();
-
-  return order;
-}
-
-async function restoreXenditStock(order) {
-  if (!order || order.stock_restored) return order;
-
-  for (const item of order.items || []) {
-
-    const finalProductId =
-      item.productId ||
-      item.product_id ||
-      item.productID ||
-      item.id;
-
-    const finalVariantLabel =
-      item.variantLabel ||
-      item.variant ||
-      item.variation ||
-      item.variant_name ||
-      item.variantName ||
-      item.option ||
-      item.label ||
-      "Default";
-
-    const finalQuantity = Number(
-      item.quantity ||
-      item.qty ||
-      item.quantityOrdered ||
-      1
-    );
-
-    console.log("STOCK DEBUG RESTORE:", {
-      orderId: order.external_id || order.id,
-      finalProductId,
-      finalVariantLabel,
-      finalQuantity,
-      item
-    });
-
-    const { error } = await supabase.rpc("restore_stock", {
-      p_product_id: finalProductId,
-      p_variant_label: finalVariantLabel,
-      p_quantity: finalQuantity,
-      p_order_id: String(order.external_id || order.id)
-    });
-
-    if (error) throw error;
-  }
-
-  order.stock_reserved = false;
-  order.stock_restored = true;
-  order.stock_restored_at = new Date().toISOString();
-  order.updated_at = new Date().toISOString();
-
-  return order;
-}
-
-
 // ================= ROOT =================
 app.get("/", (req, res) => {
   res.send("🔥 Server Running");
@@ -423,56 +314,27 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
 
     const spxPayload = {
       _id: order.external_id,
+      paymentMethod: order.payment_provider === "COD" ? "COD" : "PAID",
+      totalAmount: order.amount,
+      customerName: order.customer_name,
+      phone: order.customer_phone || "639123456789",
+      address: savedAddress.fullAddress || "Test address",
 
-      paymentMethod:
-        order.payment_provider === "COD"
-          ? "COD"
-          : "PAID",
+      deliverState: savedAddress.province || "Metro Manila",
+      deliverCity: savedAddress.city || "Metro Manila",
+      deliverDistrict: savedAddress.barangay || "Intramuros",
+      deliverStreet: savedAddress.barangay || "Barangay 654",
+      deliverPostCode: savedAddress.postCode || savedAddress.zipCode || "1002",
 
-      totalAmount:
-        order.amount,
+      parcelWeight: savedParcel.parcelWeight || 1,
+      parcelLength: savedParcel.parcelLength || 10,
+      parcelWidth: savedParcel.parcelWidth || 10,
+      parcelHeight: savedParcel.parcelHeight || 10,
+      parcelItemName: savedParcel.itemName || "Electronics",
+      parcelItemQuantity: savedParcel.itemQuantity || (order.items?.length || 1),
+      parcelItemType: savedParcel.itemType || "Electronics",
 
-      customerName:
-        order.customer_name,
-
-      phone:
-        order.customer_phone ||
-        "639123456789",
-
-      // FULL CUSTOMER ADDRESS OBJECT
-      address:
-        savedAddress,
-
-      // PARCEL INFO
-      parcelWeight:
-        savedParcel.parcelWeight || 1,
-
-      parcelLength:
-        savedParcel.parcelLength || 10,
-
-      parcelWidth:
-        savedParcel.parcelWidth || 10,
-
-      parcelHeight:
-        savedParcel.parcelHeight || 10,
-
-      parcelItemName:
-        savedParcel.itemName ||
-        "Electronics",
-
-      parcelItemQuantity:
-        savedParcel.itemQuantity ||
-        (order.items?.length || 1),
-
-      parcelItemType:
-        savedParcel.itemType ||
-        "Electronics",
-
-      // ORDER ITEMS
-      items:
-        order.items || [
-          { name: "Electronics" }
-        ]
+      items: order.items || [{ name: "Electronics" }]
     };
 
     const createResult = await createOrder(spxPayload);
@@ -557,7 +419,7 @@ app.post("/api/orders/cod", async (req, res) => {
       courier
     } = req.body;
 
-    let order = await savePendingOrder({
+    const order = await savePendingOrder({
       orderId,
       amount,
       subtotal,
@@ -579,22 +441,13 @@ app.post("/api/orders/cod", async (req, res) => {
       orders[index].status = "COD";
       orders[index].order_status = "To Ship";
       orders[index].updated_at = new Date().toISOString();
-
       await saveOrders(orders);
     }
 
-    res.json({
-      success: true,
-      order: index !== -1 ? orders[index] : order
-    });
-
+    res.json({ success: true, order: index !== -1 ? orders[index] : order });
   } catch (err) {
     console.error("COD ORDER SAVE ERROR:", err);
-
-    res.status(500).json({
-      success: false,
-      message: "COD order save failed"
-    });
+    res.status(500).json({ success: false, message: "COD order save failed" });
   }
 });
 
@@ -644,7 +497,7 @@ app.post("/api/create-payment", async (req, res) => {
       });
     }
 
-    let order = await savePendingOrder({
+    const order = await savePendingOrder({
       orderId,
       amount,
       customerName,
@@ -657,10 +510,6 @@ app.post("/api/create-payment", async (req, res) => {
       shippingFee,
       checkoutUrl: data.invoice_url
     });
-
-    order = await reserveXenditStock(order);
-    await saveOrders([order]);
-
 
     res.json({
       success: true,
@@ -797,28 +646,7 @@ app.post("/api/orders/update", async (req, res) => {
       });
     }
 
-    if (order_status) {
-      orders[index].order_status = order_status;
-
-      if (
-        String(order_status).toLowerCase() === "cancelled" &&
-        orders[index].stock_restored !== true
-      ) {
-        try {
-          await restoreXenditStock({
-            ...orders[index],
-            stock_reserved: true
-          });
-
-          orders[index].stock_reserved = false;
-          orders[index].stock_restored = true;
-          orders[index].stock_restored_at = new Date().toISOString();
-
-        } catch (stockErr) {
-          console.error("UPDATE CANCEL RESTORE STOCK ERROR:", stockErr);
-        }
-      }
-    }
+    if (order_status) orders[index].order_status = order_status;
     if (tracking_number !== undefined) orders[index].tracking_number = tracking_number;
     if (courier !== undefined) orders[index].courier = courier;
 
@@ -880,24 +708,6 @@ app.post("/api/orders/:orderId/cancel", async (req, res) => {
     orders[index].updated_at =
       new Date().toISOString();
 
-    if (orders[index].stock_restored !== true) {
-      try {
-
-        await restoreXenditStock({
-          ...orders[index],
-          stock_reserved: true
-        });
-
-        orders[index].stock_reserved = false;
-        orders[index].stock_restored = true;
-        orders[index].stock_restored_at = new Date().toISOString();
-        orders[index].updated_at = new Date().toISOString();
-
-      } catch (stockErr) {
-        console.error("RESTORE STOCK ERROR:", stockErr);
-      }
-    }
-
     await saveOrders(orders);
 
     res.json({
@@ -912,65 +722,6 @@ app.post("/api/orders/:orderId/cancel", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Cancel order failed"
-    });
-  }
-});
-
-// ================= EXPIRE PAYMENT =================
-app.post("/api/orders/:orderId/expire-payment", async (req, res) => {
-  try {
-    const { orderId } = req.params;
-
-    let orders = await readOrders();
-
-    const index = orders.findIndex(
-      order => String(order.external_id) === String(orderId) ||
-        String(order.id) === String(orderId)
-    );
-
-    if (index === -1) {
-      return res.status(404).json({
-        success: false,
-        message: "Order not found"
-      });
-    }
-
-    if (orders[index].stock_restored !== true) {
-      try {
-        await restoreXenditStock({
-          ...orders[index],
-          stock_reserved: true
-        });
-
-        orders[index].stock_reserved = false;
-        orders[index].stock_restored = true;
-        orders[index].stock_restored_at = new Date().toISOString();
-
-      } catch (stockErr) {
-        console.error("EXPIRE PAYMENT RESTORE STOCK ERROR:", stockErr);
-      }
-    }
-
-    orders[index].status = "PAYMENT_EXPIRED";
-    orders[index].payment_status = "PAYMENT_EXPIRED";
-    orders[index].order_status = "Payment Expired";
-    orders[index].expired_at = new Date().toISOString();
-    orders[index].updated_at = new Date().toISOString();
-
-    await saveOrders(orders);
-
-    res.json({
-      success: true,
-      message: "Payment expired and stock restored",
-      order: orders[index]
-    });
-
-  } catch (err) {
-    console.error("EXPIRE PAYMENT ERROR:", err);
-
-    res.status(500).json({
-      success: false,
-      message: "Expire payment failed"
     });
   }
 });
@@ -1195,17 +946,8 @@ app.post("/api/xendit/webhook", async (req, res) => {
 
     if (paidStatuses.includes(xenditStatus)) {
       markOrderPaid(orders[index], "XENDIT", meta);
-
     } else if (["EXPIRED", "FAILED", "VOIDED", "CANCELLED", "CANCELED"].includes(xenditStatus)) {
-
       markOrderPaymentFailed(orders[index], "XENDIT", xenditStatus, meta);
-
-      try {
-        await restoreXenditStock(orders[index]);
-      } catch (stockErr) {
-        console.error("XENDIT RESTORE STOCK ERROR:", stockErr);
-      }
-
     } else {
       orders[index].xendit_status = xenditStatus;
       orders[index].xendit_raw_webhook = data;

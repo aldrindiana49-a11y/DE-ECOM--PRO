@@ -19,11 +19,6 @@ async function spxPost(endpoint, payload) {
   const timestamp = Math.floor(Date.now() / 1000);
   const randomNum = Math.floor(Math.random() * 1000000000);
 
-  console.log(
-    "SPX OUTGOING PAYLOAD:",
-    JSON.stringify(payload, null, 2)
-  );
-
   const payloadString = JSON.stringify(payload);
 
   const checkSign = generateCheckSign(
@@ -86,27 +81,39 @@ function normalizeParcelInfo(parcelInfo = {}) {
 }
 
 function normalizeAddress(address = {}) {
+  const isMetroManila = address.areaGroup === "Metro Manila";
 
   return {
     deliver_state:
-      address.areaGroup,
+      address.areaGroup ||
+      address.deliverState ||
+      "Metro Manila",
 
     deliver_city:
-      address.province,
+      isMetroManila
+        ? "Metro Manila"
+        : address.province || address.deliverCity || "Metro Manila",
 
     deliver_district:
-      address.city,
+      isMetroManila
+        ? address.province || address.city || address.deliverDistrict || "Binondo"
+        : address.city || address.deliverDistrict || "Binondo",
 
     deliver_street:
-      address.fullAddress,
+      address.barangay ||
+      address.deliverStreet ||
+      "Barangay 293",
 
     deliver_post_code:
       address.postCode ||
       address.zipCode ||
+      address.deliverPostCode ||
       "1002",
 
     deliver_detail_address:
-      address.fullAddress
+      address.fullAddress ||
+      address.deliverDetailAddress ||
+      "Test address"
   };
 }
 
@@ -159,24 +166,6 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
 }
 
 async function createOrder(order) {
-
-  console.log("SPX ADDRESS DEBUG:", {
-    address: order.address,
-    deliver_info: {
-      deliver_state: order.address?.areaGroup,
-      deliver_city: order.address?.province,
-      deliver_district: order.address?.city,
-      deliver_street: order.address?.fullAddress,
-
-      deliver_post_code:
-        order.address?.postCode ||
-        order.address?.zipCode,
-
-      deliver_detail_address:
-        order.address?.fullAddress
-    }
-  });
-
   return spxPost("/open/api/v2/order/batch_create_order", {
     user_id: Number(process.env.SPX_USER_ID),
     user_secret: process.env.SPX_USER_SECRET,
@@ -208,34 +197,21 @@ async function createOrder(order) {
         },
 
         deliver_info: {
-          deliver_state:
-            order.address?.areaGroup,
-
-          deliver_city:
-            order.address?.province,
-
-          deliver_district:
-            order.address?.city,
-
-          deliver_street:
-            order.address?.fullAddress,
-
+          deliver_state: order.address?.areaGroup || "Metro Manila",
+          deliver_city: order.address?.areaGroup || "Metro Manila",
+          deliver_district: order.address?.province || "Intramuros",
+          deliver_street: order.address?.barangay || "Barangay 658",
           deliver_post_code:
-            order.address?.postCode ||
             order.address?.zipCode ||
+            order.address?.postCode ||
             "1002",
 
-          deliver_name:
-            order.customerName,
-
-          deliver_phone:
-            order.phone,
-
+          deliver_name: order.customerName,
+          deliver_phone: order.phone,
           deliver_detail_address:
-            order.address?.fullAddress,
+            order.address?.fullAddress || order.address || "",
 
-          deliver_instruction:
-            order.note || ""
+          deliver_instruction: order.note || ""
         },
 
         parcel_info: {
