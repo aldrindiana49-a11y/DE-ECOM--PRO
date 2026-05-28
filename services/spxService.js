@@ -234,7 +234,7 @@ async function createOrder(order) {
           parcel_height: order.parcelHeight || 10,
           parcel_item_name: order.parcelItemName || "Electronics",
           parcel_item_quantity: order.parcelItemQuantity || order.items?.length || 1,
-          express_insured_value: Number(order.totalAmount),
+          express_insured_value: Math.max(Number(order.totalAmount) || 0, 1),
           parcel_item_type: order.parcelItemType || "Electronics"
         }
       }
