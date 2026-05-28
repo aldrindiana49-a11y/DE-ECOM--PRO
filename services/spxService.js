@@ -91,7 +91,7 @@ function normalizeAddress(address = {}) {
       isMetroManila ? "Metro Manila" : address.province,
 
     deliver_district:
-      isMetroManila ? address.province : address.city,
+      address.city || "",
 
     deliver_street:
       address.barangay,
