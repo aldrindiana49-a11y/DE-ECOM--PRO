@@ -19,6 +19,11 @@ async function spxPost(endpoint, payload) {
   const timestamp = Math.floor(Date.now() / 1000);
   const randomNum = Math.floor(Math.random() * 1000000000);
 
+  console.log(
+    "SPX OUTGOING PAYLOAD:",
+    JSON.stringify(payload, null, 2)
+  );
+
   const payloadString = JSON.stringify(payload);
 
   const checkSign = generateCheckSign(
@@ -93,11 +98,12 @@ function normalizeAddress(address = {}) {
       address.city,
 
     deliver_street:
-      address.barangay,
+      address.fullAddress,
 
     deliver_post_code:
       address.postCode ||
-      address.zipCode,
+      address.zipCode ||
+      "1002",
 
     deliver_detail_address:
       address.fullAddress
@@ -160,10 +166,12 @@ async function createOrder(order) {
       deliver_state: order.address?.areaGroup,
       deliver_city: order.address?.province,
       deliver_district: order.address?.city,
-      deliver_street: order.address?.barangay,
+      deliver_street: order.address?.fullAddress,
+
       deliver_post_code:
-        order.address?.zipCode ||
-        order.address?.postCode,
+        order.address?.postCode ||
+        order.address?.zipCode,
+
       deliver_detail_address:
         order.address?.fullAddress
     }
@@ -210,11 +218,12 @@ async function createOrder(order) {
             order.address?.city,
 
           deliver_street:
-            order.address?.barangay,
+            order.address?.fullAddress,
 
           deliver_post_code:
+            order.address?.postCode ||
             order.address?.zipCode ||
-            order.address?.postCode,
+            "1002",
 
           deliver_name:
             order.customerName,
