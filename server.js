@@ -427,7 +427,7 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
       totalAmount: order.amount,
       customerName: order.customer_name,
       phone: order.customer_phone || "639123456789",
-      address: savedAddress.fullAddress || "Test address",
+      address: savedAddress,
 
       deliverState: savedAddress.province || "Metro Manila",
       deliverCity: savedAddress.city || "Metro Manila",

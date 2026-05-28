@@ -197,21 +197,33 @@ async function createOrder(order) {
         },
 
         deliver_info: {
-          deliver_state: order.address?.areaGroup || "Metro Manila",
-          deliver_city: order.address?.areaGroup || "Metro Manila",
-          deliver_district: order.address?.province || "Intramuros",
-          deliver_street: order.address?.barangay || "Barangay 658",
+          deliver_state:
+            order.address?.areaGroup,
+
+          deliver_city:
+            order.address?.city,
+
+          deliver_district:
+            order.address?.barangay,
+
+          deliver_street:
+            order.address?.fullAddress,
+
           deliver_post_code:
             order.address?.zipCode ||
-            order.address?.postCode ||
-            "1002",
+            order.address?.postCode,
 
-          deliver_name: order.customerName,
-          deliver_phone: order.phone,
+          deliver_name:
+            order.customerName,
+
+          deliver_phone:
+            order.phone,
+
           deliver_detail_address:
-            order.address?.fullAddress || order.address || "",
+            order.address?.fullAddress,
 
-          deliver_instruction: order.note || ""
+          deliver_instruction:
+            order.note || ""
         },
 
         parcel_info: {
