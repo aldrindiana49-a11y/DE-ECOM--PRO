@@ -389,3 +389,10 @@ function addEmoji(emoji) {
 
     input.value += emoji;
 }
+
+function initGlobalChat() {
+    ensureChatModal();
+    injectChatButton();
+}
+
+document.addEventListener("DOMContentLoaded", initGlobalChat);

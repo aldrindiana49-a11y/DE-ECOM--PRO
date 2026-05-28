@@ -33,7 +33,8 @@
   <meta name="twitter:image" content="https://drinelectronicsph.com/Image/social-preview.png" />
 
   <link rel="stylesheet" href="../style.css?v=10003" />
-  <link rel="stylesheet" href="product.css?v=10003" />
+  <link rel="stylesheet" href="../chat/chat.css?v=1">
+  <link rel="stylesheet" href="product.css?v=10007" />
 </head>
 
 <body>
@@ -165,7 +166,6 @@
         <li><a href="#">Contact Us</a></li>
       </ul>
     </div>
-    </div>
   </aside>
 
   <div class="overlay" id="overlay"></div>
@@ -293,19 +293,15 @@
     </section>
   </main>
 
-  <button type="button" class="messenger-float" onclick="openWebsiteChat()">
-    💬
-  </button>
-
-  <div id="cartToast" class="cart-toast"></div>
-
   <div class="mobile-bottom-nav">
 
     <button class="mobile-nav-item" onclick="openWebsiteChat()">
 
-      <div class="mobile-nav-icon">💬</div>
+      <img src="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/DeSupport.png"
+        alt="Chat" class="mobile-chat-avatar">
 
-      <span>Message</span>
+      <span>Chat</span>
+
     </button>
 
     <button class="mobile-nav-item" onclick="window.location.href='../Cart/index.html'">
@@ -333,10 +329,10 @@
       <span>Buy Now</span>
     </button>
 
+
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script src="../admin/supabase.js"></script>
+  <!-- Variant popup must stay before product.js so product.js can access its elements -->
   <div id="variantPopup" class="variant-popup-overlay">
     <div class="variant-popup-box">
 
@@ -379,50 +375,118 @@
     </div>
   </div>
 
-  <div id="websiteChatModal" class="website-chat-modal">
+  <button type="button" class="messenger-float" onclick="openWebsiteChat()" aria-label="Support Chat">
+    <img src="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/DeSupport.png"
+      alt="Support" class="chat-float-avatar">
+  </button>
 
-    <div class="website-chat-box">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="../admin/supabase.js"></script>
+  <script src="product.js?v=10006"></script>
+  <script src="../chat/chat.js?v=1"></script>
 
-      <div class="website-chat-header">
+  <footer class="site-footer">
 
-        <div>
-          <strong>Drin Electronics Support</strong>
-          <small>Online support</small>
+    <div class="footer-container">
+
+      <div class="footer-top">
+
+        <div class="footer-brand">
+
+          <h3>Drin Electronics</h3>
+
+          <p>
+            Trusted source for amplifiers,
+            audio equipment, electronics,
+            and tech accessories.
+          </p>
+
         </div>
 
-        <button type="button" onclick="closeWebsiteChat()">×</button>
+        <div class="footer-links">
+
+          <a href="https://drinelectronicsph.com/about/">
+            About Us
+          </a>
+
+          <a href="https://drinelectronicsph.com/contact-us/">
+            Contact Us
+          </a>
+
+          <a href="https://drinelectronicsph.com/privacy-policy/">
+            Privacy Policy
+          </a>
+
+          <a href="https://drinelectronicsph.com/cookie-policy/">
+            Cookie Policy
+          </a>
+
+          <a href="https://drinelectronicsph.com/terms-and-conditions/">
+            Terms & Conditions
+          </a>
+
+          <a href="https://drinelectronicsph.com/refund-policy/">
+            Refund Policy
+          </a>
+
+          <a href="https://drinelectronicsph.com/shipping-policy/">
+            Shipping Policy
+          </a>
+
+        </div>
 
       </div>
 
-      <div id="websiteChatMessages" class="website-chat-messages"></div>
+      <!-- PAYMENTS -->
 
-      <div class="website-chat-input">
+      <div class="footer-payments">
 
-        <button type="button" class="chat-tool-btn link-btn" onclick="sendCurrentProductLink()"
-          title="Send product link">
-          🔗
-        </button>
+        <h4>Accepted Payments</h4>
 
-        <input type="file" id="chatMediaInput" accept="image/png,image/jpeg,image/webp" multiple hidden>
+        <p>
+          Fast • Convenient • Secure
+        </p>
 
-        <button type="button" class="chat-tool-btn media-btn" onclick="openChatMediaUpload()" title="Upload photo">
-          🖼️
-        </button>
+        <div class="payment-grid">
 
-        <input type="text" id="websiteChatInput" placeholder="Type your message...">
+          <img src="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/website-assets/JCB_logo.svg"
+            alt="JCB">
 
-        <button type="button" onclick="sendWebsiteChatMessage()">
-          Send
-        </button>
+          <img
+            src="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/website-assets/Mastercard-logo.svg"
+            alt="Mastercard">
+
+          <img src="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/website-assets/Untitled.png"
+            alt="VISA">
+
+          <img src="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/website-assets/Maya_logo.svg"
+            alt="Maya">
+
+          <img
+            src="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/website-assets/d5016e0f8819e462514576588fb1c677.jpg"
+            alt="BPI">
+
+          <img src="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/website-assets/QR_Ph_Logo.svg"
+            alt="QRPH">
+
+          <img src="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/website-assets/GCash_logo.svg"
+            alt="GCASH">
+
+          <img
+            src="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/website-assets/Grab_(application)_logo.svg"
+            alt="GRAB">
+
+        </div>
 
       </div>
 
     </div>
 
-  </div>
+    <div class="footer-bottom">
+      © 2026 Drin Electronics. All rights reserved.
+    </div>
 
-
-  <script src="product.js?v=10006"></script>
+  </footer>
 
 </body>
 
