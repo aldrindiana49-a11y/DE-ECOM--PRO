@@ -84,7 +84,7 @@ async function loadSPXAddresses() {
 
     if (!ADDRESS_DATA[province].cities[city]) {
       ADDRESS_DATA[province].cities[city] = {
-        zip: "",
+        zip: row.zip_code || row.zip || row.post_code || row.postcode || row.postal_code || row.postal || row.zipcode || "",
         barangays: [],
         couriers: [
           "SPX",
@@ -721,12 +721,17 @@ function clearCheckedCartItems() {
 }
 
 function getSelectedAddress() {
+  const cityData =
+    ADDRESS_DATA[provinceSelect?.value]
+      ?.cities?.[citySelect?.value];
+
   return {
     country: "Philippines",
     areaGroup: areaGroupSelect?.value || "",
     province: provinceSelect?.value || "",
     city: citySelect?.value || "",
     barangay: barangaySelect?.value || "",
+    zip: cityData?.zip || (provinceSelect?.value === "Pandacan" ? "1011" : ""),
     fullAddress: fullAddressInput?.value.trim() || "",
   };
 }
@@ -1548,6 +1553,11 @@ function smartBack(fallback = "../Cart/index.html") {
 
 
 function saveCustomerCheckoutInfo() {
+
+  const cityData =
+    ADDRESS_DATA[provinceSelect?.value]
+      ?.cities?.[citySelect?.value];
+
   const data = {
     name: nameInput?.value || "",
     phone: phoneInput?.value || "",
@@ -1555,6 +1565,7 @@ function saveCustomerCheckoutInfo() {
     province: provinceSelect?.value || "",
     city: citySelect?.value || "",
     barangay: barangaySelect?.value || "",
+    zip: cityData?.zip || (provinceSelect?.value === "Pandacan" ? "1011" : ""),
     fullAddress: fullAddressInput?.value || "",
     courier: courierSelect?.value || ""
   };

@@ -81,34 +81,35 @@ function normalizeParcelInfo(parcelInfo = {}) {
 }
 
 function normalizeAddress(address = {}) {
-  const isMetroManila = address.areaGroup === "Metro Manila";
+  const isMetroManila =
+    address.areaGroup === "Metro Manila";
 
   return {
-    deliver_state:
-      address.areaGroup ||
-      address.deliverState ||
-      "Metro Manila",
 
-    deliver_city:
-      isMetroManila
-        ? "Metro Manila"
-        : address.province || address.deliverCity || "Metro Manila",
+    deliver_state: isMetroManila
+      ? "Metro Manila"
+      : address.province || address.deliverState || "Metro Manila",
+
+    deliver_city: isMetroManila
+      ? "Manila"
+      : address.province || address.deliverCity || "Metro Manila",
 
     deliver_district:
-      isMetroManila
-        ? address.province || address.city || address.deliverDistrict || "Binondo"
-        : address.city || address.deliverDistrict || "Binondo",
+      address.city ||
+      address.deliverDistrict ||
+      "Pandacan",
 
     deliver_street:
       address.barangay ||
       address.deliverStreet ||
-      "Barangay 293",
+      "Barangay 858",
 
     deliver_post_code:
+      address.zip ||
       address.postCode ||
       address.zipCode ||
       address.deliverPostCode ||
-      "1002",
+      "1011",
 
     deliver_detail_address:
       address.fullAddress ||
