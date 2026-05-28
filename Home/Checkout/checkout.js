@@ -66,11 +66,7 @@ async function loadSPXAddresses() {
 
   SPX_ADDRESSES.forEach((row) => {
 
-    const province =
-      row.state === "Metro Manila"
-        ? row.district
-        : row.city;
-
+    const province = row.city;
     const city = row.district;
 
     const barangay = row.street;
@@ -731,7 +727,7 @@ function getSelectedAddress() {
     province: provinceSelect?.value || "",
     city: citySelect?.value || "",
     barangay: barangaySelect?.value || "",
-    zip: cityData?.zip || (provinceSelect?.value === "Pandacan" ? "1011" : ""),
+    zip: cityData?.zip || "",
     fullAddress: fullAddressInput?.value.trim() || "",
   };
 }
@@ -1565,7 +1561,7 @@ function saveCustomerCheckoutInfo() {
     province: provinceSelect?.value || "",
     city: citySelect?.value || "",
     barangay: barangaySelect?.value || "",
-    zip: cityData?.zip || (provinceSelect?.value === "Pandacan" ? "1011" : ""),
+    zip: cityData?.zip || "",
     fullAddress: fullAddressInput?.value || "",
     courier: courierSelect?.value || ""
   };

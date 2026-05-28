@@ -81,40 +81,30 @@ function normalizeParcelInfo(parcelInfo = {}) {
 }
 
 function normalizeAddress(address = {}) {
-  const isMetroManila =
-    address.areaGroup === "Metro Manila";
+  const isMetroManila = address.areaGroup === "Metro Manila";
 
   return {
+    deliver_state:
+      isMetroManila ? "Metro Manila" : address.areaGroup,
 
-    deliver_state: isMetroManila
-      ? "Metro Manila"
-      : address.province || address.deliverState || "Metro Manila",
-
-    deliver_city: isMetroManila
-      ? "Manila"
-      : address.province || address.deliverCity || "Metro Manila",
+    deliver_city:
+      isMetroManila ? "Metro Manila" : address.province,
 
     deliver_district:
-      address.city ||
-      address.deliverDistrict ||
-      "Pandacan",
+      isMetroManila ? address.province : address.city,
 
     deliver_street:
-      address.barangay ||
-      address.deliverStreet ||
-      "Barangay 858",
+      address.barangay,
 
     deliver_post_code:
       address.zip ||
       address.postCode ||
       address.zipCode ||
       address.deliverPostCode ||
-      "1011",
+      "",
 
     deliver_detail_address:
-      address.fullAddress ||
-      address.deliverDetailAddress ||
-      "Test address"
+      address.fullAddress || ""
   };
 }
 
@@ -124,6 +114,9 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
     expressInsuredValue: Number(amount || 0)
   });
   const delivery = normalizeAddress(address);
+
+  console.log("SPX DELIVERY DEBUG:", delivery);
+  console.log("SPX RAW ADDRESS:", address);
 
   return spxPost("/open/api/v1/order/batch_check_order", {
     user_id: Number(process.env.SPX_USER_ID),
@@ -153,31 +146,11 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
           ...(voucherCode ? { voucher_code: voucherCode } : {})
         },
         deliver_info: {
-          deliver_state:
-            address?.areaGroup || "Metro Manila",
+          ...delivery,
 
-          deliver_city:
-            address?.city || "Pasig",
+          deliver_name: "Test Customer",
 
-          deliver_district:
-            address?.barangay || "Unknown",
-
-          deliver_street:
-            address?.fullAddress || "",
-
-          deliver_post_code:
-            address?.zipCode ||
-            address?.postCode ||
-            "1000",
-
-          deliver_detail_address:
-            address?.fullAddress || "",
-
-          deliver_name:
-            "Test Customer",
-
-          deliver_phone:
-            "09171234567"
+          deliver_phone: "09171234567"
         },
 
         parcel_info: parcel
