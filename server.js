@@ -423,27 +423,56 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
 
     const spxPayload = {
       _id: order.external_id,
-      paymentMethod: order.payment_provider === "COD" ? "COD" : "PAID",
-      totalAmount: order.amount,
-      customerName: order.customer_name,
-      phone: order.customer_phone || "639123456789",
-      address: savedAddress.fullAddress || "Test address",
 
-      deliverState: savedAddress.province || "Metro Manila",
-      deliverCity: savedAddress.city || "Metro Manila",
-      deliverDistrict: savedAddress.barangay || "Intramuros",
-      deliverStreet: savedAddress.barangay || "Barangay 654",
-      deliverPostCode: savedAddress.postCode || savedAddress.zipCode || "1002",
+      paymentMethod:
+        order.payment_provider === "COD"
+          ? "COD"
+          : "PAID",
 
-      parcelWeight: savedParcel.parcelWeight || 1,
-      parcelLength: savedParcel.parcelLength || 10,
-      parcelWidth: savedParcel.parcelWidth || 10,
-      parcelHeight: savedParcel.parcelHeight || 10,
-      parcelItemName: savedParcel.itemName || "Electronics",
-      parcelItemQuantity: savedParcel.itemQuantity || (order.items?.length || 1),
-      parcelItemType: savedParcel.itemType || "Electronics",
+      totalAmount:
+        order.amount,
 
-      items: order.items || [{ name: "Electronics" }]
+      customerName:
+        order.customer_name,
+
+      phone:
+        order.customer_phone ||
+        "639123456789",
+
+      // FULL CUSTOMER ADDRESS OBJECT
+      address:
+        savedAddress,
+
+      // PARCEL INFO
+      parcelWeight:
+        savedParcel.parcelWeight || 1,
+
+      parcelLength:
+        savedParcel.parcelLength || 10,
+
+      parcelWidth:
+        savedParcel.parcelWidth || 10,
+
+      parcelHeight:
+        savedParcel.parcelHeight || 10,
+
+      parcelItemName:
+        savedParcel.itemName ||
+        "Electronics",
+
+      parcelItemQuantity:
+        savedParcel.itemQuantity ||
+        (order.items?.length || 1),
+
+      parcelItemType:
+        savedParcel.itemType ||
+        "Electronics",
+
+      // ORDER ITEMS
+      items:
+        order.items || [
+          { name: "Electronics" }
+        ]
     };
 
     const createResult = await createOrder(spxPayload);

@@ -81,39 +81,26 @@ function normalizeParcelInfo(parcelInfo = {}) {
 }
 
 function normalizeAddress(address = {}) {
-  const isMetroManila = address.areaGroup === "Metro Manila";
 
   return {
     deliver_state:
-      address.areaGroup ||
-      address.deliverState ||
-      "Metro Manila",
+      address.areaGroup,
 
     deliver_city:
-      isMetroManila
-        ? "Metro Manila"
-        : address.province || address.deliverCity || "Metro Manila",
+      address.province,
 
     deliver_district:
-      isMetroManila
-        ? address.province || address.city || address.deliverDistrict || "Binondo"
-        : address.city || address.deliverDistrict || "Binondo",
+      address.city,
 
     deliver_street:
-      address.barangay ||
-      address.deliverStreet ||
-      "Barangay 293",
+      address.barangay,
 
     deliver_post_code:
       address.postCode ||
-      address.zipCode ||
-      address.deliverPostCode ||
-      "1002",
+      address.zipCode,
 
     deliver_detail_address:
-      address.fullAddress ||
-      address.deliverDetailAddress ||
-      "Test address"
+      address.fullAddress
   };
 }
 
