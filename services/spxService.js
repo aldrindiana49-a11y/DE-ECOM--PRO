@@ -161,6 +161,7 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
 }
 
 async function createOrder(order) {
+  const delivery = normalizeAddress(order.address || {});
   return spxPost("/open/api/v2/order/batch_create_order", {
     user_id: Number(process.env.SPX_USER_ID),
     user_secret: process.env.SPX_USER_SECRET,
@@ -187,43 +188,20 @@ async function createOrder(order) {
         fulfillment_info: {
           payment_role: 1,
 
-          cod_collection:
-            order.paymentMethod === "COD" ? 1 : 0,
-
-          cod_amount:
-            order.paymentMethod === "COD"
-              ? Number(order.totalAmount || 0)
-              : 0,
+          cod_collection: 0,
+          cod_amount: 0,
 
           collect_type: 2
         },
 
         deliver_info: {
-          deliver_state:
-            order.address?.areaGroup || "Metro Manila",
-
-          deliver_city:
-            order.address?.city?.replace(" City", "") || "Pasig",
-
-          deliver_district:
-            order.address?.barangay || "Barangay",
-
-          deliver_street:
-            order.address?.fullAddress || "",
-
-          deliver_post_code:
-            order.address?.zipCode ||
-            order.address?.postCode ||
-            "1000",
+          ...delivery,
 
           deliver_name:
             order.customerName || "Customer",
 
           deliver_phone:
             order.phone || "09171234567",
-
-          deliver_detail_address:
-            order.address?.fullAddress || "",
 
           deliver_instruction:
             order.note || ""
