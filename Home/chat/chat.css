@@ -339,3 +339,19 @@
     max-width: 80%;
     border-radius: 10px;
 }
+
+.chat-image {
+    max-width: 220px;
+
+    border-radius: 14px;
+
+    display: block;
+}
+
+.chat-video {
+    max-width: 240px;
+
+    border-radius: 14px;
+
+    display: block;
+}

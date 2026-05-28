@@ -69,12 +69,31 @@ function ensureChatModal() {
     document
         .getElementById("websiteChatInput")
         ?.addEventListener("keydown", function (event) {
+
             if (event.key === "Enter") {
                 event.preventDefault();
                 sendWebsiteChatMessage();
             }
+
         });
+
+    document
+        .getElementById("chatFileInput")
+        ?.addEventListener("change", async function (event) {
+
+            const file = event.target.files?.[0];
+
+            if (!file) return;
+
+            await uploadChatMedia(file);
+
+            event.target.value = "";
+
+        });
+
 }
+
+
 
 function renderSystemWelcome() {
     const box = document.getElementById("websiteChatMessages");
@@ -155,7 +174,33 @@ function appendChatMessage(msg, scroll = true) {
 
     const div = document.createElement("div");
     div.className = `chat-msg ${msg.sender_type || "system"}`;
-    div.textContent = msg.message;
+
+    if (msg.image_url) {
+
+        div.innerHTML = `
+      <img
+        src="${msg.image_url}"
+        class="chat-image">
+    `;
+
+    }
+    else if (msg.video_url) {
+
+        div.innerHTML = `
+      <video
+        controls
+        class="chat-video">
+
+        <source src="${msg.video_url}">
+      </video>
+    `;
+
+    }
+    else {
+
+        div.textContent = msg.message;
+
+    }
 
     box.appendChild(div);
 
@@ -192,16 +237,14 @@ function subscribeChatRealtime() {
 
 async function openWebsiteChat() {
 
+    ensureChatModal();
+
     const modal = document.getElementById("websiteChatModal");
 
-    // 👉 IF OPEN → CLOSE
     if (modal?.classList.contains("show")) {
         closeWebsiteChat();
         return;
     }
-
-    // 👉 IF CLOSED → OPEN
-    ensureChatModal();
 
     modal?.classList.add("show");
 
@@ -409,16 +452,3 @@ function initGlobalChat() {
 
 document.addEventListener("DOMContentLoaded", initGlobalChat);
 
-document
-    .getElementById("chatFileInput")
-    ?.addEventListener("change", async function (event) {
-
-        const file = event.target.files?.[0];
-
-        if (!file) return;
-
-        await uploadChatMedia(file);
-
-        event.target.value = "";
-
-    });
