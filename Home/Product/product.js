@@ -1229,77 +1229,80 @@ document
 
   });
 
-document
-  .getElementById("confirmVariantAdd")
-  ?.addEventListener("click", () => {
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("#confirmVariantAdd");
+  if (!btn) return;
 
-    if (!selectedVariant) {
-      showMessage(`Please select ${product.variantTitle || "variation"}.`, "error");
-      return;
-    }
+  e.preventDefault();
+  e.stopPropagation();
 
-    const qty = Number(popupQtyInput.value) || 1;
-    const stock = safeNumber(selectedVariant.stock);
+  if (!selectedVariant) {
+    showMessage(`Please select ${product.variantTitle || "variation"}.`, "error");
+    return;
+  }
 
-    if (qty > stock) {
-      showMessage("Quantity limit reached.", "error");
-      return;
-    }
+  const qty = Number(popupQtyInput.value) || 1;
+  const stock = safeNumber(selectedVariant.stock);
 
-    let cartData = getCart();
+  if (qty > stock) {
+    showMessage("Quantity limit reached.", "error");
+    return;
+  }
 
-    const existingItem = cartData.find(item =>
-      String(item.id) === String(product.id) &&
-      item.variantLabel === selectedVariant.label
-    );
+  let cartData = getCart();
 
-    if (existingItem) {
-      const newQty = safeNumber(existingItem.quantity) + qty;
+  const existingItem = cartData.find(item =>
+    String(item.id) === String(product.id) &&
+    item.variantLabel === selectedVariant.label
+  );
 
-      existingItem.weight = Number(parcelSource.weight ?? product.weight ?? 0.01);
-      existingItem.length = Number(parcelSource.length ?? product.length ?? 1);
-      existingItem.width = Number(parcelSource.width ?? product.width ?? 1);
-      existingItem.height = Number(parcelSource.height ?? product.height ?? 1);
+  if (existingItem) {
+    const newQty = safeNumber(existingItem.quantity) + qty;
 
-      if (newQty > stock) {
-        existingItem.quantity = stock;
-        showMessage("Cart updated to maximum available stock.", "error");
-      } else {
-        existingItem.quantity = newQty;
-        showMessage("Quantity added to cart!", "success");
-      }
+    existingItem.weight = Number(selectedVariant?.weight ?? product.weight ?? 0.01);
+    existingItem.length = Number(selectedVariant?.length ?? product.length ?? 1);
+    existingItem.width = Number(selectedVariant?.width ?? product.width ?? 1);
+    existingItem.height = Number(selectedVariant?.height ?? product.height ?? 1);
 
+    if (newQty > stock) {
+      existingItem.quantity = stock;
+      showMessage("Cart updated to maximum available stock.", "error");
     } else {
-      cartData.push({
-        id: product.id,
-        name: product.name,
-        variantLabel: selectedVariant.label,
-
-        price: safeNumber(selectedVariant.discountPrice) > 0
-          ? safeNumber(selectedVariant.discountPrice)
-          : safeNumber(selectedVariant.price),
-
-        image: selectedVariant.image || getProductImage(product),
-        variant_image: selectedVariant.image || getProductImage(product),
-        product_image: product.image,
-
-        weight: Number(selectedVariant?.weight ?? product.weight ?? 0.01),
-        length: Number(selectedVariant?.length ?? product.length ?? 1),
-        width: Number(selectedVariant?.width ?? product.width ?? 1),
-        height: Number(selectedVariant?.height ?? product.height ?? 1),
-
-        stock: stock,
-        quantity: qty,
-        selected: true
-      });
-
-      showMessage("Product added to cart!", "success");
+      existingItem.quantity = newQty;
+      showMessage("Quantity added to cart!", "success");
     }
 
-    saveCart(cartData);
-    updateCartCount();
-    closeVariantPopup();
-  });
+  } else {
+    cartData.push({
+      id: product.id,
+      name: product.name,
+      variantLabel: selectedVariant.label,
+
+      price: safeNumber(selectedVariant.discountPrice) > 0
+        ? safeNumber(selectedVariant.discountPrice)
+        : safeNumber(selectedVariant.price),
+
+      image: selectedVariant.image || getProductImage(product),
+      variant_image: selectedVariant.image || getProductImage(product),
+      product_image: product.image,
+
+      weight: Number(selectedVariant?.weight ?? product.weight ?? 0.01),
+      length: Number(selectedVariant?.length ?? product.length ?? 1),
+      width: Number(selectedVariant?.width ?? product.width ?? 1),
+      height: Number(selectedVariant?.height ?? product.height ?? 1),
+
+      stock: stock,
+      quantity: qty,
+      selected: true
+    });
+
+    showMessage("Product added to cart!", "success");
+  }
+
+  saveCart(cartData);
+  updateCartCount();
+  closeVariantPopup();
+});
 
 document.getElementById("mobileCartBtn")
   ?.addEventListener("touchend", function (e) {

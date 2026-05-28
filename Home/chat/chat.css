@@ -3,12 +3,6 @@
 ========================= */
 
 /* FLOAT BUTTON */
-.messenger-float {
-    position: fixed;
-    border: none;
-    background: transparent !important;
-    overflow: visible;
-}
 
 .chat-float-avatar {
     width: 58px;
@@ -354,4 +348,22 @@
     border-radius: 14px;
 
     display: block;
+}
+
+.messenger-float {
+    position: fixed;
+
+    right: 18px;
+
+    bottom: 18px;
+
+    z-index: 99999;
+
+    border: none;
+
+    background: transparent !important;
+
+    overflow: visible;
+
+    cursor: pointer;
 }
