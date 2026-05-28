@@ -191,36 +191,37 @@ async function createOrder(order) {
 
         fulfillment_info: {
           payment_role: 1,
-          cod_collection: order.paymentMethod === "COD" ? 1 : 0,
-          cod_amount: order.paymentMethod === "COD" ? Number(order.totalAmount) : 0,
+          cod_collection: 1,
+          cod_amount: Number(order.totalAmount || 0),
           collect_type: 2
         },
 
         deliver_info: {
           deliver_state:
-            order.address?.areaGroup,
+            order.address?.areaGroup || "Metro Manila",
 
           deliver_city:
-            order.address?.city,
+            order.address?.city?.replace(" City", "") || "Pasig",
 
           deliver_district:
-            order.address?.barangay,
+            order.address?.barangay || "Barangay",
 
           deliver_street:
-            order.address?.fullAddress,
+            order.address?.fullAddress || "",
 
           deliver_post_code:
             order.address?.zipCode ||
-            order.address?.postCode,
+            order.address?.postCode ||
+            "1000",
 
           deliver_name:
-            order.customerName,
+            order.customerName || "Customer",
 
           deliver_phone:
-            order.phone,
+            order.phone || "09171234567",
 
           deliver_detail_address:
-            order.address?.fullAddress,
+            order.address?.fullAddress || "",
 
           deliver_instruction:
             order.note || ""
