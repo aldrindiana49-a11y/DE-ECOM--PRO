@@ -130,7 +130,7 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
     orders: [
       {
         base_info: {
-          service_type: 2,
+          service_type: 1,
           product_id: process.env.SPX_PRODUCT_ID || "1",
           ed_item_list: baseInfo?.ed_item_list || [],
           vas_info: {}
