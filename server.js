@@ -463,6 +463,11 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
 
     const result = await getCreateResult(batchNo);
 
+    console.log(
+      "SPX CREATE RESULT FULL:",
+      JSON.stringify(result, null, 2)
+    );
+
     if (result.data?.success_count < 1) {
       orders[index].spx_batch_no = batchNo;
       orders[index].shipping_status = "SPX_FAILED";
