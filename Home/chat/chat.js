@@ -290,26 +290,34 @@ async function sendWebsiteChatMessage() {
 
     input.value = "";
 
-    appendChatMessage({
-        sender_type: "customer",
-        message
-    });
-
     const conversationId = await createChatConversationIfNeeded();
 
     if (!conversationId) return;
 
-    const { error } = await supabaseClient
+    const { data, error } = await supabaseClient
         .from("chat_messages")
         .insert({
             conversation_id: conversationId,
             sender_type: "customer",
             message
-        });
+        })
+        .select()
+        .single();
 
     if (error) {
         console.error("Send message error:", error);
+        return;
     }
+
+    appendChatMessage(data);
+
+    await supabaseClient
+        .from("chat_conversations")
+        .update({
+            updated_at: new Date().toISOString(),
+            last_message: message
+        })
+        .eq("id", conversationId);
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
