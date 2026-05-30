@@ -286,6 +286,24 @@
     }
 }
 
+@media (max-width: 768px) {
+
+    .messenger-float {
+        display: flex !important;
+        right: 14px !important;
+        bottom: 86px !important;
+        z-index: 999999 !important;
+    }
+
+    .chat-unread-badge {
+        display: flex;
+        top: -4px;
+        right: -4px;
+        z-index: 1000000;
+    }
+
+}
+
 /* =========================
    ONLINE STATUS
 ========================= */
