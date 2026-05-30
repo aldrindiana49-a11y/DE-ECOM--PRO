@@ -113,7 +113,24 @@ function renderSystemWelcome() {
 }
 
 async function createChatConversationIfNeeded() {
-    if (drinChatConversationId) return drinChatConversationId;
+
+    if (drinChatConversationId) {
+
+        const { data } = await supabaseClient
+            .from("chat_conversations")
+            .select("id")
+            .eq("id", drinChatConversationId)
+            .maybeSingle();
+
+        if (data) {
+            return drinChatConversationId;
+        }
+
+        localStorage.removeItem("drinChatConversationId");
+        drinChatConversationId = null;
+        drinChatChannel = null;
+        drinTypingChannel = null;
+    }
 
     const guestId =
         localStorage.getItem("drinGuestId") ||
@@ -126,7 +143,8 @@ async function createChatConversationIfNeeded() {
         .insert({
             guest_id: guestId,
             page_url: window.location.href,
-            status: "open"
+            status: "open",
+            updated_at: new Date().toISOString()
         })
         .select("id")
         .single();
