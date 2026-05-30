@@ -323,19 +323,8 @@
 ========================= */
 
 .chat-image {
-    width: 160px;
-    max-width: 70%;
-    border-radius: 10px;
-}
-
-.chat-video {
-    width: 200px;
-    max-width: 80%;
-    border-radius: 10px;
-}
-
-.chat-image {
-    max-width: 220px;
+    max-width: 320px;
+    width: 100%;
 
     border-radius: 14px;
 
@@ -343,7 +332,8 @@
 }
 
 .chat-video {
-    max-width: 240px;
+    max-width: 340px;
+    width: 100%;
 
     border-radius: 14px;
 

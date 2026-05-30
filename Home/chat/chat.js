@@ -191,6 +191,9 @@ function appendChatMessage(msg, scroll = true) {
     if (!box) return;
 
     const div = document.createElement("div");
+
+    div.dataset.chatId = msg.id;
+
     div.className = `chat-msg ${msg.sender_type || "system"}`;
 
     if (msg.image_url) {
@@ -240,11 +243,15 @@ function subscribeChatRealtime() {
                 table: "chat_messages",
                 filter: `conversation_id=eq.${drinChatConversationId}`
             },
+
             (payload) => {
 
-                if (payload.new.sender_type === "customer") {
-                    return;
-                }
+                const existing =
+                    document.querySelector(
+                        `[data-chat-id="${payload.new.id}"]`
+                    );
+
+                if (existing) return;
 
                 appendChatMessage(payload.new);
 
@@ -299,7 +306,8 @@ async function sendWebsiteChatMessage() {
         .insert({
             conversation_id: conversationId,
             sender_type: "customer",
-            message
+            message,
+            is_read: false
         })
         .select()
         .single();
@@ -423,38 +431,67 @@ document.addEventListener("visibilitychange", () => {
 async function uploadChatMedia(file) {
 
     const isImage = file.type.startsWith("image/");
-    const folder = isImage ? "images" : "videos";
+    const isVideo = file.type.startsWith("video/");
 
+    if (!isImage && !isVideo) {
+        alert("Image or video only.");
+        return;
+    }
+
+    const folder = isImage ? "images" : "videos";
     const fileName = `${Date.now()}-${file.name}`;
     const path = `${folder}/${fileName}`;
 
-    const { error } = await supabaseClient
+    const { error: uploadError } = await supabaseClient
         .storage
         .from("chat-media")
         .upload(path, file);
 
-    if (error) {
-        console.error("Upload error:", error);
+    if (uploadError) {
+        console.error("Upload error:", uploadError);
+        alert("Upload failed.");
         return;
     }
 
-    const { data } = supabaseClient
+    const { data: publicData } = supabaseClient
         .storage
         .from("chat-media")
         .getPublicUrl(path);
 
-    const url = data.publicUrl;
+    const url = publicData.publicUrl;
 
     const conversationId = await createChatConversationIfNeeded();
 
-    await supabaseClient.from("chat_messages").insert({
-        conversation_id: conversationId,
-        sender_type: "customer",
-        message: null,
-        image_url: isImage ? url : null,
-        video_url: !isImage ? url : null
-    });
+    if (!conversationId) return;
 
+    const { data, error } = await supabaseClient
+        .from("chat_messages")
+        .insert({
+            conversation_id: conversationId,
+            sender_type: "customer",
+            message: isImage ? "📷 Image" : "🎥 Video",
+            image_url: isImage ? url : null,
+            video_url: isVideo ? url : null,
+            is_read: false
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.error("Media message insert error:", error);
+        alert("Media send failed.");
+        return;
+    }
+
+    appendChatMessage(data);
+
+    await supabaseClient
+        .from("chat_conversations")
+        .update({
+            updated_at: new Date().toISOString(),
+            last_message: isImage ? "📷 Image" : "🎥 Video"
+        })
+        .eq("id", conversationId);
 }
 
 function toggleEmojiPanel() {
