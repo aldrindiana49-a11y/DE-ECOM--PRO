@@ -267,7 +267,8 @@ async function openWebsiteChat() {
 
     if (!user) {
 
-        window.location.href = "./login/index.html";
+        window.location.href =
+            "https://drinelectronicsph.com/login/index.html";
 
         return;
     }
