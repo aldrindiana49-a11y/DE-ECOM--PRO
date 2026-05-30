@@ -393,3 +393,21 @@
 
     z-index: 999999;
 }
+
+.mobile-nav-item {
+    position: relative;
+}
+
+#mobileChatUnreadBadge {
+    position: absolute;
+
+    top: 2px;
+    right: 14px;
+
+    min-width: 18px;
+    height: 18px;
+
+    font-size: 11px;
+
+    z-index: 999999;
+}
