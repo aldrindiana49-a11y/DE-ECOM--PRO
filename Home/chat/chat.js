@@ -126,6 +126,10 @@ async function createChatConversationIfNeeded() {
         return null;
     }
 
+    localStorage.removeItem("drinGuestId");
+    localStorage.removeItem("drinChatConversationId");
+    drinChatConversationId = null;
+
     const { data: existingConversation } =
         await supabaseClient
             .from("chat_conversations")
@@ -135,7 +139,6 @@ async function createChatConversationIfNeeded() {
 
     if (existingConversation?.id) {
         drinChatConversationId = existingConversation.id;
-        localStorage.setItem("drinChatConversationId", drinChatConversationId);
         return drinChatConversationId;
     }
 
@@ -156,8 +159,6 @@ async function createChatConversationIfNeeded() {
     }
 
     drinChatConversationId = data.id;
-    localStorage.setItem("drinChatConversationId", drinChatConversationId);
-
     return drinChatConversationId;
 }
 

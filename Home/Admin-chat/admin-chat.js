@@ -103,6 +103,12 @@ async function openConversation(conversationId) {
 
     renderMessages(data || []);
 
+    await supabaseClient
+        .from("chat_messages")
+        .update({ is_read: true })
+        .eq("conversation_id", conversationId)
+        .eq("sender_type", "customer");
+
     document
         .querySelectorAll(".conversation-item")
         .forEach(item => item.classList.remove("active"));
