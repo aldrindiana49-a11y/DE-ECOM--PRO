@@ -255,6 +255,8 @@ function subscribeChatRealtime() {
 
                 appendChatMessage(payload.new);
 
+                updateChatUnreadBadge();
+
             }
         )
         .subscribe();
@@ -276,6 +278,13 @@ async function openWebsiteChat() {
     await createChatConversationIfNeeded();
     await loadChatMessages();
 
+    await supabaseClient
+        .from("chat_messages")
+        .update({ is_read: true })
+        .eq("conversation_id", drinChatConversationId)
+        .eq("sender_type", "admin");
+
+    await updateChatUnreadBadge();
     subscribeChatRealtime();
     subscribeTypingStatus();
 
@@ -335,6 +344,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     subscribeChatRealtime();
     subscribeTypingStatus();
+
+    updateChatUnreadBadge();
 });
 
 let chatTypingTimer = null;
@@ -507,6 +518,36 @@ function addEmoji(emoji) {
     if (!input) return;
 
     input.value += emoji;
+}
+
+async function updateChatUnreadBadge() {
+
+    if (!drinChatConversationId) return;
+
+    const { data } = await supabaseClient
+        .from("chat_messages")
+        .select("id")
+        .eq("conversation_id", drinChatConversationId)
+        .eq("sender_type", "admin")
+        .eq("is_read", false);
+
+    const badge =
+        document.getElementById("chatUnreadBadge");
+
+    if (!badge) return;
+
+    const count = data?.length || 0;
+
+    if (count === 0) {
+
+        badge.textContent = "0";
+        badge.style.display = "none";
+
+        return;
+    }
+
+    badge.textContent = count;
+    badge.style.display = "flex";
 }
 
 function initGlobalChat() {

@@ -140,11 +140,41 @@ function renderMessages(messages) {
     }
 
     adminChatMessages.innerHTML =
-        messages.map(msg => `
-      <div class="chat-message ${msg.sender_type}">
-        ${escapeHtml(msg.message)}
-      </div>
-    `).join("");
+        messages.map(msg => {
+
+            let content = "";
+
+            if (msg.image_url) {
+
+                content = `
+                <img
+                    src="${msg.image_url}"
+                    class="chat-image">
+            `;
+
+            }
+            else if (msg.video_url) {
+
+                content = `
+                <video controls class="chat-video">
+                    <source src="${msg.video_url}">
+                </video>
+            `;
+
+            }
+            else {
+
+                content = escapeHtml(msg.message || "");
+
+            }
+
+            return `
+            <div class="chat-message ${msg.sender_type}">
+                ${content}
+            </div>
+        `;
+
+        }).join("");
 
     adminChatMessages.scrollTop =
         adminChatMessages.scrollHeight;
@@ -175,7 +205,8 @@ async function sendAdminReply() {
         .insert({
             conversation_id: selectedConversationId,
             sender_type: "admin",
-            message
+            message,
+            is_read: false
         });
 
     if (error) {
