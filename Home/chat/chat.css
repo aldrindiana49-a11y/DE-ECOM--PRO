@@ -291,13 +291,6 @@
     .messenger-float {
         display: none !important;
     }
-
-    .chat-unread-badge {
-        top: -4px;
-        right: -4px;
-        z-index: 1000000;
-    }
-
 }
 
 /* =========================

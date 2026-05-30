@@ -120,11 +120,6 @@ async function createChatConversationIfNeeded() {
         data: { user }
     } = await supabaseClient.auth.getUser();
 
-    if (!user) {
-        window.location.href = "/login/";
-        return null;
-    }
-
     localStorage.removeItem("drinGuestId");
 
     const { data: existingConversation } =
@@ -265,6 +260,17 @@ function subscribeChatRealtime() {
 
 async function openWebsiteChat() {
 
+    const {
+        data: { user }
+    } = await supabaseClient.auth.getUser();
+
+    if (!user) {
+
+        window.location.href = "./login/index.html";
+
+        return;
+    }
+
     ensureChatModal();
 
     const modal = document.getElementById("websiteChatModal");
@@ -339,7 +345,14 @@ async function sendWebsiteChatMessage() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+
     ensureChatModal();
+
+    const {
+        data: { user }
+    } = await supabaseClient.auth.getUser();
+
+    if (!user) return;
 
     await createChatConversationIfNeeded();
 
