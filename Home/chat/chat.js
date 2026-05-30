@@ -29,14 +29,15 @@ function ensureChatModal() {
 
       <div id="emojiPanel" style="display:none; position:absolute; bottom:70px; left:10px; background:white; padding:8px; border-radius:10px;">
 
-   <span onclick="addEmoji('😢')">😢</span>
-   <span onclick="addEmoji('😊')">😊</span>
-  <span onclick="addEmoji('😍')">😍</span>
-  <span onclick="addEmoji('❤️')">❤️</span>
-  <span onclick="addEmoji('👍')">👍</span>
-  <span onclick="addEmoji('🙏')">🙏</span>
-<span onclick="addEmoji('🤝')">🤝</span>
-<span onclick="addEmoji('👏')">👏</span>
+   
+    <span onclick="addEmoji('👍')">👍</span>
+    <span onclick="addEmoji('😊')">😊</span>
+    <span onclick="addEmoji('😍')">😍</span>
+    <span onclick="addEmoji('❤️')">❤️</span>
+    <span onclick="addEmoji('🙏')">🙏</span>
+    <span onclick="addEmoji('🤝')">🤝</span>
+    <span onclick="addEmoji('👏')">👏</span>
+    <span onclick="addEmoji('😢')">😢</span>
 
 
 </div>
