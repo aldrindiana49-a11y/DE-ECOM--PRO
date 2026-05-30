@@ -35,6 +35,9 @@ function ensureChatModal() {
   <span onclick="addEmoji('😍')">😍</span>
   <span onclick="addEmoji('❤️')">❤️</span>
   <span onclick="addEmoji('👍')">👍</span>
+  <span onclick="addEmoji('🙏')">🙏</span>
+<span onclick="addEmoji('🤝')">🤝</span>
+<span onclick="addEmoji('👏')">👏</span>
 
 
 </div>
@@ -114,34 +117,32 @@ function renderSystemWelcome() {
 
 async function createChatConversationIfNeeded() {
 
-    if (drinChatConversationId) {
+    const {
+        data: { user }
+    } = await supabaseClient.auth.getUser();
 
-        const { data } = await supabaseClient
-            .from("chat_conversations")
-            .select("id")
-            .eq("id", drinChatConversationId)
-            .maybeSingle();
-
-        if (data) {
-            return drinChatConversationId;
-        }
-
-        localStorage.removeItem("drinChatConversationId");
-        drinChatConversationId = null;
-        drinChatChannel = null;
-        drinTypingChannel = null;
+    if (!user) {
+        window.location.href = "/login/";
+        return null;
     }
 
-    const guestId =
-        localStorage.getItem("drinGuestId") ||
-        crypto.randomUUID();
+    const { data: existingConversation } =
+        await supabaseClient
+            .from("chat_conversations")
+            .select("id")
+            .eq("customer_id", user.id)
+            .maybeSingle();
 
-    localStorage.setItem("drinGuestId", guestId);
+    if (existingConversation?.id) {
+        drinChatConversationId = existingConversation.id;
+        localStorage.setItem("drinChatConversationId", drinChatConversationId);
+        return drinChatConversationId;
+    }
 
     const { data, error } = await supabaseClient
         .from("chat_conversations")
         .insert({
-            guest_id: guestId,
+            customer_id: user.id,
             page_url: window.location.href,
             status: "open",
             updated_at: new Date().toISOString()
@@ -514,10 +515,22 @@ function toggleEmojiPanel() {
 }
 
 function addEmoji(emoji) {
-    const input = document.getElementById("websiteChatInput");
+
+    const input =
+        document.getElementById("websiteChatInput");
+
     if (!input) return;
 
     input.value += emoji;
+
+    const panel =
+        document.getElementById("emojiPanel");
+
+    if (panel) {
+        panel.style.display = "none";
+    }
+
+    input.focus();
 }
 
 async function updateChatUnreadBadge() {
