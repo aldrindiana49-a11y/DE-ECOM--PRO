@@ -1,8 +1,7 @@
 const DRIN_SUPPORT_AVATAR =
     "https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/DeSupport.png";
 
-let drinChatConversationId =
-    localStorage.getItem("drinChatConversationId") || null;
+let drinChatConversationId = null;
 
 let drinChatChannel = null;
 
@@ -127,14 +126,14 @@ async function createChatConversationIfNeeded() {
     }
 
     localStorage.removeItem("drinGuestId");
-    localStorage.removeItem("drinChatConversationId");
-    drinChatConversationId = null;
 
     const { data: existingConversation } =
         await supabaseClient
             .from("chat_conversations")
             .select("id")
             .eq("customer_id", user.id)
+            .order("updated_at", { ascending: false })
+            .limit(1)
             .maybeSingle();
 
     if (existingConversation?.id) {
