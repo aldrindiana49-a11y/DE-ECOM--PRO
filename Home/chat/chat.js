@@ -557,28 +557,24 @@ async function updateChatUnreadBadge() {
         .eq("sender_type", "admin")
         .eq("is_read", false);
 
-    const badge =
-        document.getElementById("chatUnreadBadge");
-
-    if (!badge) return;
-
     const count = data?.length || 0;
 
-    if (count === 0) {
+    const badges = document.querySelectorAll(
+        "#chatUnreadBadge, #mobileChatUnreadBadge"
+    );
 
-        badge.textContent = "0";
-        badge.style.display = "none";
+    badges.forEach((badge) => {
 
-        return;
+        badge.textContent = count;
+
+        badge.style.display =
+            count > 0 ? "flex" : "none";
+
+    });
+
+    function initGlobalChat() {
+        ensureChatModal();
     }
-
-    badge.textContent = count;
-    badge.style.display = "flex";
 }
-
-function initGlobalChat() {
-    ensureChatModal();
-}
-
 document.addEventListener("DOMContentLoaded", initGlobalChat);
 
