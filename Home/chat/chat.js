@@ -141,8 +141,15 @@ async function createChatConversationIfNeeded() {
         .from("chat_conversations")
         .insert({
             customer_id: user.id,
+            customer_name:
+                user.user_metadata?.full_name ||
+                user.email ||
+                "Customer",
+
             page_url: window.location.href,
+
             status: "open",
+
             updated_at: new Date().toISOString()
         })
         .select("id")

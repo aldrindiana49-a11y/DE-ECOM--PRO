@@ -351,3 +351,84 @@ body {
     }
 
 }
+
+.conversation-unread-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 20px;
+    height: 20px;
+
+    margin-left: 6px;
+    padding: 0 6px;
+
+    border-radius: 999px;
+
+    background: #ef4444;
+    color: white;
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+body {
+    background: #e5eef5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-layout {
+    width: 1100px;
+    max-width: calc(100vw - 30px);
+    height: 720px;
+    max-height: calc(100vh - 30px);
+
+    border-radius: 24px;
+    overflow: hidden;
+
+    background: #fff;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+}
+
+.conversation-sidebar {
+    height: 100%;
+}
+
+.chat-main {
+    height: 100%;
+}
+
+@media (max-width: 768px) {
+    body {
+        display: block;
+    }
+
+    .chat-layout {
+        width: 100%;
+        height: 100vh;
+        max-width: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+}
+
+.pin-btn {
+
+    border: none;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    font-size: 16px;
+
+    padding: 0;
+
+    transition: 0.2s;
+}
+
+.pin-btn:hover {
+    transform: scale(1.15);
+}

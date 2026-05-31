@@ -22,7 +22,15 @@ async function loadConversations() {
 
     const { data, error } = await supabaseClient
         .from("chat_conversations")
-        .select("*")
+        .select(`
+            *,
+            chat_messages (
+                id,
+                sender_type,
+                is_read
+            )
+        `)
+        .order("is_pinned", { ascending: false })
         .order("updated_at", { ascending: false });
 
     if (error) {
@@ -59,6 +67,13 @@ function renderConversationList(conversations) {
                 conversation.guest_id ||
                 "Guest Customer";
 
+            const unreadCount =
+                (conversation.chat_messages || [])
+                    .filter(msg =>
+                        msg.sender_type === "customer" &&
+                        msg.is_read === false
+                    ).length;
+
             return `
         <div
           class="conversation-item ${selectedConversationId === conversation.id ? "active" : ""}"
@@ -68,12 +83,33 @@ function renderConversationList(conversations) {
           <div class="conversation-top">
 
             <div class="conversation-name">
-              ${name}
-            </div>
+  ${name}
 
-            <div class="conversation-time">
-              ${formatTime(conversation.updated_at)}
-            </div>
+  ${unreadCount > 0
+                    ? `<span class="conversation-unread-badge">${unreadCount}</span>`
+                    : ""
+                }
+</div>
+
+            <div style="display:flex; align-items:center; gap:8px;">
+
+  <button
+    class="pin-btn"
+    onclick="togglePinConversation(
+      event,
+      '${conversation.id}',
+      ${conversation.is_pinned}
+    )">
+
+    ${conversation.is_pinned ? '📌' : '📍'}
+
+  </button>
+
+  <div class="conversation-time">
+    ${formatTime(conversation.updated_at)}
+  </div>
+
+</div>
 
           </div>
 
@@ -108,6 +144,7 @@ async function openConversation(conversationId) {
         .update({ is_read: true })
         .eq("conversation_id", conversationId)
         .eq("sender_type", "customer");
+    await loadConversations();
 
     document
         .querySelectorAll(".conversation-item")
@@ -154,8 +191,9 @@ function renderMessages(messages) {
 
                 content = `
                 <img
-                    src="${msg.image_url}"
-                    class="chat-image">
+    src="${msg.image_url}"
+    class="chat-image"
+    onclick="openChatImagePreview('${msg.image_url}')">
             `;
 
             }
@@ -200,10 +238,6 @@ async function sendAdminReply() {
 
     adminReplyInput.value = "";
 
-    appendMessage({
-        sender_type: "admin",
-        message
-    });
 
 
     const { error } = await supabaseClient
@@ -269,9 +303,14 @@ function subscribeRealtime() {
                     msg.conversation_id === selectedConversationId
                 ) {
 
-                    if (msg.sender_type !== "admin") {
-                        appendMessage(msg);
-                    }
+                    const existing =
+                        document.querySelector(
+                            `[data-chat-id="${msg.id}"]`
+                        );
+
+                    if (existing) return;
+
+                    appendMessage(msg);
 
                 }
 
@@ -300,11 +339,36 @@ function appendMessage(msg) {
     const div =
         document.createElement("div");
 
+    div.dataset.chatId = msg.id;
+
     div.className =
         `chat-message ${msg.sender_type}`;
 
-    div.textContent =
-        msg.message;
+    if (msg.image_url) {
+
+        div.innerHTML = `
+        <img
+            src="${msg.image_url}"
+            class="chat-image"
+            onclick="openChatImagePreview('${msg.image_url}')">
+    `;
+
+    }
+    else if (msg.video_url) {
+
+        div.innerHTML = `
+            <video controls class="chat-video">
+                <source src="${msg.video_url}">
+            </video>
+        `;
+
+    }
+    else {
+
+        div.textContent =
+            msg.message;
+
+    }
 
     adminChatMessages.appendChild(div);
 
@@ -445,9 +509,116 @@ function toggleAdminEmojiPanel() {
 }
 
 function addAdminEmoji(emoji) {
-    const input = document.getElementById("adminReplyInput");
+
+    const input =
+        document.getElementById("adminReplyInput");
+
+    const panel =
+        document.getElementById("adminEmojiPanel");
+
     if (!input) return;
 
     input.value += emoji;
+
     input.focus();
+
+    panel.style.display = "none";
+}
+
+async function uploadAdminChatMedia(file) {
+
+    if (!selectedConversationId) {
+        alert("Select conversation first.");
+        return;
+    }
+
+    const isImage = file.type.startsWith("image/");
+    const isVideo = file.type.startsWith("video/");
+
+    if (!isImage && !isVideo) {
+        alert("Image or video only.");
+        return;
+    }
+
+    const folder = isImage ? "admin-images" : "admin-videos";
+    const fileName = `${Date.now()}-${file.name}`;
+    const path = `${folder}/${fileName}`;
+
+    const { error: uploadError } = await supabaseClient
+        .storage
+        .from("chat-media")
+        .upload(path, file);
+
+    if (uploadError) {
+        console.error("Admin upload error:", uploadError);
+        alert("Upload failed.");
+        return;
+    }
+
+    const { data: publicData } = supabaseClient
+        .storage
+        .from("chat-media")
+        .getPublicUrl(path);
+
+    const url = publicData.publicUrl;
+
+    const { data, error } = await supabaseClient
+        .from("chat_messages")
+        .insert({
+            conversation_id: selectedConversationId,
+            sender_type: "admin",
+            message: isImage ? "📷 Image" : "🎥 Video",
+            image_url: isImage ? url : null,
+            video_url: isVideo ? url : null,
+            is_read: false
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.error("Admin media insert error:", error);
+        alert("Media send failed.");
+        return;
+    }
+
+    appendMessage(data);
+
+    await supabaseClient
+        .from("chat_conversations")
+        .update({
+            updated_at: new Date().toISOString(),
+            last_message: isImage ? "📷 Image" : "🎥 Video"
+        })
+        .eq("id", selectedConversationId);
+}
+
+document
+    .getElementById("adminChatFileInput")
+    ?.addEventListener("change", async function (event) {
+
+        const file = event.target.files?.[0];
+
+        if (!file) return;
+
+        await uploadAdminChatMedia(file);
+
+        event.target.value = "";
+    });
+
+async function togglePinConversation(
+    event,
+    conversationId,
+    pinned
+) {
+
+    event.stopPropagation();
+
+    await supabaseClient
+        .from("chat_conversations")
+        .update({
+            is_pinned: !pinned
+        })
+        .eq("id", conversationId);
+
+    loadConversations();
 }
