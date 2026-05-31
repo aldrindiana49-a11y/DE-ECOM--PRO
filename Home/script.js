@@ -32,6 +32,7 @@ const accountBtn = document.getElementById("accountBtn");
 const accountDropdown = document.getElementById("accountDropdown");
 
 let products = [];
+let homepageProductLimit = 10;
 let rawBanners = JSON.parse(localStorage.getItem("drinBanners")) || [];
 let cart = JSON.parse(localStorage.getItem("drinCart")) || [];
 
@@ -206,6 +207,7 @@ function renderPriceBlock(price, discountPrice) {
 }
 
 /* UPDATED: In-stock first, Out of Stock section at bottom */
+
 function renderHomepageProducts(productArray = products) {
   if (!homepageProductList) return;
 
@@ -231,7 +233,25 @@ function renderHomepageProducts(productArray = products) {
   const inStockProducts = productArray.filter(hasAvailableStock);
   const outOfStockProducts = productArray.filter((product) => !hasAvailableStock(product));
 
-  renderProductCards(inStockProducts);
+  const visibleInStockProducts =
+    inStockProducts.slice(0, homepageProductLimit);
+
+  renderProductCards(visibleInStockProducts);
+
+  const hasMoreProducts =
+    inStockProducts.length > homepageProductLimit;
+
+  if (hasMoreProducts) {
+    homepageProductList.insertAdjacentHTML("beforeend", `
+      <div class="homepage-loadmore-wrap">
+        <button
+          class="homepage-loadmore-btn"
+          onclick="loadMoreHomepageProducts()">
+          Load More
+        </button>
+      </div>
+    `);
+  }
 
   if (outOfStockProducts.length > 0) {
     const divider = document.createElement("div");
@@ -258,15 +278,13 @@ function renderProductCards(productArray) {
     };
 
     const imageSlides = product.images
-      .map(
-        (img) => `
-      <img
-        src="${img}"
-        alt="${escapeHtml(product.name)}"
-        onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'"
-      />
-    `
-      )
+      .map((img) => `
+        <img
+          src="${img}"
+          alt="${escapeHtml(product.name)}"
+          onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'"
+        />
+      `)
       .join("");
 
     card.innerHTML = `
@@ -274,18 +292,14 @@ function renderProductCards(productArray) {
         <div class="product-image-track">
           ${imageSlides}
         </div>
-
         ${outOfStock ? `<div class="stock-overlay">Out of Stock</div>` : ""}
       </div>
 
       <div class="homepage-product-info">
         <span class="homepage-product-category">${escapeHtml(product.category)}</span>
         <h3>${escapeHtml(product.name)}</h3>
-
         ${product.brand ? `<p class="homepage-product-brand">${escapeHtml(product.brand)}</p>` : ""}
-
         ${renderPriceBlock(product.price, product.discountPrice)}
-
         <p class="homepage-product-stock ${outOfStock ? "out-stock-text" : ""}">
           ${outOfStock ? "Out of stock" : `Stock: ${product.stock}`}
         </p>
@@ -988,9 +1002,7 @@ async function claimVoucher(code) {
 
   if (!user) {
 
-    showVoucherToast(
-      "⚠️ Please login first"
-    );
+    showPremiumLoginPopup();
 
     setTimeout(() => {
 
@@ -1669,4 +1681,77 @@ function showVoucherToast(message) {
   setTimeout(() => {
     toast.classList.remove("show");
   }, 2200);
+}
+
+function loadMoreHomepageProducts() {
+
+  homepageProductLimit += 10;
+
+  renderHomepageProducts(products);
+}
+
+function showPremiumLoginPopup() {
+
+  const existing =
+    document.getElementById("premiumLoginPopup");
+
+  if (existing) existing.remove();
+
+  const popup =
+    document.createElement("div");
+
+  popup.id = "premiumLoginPopup";
+
+  popup.innerHTML = `
+
+    <div class="premium-login-overlay">
+
+      <div class="premium-login-box">
+
+        <div class="premium-login-icon">
+          🔒
+        </div>
+
+        <h3>
+          Login Required
+        </h3>
+
+        <p>
+          Please login first to claim vouchers and enjoy member benefits.
+        </p>
+
+        <div class="premium-login-actions">
+
+          <button
+            class="premium-login-btn"
+            onclick="window.location.href='./login/'">
+
+            Login Now
+
+          </button>
+
+          <button
+            class="premium-cancel-btn"
+            onclick="closePremiumLoginPopup()">
+
+            Cancel
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+  `;
+
+  document.body.appendChild(popup);
+}
+
+function closePremiumLoginPopup() {
+
+  const popup =
+    document.getElementById("premiumLoginPopup");
+
+  if (popup) popup.remove();
 }

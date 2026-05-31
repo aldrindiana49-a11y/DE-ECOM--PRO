@@ -12,6 +12,20 @@ const message = document.getElementById("message");
 
 let productsLoading = true;
 
+function setProductActionsLoading(isLoading) {
+  productsLoading = isLoading;
+
+  document
+    .querySelectorAll("#addToCartBtn, #buyNowBtn")
+    .forEach(btn => {
+      if (!btn) return;
+
+      btn.disabled = isLoading;
+      btn.style.pointerEvents = isLoading ? "none" : "auto";
+      btn.style.opacity = isLoading ? "0.55" : "1";
+    });
+}
+
 if (addToCartBtn) {
   addToCartBtn.disabled = true;
   addToCartBtn.textContent = "Loading...";
@@ -188,6 +202,8 @@ let product = null;
 
 async function loadProductsFromSupabase() {
 
+  setProductActionsLoading(true);
+
   const { data, error } = await supabaseClient
     .from("products")
     .select("*")
@@ -278,6 +294,7 @@ async function loadProductsFromSupabase() {
   loadProductVouchers();
   updateCartCount();
   renderDynamicSidebarCategories();
+  setProductActionsLoading(false);
 }
 
 productsLoading = false;
@@ -486,12 +503,18 @@ function updateCartCount() {
   if (mobileCartCount) mobileCartCount.textContent = totalQty;
 }
 
+const MAX_CART_QTY = 50;
+
 function validateQuantity() {
   const stock = getProductStock(product);
   let qty = parseInt(quantityInput.value);
 
   if (isNaN(qty) || qty < 1) qty = 1;
-  if (qty > stock) qty = stock;
+  const maxQty =
+    Math.min(stock, MAX_CART_QTY);
+
+  if (qty > maxQty)
+    qty = maxQty;
 
   quantityInput.value = qty;
   return qty;
@@ -756,6 +779,7 @@ function showMessage(text, type) {
   }, 2500);
 }
 
+let suggestedLimit = 8;
 function renderSuggestedProducts() {
   const container = document.getElementById("suggestedProducts");
   if (!container) return;
@@ -770,7 +794,7 @@ function renderSuggestedProducts() {
       return getProductStock(p) > 0;
 
     })
-    .slice(0, 8);
+    .slice(0, suggestedLimit);
 
   if (!list.length) {
     container.innerHTML = `
@@ -786,7 +810,7 @@ function renderSuggestedProducts() {
   <div class="homepage-product-card" onclick="openSuggestedProduct('${item.id}')">
     
     <div class="homepage-product-image">
-      <img src="${getProductImage(item)}" alt="${item.name}">
+      <img src="${item.image || getProductImage(item)}" alt="${item.name}">
     </div>
 
     <div class="homepage-product-info">
@@ -803,6 +827,35 @@ function renderSuggestedProducts() {
 
   </div>
 `).join("");
+
+  const hasMore =
+    products.filter(p => {
+
+      if (String(p.id) === String(product.id)) {
+        return false;
+      }
+
+      return getProductStock(p) > 0;
+
+    }).length > suggestedLimit;
+
+  if (hasMore) {
+
+    container.innerHTML += `
+
+      <div class="suggested-loadmore-wrap">
+
+        <button
+          class="suggested-loadmore-btn"
+          onclick="loadMoreSuggestedProducts()">
+
+          Load More
+
+        </button>
+
+      </div>
+    `;
+  }
 }
 
 function openSuggestedProduct(id) {
@@ -938,11 +991,9 @@ async function claimProductVoucher(code, btn) {
 
   if (!user) {
 
-    alert("Please login first to claim this voucher.");
-
-    window.location.href = "../login/";
-
+    showPremiumLoginPopup();
     return;
+
   }
 
   localStorage.setItem(
@@ -1200,9 +1251,12 @@ document
       Number(popupQtyInput.value) || 1;
 
     const maxStock =
-      selectedVariant
-        ? safeNumber(selectedVariant.stock)
-        : getProductStock(product);
+      Math.min(
+        selectedVariant
+          ? safeNumber(selectedVariant.stock)
+          : getProductStock(product),
+        MAX_CART_QTY
+      );
 
     if (qty < maxStock) {
 
@@ -1943,4 +1997,45 @@ function showVoucherToast(message) {
 
   }, 2200);
 
+}
+
+function loadMoreSuggestedProducts() {
+
+  suggestedLimit += 8;
+
+  renderSuggestedProducts();
+}
+
+function showPremiumLoginPopup() {
+  const existing = document.getElementById("premiumLoginPopup");
+  if (existing) existing.remove();
+
+  const popup = document.createElement("div");
+  popup.id = "premiumLoginPopup";
+
+  popup.innerHTML = `
+    <div class="premium-login-overlay">
+      <div class="premium-login-box">
+        <div class="premium-login-icon">🔒</div>
+        <h3>Login Required</h3>
+        <p>Please login first to claim vouchers and enjoy member benefits.</p>
+
+        <div class="premium-login-actions">
+          <button class="premium-login-btn" onclick="window.location.href='../login/'">
+            Login Now
+          </button>
+
+          <button class="premium-cancel-btn" onclick="closePremiumLoginPopup()">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(popup);
+}
+
+function closePremiumLoginPopup() {
+  document.getElementById("premiumLoginPopup")?.remove();
 }
