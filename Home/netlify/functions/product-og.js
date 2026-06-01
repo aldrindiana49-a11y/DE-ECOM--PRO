@@ -36,16 +36,21 @@ exports.handler = async (event) => {
             };
         }
 
-        const title = product.title || "Drin Electronics";
+        const title =
+            product.variant_title ||
+            product.brand ||
+            "Drin Electronics";
+
         const description =
-            product.description || "Check this product";
+            product.brand ||
+            "Check this product";
+
         const image =
-            product.image ||
+            product.gallery?.[0] ||
             "https://drinelectronicsph.com/Image/social-preview.png";
 
         const url =
             `https://drinelectronicsph.com/product/?id=${id}`;
-
         const html = `
       <!DOCTYPE html>
       <html>
