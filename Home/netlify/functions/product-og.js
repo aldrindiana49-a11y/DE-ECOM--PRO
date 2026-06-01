@@ -78,32 +78,16 @@ exports.handler = async (event) => {
 
       </head>
       
-<body style="font-family:Arial;padding:40px;text-align:center;">
+<body>
+  <script>
+    const isBot = /facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|TelegramBot/i.test(navigator.userAgent);
 
-  <h1>${title}</h1>
+    if (!isBot) {
+      window.location.href = "${url}";
+    }
+  </script>
 
-  <img 
-    src="${image}" 
-    style="max-width:300px;border-radius:12px;"
-  />
-
-  <p>${description}</p>
-
-  <a 
-    href="${url}"
-    style="
-      display:inline-block;
-      padding:12px 24px;
-      background:#0066ff;
-      color:white;
-      text-decoration:none;
-      border-radius:8px;
-      margin-top:20px;
-    "
-  >
-    View Product
-  </a>
-
+  <a href="${url}">View Product</a>
 </body>
 
       </html>
