@@ -16,7 +16,7 @@ exports.handler = async (event) => {
     try {
 
         const response = await fetch(
-            `${SUPABASE_URL}/rest/v1/products?id=eq.${id}&select=*`,
+            `${SUPABASE_URL}/rest/v1/products?id=eq.${encodeURIComponent(id)}&select=*`,
             {
                 headers: {
                     apikey: SUPABASE_KEY,
@@ -24,6 +24,7 @@ exports.handler = async (event) => {
                 }
             }
         );
+
 
         const data = await response.json();
 
@@ -50,7 +51,7 @@ exports.handler = async (event) => {
             "https://drinelectronicsph.com/Image/social-preview.png";
 
         const url =
-            `https://drinelectronicsph.com/product/?id=${id}`;
+            `https://drinelectronicsph.com/Product/?id=${id}`;
         const html = `
       <!DOCTYPE html>
       <html>
