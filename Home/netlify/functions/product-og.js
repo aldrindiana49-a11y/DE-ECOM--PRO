@@ -9,8 +9,9 @@ exports.handler = async (event) => {
         };
     }
 
-    const SUPABASE_URL = "https://YOUR_PROJECT.supabase.co";
-    const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
+    const SUPABASE_URL = "https://zdinvxowzpkolbfzpcac.supabase.co";
+
+    const SUPABASE_KEY = "sb_publishable_yWOmkaQzsh7sInJPhDOFWw_tyjALAuP";
 
     try {
 
