@@ -70,9 +70,7 @@ exports.handler = async (event) => {
         <meta name="twitter:description" content="${description}" />
         <meta name="twitter:image" content="${image}" />
 
-        <script>
-          window.location.href = "${url}";
-        </script>
+        <meta http-equiv="refresh" content="2;url=${url}">
 
       </head>
       <body>
