@@ -7,13 +7,12 @@ const ordersTotalCount = document.getElementById("ordersTotalCount");
 const ordersPendingCount = document.getElementById("ordersPendingCount");
 const ordersPaidCount = document.getElementById("ordersPaidCount");
 const ordersToShipCount = document.getElementById("ordersToShipCount");
-
 const dashboardToShip = document.getElementById("dashboardToShip");
 const dashboardShipped = document.getElementById("dashboardShipped");
 const dashboardDelivered = document.getElementById("dashboardDelivered");
 
 let adminOrders = [];
-let currentOrderFilter = "ALL";
+let currentOrderFilter = "Processing";
 let expandedOrderItems = {};
 
 const cancelledOrdersTableBody =
@@ -46,8 +45,10 @@ function getOrderStatusClass(status) {
   if (status === "PAID") return "status-paid";
   if (status === "Pending Payment") return "status-pending";
   if (status === "Processing") return "status-processing";
+  if (status === "Packed") return "status-processing";
   if (status === "To Ship") return "status-processing";
   if (status === "Shipped") return "status-shipped";
+  if (status === "Failed Delivery") return "status-inactive";
   if (status === "In Transit") return "status-shipped";
   if (status === "Delivered") return "status-delivered";
   if (status === "Cancelled") return "status-inactive";
@@ -464,6 +465,38 @@ function openOrderModal(orderId) {
 </button>
 
 <button
+  class="small-btn"
+  type="button"
+  onclick="markOrderShipped('${escapeAttribute(orderId)}', this)"
+>
+  Mark Shipped
+</button>
+
+<button
+  class="small-btn"
+  type="button"
+  onclick="markOrderInTransit('${escapeAttribute(orderId)}', this)"
+>
+  In Transit
+</button>
+
+<button
+  class="danger-btn"
+  type="button"
+  onclick="markOrderFailed('${escapeAttribute(orderId)}', this)"
+>
+  Failed Delivery
+</button>
+
+<button
+  class="small-btn"
+  type="button"
+  onclick="markOrderDelivered('${escapeAttribute(orderId)}', this)"
+>
+  Mark Delivered
+</button>
+
+<button
   class="secondary-btn"
   type="button"
   onclick="openAWB('${escapeAttribute(orderId)}')"
@@ -623,11 +656,9 @@ async function createSPXShipment(orderId, btn) {
     const paymentStatus =
       String(order.status || "").toUpperCase();
 
-    const paymentMethod =
-      String(order.payment_method || "").toUpperCase();
 
     const isCOD =
-      paymentMethod.includes("COD");
+      paymentStatus.includes("COD");
 
     const isPaid =
       paymentStatus === "PAID";
@@ -1057,6 +1088,203 @@ function getSelectedOrderIds() {
 
 }
 
+async function bulkMarkPacked() {
+
+  const selectedOrders =
+    getSelectedOrderIds();
+
+  if (!selectedOrders.length) {
+
+    showToast(
+      "Select orders first.",
+      "error"
+    );
+
+    return;
+  }
+
+  for (const orderId of selectedOrders) {
+
+    try {
+
+      await fetch(
+        "https://de-ecom-pro.onrender.com/api/orders/update",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify({
+            orderId,
+            order_status: "Packed"
+          })
+        }
+      );
+
+    } catch (err) {
+
+      console.error(err);
+
+    }
+
+  }
+
+  showToast(
+    "Selected orders marked as Packed.",
+    "success"
+  );
+
+  await loadAdminOrders();
+}
+
+async function markOrderShipped(orderId, btn) {
+  try {
+
+    const order = adminOrders.find(o =>
+      String(o.external_id || o.id) === String(orderId)
+    );
+
+    if (!order) {
+      showToast("Order not found", "error");
+      return;
+    }
+
+    const paymentStatus =
+      String(order.status || "").toUpperCase();
+
+    const isCOD =
+      paymentStatus.includes("COD");
+
+    const isPaid =
+      paymentStatus === "PAID";
+
+    if (!isCOD && !isPaid) {
+      showToast(
+        "Only COD or PAID orders can be marked shipped.",
+        "error"
+      );
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerText = "Updating...";
+    }
+
+    const res = await fetch(
+      "https://de-ecom-pro.onrender.com/api/orders/update",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          order_status: "Shipped"
+        })
+      }
+    );
+
+    const result = await res.json();
+
+    if (!result.success) {
+      showToast(result.message || "Failed to mark shipped", "error");
+      return;
+    }
+
+    showToast("Order marked as Shipped.", "success");
+    closeOrderModal();
+    await loadAdminOrders();
+
+  } catch (err) {
+    console.error(err);
+    showToast("Mark shipped server error", "error");
+
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "Mark Shipped";
+    }
+  }
+}
+
+async function markOrderInTransit(orderId, btn) {
+  await forceUpdateOrderStatus(orderId, "In Transit", btn);
+}
+
+async function markOrderFailed(orderId, btn) {
+  await forceUpdateOrderStatus(orderId, "Failed Delivery", btn);
+}
+
+async function markOrderDelivered(orderId, btn) {
+  await forceUpdateOrderStatus(orderId, "Delivered", btn);
+}
+
+async function forceUpdateOrderStatus(orderId, status, btn) {
+  try {
+
+    const order = adminOrders.find(o =>
+      String(o.external_id || o.id) === String(orderId)
+    );
+
+    if (!order) {
+      showToast("Order not found", "error");
+      return;
+    }
+
+    const paymentStatus =
+      String(order.status || "").toUpperCase();
+
+    const isCOD =
+      paymentStatus.includes("COD");
+
+    const isPaid =
+      paymentStatus === "PAID";
+
+    if (!isCOD && !isPaid) {
+
+      showToast(
+        "Only COD or PAID orders can update status.",
+        "error"
+      );
+
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerText = "Updating...";
+    }
+
+    const res = await fetch("https://de-ecom-pro.onrender.com/api/orders/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId, order_status: status })
+    });
+
+    const result = await res.json();
+
+    if (!result.success) {
+      showToast(result.message || "Failed to update order", "error");
+      return;
+    }
+
+    showToast(`Order marked as ${status}.`, "success");
+    closeOrderModal();
+    await loadAdminOrders();
+
+  } catch (err) {
+    console.error(err);
+    showToast("Order update server error", "error");
+
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = status;
+    }
+  }
+}
+
 async function bulkArrangeShipment() {
 
   const selectedOrders =
@@ -1093,6 +1321,8 @@ window.handleOrderRequestAction = handleOrderRequestAction;
 window.approveOrderRequest = approveOrderRequest;
 window.rejectOrderRequest = rejectOrderRequest;
 window.updateOrderRequestStatus = updateOrderRequestStatus;
+window.bulkMarkPacked = bulkMarkPacked;
+window.markOrderShipped = markOrderShipped;
 window.bulkArrangeShipment = bulkArrangeShipment;
 window.loadAdminOrders = loadAdminOrders;
 window.loadCancelledOrders = loadCancelledOrders;
@@ -1105,6 +1335,9 @@ window.createSPXShipment = createSPXShipment;
 window.openAWB = openAWB;
 window.openTracking = openTracking;
 window.toggleShowAllOrderItems = toggleShowAllOrderItems;
+window.markOrderInTransit = markOrderInTransit;
+window.markOrderFailed = markOrderFailed;
+window.markOrderDelivered = markOrderDelivered;
 
 /* ===============================
    INIT
