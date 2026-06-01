@@ -608,16 +608,45 @@ async function cancelOrder(orderId, btn) {
   }
 }
 
-/* ===============================
-   SPX
-================================ */
-
 async function createSPXShipment(orderId, btn) {
   try {
+
+    const order = adminOrders.find(o =>
+      String(o.external_id || o.id) === String(orderId)
+    );
+
+    if (!order) {
+      showToast("Order not found", "error");
+      return;
+    }
+
+    const paymentStatus =
+      String(order.status || "").toUpperCase();
+
+    const paymentMethod =
+      String(order.payment_method || "").toUpperCase();
+
+    const isCOD =
+      paymentMethod.includes("COD");
+
+    const isPaid =
+      paymentStatus === "PAID";
+
+    if (!isCOD && !isPaid) {
+
+      showToast(
+        "Only COD or PAID orders can be shipped.",
+        "error"
+      );
+
+      return;
+    }
+
     if (btn) {
       btn.disabled = true;
       btn.innerText = "Arranging Shipment...";
     }
+
 
     const res = await fetch(
       `https://de-ecom-pro.onrender.com/api/orders/${orderId}/spx-create`,
@@ -634,18 +663,44 @@ async function createSPXShipment(orderId, btn) {
       return;
     }
 
-    showToast("Shipment arranged successfully!", "success");
+    await fetch(
+      "https://de-ecom-pro.onrender.com/api/orders/update",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+
+        body: JSON.stringify({
+          orderId,
+          order_status: "Shipped"
+        })
+      }
+    );
+
+    showToast(
+      "Shipment arranged. Order moved to Shipped!",
+      "success"
+    );
+
+    closeOrderModal();
+
     await loadAdminOrders();
 
   } catch (err) {
+
     console.error(err);
-    showToast("SPX server error", "error");
+
+    showToast(
+      "SPX server error",
+      "error"
+    );
 
   } finally {
+
     if (btn) {
       btn.disabled = false;
       btn.innerText = "Arrange Shipment";
     }
+
   }
 }
 

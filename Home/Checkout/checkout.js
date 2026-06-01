@@ -918,6 +918,13 @@ async function calculateShippingFee() {
       : "SPX shipping fee calculated";
 
     setShippingUI("ready", etaText, currentShippingFee);
+
+    document.querySelector(".checkout-summary")
+      ?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
     clearTimeout(slowShippingTimer);
     closeOrderModal();
 
@@ -1166,7 +1173,7 @@ async function placeOrder() {
     id: "ORD-" + Date.now(),
     customer: { name, phone },
     address,
-    courier: selectedCourier || courierSelect?.value || "Manual Delivery",
+    courier: selectedCourier || courierSelect?.value,
     payment: { method: paymentMain },
     items: normalizedItems,
     subtotal: subtotalNumber,
