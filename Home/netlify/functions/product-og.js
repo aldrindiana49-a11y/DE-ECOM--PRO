@@ -37,21 +37,27 @@ exports.handler = async (event) => {
             };
         }
 
+        const price =
+            product.discount_price ||
+            product.price ||
+            "";
+
         const title =
-            product.variant_title ||
+            product.title ||
+            product.name ||
             product.brand ||
             "Drin Electronics";
 
         const description =
-            product.brand ||
-            "Check this product";
+            `${product.brand || "Drin Electronics"}${price ? " • ₱" + Number(price).toLocaleString() : ""}`;
 
         const image =
             product.gallery?.[0] ||
             "https://drinelectronicsph.com/Image/social-preview.png";
 
         const url =
-            `https://drinelectronicsph.com/Product/?id=${id}`;
+            `https://drinelectronicsph.com/product/index.html?id=${id}`;
+
         const html = `
       <!DOCTYPE html>
       <html>
@@ -71,9 +77,35 @@ exports.handler = async (event) => {
         <meta name="twitter:image" content="${image}" />
 
       </head>
-      <body>
-        Redirecting...
-      </body>
+      
+<body style="font-family:Arial;padding:40px;text-align:center;">
+
+  <h1>${title}</h1>
+
+  <img 
+    src="${image}" 
+    style="max-width:300px;border-radius:12px;"
+  />
+
+  <p>${description}</p>
+
+  <a 
+    href="${url}"
+    style="
+      display:inline-block;
+      padding:12px 24px;
+      background:#0066ff;
+      color:white;
+      text-decoration:none;
+      border-radius:8px;
+      margin-top:20px;
+    "
+  >
+    View Product
+  </a>
+
+</body>
+
       </html>
     `;
 
