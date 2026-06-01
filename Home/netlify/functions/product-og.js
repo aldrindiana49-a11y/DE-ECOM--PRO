@@ -52,7 +52,13 @@ exports.handler = async (event) => {
             `${product.brand || "Drin Electronics"}${price ? " • ₱" + Number(price).toLocaleString() : ""}`;
 
         const image =
+            product.image ||
+            product.image_url ||
+            product.thumbnail ||
+            product.main_image ||
             product.gallery?.[0] ||
+            product.variations?.[0]?.image ||
+            product.variants?.[0]?.image ||
             "https://drinelectronicsph.com/Image/social-preview.png";
 
         const url =
