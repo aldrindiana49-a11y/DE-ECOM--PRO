@@ -958,9 +958,9 @@ async function loadVouchersFromSupabase() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Voucher load error:", error);
-    voucherList.innerHTML = "";
-    if (voucherSection) voucherSection.style.display = "none";
+
+    console.error(error);
+
     return;
   }
 
@@ -1064,7 +1064,9 @@ async function loadProductsFromSupabase() {
 
   if (error) {
     console.error(error);
+
     return;
+
   }
   products = (data || []).map((item) => {
 

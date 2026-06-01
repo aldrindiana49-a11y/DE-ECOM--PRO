@@ -1926,7 +1926,7 @@ shareBtn?.addEventListener(
         product.description ||
         "Check this product from Drin Electronics",
 
-      url: window.location.href
+      url: `https://drinelectronicsph.com/.netlify/functions/product-og?id=${encodeURIComponent(product.id)}`
     };
 
     try {
