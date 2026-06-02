@@ -162,6 +162,11 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
 
 async function createOrder(order) {
   const delivery = normalizeAddress(order.address || {});
+  const isCOD = order.paymentMethod === "COD";
+
+  const codAmount = isCOD
+    ? Number(order.totalAmount || order.amount || 0)
+    : 0;
   return spxPost("/open/api/v2/order/batch_create_order", {
     user_id: Number(process.env.SPX_USER_ID),
     user_secret: process.env.SPX_USER_SECRET,
@@ -188,8 +193,9 @@ async function createOrder(order) {
         fulfillment_info: {
           payment_role: 1,
 
-          cod_collection: 0,
-          cod_amount: 0,
+          cod_collection: isCOD ? 1 : 0,
+
+          cod_amount: codAmount,
 
           collect_type: 2
         },
