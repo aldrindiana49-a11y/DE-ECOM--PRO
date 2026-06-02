@@ -4,11 +4,30 @@ const loginForm =
 const googleLoginBtn =
   document.getElementById("googleLoginBtn");
 
-googleLoginBtn.addEventListener("click", async () => {
+const facebookLoginBtn =
+  document.getElementById("facebookLoginBtn");
+
+googleLoginBtn?.addEventListener("click", async () => {
 
   const { error } =
     await supabaseClient.auth.signInWithOAuth({
       provider: "google",
+      options: {
+        redirectTo: "https://drinelectronicsph.com/"
+      }
+    });
+
+  if (error) {
+    alert(error.message);
+  }
+
+});
+
+facebookLoginBtn?.addEventListener("click", async () => {
+
+  const { error } =
+    await supabaseClient.auth.signInWithOAuth({
+      provider: "facebook",
       options: {
         redirectTo: "https://drinelectronicsph.com/"
       }
