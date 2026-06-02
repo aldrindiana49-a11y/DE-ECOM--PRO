@@ -33,7 +33,8 @@ function redirectIfNoCheckoutItems() {
   const items = JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
 
   if (!items.length) {
-    window.location.replace("../index.html");
+    console.warn("No checkout items found.");
+    return;
   }
 }
 
