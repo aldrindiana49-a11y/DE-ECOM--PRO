@@ -429,20 +429,6 @@
     position: relative;
 }
 
-#mobileChatUnreadBadge {
-    position: absolute;
-
-    top: 2px;
-    right: 14px;
-
-    min-width: 18px;
-    height: 18px;
-
-    font-size: 11px;
-
-    z-index: 999999;
-}
-
 .website-chat-modal,
 .website-chat-box {
     box-sizing: border-box;
@@ -467,11 +453,3 @@
     position: relative;
 }
 
-#mobileChatUnreadBadge {
-    position: absolute !important;
-
-    top: 0px !important;
-    right: 10px !important;
-
-    z-index: 999999 !important;
-}
