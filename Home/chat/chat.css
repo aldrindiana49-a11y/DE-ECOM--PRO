@@ -455,3 +455,23 @@
 .website-chat-input-row button:last-child {
     flex-shrink: 0;
 }
+
+.mobile-chat-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.mobile-nav-item {
+    position: relative;
+}
+
+#mobileChatUnreadBadge {
+    position: absolute !important;
+
+    top: 0px !important;
+    right: 10px !important;
+
+    z-index: 999999 !important;
+}

@@ -2291,3 +2291,45 @@ body {
     opacity: 1;
   }
 }
+
+.cart-toast {
+  position: fixed;
+  left: 50%;
+  top: 18px;
+  transform: translateX(-50%) translateY(-20px);
+  z-index: 2000005 !important;
+
+  min-width: 220px;
+  max-width: calc(100% - 32px);
+  padding: 13px 18px;
+
+  border-radius: 14px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.25s ease;
+}
+
+.cart-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.cart-toast.success {
+  background: #16a34a;
+}
+
+.cart-toast.error {
+  background: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .cart-toast {
+    top: 14px;
+    z-index: 3000000 !important;
+  }
+}
