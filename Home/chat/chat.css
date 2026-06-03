@@ -399,8 +399,8 @@
 .chat-unread-badge {
     position: absolute;
 
-    top: -2px;
-    right: -2px;
+    top: -6px;
+    right: -6px;
 
     min-width: 22px;
     height: 22px;
@@ -453,3 +453,11 @@
     position: relative;
 }
 
+#mobileChatUnreadBadge {
+    position: absolute !important;
+
+    top: -4px !important;
+    right: 28px !important;
+
+    z-index: 999999 !important;
+}
