@@ -64,3 +64,24 @@ signupForm.addEventListener("submit", async (e) => {
         "https://drinelectronicsph.com/";
 
 });
+
+function togglePassword(id, el) {
+
+    const input =
+        document.getElementById(id);
+
+    if (!input) return;
+
+    if (input.type === "password") {
+
+        input.type = "text";
+        el.innerHTML = '<i class="fa-solid fa-eye"></i>';
+
+    } else {
+
+        input.type = "password";
+        el.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+
+    }
+
+}

@@ -2021,7 +2021,8 @@ function showPremiumLoginPopup() {
         <p>Please login first to claim vouchers and enjoy member benefits.</p>
 
         <div class="premium-login-actions">
-          <button class="premium-login-btn" onclick="window.location.href='../login/'">
+          <button class="premium-login-btn"
+          onclick="window.location.href='../login/?redirect=' + encodeURIComponent(window.location.href)">
             Login Now
           </button>
 

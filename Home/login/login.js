@@ -72,7 +72,10 @@ loginForm.addEventListener("submit", async (e) => {
     "drinCart"
   );
 
-  window.location.href = "/";
+  const params = new URLSearchParams(window.location.search);
+  const redirect = params.get("redirect");
+
+  window.location.href = redirect || "/";
 
 });
 
