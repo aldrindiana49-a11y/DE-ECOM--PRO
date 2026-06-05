@@ -2076,7 +2076,7 @@ async function updateAuthUI() {
     if (profileDropdown) {
 
       profileDropdown.innerHTML = `
-      <a href="/login/">Login</a>
+      <a href="/login/?redirect=${encodeURIComponent(window.location.href)}">Login</a>
       <a href="/signup/">Signup</a>
     `;
 
