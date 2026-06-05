@@ -22,7 +22,7 @@
     right: 20px;
     bottom: 92px;
 
-    width: 460px;
+    width: 440px;
     max-width: calc(100vw - 24px);
 
     height: 560px;
@@ -458,4 +458,16 @@
     right: 28px !important;
 
     z-index: 999999 !important;
+}
+
+@media (min-width: 769px) {
+
+    .website-chat-modal {
+        width: 440px !important;
+    }
+
+    .website-chat-box {
+        width: 440px !important;
+    }
+
 }
