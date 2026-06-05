@@ -2052,7 +2052,8 @@ async function updateAuthUI() {
     document.getElementById("accountBtn");
 
   const profileDropdown =
-    document.getElementById("profileDropdown");
+    document.getElementById("profileDropdown") ||
+    document.getElementById("accountDropdown");
 
   if (!accountBtn) return;
 
@@ -2086,16 +2087,17 @@ async function updateAuthUI() {
 
 }
 
-updateAuthUI();
+window.addEventListener("load", async () => {
+  await updateAuthUI();
+});
 
-supabaseClient.auth.onAuthStateChange((event) => {
+supabaseClient.auth.onAuthStateChange(async (event) => {
+
+  await updateAuthUI();
 
   if (event === "SIGNED_OUT") {
-
     localStorage.removeItem("drinUser");
-
-    window.location.reload();
-
+    window.location.href = "/";
   }
 
 });
