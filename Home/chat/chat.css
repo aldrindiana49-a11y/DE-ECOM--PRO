@@ -22,7 +22,7 @@
     right: 20px;
     bottom: 92px;
 
-    width: 410px;
+    width: 440px;
     max-width: calc(100vw - 24px);
 
     height: 560px;
@@ -214,9 +214,10 @@
 
     border-radius: 999px;
 
-    padding: 0 18px;
+    padding: 0 14px;
 
-    min-width: 72px;
+    min-width: 64px;
+    
     width: auto;
 
     font-weight: bold;
