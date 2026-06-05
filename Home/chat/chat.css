@@ -27,7 +27,7 @@
     max-height: calc(100vh - 130px);
     background: #fff;
     border-radius: 22px;
-    box-shadow: 0 18px 50px rgba(0, 0, 0, .22);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
     display: none;
     overflow: hidden;
     z-index: 5000;
@@ -84,9 +84,9 @@
 
     border-radius: 50%;
 
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.28);
 
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px);
 
     color: #fff;
 
@@ -100,6 +100,8 @@
     cursor: pointer;
 
     transition: 0.2s ease;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
 }
 
 .website-chat-close:hover {
@@ -215,20 +217,23 @@
 }
 
 /* 🚀 SEND BUTTON */
+
 .website-chat-input-row button:last-child {
     background: #00bcd4;
     color: white;
 
     border-radius: 999px;
 
-    padding: 0 18px;
+    padding: 0 14px;
 
-    min-width: 70px;
+    min-width: 64px;
     width: auto;
 
     font-weight: bold;
 
     box-shadow: 0 4px 12px rgba(0, 188, 212, 0.35);
+
+    flex-shrink: 0;
 }
 
 /* =========================
@@ -436,6 +441,8 @@
 
 .website-chat-input-row {
     flex-wrap: nowrap;
+    box-sizing: border-box;
+    overflow: visible;
 }
 
 .website-chat-input-row button:last-child {
