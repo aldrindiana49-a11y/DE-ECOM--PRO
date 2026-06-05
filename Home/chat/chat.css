@@ -22,7 +22,7 @@
     right: 20px;
     bottom: 92px;
 
-    width: 380px;
+    width: 410px;
     max-width: calc(100vw - 24px);
 
     height: 560px;
@@ -79,6 +79,7 @@
     opacity: .9;
 }
 
+
 .website-chat-close {
 
     margin-left: auto;
@@ -87,6 +88,8 @@
 
     width: 34px;
     height: 34px;
+
+    flex-shrink: 0;
 
     border-radius: 50%;
 
@@ -211,9 +214,9 @@
 
     border-radius: 999px;
 
-    padding: 0 14px;
+    padding: 0 18px;
 
-    min-width: 64px;
+    min-width: 72px;
     width: auto;
 
     font-weight: bold;
