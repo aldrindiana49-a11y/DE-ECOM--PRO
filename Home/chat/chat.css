@@ -21,15 +21,21 @@
     position: fixed;
     right: 20px;
     bottom: 92px;
-    width: 360px;
+
+    width: 380px;
     max-width: calc(100vw - 24px);
-    height: 520px;
+
+    height: 560px;
     max-height: calc(100vh - 130px);
+
     background: #fff;
     border-radius: 22px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+
+    box-shadow: none;
+
     display: none;
     overflow: hidden;
+
     z-index: 5000;
 }
 
@@ -158,25 +164,6 @@
 /* =========================
    INPUT ROW (CLEAN FIXED)
 ========================= */
-
-.website-chat-input-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    border-top: 1px solid #eee;
-    background: #fff;
-}
-
-#websiteChatInput {
-    flex: 1;
-    height: 42px;
-    padding: 10px 14px;
-    border-radius: 999px;
-    border: 1px solid #ddd;
-    outline: none;
-    font-size: 14px;
-}
 
 .website-chat-input-row {
     display: flex;
