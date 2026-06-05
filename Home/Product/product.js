@@ -2039,3 +2039,22 @@ function showPremiumLoginPopup() {
 function closePremiumLoginPopup() {
   document.getElementById("premiumLoginPopup")?.remove();
 }
+
+supabaseClient.auth.onAuthStateChange((event) => {
+
+  if (event === "SIGNED_OUT") {
+
+    localStorage.removeItem("drinUser");
+
+    window.location.reload();
+
+  }
+
+  if (event === "SIGNED_IN") {
+
+    window.location.reload();
+
+  }
+
+});
+

@@ -1578,11 +1578,14 @@ async function logoutUser() {
 
   await supabaseClient.auth.signOut();
 
-  window.location.replace("/");
+  localStorage.removeItem("drinUser");
+
+  window.location.reload();
 
 }
 
 updateAuthUI();
+
 
 async function goAccount() {
 
@@ -1757,3 +1760,21 @@ function closePremiumLoginPopup() {
 
   if (popup) popup.remove();
 }
+
+supabaseClient.auth.onAuthStateChange((event) => {
+
+  if (event === "SIGNED_OUT") {
+
+    localStorage.removeItem("drinUser");
+
+    window.location.reload();
+
+  }
+
+  if (event === "SIGNED_IN") {
+
+    window.location.reload();
+
+  }
+
+});
