@@ -2333,3 +2333,9 @@ body {
     z-index: 3000000 !important;
   }
 }
+
+@media (min-width: 769px) {
+  .website-chat-modal {
+    width: 440px !important;
+  }
+}
