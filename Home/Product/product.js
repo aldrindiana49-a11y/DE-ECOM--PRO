@@ -2021,10 +2021,11 @@ function showPremiumLoginPopup() {
         <p>Please login first to claim vouchers and enjoy member benefits.</p>
 
         <div class="premium-login-actions">
-          <button class="premium-login-btn"
-          onclick="window.location.href='../login/?redirect=' + encodeURIComponent(window.location.href)">
-            Login Now
-          </button>
+          
+        <button class="premium-login-btn"
+  onclick="window.location.href='https://drinelectronicsph.com/login/?redirect=' + encodeURIComponent(window.location.href)">
+  Login Now
+</button>
 
           <button class="premium-cancel-btn" onclick="closePremiumLoginPopup()">
             Cancel
@@ -2050,15 +2051,36 @@ async function updateAuthUI() {
   const accountBtn =
     document.getElementById("accountBtn");
 
+  const profileDropdown =
+    document.getElementById("profileDropdown");
+
   if (!accountBtn) return;
 
   if (user) {
 
     accountBtn.classList.add("logged-in");
 
+    if (profileDropdown) {
+
+      profileDropdown.innerHTML = `
+      <a href="/homeprofile/">My Profile</a>
+      <a href="#" onclick="logoutUser()">Logout</a>
+    `;
+
+    }
+
   } else {
 
     accountBtn.classList.remove("logged-in");
+
+    if (profileDropdown) {
+
+      profileDropdown.innerHTML = `
+      <a href="/login/">Login</a>
+      <a href="/signup/">Signup</a>
+    `;
+
+    }
 
   }
 
@@ -2077,3 +2099,13 @@ supabaseClient.auth.onAuthStateChange((event) => {
   }
 
 });
+
+async function logoutUser() {
+
+  await supabaseClient.auth.signOut();
+
+  localStorage.removeItem("drinUser");
+
+  window.location.href = "/";
+
+}
