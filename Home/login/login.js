@@ -7,13 +7,20 @@ const googleLoginBtn =
 const facebookLoginBtn =
   document.getElementById("facebookLoginBtn");
 
+const params =
+  new URLSearchParams(window.location.search);
+
+const redirect =
+  params.get("redirect") ||
+  "https://drinelectronicsph.com/";
+
 googleLoginBtn?.addEventListener("click", async () => {
 
   const { error } =
     await supabaseClient.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: "https://drinelectronicsph.com/"
+        redirectTo: redirect
       }
     });
 
@@ -29,7 +36,7 @@ facebookLoginBtn?.addEventListener("click", async () => {
     await supabaseClient.auth.signInWithOAuth({
       provider: "facebook",
       options: {
-        redirectTo: "https://drinelectronicsph.com/"
+        redirectTo: redirect
       }
     });
 
@@ -72,9 +79,7 @@ loginForm.addEventListener("submit", async (e) => {
     "drinCart"
   );
 
-  const params = new URLSearchParams(window.location.search);
-  const redirect = params.get("redirect");
-
+  
   window.location.href = redirect || "/";
 
 });
