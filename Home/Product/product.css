@@ -1853,7 +1853,7 @@ body {
   .website-chat-box {
     width: 100% !important;
 
-    height: 78vh !important;
+    max-height: 70vh !important;
 
     position: fixed !important;
 
@@ -1866,6 +1866,9 @@ body {
     border-radius: 18px 18px 0 0 !important;
 
     z-index: 999999 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   .website-chat-input {
@@ -2129,6 +2132,13 @@ body {
   .cart-toast {
     top: 14px;
     z-index: 3000000 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .website-chat-box {
+    height: 65vh !important;
+    max-height: 65vh !important;
   }
 }
 

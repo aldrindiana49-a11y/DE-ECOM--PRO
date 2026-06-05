@@ -209,6 +209,17 @@ async function loadProductsFromSupabase() {
     .select("*")
     .order("created_at", { ascending: false });
 
+  if (error) {
+    console.log("PRODUCT ERROR:", error);
+
+    setProductActionsLoading(false); // 🔥 IMPORTANT FIX
+
+    products = [];
+    renderHomepageProducts(products);
+
+    return;
+  }
+
   products = (data || []).map((item) => {
 
 
@@ -293,7 +304,6 @@ async function loadProductsFromSupabase() {
   renderSuggestedProducts();
   loadProductVouchers();
   updateCartCount();
-  renderDynamicSidebarCategories();
   setProductActionsLoading(false);
 }
 
@@ -2091,7 +2101,15 @@ window.addEventListener("load", async () => {
   await updateAuthUI();
 });
 
+let authInitialized = false;
+
 supabaseClient.auth.onAuthStateChange(async (event) => {
+
+  if (!authInitialized) {
+    authInitialized = true;
+    await updateAuthUI();
+    return;
+  }
 
   await updateAuthUI();
 
@@ -2101,13 +2119,3 @@ supabaseClient.auth.onAuthStateChange(async (event) => {
   }
 
 });
-
-async function logoutUser() {
-
-  await supabaseClient.auth.signOut();
-
-  localStorage.removeItem("drinUser");
-
-  window.location.href = "/";
-
-}

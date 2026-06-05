@@ -1761,20 +1761,18 @@ function closePremiumLoginPopup() {
   if (popup) popup.remove();
 }
 
-supabaseClient.auth.onAuthStateChange((event) => {
+let authReady = false;
+
+supabaseClient.auth.onAuthStateChange(async (event) => {
+  if (!authReady) {
+    authReady = true;
+    await updateAuthUI();
+    return;
+  }
+
+  await updateAuthUI();
 
   if (event === "SIGNED_OUT") {
-
-    localStorage.removeItem("drinUser");
-
-    window.location.reload();
-
+    window.location.href = "/";
   }
-
-  if (event === "SIGNED_IN") {
-
-    window.location.reload();
-
-  }
-
 });
