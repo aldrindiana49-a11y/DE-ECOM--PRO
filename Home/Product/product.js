@@ -2040,6 +2040,31 @@ function closePremiumLoginPopup() {
   document.getElementById("premiumLoginPopup")?.remove();
 }
 
+async function updateAuthUI() {
+
+  const {
+    data: { user }
+  } = await supabaseClient.auth.getUser();
+
+  const accountBtn =
+    document.getElementById("accountBtn");
+
+  if (!accountBtn) return;
+
+  if (user) {
+
+    accountBtn.classList.add("logged-in");
+
+  } else {
+
+    accountBtn.classList.remove("logged-in");
+
+  }
+
+}
+
+updateAuthUI();
+
 supabaseClient.auth.onAuthStateChange((event) => {
 
   if (event === "SIGNED_OUT") {
@@ -2050,11 +2075,4 @@ supabaseClient.auth.onAuthStateChange((event) => {
 
   }
 
-  if (event === "SIGNED_IN") {
-
-    window.location.reload();
-
-  }
-
 });
-
