@@ -45,6 +45,13 @@
 }
 
 
+.website-chat-box {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
 
 /* =========================
    HEADER
@@ -293,6 +300,7 @@
 
     .website-chat-header {
         border-radius: 18px 18px 0 0;
+        flex-shrink: 0;
     }
 
     .website-chat-modal {
@@ -318,6 +326,7 @@
     .website-chat-modal:not(.show) {
         display: none !important;
     }
+
 }
 
 /* =========================
