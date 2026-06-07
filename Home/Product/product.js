@@ -789,7 +789,7 @@ function showMessage(text, type) {
   }, 2500);
 }
 
-let suggestedLimit = 8;
+let suggestedLimit = 10;
 function renderSuggestedProducts() {
   const container = document.getElementById("suggestedProducts");
   if (!container) return;
@@ -2011,7 +2011,7 @@ function showVoucherToast(message) {
 
 function loadMoreSuggestedProducts() {
 
-  suggestedLimit += 8;
+  suggestedLimit += 10;
 
   renderSuggestedProducts();
 }
