@@ -958,43 +958,6 @@ function getFallbackCourier() {
 
 }
 
-async function deductOrderStock(order) {
-
-  for (const item of order.items) {
-
-    const { error } =
-      await supabaseClient.rpc(
-        "deduct_stock",
-        {
-          p_product_id:
-            Number(item.id),
-
-          p_variant_label:
-            item.variantLabel ||
-            item.variant ||
-            "Default",
-
-          p_quantity:
-            Number(item.quantity) || 1,
-
-          p_order_id:
-            order.id
-        }
-      );
-
-    if (error) {
-
-      console.error(
-        "RPC ERROR:",
-        error
-      );
-
-      throw error;
-    }
-
-  }
-}
-
 async function placeOrder() {
 
   if (isPlacingOrder) return;
@@ -1156,6 +1119,46 @@ async function placeOrder() {
   }
 
   const normalizedItems = normalizeOrderItems(cartItems);
+
+  const { data: stockCheck, error: stockError }
+    = await supabaseClient.rpc(
+      "reserve_stock_checkout",
+      {
+        p_items: normalizedItems.map(item => ({
+          id: item.id,
+          quantity: item.quantity,
+          variantLabel: item.variantLabel
+        }))
+      }
+    );
+
+  if (
+    stockError ||
+    !stockCheck?.success
+  ) {
+
+    showOrderModal(
+      "Item Unavailable",
+      `
+    <div class="premium-stock-alert">
+      <div class="premium-stock-icon">⚠️</div>
+
+      <h4>Stock just ran out</h4>
+
+      <p>
+        ${stockCheck?.message || "Some items are already out of stock."}
+      </p>
+
+      <small>
+        Please update your cart or choose another variation.
+      </small>
+    </div>
+    `
+    );
+
+    return resetPlaceOrder();
+  }
+
   const address = getSelectedAddress();
   currentParcelInfo = calculateParcelInfo();
 
@@ -1168,7 +1171,6 @@ async function placeOrder() {
     return resetPlaceOrder();
   }
 
-  // dito tuloy yung existing code mo sa baba
 
   const order = {
     id: "ORD-" + Date.now(),
@@ -1199,12 +1201,6 @@ async function placeOrder() {
 
 
     saveOrder(order);
-
-    if (paymentMain === "COD") {
-
-      await deductOrderStock(order);
-
-    }
 
     if (voucherCode && user) {
 
@@ -1821,3 +1817,4 @@ async function syncCheckoutProfile() {
 
   }
 }
+

@@ -2164,31 +2164,29 @@ body {
 @media (min-width: 769px) {
 
   .cart-toast {
+
     position: fixed !important;
 
-    left: 55% !important;
-    top: 72% !important;
-    right: auto !important;
-    bottom: auto !important;
-
-    transform: translateY(10px) !important;
-
     min-width: unset !important;
-    width: fit-content !important;
-    max-width: 220px !important;
 
-    padding: 6px 10px !important;
-    border-radius: 8px !important;
+    width: fit-content !important;
+
+    max-width: 320px !important;
+    word-break: break-word;
+    white-space: normal !important;
+
+    padding: 7px 12px !important;
+
+    border-radius: 10px !important;
 
     font-size: 12px !important;
     font-weight: 700 !important;
 
     white-space: nowrap !important;
+
+    z-index: 999999 !important;
   }
 
-  .cart-toast.show {
-    transform: translateY(0) !important;
-  }
 }
 
 #suggestedProducts .homepage-product-card {

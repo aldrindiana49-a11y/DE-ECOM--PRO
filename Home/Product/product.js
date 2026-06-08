@@ -662,6 +662,16 @@ addToCartBtn.addEventListener("click", () => {
 
   saveCart(cartData);
   updateCartCount();
+  if (
+    document.getElementById("cartToast")
+      ?.dataset.type !== "error"
+  ) {
+
+    setTimeout(() => {
+      animateToCart();
+    }, 120);
+
+  }
 });
 
 const buyNowBtn =
@@ -768,14 +778,53 @@ buyNowBtn?.addEventListener("click", () => {
 function showMessage(text, type) {
   const toast = document.getElementById("cartToast");
 
-  if (toast) {
-    toast.textContent = text;
-    toast.classList.add("show");
-    toast.classList.toggle("success", type === "success");
-    toast.classList.toggle("error", type === "error");
+  if (window.innerWidth > 768) {
 
+    const btn = document.getElementById("addToCartBtn");
+
+    if (btn && toast) {
+
+      const rect = btn.getBoundingClientRect();
+
+      toast.style.position = "fixed";
+
+      toast.style.left =
+        (rect.left + rect.width / 2) + "px";
+
+      toast.style.top =
+        (rect.bottom + 10) + "px";
+
+      toast.style.transform =
+        "translateX(-50%)";
+    }
+
+  }
+
+  if (toast) {
+
+    toast.textContent = text;
+
+    toast.classList.add("show");
+
+    toast.classList.toggle(
+      "success",
+      type === "success"
+    );
+
+    toast.classList.toggle(
+      "error",
+      type === "error"
+    );
+    toast.dataset.type = type;
+    
     setTimeout(() => {
-      toast.classList.remove("show", "success", "error");
+
+      toast.classList.remove(
+        "show",
+        "success",
+        "error"
+      );
+
     }, 2500);
 
     return;
@@ -1366,6 +1415,7 @@ document.addEventListener("click", (e) => {
   saveCart(cartData);
   updateCartCount();
   closeVariantPopup();
+  animateToCart();
 });
 
 document.getElementById("mobileCartBtn")
@@ -2119,3 +2169,76 @@ supabaseClient.auth.onAuthStateChange(async (event) => {
   }
 
 });
+
+function animateToCart() {
+
+  const productImg =
+    document.getElementById("cartToast");
+
+  const cartIcon =
+    document.querySelector(
+      "#cartCount, #mobileCartCount"
+    );
+
+  if (!productImg || !cartIcon) return;
+
+  const imgRect =
+    productImg.getBoundingClientRect();
+
+  const cartRect =
+    cartIcon.getBoundingClientRect();
+
+  const flyingImg =
+    productImg.cloneNode(true);
+
+  flyingImg.style.position = "fixed";
+
+  flyingImg.style.left =
+    imgRect.left + "px";
+
+  flyingImg.style.top =
+    imgRect.top + "px";
+
+  flyingImg.style.width = "80px";
+  flyingImg.style.height = "80px";
+
+  flyingImg.style.objectFit = "cover";
+
+  flyingImg.style.borderRadius = "12px";
+
+  flyingImg.style.zIndex = "9999999";
+
+  flyingImg.style.pointerEvents = "none";
+
+  flyingImg.style.transition =
+    "all 0.75s ease";
+
+  document.body.appendChild(
+    flyingImg
+  );
+
+  setTimeout(() => {
+
+    flyingImg.style.left =
+      cartRect.left + "px";
+
+    flyingImg.style.top =
+      cartRect.top + "px";
+
+    flyingImg.style.width =
+      "20px";
+
+    flyingImg.style.height =
+      "20px";
+
+    flyingImg.style.opacity =
+      "0.2";
+
+  }, 20);
+
+  setTimeout(() => {
+
+    flyingImg.remove();
+
+  }, 800);
+}
