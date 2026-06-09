@@ -33,6 +33,8 @@ const accountDropdown = document.getElementById("accountDropdown");
 
 let products = [];
 let homepageProductLimit = 10;
+let homepageRenderedCount = 0;
+
 let rawBanners = JSON.parse(localStorage.getItem("drinBanners")) || [];
 let cart = JSON.parse(localStorage.getItem("drinCart")) || [];
 
@@ -234,10 +236,13 @@ function renderHomepageProducts(productArray = products) {
   const inStockProducts = productArray.filter(hasAvailableStock);
   const outOfStockProducts = productArray.filter((product) => !hasAvailableStock(product));
 
-  const visibleInStockProducts =
+  const visibleProducts =
     inStockProducts.slice(0, homepageProductLimit);
 
-  renderProductCards(visibleInStockProducts);
+  homepageRenderedCount =
+    visibleProducts.length;
+
+  renderProductCards(visibleProducts);
 
   const hasMoreProducts =
     inStockProducts.length > homepageProductLimit;
@@ -1068,6 +1073,8 @@ async function loadProductsFromSupabase() {
 
     renderHomepageProducts(products);
 
+    hideProductLoader();
+
     if (typeof window.renderTrendingProducts === "function") {
       window.renderTrendingProducts(products);
     }
@@ -1177,8 +1184,14 @@ async function loadProductsFromSupabase() {
 
     renderHomepageProducts(products);
 
+    hideProductLoader();
+
     if (typeof window.renderTrendingProducts === "function") {
       window.renderTrendingProducts(products);
+    }
+
+    if (typeof window.renderHotDeals === "function") {
+      window.renderHotDeals(products);
     }
 
   }
@@ -1805,4 +1818,52 @@ supabaseClient.auth.onAuthStateChange(async (event) => {
   if (event === "SIGNED_OUT") {
     window.location.href = "/";
   }
+});
+
+function hideProductLoader() {
+
+  const loader =
+    document.getElementById(
+      "productLoadingModal"
+    );
+
+  if (!loader) return;
+
+  setTimeout(() => {
+
+    loader.classList.add("hide");
+
+  }, 500);
+
+}
+
+let isAutoLoadingProducts = false;
+
+window.addEventListener("scroll", () => {
+
+  const nearBottom =
+    window.innerHeight + window.scrollY >=
+    document.body.offsetHeight - 1200;
+
+  if (!nearBottom) return;
+
+  if (isAutoLoadingProducts) return;
+
+  if (
+    homepageRenderedCount >=
+    products.length
+  ) return;
+
+  isAutoLoadingProducts = true;
+
+  homepageProductLimit += 10;
+
+  renderHomepageProducts(products);
+
+  setTimeout(() => {
+
+    isAutoLoadingProducts = false;
+
+  }, 400);
+
 });

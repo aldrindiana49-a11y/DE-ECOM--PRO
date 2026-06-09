@@ -2361,7 +2361,7 @@ body {
   inset: 0;
 
   background:
-    rgba(0,0,0,.55);
+    rgba(0, 0, 0, .55);
 
   backdrop-filter: blur(6px);
 
@@ -2388,7 +2388,7 @@ body {
   text-align: center;
 
   box-shadow:
-    0 25px 60px rgba(0,0,0,.22);
+    0 25px 60px rgba(0, 0, 0, .22);
 
   animation:
     popupPremium .22s ease;
@@ -2410,16 +2410,14 @@ body {
   font-size: 34px;
 
   background:
-    linear-gradient(
-      135deg,
+    linear-gradient(135deg,
       #00bcd4,
-      #0097a7
-    );
+      #0097a7);
 
   color: white;
 
   box-shadow:
-    0 12px 30px rgba(0,188,212,.28);
+    0 12px 30px rgba(0, 188, 212, .28);
 }
 
 .premium-login-box h3 {
@@ -2454,11 +2452,9 @@ body {
   border: none;
 
   background:
-    linear-gradient(
-      135deg,
+    linear-gradient(135deg,
       #00bcd4,
-      #0097a7
-    );
+      #0097a7);
 
   color: white;
 
@@ -2493,20 +2489,84 @@ body {
   from {
     opacity: 0;
     transform:
-      scale(.9)
-      translateY(10px);
+      scale(.9) translateY(10px);
   }
 
   to {
     opacity: 1;
     transform:
-      scale(1)
-      translateY(0);
+      scale(1) translateY(0);
   }
 }
 
 @keyframes fadePremium {
 
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* =========================
+   PRODUCT LOADING MODAL
+========================= */
+
+.product-loading-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999999;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .35s ease, visibility .35s ease;
+}
+
+.product-loading-modal.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.product-loading-box {
+  width: min(320px, calc(100% - 32px));
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 28px 24px;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.25);
+}
+
+.product-loading-spinner {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  border: 5px solid #e5e7eb;
+  border-top-color: var(--primary);
+  animation: spinLoader .8s linear infinite;
+}
+
+.product-loading-box h3 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.product-loading-box p {
+  font-size: 13px;
+  color: #64748b;
+}
+
+@keyframes spinLoader {
+  to {
+    transform: rotate(360deg);
+  }
 }
