@@ -1072,6 +1072,10 @@ async function loadProductsFromSupabase() {
       window.renderTrendingProducts(products);
     }
 
+    if (typeof window.renderHotDeals === "function") {
+      window.renderHotDeals(products);
+    }
+
   }
 
   const { data, error } = await supabaseClient
