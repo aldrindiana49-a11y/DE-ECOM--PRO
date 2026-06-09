@@ -989,6 +989,45 @@ async function deductOrderStock(order) {
         error
       );
 
+      const itemName =
+        item.name || "Item";
+
+      const variantName =
+        item.variantLabel ||
+        item.variant ||
+        item.variation ||
+        "Default Variant";
+
+      showOrderModal(
+        "Variation Out of Stock",
+        `
+    <div class="premium-stock-alert">
+
+      <div class="premium-stock-icon">
+        ⚠️
+      </div>
+
+      <h4>
+        Selected Variation Unavailable
+      </h4>
+
+      <p>
+        <strong>${itemName}</strong>
+      </p>
+
+      <p>
+        Variation:
+        <strong>${variantName}</strong>
+      </p>
+
+      <small>
+        Another customer may have checked out this variation first.
+      </small>
+
+    </div>
+    `
+      );
+
       throw error;
     }
 
@@ -1168,8 +1207,6 @@ async function placeOrder() {
     return resetPlaceOrder();
   }
 
-  // dito tuloy yung existing code mo sa baba
-
   const order = {
     id: "ORD-" + Date.now(),
     customer: { name, phone },
@@ -1190,6 +1227,8 @@ async function placeOrder() {
 
   try {
 
+    await deductOrderStock(order);
+
     const syncResult =
       await syncOrderToSupabase(order);
 
@@ -1197,14 +1236,7 @@ async function placeOrder() {
       return resetPlaceOrder();
     }
 
-
     saveOrder(order);
-
-    if (paymentMain === "COD") {
-
-      await deductOrderStock(order);
-
-    }
 
     if (voucherCode && user) {
 
