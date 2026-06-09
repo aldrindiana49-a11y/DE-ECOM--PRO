@@ -2570,3 +2570,42 @@ body {
     transform: rotate(360deg);
   }
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 25px 0;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.pagination button:hover {
+  transform: translateY(-2px);
+  border-color: #00bcd4;
+  color: #00bcd4;
+}
+
+.pagination button.active {
+  background: linear-gradient(135deg, #00bcd4, #0097a7);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

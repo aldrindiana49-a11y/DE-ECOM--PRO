@@ -34,7 +34,10 @@ const accountDropdown = document.getElementById("accountDropdown");
 let products = [];
 let homepageProductLimit = 10;
 let homepageRenderedCount = 0;
-
+let isSearching = false;
+let currentPage = 1;
+const pageSize = 10;
+let filteredProducts = [];
 let rawBanners = JSON.parse(localStorage.getItem("drinBanners")) || [];
 let cart = JSON.parse(localStorage.getItem("drinCart")) || [];
 
@@ -246,18 +249,6 @@ function renderHomepageProducts(productArray = products) {
 
   const hasMoreProducts =
     inStockProducts.length > homepageProductLimit;
-
-  if (hasMoreProducts) {
-    homepageProductList.insertAdjacentHTML("beforeend", `
-      <div class="homepage-loadmore-wrap">
-        <button
-          class="homepage-loadmore-btn"
-          onclick="loadMoreHomepageProducts()">
-          Load More
-        </button>
-      </div>
-    `);
-  }
 
   if (outOfStockProducts.length > 0) {
     const divider = document.createElement("div");
@@ -764,7 +755,8 @@ function handleSearch(keyword) {
   const safeKeyword = safeText(keyword).trim().toLowerCase();
 
   if (!safeKeyword) {
-    renderHomepageProducts(products);
+    currentPage = 1;
+    renderProducts(products);
     updateCartCount();
     return;
   }
@@ -783,7 +775,8 @@ function handleSearch(keyword) {
     );
   });
 
-  renderHomepageProducts(filtered);
+  currentPage = 1;
+  renderProducts(filtered);
 
   const section = document.getElementById("productsSection");
   if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1071,7 +1064,8 @@ async function loadProductsFromSupabase() {
 
     products = cached;
 
-    renderHomepageProducts(products);
+    currentPage = 1;
+    renderProducts(products);
 
     hideProductLoader();
 
@@ -1182,7 +1176,8 @@ async function loadProductsFromSupabase() {
 
   } else {
 
-    renderHomepageProducts(products);
+    currentPage = 1;
+    renderProducts(products);
 
     hideProductLoader();
 
@@ -1652,8 +1647,8 @@ function showAllProducts() {
 
   localStorage.removeItem("selectedCategory");
 
-  renderHomepageProducts(products);
-
+  currentPage = 1;
+  renderProducts(products);
   const section =
     document.getElementById("productsSection");
 
@@ -1731,12 +1726,6 @@ function showVoucherToast(message) {
   }, 2200);
 }
 
-function loadMoreHomepageProducts() {
-
-  homepageProductLimit += 10;
-
-  renderHomepageProducts(products);
-}
 
 function showPremiumLoginPopup() {
 
@@ -1837,33 +1826,53 @@ function hideProductLoader() {
 
 }
 
-let isAutoLoadingProducts = false;
+function renderProducts(list) {
 
-window.addEventListener("scroll", () => {
+  const start = (currentPage - 1) * pageSize;
+  const end = start + pageSize;
 
-  const nearBottom =
-    window.innerHeight + window.scrollY >=
-    document.body.offsetHeight - 1200;
+  const pageItems = list.slice(start, end);
 
-  if (!nearBottom) return;
+  renderHomepageProducts(pageItems);
 
-  if (isAutoLoadingProducts) return;
+  renderPagination(list);
+}
 
-  if (
-    homepageRenderedCount >=
-    products.length
-  ) return;
+function renderPagination(list) {
+  const container = document.getElementById("paginationContainer");
+  if (!container) return;
 
-  isAutoLoadingProducts = true;
+  const totalPages = Math.ceil(list.length / pageSize);
 
-  homepageProductLimit += 10;
+  let html = "";
 
-  renderHomepageProducts(products);
+  // Prev (dynamic safe)
+  if (currentPage > 1) {
+    html += `<button onclick="changePage(${currentPage - 1})">Prev</button>`;
+  }
 
-  setTimeout(() => {
+  // Pages
+  for (let i = 1; i <= totalPages; i++) {
+    html += `<button onclick="changePage(${i})" ${i === currentPage ? 'class="active"' : ""}>${i}</button>`;
+  }
 
-    isAutoLoadingProducts = false;
+  // Next (dynamic safe)
+  if (currentPage < totalPages) {
+    html += `<button onclick="changePage(${currentPage + 1})">Next</button>`;
+  }
 
-  }, 400);
+  container.innerHTML = html;
+}
 
-});
+function changePage(page) {
+
+  const list = isSearching ? filteredProducts : products;
+
+  const totalPages = Math.ceil(list.length / pageSize);
+
+  if (page < 1 || page > totalPages) return;
+
+  currentPage = page;
+
+  renderProducts(list);
+}
