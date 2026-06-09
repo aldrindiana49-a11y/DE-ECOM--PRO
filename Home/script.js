@@ -230,6 +230,7 @@ function renderHomepageProducts(productArray = products) {
     return safeNumber(product.stock, 0) > 0;
   };
 
+  productArray = [...productArray].sort(() => Math.random() - 0.5);
   const inStockProducts = productArray.filter(hasAvailableStock);
   const outOfStockProducts = productArray.filter((product) => !hasAvailableStock(product));
 
@@ -279,12 +280,13 @@ function renderProductCards(productArray) {
 
     const imageSlides = product.images
       .map((img) => `
-        <img
-          src="${img}"
-          alt="${escapeHtml(product.name)}"
-          onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'"
-        />
-      `)
+    <img
+      loading="lazy"
+      src="${img}"
+      alt="${escapeHtml(product.name)}"
+      onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'"
+    />
+  `)
       .join("");
 
     card.innerHTML = `
@@ -1057,6 +1059,21 @@ async function claimVoucher(code) {
 /* INIT */
 async function loadProductsFromSupabase() {
 
+  const cached =
+    JSON.parse(localStorage.getItem("cachedProducts"));
+
+  if (cached?.length) {
+
+    products = cached;
+
+    renderHomepageProducts(products);
+
+    if (typeof window.renderTrendingProducts === "function") {
+      window.renderTrendingProducts(products);
+    }
+
+  }
+
   const { data, error } = await supabaseClient
     .from("products")
     .select("*")
@@ -1138,6 +1155,11 @@ async function loadProductsFromSupabase() {
     };
   });
 
+  localStorage.setItem(
+    "cachedProducts",
+    JSON.stringify(products)
+  );
+
   const selectedCategory =
     localStorage.getItem("selectedCategory");
 
@@ -1150,6 +1172,10 @@ async function loadProductsFromSupabase() {
   } else {
 
     renderHomepageProducts(products);
+
+    if (typeof window.renderTrendingProducts === "function") {
+      window.renderTrendingProducts(products);
+    }
 
   }
 }
