@@ -1878,53 +1878,48 @@ function changePage(page) {
 }
 
 /* ===============================
-   MAINTENANCE MODE
+   GLOBAL MAINTENANCE MODE
 ================================ */
 
-window.maintenanceMode =
-  localStorage.getItem(
-    "maintenanceMode"
-  ) === "true";
+window.maintenanceMode = false;
 
-function enableMaintenanceMode() {
-
-  localStorage.setItem(
-    "maintenanceMode",
-    "true"
-  );
-
-  window.maintenanceMode = true;
+async function checkMaintenanceMode() {
 
   const popup =
     document.getElementById(
       "maintenancePopup"
     );
 
-  if (popup) {
+  if (!popup) return;
 
-    popup.style.display = "flex";
+  try {
 
-  }
+    const { data, error } =
+      await supabaseClient
+        .from("site_settings")
+        .select("value")
+        .eq(
+          "key",
+          "maintenance_mode"
+        )
+        .single();
 
-}
+    if (error) return;
 
-function disableMaintenanceMode() {
+    const enabled =
+      data?.value === "true";
 
-  localStorage.setItem(
-    "maintenanceMode",
-    "false"
-  );
+    window.maintenanceMode =
+      enabled;
 
-  window.maintenanceMode = false;
+    popup.style.display =
+      enabled
+        ? "flex"
+        : "none";
 
-  const popup =
-    document.getElementById(
-      "maintenancePopup"
-    );
+  } catch (err) {
 
-  if (popup) {
-
-    popup.style.display = "none";
+    console.error(err);
 
   }
 
@@ -1934,22 +1929,12 @@ document.addEventListener(
   "DOMContentLoaded",
   () => {
 
-    const popup =
-      document.getElementById(
-        "maintenancePopup"
-      );
+    checkMaintenanceMode();
 
-    if (!popup) return;
-
-    if (window.maintenanceMode) {
-
-      popup.style.display = "flex";
-
-    } else {
-
-      popup.style.display = "none";
-
-    }
+    setInterval(
+      checkMaintenanceMode,
+      5000
+    );
 
   }
 );
