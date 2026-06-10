@@ -229,7 +229,6 @@ app.get("/", (req, res) => {
   res.send("🔥 Server Running");
 });
 
-
 // ================= SPX CREATE ACCOUNT =================
 app.post("/api/spx/create-account", async (req, res) => {
   try {

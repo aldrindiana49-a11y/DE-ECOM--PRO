@@ -581,9 +581,15 @@ async function updateChatUnreadBadge() {
 
     });
 
-    function initGlobalChat() {
-        ensureChatModal();
-    }
 }
-document.addEventListener("DOMContentLoaded", initGlobalChat);
 
+function initGlobalChat() {
+
+    ensureChatModal();
+
+}
+
+document.addEventListener(
+    "DOMContentLoaded",
+    initGlobalChat
+);
