@@ -10,7 +10,7 @@
 </head>
 
 <body>
-  
+
   <div class="admin-layout">
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-top">
@@ -62,7 +62,21 @@
           </div>
         </div>
         <div class="topbar-right">
-          <span class="admin-badge">Admin</span>
+
+          <div class="maintenance-controls">
+
+            <button onclick="enableGlobalMaintenance()" class="maintenance-on-btn">
+              🔴 Maintenance ON
+            </button>
+
+            <button onclick="disableGlobalMaintenance()" class="maintenance-off-btn">
+              🟢 Maintenance OFF
+            </button>
+
+          </div>
+          <span class="admin-badge">
+            Admin
+          </span>
         </div>
       </header>
 

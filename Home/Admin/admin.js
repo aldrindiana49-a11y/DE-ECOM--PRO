@@ -429,3 +429,63 @@ supabaseClient
     )
 
     .subscribe();
+
+/* ===============================
+GLOBAL MAINTENANCE CONTROL
+================================ */
+
+async function enableGlobalMaintenance() {
+
+    const { error } =
+        await supabaseClient
+            .from("site_settings")
+            .update({
+                value: "true"
+            })
+            .eq(
+                "key",
+                "maintenance_mode"
+            );
+
+    if (error) {
+
+        alert(
+            "Failed to enable maintenance."
+        );
+
+        return;
+    }
+
+    alert(
+        "Maintenance Mode Enabled"
+    );
+
+}
+
+async function disableGlobalMaintenance() {
+
+    const { error } =
+        await supabaseClient
+            .from("site_settings")
+            .update({
+                value: "false"
+            })
+            .eq(
+                "key",
+                "maintenance_mode"
+            );
+
+    if (error) {
+
+        alert(
+            "Failed to disable maintenance."
+        );
+
+        return;
+    }
+
+    alert(
+        "Maintenance Mode Disabled"
+    );
+
+}

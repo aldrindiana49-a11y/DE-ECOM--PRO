@@ -134,6 +134,16 @@ body {
   font-size: 14px;
 }
 
+.topbar-right {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 24px;
+
+}
+
 .toggle-btn {
   display: none;
   width: 42px;
@@ -147,12 +157,21 @@ body {
 }
 
 .admin-badge {
+
   background: #e0f7fa;
+
   color: #0f766e;
+
   padding: 8px 14px;
+
   border-radius: 999px;
+
   font-weight: 600;
+
   font-size: 14px;
+
+  margin-left: 8px;
+
 }
 
 .content-area {
@@ -1418,7 +1437,7 @@ body {
 }
 
 .admin-chat-link:hover {
-  background: rgba(255,255,255,.08);
+  background: rgba(255, 255, 255, .08);
   color: white;
 }
 
@@ -1439,4 +1458,59 @@ body {
 
   font-size: 12px;
   font-weight: 800;
+}
+
+.maintenance-controls {
+
+  display: flex;
+
+  gap: 10px;
+
+  align-items: center;
+
+  margin-right: 12px;
+
+}
+
+.maintenance-on-btn,
+.maintenance-off-btn {
+
+  border: none;
+
+  padding: 10px 14px;
+
+  border-radius: 10px;
+
+  color: white;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  font-size: 13px;
+
+}
+
+.maintenance-on-btn {
+
+  background: #dc2626;
+
+}
+
+.maintenance-off-btn {
+
+  background: #16a34a;
+
+}
+
+.maintenance-on-btn:hover {
+
+  opacity: .9;
+
+}
+
+.maintenance-off-btn:hover {
+
+  opacity: .9;
+
 }
