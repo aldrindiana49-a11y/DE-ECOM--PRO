@@ -2243,20 +2243,32 @@ function animateToCart() {
   }, 800);
 }
 
-window.maintenanceMode = false;
+/* ===============================
+   MAINTENANCE MODE
+================================ */
+
+window.maintenanceMode =
+  localStorage.getItem(
+    "maintenanceMode"
+  ) === "true";
 
 function enableMaintenanceMode() {
 
+  localStorage.setItem(
+    "maintenanceMode",
+    "true"
+  );
+
   window.maintenanceMode = true;
 
-  const banner =
+  const popup =
     document.getElementById(
-      "maintenanceBanner"
+      "maintenancePopup"
     );
 
-  if (banner) {
+  if (popup) {
 
-    banner.style.display = "block";
+    popup.style.display = "flex";
 
   }
 
@@ -2264,17 +2276,46 @@ function enableMaintenanceMode() {
 
 function disableMaintenanceMode() {
 
+  localStorage.setItem(
+    "maintenanceMode",
+    "false"
+  );
+
   window.maintenanceMode = false;
 
-  const banner =
+  const popup =
     document.getElementById(
-      "maintenanceBanner"
+      "maintenancePopup"
     );
 
-  if (banner) {
+  if (popup) {
 
-    banner.style.display = "none";
+    popup.style.display = "none";
 
   }
 
 }
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    const popup =
+      document.getElementById(
+        "maintenancePopup"
+      );
+
+    if (!popup) return;
+
+    if (window.maintenanceMode) {
+
+      popup.style.display = "flex";
+
+    } else {
+
+      popup.style.display = "none";
+
+    }
+
+  }
+);
