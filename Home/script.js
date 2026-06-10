@@ -1877,10 +1877,6 @@ function changePage(page) {
   renderProducts(list);
 }
 
-/* ===============================
-   MAINTENANCE MODE
-================================ */
-
 window.maintenanceMode = false;
 
 function enableMaintenanceMode() {
@@ -1917,46 +1913,3 @@ function disableMaintenanceMode() {
 
 }
 
-/* AUTO BACKEND CHECK */
-
-async function checkBackendHealth() {
-
-  try {
-
-    const res =
-      await fetch(
-        "https://de-ecom-pro.onrender.com",
-        {
-          method: "GET",
-          cache: "no-store"
-        }
-      );
-
-    if (!res.ok) {
-
-      enableMaintenanceMode();
-
-      return;
-    }
-
-    disableMaintenanceMode();
-
-  } catch (error) {
-
-    console.error(
-      "BACKEND OFFLINE:",
-      error
-    );
-
-    enableMaintenanceMode();
-
-  }
-
-}
-
-checkBackendHealth();
-
-setInterval(
-  checkBackendHealth,
-  30000
-);

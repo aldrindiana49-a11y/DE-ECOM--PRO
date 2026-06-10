@@ -1853,3 +1853,39 @@ async function syncCheckoutProfile() {
 
   }
 }
+
+window.maintenanceMode = false;
+
+function enableMaintenanceMode() {
+
+  window.maintenanceMode = true;
+
+  const banner =
+    document.getElementById(
+      "maintenanceBanner"
+    );
+
+  if (banner) {
+
+    banner.style.display = "block";
+
+  }
+
+}
+
+function disableMaintenanceMode() {
+
+  window.maintenanceMode = false;
+
+  const banner =
+    document.getElementById(
+      "maintenanceBanner"
+    );
+
+  if (banner) {
+
+    banner.style.display = "none";
+
+  }
+
+}
