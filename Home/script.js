@@ -1876,3 +1876,87 @@ function changePage(page) {
 
   renderProducts(list);
 }
+
+/* ===============================
+   MAINTENANCE MODE
+================================ */
+
+window.maintenanceMode = false;
+
+function enableMaintenanceMode() {
+
+  window.maintenanceMode = true;
+
+  const banner =
+    document.getElementById(
+      "maintenanceBanner"
+    );
+
+  if (banner) {
+
+    banner.style.display = "block";
+
+  }
+
+}
+
+function disableMaintenanceMode() {
+
+  window.maintenanceMode = false;
+
+  const banner =
+    document.getElementById(
+      "maintenanceBanner"
+    );
+
+  if (banner) {
+
+    banner.style.display = "none";
+
+  }
+
+}
+
+/* AUTO BACKEND CHECK */
+
+async function checkBackendHealth() {
+
+  try {
+
+    const res =
+      await fetch(
+        "https://de-ecom-pro.onrender.com",
+        {
+          method: "GET",
+          cache: "no-store"
+        }
+      );
+
+    if (!res.ok) {
+
+      enableMaintenanceMode();
+
+      return;
+    }
+
+    disableMaintenanceMode();
+
+  } catch (error) {
+
+    console.error(
+      "BACKEND OFFLINE:",
+      error
+    );
+
+    enableMaintenanceMode();
+
+  }
+
+}
+
+checkBackendHealth();
+
+setInterval(
+  checkBackendHealth,
+  30000
+);
