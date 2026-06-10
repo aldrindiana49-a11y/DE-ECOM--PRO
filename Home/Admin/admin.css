@@ -1514,3 +1514,18 @@ body {
   opacity: .9;
 
 }
+
+.summary-box {
+  border-left: 3px solid #2563eb;
+  padding-left: 10px;
+}
+
+.summary-box {
+  border-left: 3px solid #2563eb;
+  padding-left: 10px;
+  transition: all 0.2s ease;
+}
+
+.summary-box:hover {
+  background: #f8fafc;
+}

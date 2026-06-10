@@ -195,6 +195,19 @@ function renderAdminOrders() {
       order.order_request_status &&
       String(order.order_request_status).trim() !== "";
 
+
+    const subtotal =
+      Number(order.subtotal || order.amount || 0);
+
+    const voucher =
+      Number(order.voucher_discount || 0);
+
+    const shipping =
+      Number(order.shipping_fee || 0);
+
+    const total =
+      Number(order.amount || 0);
+
     return `
       <div class="warehouse-order-card">
         <div class="warehouse-order-head">
@@ -288,27 +301,69 @@ ${hasOrderRequest ? `
       }
           </div>
 
-          <div class="warehouse-order-info">
-            <div>
-              <span>Amount</span>
-              <strong>₱${Number(order.amount || 0).toLocaleString("en-PH")}</strong>
-            </div>
+<div
+  class="warehouse-order-info summary-box"
+  style="
+    border-top:1px solid #e5e7eb;
+    padding-top:10px;
+    margin-top:10px;
+  "
+>
 
-            <div>
-              <span>Payment</span>
-              <strong>${escapeHtml(paymentStatus)}</strong>
-            </div>
+  <div>
+    <span style="
+      font-size:12px;
+      font-weight:600;
+      color:#6b7280;
+    ">
+      Subtotal
+    </span>
 
-            <div>
-              <span>Courier</span>
-              <strong>${escapeHtml(order.courier || "-")}</strong>
-            </div>
+    <strong>
+  ₱${subtotal.toLocaleString("en-PH")}
+</strong>
+</div>
 
-            <div>
-              <span>Tracking</span>
-              <strong>${escapeHtml(order.tracking_number || "-")}</strong>
-            </div>
-          </div>
+  <div>
+    <span style="color:#16a34a;">Voucher</span>
+    <strong style="color:#16a34a;">
+      -₱${voucher.toLocaleString("en-PH")}
+    </strong>
+  </div>
+
+  <div>
+    <span style="color:#f59e0b;">Shipping</span>
+    <strong>
+      ₱${shipping.toLocaleString("en-PH")}
+    </strong>
+  </div>
+
+  <div>
+    <span>Total</span>
+    <strong style="
+  font-size:16px;
+  color:#2563eb;
+">
+      ₱${total.toLocaleString("en-PH")}
+    </strong>
+  </div>
+
+  <div>
+    <span>Payment</span>
+    <strong>${escapeHtml(paymentStatus)}</strong>
+  </div>
+
+  <div>
+    <span>Courier</span>
+    <strong>${escapeHtml(order.courier || "-")}</strong>
+  </div>
+
+  <div>
+    <span>Tracking</span>
+    <strong>${escapeHtml(order.tracking_number || "-")}</strong>
+  </div>
+
+</div>
 
 
 ${hasOrderRequest ? `
@@ -951,8 +1006,14 @@ function renderCancelledOrders() {
 
           </div>
 
-          <div class="warehouse-order-info">
-
+         <div
+  class="warehouse-order-info summary-box"
+  style="
+    border-top:1px solid #e5e7eb;
+    padding-top:10px;
+    margin-top:10px;
+  "
+>
             <div>
               <span>Amount</span>
 
