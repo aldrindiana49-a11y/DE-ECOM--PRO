@@ -1902,7 +1902,7 @@ async function checkMaintenanceMode() {
           "key",
           "maintenance_mode"
         )
-        .single();
+        .maybeSingle();
 
     if (error) return;
 
