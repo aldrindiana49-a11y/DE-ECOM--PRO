@@ -2692,3 +2692,37 @@ body {
   }
 
 }
+
+.virtual-mixer-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 42px;
+  padding: 0 14px;
+
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, .10);
+
+  color: #fff;
+  text-decoration: none;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  transition: .25s ease;
+}
+
+.virtual-mixer-btn:hover {
+  background: rgba(255, 255, 255, .20);
+  transform: translateY(-2px);
+}
+
+@media (max-width:768px) {
+
+  .virtual-mixer-btn {
+    display: none !important;
+  }
+
+}
