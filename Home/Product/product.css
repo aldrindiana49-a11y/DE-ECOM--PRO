@@ -2336,3 +2336,34 @@ img.lazy-image {
 img.lazy-image.loaded {
   opacity: 1;
 }
+
+/* FORCE WHITE BADGE TEXT MOBILE */
+
+@media (max-width: 768px) {
+
+  .cart-badge,
+  #cartCount,
+  #mobileCartCount,
+  .chat-badge,
+  .message-badge,
+  #messageCount {
+
+    color: #ffffff !important;
+
+    font-weight: 800 !important;
+
+    text-shadow: 0 0 3px rgba(0, 0, 0, .5) !important;
+  }
+
+}
+
+/* FORCE CHAT BADGE WHITE */
+
+#messageCount,
+.chat-badge,
+.website-chat-badge {
+
+  color: #ffffff !important;
+  font-weight: 800 !important;
+
+}

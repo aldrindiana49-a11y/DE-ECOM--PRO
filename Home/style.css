@@ -2726,3 +2726,33 @@ body {
   }
 
 }
+
+/* FORCE WHITE NOTIFICATION COUNT - INDEX + MOBILE */
+
+.cart-badge,
+.notif-badge,
+#cartCount,
+#mobileCartCount,
+#messageCount {
+
+  color: #ffffff !important;
+  font-weight: 800 !important;
+
+  text-shadow: 0 0 3px rgba(0, 0, 0, .45) !important;
+}
+
+/* MOBILE OVERRIDE */
+
+@media (max-width: 768px) {
+
+  .mobile-nav-icon .cart-badge,
+  .mobile-nav-icon .notif-badge,
+  #mobileCartCount,
+  #messageCount {
+
+    color: #ffffff !important;
+    font-weight: 800 !important;
+
+  }
+
+}

@@ -39,6 +39,10 @@ function setProductActionsLoading(isLoading) {
       btn.style.pointerEvents = isLoading ? "none" : "auto";
       btn.style.opacity = isLoading ? "0.55" : "1";
     });
+
+  if (addToCartBtn) {
+    addToCartBtn.textContent = isLoading ? "Loading..." : "🛒 Add to Cart";
+  }
 }
 
 if (addToCartBtn) {
