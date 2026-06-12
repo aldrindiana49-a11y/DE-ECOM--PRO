@@ -88,46 +88,66 @@
         }
 
         section.innerHTML = `
-      <div class="hot-deals-wrap">
-        <div class="hot-deals-header">
-          <div>
-            <h2>🔥 Hot Deals</h2>
-            <p>Best price deals and biggest discounts today</p>
-          </div>
-        </div>
+        <div class="hot-deals-outer">
 
-        <div class="hot-deals-row">
-          ${deals.map((product) => `
-            <div class="hot-deal-card" data-id="${escapeHtml(product.id)}">
-              <div class="hot-deal-badge">-${product.deal.percent}%</div>
+            <button class="hot-deals-outside-btn hot-deals-outside-prev"
+                    type="button"
+                    onclick="scrollHotDeals(-1)">
+                &lt;
+            </button>
 
-              <div class="hot-deal-image">
-                <img
-                  loading="lazy"
-                  src="${escapeHtml(getImage(product))}"
-                  alt="${escapeHtml(product.name)}"
-                  onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'"
-                >
-              </div>
+            <div class="hot-deals-wrap">
 
-              <div class="hot-deal-info">
-                <span class="hot-deal-category">${escapeHtml(product.category || "Product")}</span>
-                <h3>${escapeHtml(product.name || "Unnamed Product")}</h3>
-
-                <div class="hot-deal-prices">
-                  <span class="hot-deal-current">${formatPrice(product.deal.discount)}</span>
-                  <span class="hot-deal-old">${formatPrice(product.deal.original)}</span>
+                <div class="hot-deals-header">
+                    <div>
+                        <h2>🔥 Hot Deals</h2>
+                        <p>Best price deals and biggest discounts today</p>
+                    </div>
                 </div>
 
-                <div class="hot-deal-save">
-                  Save ${formatPrice(product.deal.savings)}
+                <div class="hot-deals-row" id="hotDealsRow">
+                    ${deals.map((product) => `
+                        <div class="hot-deal-card" data-id="${escapeHtml(product.id)}">
+
+                            <div class="hot-deal-badge">-${product.deal.percent}%</div>
+
+                            <div class="hot-deal-image">
+                                <img
+                                  loading="lazy"
+                                  src="${escapeHtml(getImage(product))}"
+                                  alt="${escapeHtml(product.name)}"
+                                  onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'"
+                                >
+                            </div>
+
+                            <div class="hot-deal-info">
+                                <span class="hot-deal-category">${escapeHtml(product.category || "Product")}</span>
+                                <h3>${escapeHtml(product.name || "Unnamed Product")}</h3>
+
+                                <div class="hot-deal-prices">
+                                    <span class="hot-deal-current">${formatPrice(product.deal.discount)}</span>
+                                    <span class="hot-deal-old">${formatPrice(product.deal.original)}</span>
+                                </div>
+
+                                <div class="hot-deal-save">
+                                    Save ${formatPrice(product.deal.savings)}
+                                </div>
+                            </div>
+
+                        </div>
+                    `).join("")}
                 </div>
-              </div>
+
             </div>
-          `).join("")}
+
+            <button class="hot-deals-outside-btn hot-deals-outside-next"
+                    type="button"
+                    onclick="scrollHotDeals(1)">
+                &gt;
+            </button>
+
         </div>
-      </div>
-    `;
+        `;
 
         section.querySelectorAll(".hot-deal-card").forEach((card) => {
             card.addEventListener("click", () => {
@@ -142,6 +162,16 @@
             });
         });
     }
+
+    window.scrollHotDeals = function (direction) {
+        const row = document.getElementById("hotDealsRow");
+        if (!row) return;
+
+        row.scrollBy({
+            left: direction * 360,
+            behavior: "smooth"
+        });
+    };
 
     window.renderHotDeals = renderHotDeals;
 })();
