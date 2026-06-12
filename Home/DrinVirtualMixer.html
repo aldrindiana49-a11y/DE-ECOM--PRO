@@ -5,991 +5,1148 @@
   <link rel="icon" type="image/png" id="siteFavicon"
     href="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/logo.png" />
 
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>🎛️ DRIN Virtual Mixer | Free Online Audio Mixer</title>
+  <title>🎛️ DRIN Virtual Mixer | Free Online Audio Mixer</title>
 
-    <meta name="description"
-      content="Free browser-based virtual mixer from DRIN Electronics. Perfect for DJs, events, sound testing, training, and audio enthusiasts." />
+  <meta name="description"
+    content="Free browser-based virtual mixer from DRIN Electronics. Perfect for DJs, events, sound testing, training, and audio enthusiasts." />
 
-    <meta property="og:title" content="🎛️ DRIN Virtual Mixer | Free Online Audio Mixer" />
+  <meta property="og:title" content="🎛️ DRIN Virtual Mixer | Free Online Audio Mixer" />
 
-    <meta property="og:description"
-      content="Mix music, microphone, and audio tracks online. Free browser-based virtual mixer from DRIN Electronics." />
+  <meta property="og:description"
+    content="Mix music, microphone, and audio tracks online. Free browser-based virtual mixer from DRIN Electronics." />
 
-    <meta property="og:image"
-      content="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/vdsvsvxv.jpg" />
+  <meta property="og:image"
+    content="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/vdsvsvxv.jpg" />
 
-    <meta property="og:url" content="https://drinelectronicsph.com/drinvirtualmixer" />
+  <meta property="og:url" content="https://drinelectronicsph.com/drinvirtualmixer" />
 
-    <meta property="og:type" content="website" />
+  <meta property="og:type" content="website" />
 
-    <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:card" content="summary_large_image" />
 
-    <meta name="twitter:title" content="🎛️ DRIN Virtual Mixer | Free Online Audio Mixer" />
+  <meta name="twitter:title" content="🎛️ DRIN Virtual Mixer | Free Online Audio Mixer" />
 
-    <meta name="twitter:description"
-      content="Free browser-based virtual mixer from DRIN Electronics. Perfect for DJs, events, sound testing, and audio enthusiasts." />
+  <meta name="twitter:description"
+    content="Free browser-based virtual mixer from DRIN Electronics. Perfect for DJs, events, sound testing, and audio enthusiasts." />
 
-    <meta name="twitter:image"
-      content="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/vdsvsvxv.jpg" />
+  <meta name="twitter:image"
+    content="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/vdsvsvxv.jpg" />
 
-    <style>
-      body {
-        margin: 0;
-        padding: 20px;
-        background: #0a0a0a;
-        color: white;
-        font-family: Arial, sans-serif;
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #0a0a0a;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .wrap {
+      max-width: 1700px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      color: cyan;
+      font-size: 30px;
+      text-shadow: 0 0 10px cyan;
+      text-align: center;
+    }
+
+    .sub {
+      text-align: center;
+      color: #ccc;
+      margin-bottom: 18px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    button,
+    .file-btn {
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      background: cyan;
+      color: black;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover,
+    .file-btn:hover {
+      background: #66ffff;
+    }
+
+    .file-btn input {
+      display: none;
+    }
+
+    .audio-off {
+      background: #666;
+      color: #fff;
+    }
+
+    .audio-on {
+      background: #00d26a;
+      color: #021a0d;
+    }
+
+    .box,
+    .mixer-channel,
+    .spectrum-panel {
+      background: #111;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.15);
+      padding: 16px;
+    }
+
+    .master-box,
+    .mic-box,
+    .spectrum-control-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .master-box {
+      min-width: 320px;
+    }
+
+    .mic-box,
+    .spectrum-control-box {
+      flex-direction: column;
+      align-items: flex-start;
+      min-width: 340px;
+    }
+
+    .mic-off {
+      background: #666;
+      color: #fff;
+    }
+
+    .mic-on {
+      background: #00d26a;
+      color: #021a0d;
+    }
+
+    .mic-slider-row,
+    .spectrum-slider-row {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 92px 1fr 52px;
+      gap: 10px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .spectrum-panel {
+      margin-bottom: 22px;
+    }
+
+    .spectrum-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .spectrum-head h2 {
+      margin: 0;
+    }
+
+    .spectrum-head-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .clip-indicator {
+      min-width: 54px;
+      text-align: center;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: #2a0d0d;
+      color: #c88;
+      font-weight: bold;
+      letter-spacing: 1px;
+      border: 1px solid #4a2020;
+    }
+
+    .clip-indicator.active {
+      background: #ff2a2a;
+      color: #fff;
+      border-color: #ff6a6a;
+    }
+
+    .spectrum-top-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .channel-box {
+      background: #181818;
+      padding: 18px;
+      border-radius: 12px;
+      border: 1px solid #242424;
+    }
+
+    .channel-box h3 {
+      text-align: center;
+      margin: 0 0 12px;
+    }
+
+    .spectrum {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 6px;
+      padding: 15px;
+      background: #101010;
+      border-radius: 10px;
+      min-height: 320px;
+    }
+
+    .band {
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 3px;
+      align-items: center;
+    }
+
+    .segment {
+      width: 18px;
+      height: 10px;
+      background: #222;
+      border-radius: 2px;
+    }
+
+    .base-floor {
+      background: #002a5c !important;
+    }
+
+    .on-low {
+      background: lime;
+    }
+
+    .on-mid {
+      background: yellow;
+    }
+
+    .on-high {
+      background: orange;
+    }
+
+    .on-peak {
+      background: red;
+    }
+
+    .peak-dot {
+      background: #fff;
+    }
+
+    .labels {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 9px;
+      color: #aaa;
+      flex-wrap: nowrap;
+    }
+
+    .labels span {
+      width: 18px;
+      display: inline-block;
+      transform: rotate(-55deg);
+      transform-origin: top center;
+    }
+
+    .mixer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(300px, 1fr));
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .channel-title-row,
+    .playlist-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .channel-title-row h2,
+    .playlist-head h3 {
+      margin: 0;
+    }
+
+    .status {
+      color: #bbb;
+      font-size: 12px;
+    }
+
+    .transport {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    .track-box,
+    .playlist-wrap,
+    .fader-wrap {
+      background: #181818;
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .playlist-wrap {
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .time-row {
+      display: grid;
+      grid-template-columns: 52px 1fr 52px;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .seek-slider,
+    #masterVolume,
+    #micVolume,
+    #spectrumGain,
+    #fallSpeed {
+      width: 100%;
+    }
+
+    .channel-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 110px;
+      gap: 14px;
+      margin-top: 12px;
+      align-items: stretch;
+    }
+
+    .playlist {
+      margin: 10px 0 0;
+      padding-left: 20px;
+      max-height: 240px;
+      overflow: auto;
+    }
+
+    .playlist li {
+      margin-bottom: 7px;
+      padding: 8px;
+      border-radius: 6px;
+      background: #222;
+      color: #ccc;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+
+    .playlist li.active {
+      background: rgba(0, 255, 255, 0.18);
+      color: #fff;
+      box-shadow: inset 0 0 8px rgba(0, 255, 255, 0.25);
+    }
+
+    .playlist-hint {
+      margin-top: 8px;
+      color: #888;
+      font-size: 11px;
+    }
+
+    .track-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .track-icon {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .track-text {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .fader-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .slider-shell {
+      position: relative;
+      width: 86px;
+      height: 286px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(to bottom, #0f0f0f, #050505);
+      border-radius: 16px;
+      border: 1px solid #2e2e2e;
+      box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.04);
+      padding: 10px 0;
+      overflow: hidden;
+    }
+
+    .visual-fader {
+      position: absolute;
+      inset: 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .visual-fader-track {
+      position: absolute;
+      width: 12px;
+      height: 236px;
+      border-radius: 999px;
+      background:
+        linear-gradient(to right,
+          #080808 0%,
+          #191919 22%,
+          #2b2b2b 50%,
+          #171717 78%,
+          #060606 100%);
+      border: 1px solid #333;
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+        inset 0 0 8px rgba(0, 0, 0, 0.75);
+    }
+
+    .visual-fader-cap {
+      position: absolute;
+      left: 50%;
+      width: 62px;
+      height: 38px;
+      transform: translate(-50%, 0);
+      background: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27132%27%20height%3D%2780%27%20viewBox%3D%270%200%20132%2080%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g1%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%25%27%20stop-color%3D%27%23f8f8f8%27/%3E%3Cstop%20offset%3D%2748%25%27%20stop-color%3D%27%23d7d7d7%27/%3E%3Cstop%20offset%3D%27100%25%27%20stop-color%3D%27%23a7a7a7%27/%3E%3C/linearGradient%3E%3ClinearGradient%20id%3D%27g2%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%25%27%20stop-color%3D%27%23f3f3f3%27/%3E%3Cstop%20offset%3D%27100%25%27%20stop-color%3D%27%23c4c4c4%27/%3E%3C/linearGradient%3E%3ClinearGradient%20id%3D%27g3%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%25%27%20stop-color%3D%27%23d2d2d2%27/%3E%3Cstop%20offset%3D%27100%25%27%20stop-color%3D%27%23959595%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20d%3D%27M16%2062%20L31%2018%20Q34%2010%2045%2010%20L87%2010%20Q98%2010%20101%2018%20L116%2062%20Q117%2065%20114%2068%20L18%2068%20Q15%2065%2016%2062%20Z%27%20fill%3D%27url(%23g1)%27%20stroke%3D%27%23989898%27%20stroke-width%3D%271.4%27/%3E%3Cpath%20d%3D%27M31%2018%20Q34%2010%2045%2010%20L87%2010%20Q98%2010%20101%2018%20L108%2033%20L24%2033%20Z%27%20fill%3D%27url(%23g2)%27%20stroke%3D%27%23c3c3c3%27%20stroke-width%3D%271%27/%3E%3Cpath%20d%3D%27M16%2062%20L31%2018%20L24%2033%20L18%2068%20Z%27%20fill%3D%27url(%23g3)%27/%3E%3Cpath%20d%3D%27M116%2062%20L101%2018%20L108%2033%20L114%2068%20Z%27%20fill%3D%27%239f9f9f%27/%3E%3Crect%20x%3D%2763%27%20y%3D%2710%27%20width%3D%274%27%20height%3D%2758%27%20rx%3D%271.2%27%20fill%3D%27%23111111%27/%3E%3Cg%20stroke%3D%27%23eeeeee%27%20stroke-width%3D%271.4%27%20opacity%3D%270.95%27%3E%3Cline%20x1%3D%2740%27%20y1%3D%2716%27%20x2%3D%2731%27%20y2%3D%2732%27/%3E%3Cline%20x1%3D%2747%27%20y1%3D%2715%27%20x2%3D%2738%27%20y2%3D%2732%27/%3E%3Cline%20x1%3D%2754%27%20y1%3D%2714%27%20x2%3D%2745%27%20y2%3D%2732%27/%3E%3Cline%20x1%3D%2761%27%20y1%3D%2713%27%20x2%3D%2752%27%20y2%3D%2732%27/%3E%3Cline%20x1%3D%2770%27%20y1%3D%2713%27%20x2%3D%2779%27%20y2%3D%2732%27/%3E%3Cline%20x1%3D%2777%27%20y1%3D%2714%27%20x2%3D%2786%27%20y2%3D%2732%27/%3E%3Cline%20x1%3D%2784%27%20y1%3D%2715%27%20x2%3D%2793%27%20y2%3D%2732%27/%3E%3Cline%20x1%3D%2791%27%20y1%3D%2716%27%20x2%3D%27100%27%20y2%3D%2732%27/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+    }
+
+    .volume-slider {
+      writing-mode: bt-lr;
+      -webkit-appearance: slider-vertical;
+      appearance: slider-vertical;
+      position: relative;
+      z-index: 3;
+      width: 74px;
+      height: 236px;
+      cursor: pointer;
+      background: transparent;
+      opacity: 0.02;
+    }
+
+    .volume-slider::-webkit-slider-runnable-track {
+      width: 12px;
+      min-height: 236px;
+      background: transparent;
+      border: 0;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 62px;
+      height: 38px;
+      margin-left: -25px;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+    }
+
+    .volume-slider::-moz-range-track {
+      width: 12px;
+      min-height: 236px;
+      background: transparent;
+      border: 0;
+    }
+
+    .volume-slider::-moz-range-thumb {
+      width: 62px;
+      height: 38px;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+    }
+
+    .slider-shell::before {
+      content: "";
+      position: absolute;
+      width: 12px;
+      height: 238px;
+      border-radius: 999px;
+      background:
+        linear-gradient(to right,
+          rgba(255, 255, 255, 0.05),
+          rgba(255, 255, 255, 0.01) 25%,
+          rgba(0, 0, 0, 0.35) 55%,
+          rgba(255, 255, 255, 0.02) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.65);
+      pointer-events: none;
+    }
+
+    .footer {
+      margin-top: 22px;
+      color: #777;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 1300px) {
+      .mixer-grid {
+        grid-template-columns: 1fr;
       }
 
-      * {
-        box-sizing: border-box;
+      .spectrum-top-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .channel-body {
+        grid-template-columns: 1fr;
+      }
+
+      .slider-shell {
+        width: 100%;
+        height: auto;
+        padding: 10px;
+      }
+
+      .visual-fader {
+        display: none;
+      }
+
+      .volume-slider {
+        writing-mode: initial;
+        -webkit-appearance: auto;
+        appearance: auto;
+        width: 100%;
+        height: auto;
+        opacity: 1;
+      }
+
+      .mic-slider-row,
+      .spectrum-slider-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    button,
+    .file-btn,
+    .shop-btn,
+    .shop-now-bottom,
+    .back-shop-btn {
+      position: relative;
+      overflow: hidden;
+      transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        filter .18s ease;
+    }
+
+    button:hover,
+    .file-btn:hover,
+    .shop-btn:hover,
+    .shop-now-bottom:hover,
+    .back-shop-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      filter: brightness(1.12);
+    }
+
+    button:active,
+    .file-btn:active,
+    .shop-btn:active,
+    .shop-now-bottom:active,
+    .back-shop-btn:active {
+      transform: scale(.94);
+      filter: brightness(.9);
+    }
+
+    button::after,
+    .file-btn::after,
+    .shop-btn::after,
+    .shop-now-bottom::after,
+    .back-shop-btn::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, .35);
+      opacity: 0;
+      transform: scale(.4);
+      transition: .25s ease;
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    button:active::after,
+    .file-btn:active::after,
+    .shop-btn:active::after,
+    .shop-now-bottom:active::after,
+    .back-shop-btn:active::after {
+      opacity: 1;
+      transform: scale(1.4);
+    }
+
+    /* ================================
+       DRIN ELECTRONICS - MOBILE UPGRADE
+       Added responsive layout for phones/tablets
+       ================================ */
+
+    @media (max-width: 900px) {
+      body {
+        padding: 12px;
       }
 
       .wrap {
-        max-width: 1700px;
-        margin: 0 auto;
+        width: 100%;
+        max-width: 100%;
       }
 
       h1 {
-        margin: 0 0 8px;
-        color: cyan;
-        font-size: 30px;
-        text-shadow: 0 0 10px cyan;
-        text-align: center;
+        font-size: 24px;
+        line-height: 1.2;
       }
 
       .sub {
-        text-align: center;
-        color: #ccc;
-        margin-bottom: 18px;
+        font-size: 13px;
+        line-height: 1.35;
       }
 
       .topbar {
-        display: flex;
-        justify-content: center;
-        gap: 14px;
-        flex-wrap: wrap;
-        margin-bottom: 18px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        align-items: stretch;
+      }
+
+      .topbar>button,
+      .master-box,
+      .mic-box,
+      .spectrum-control-box {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .master-box {
+        display: grid;
+        grid-template-columns: 125px 1fr 48px;
+        gap: 8px;
+      }
+
+      .mic-box,
+      .spectrum-control-box {
+        align-items: stretch;
+      }
+
+      .spectrum-head {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+      }
+
+      .spectrum-head h2 {
+        font-size: 18px;
+        line-height: 1.25;
+      }
+
+      .spectrum-head-right {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .clip-indicator,
+      #toggleMeterBtn {
+        width: 100%;
+      }
+
+      .spectrum-top-grid,
+      .mixer-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .channel-box,
+      .spectrum-panel,
+      .mixer-channel,
+      .box {
+        padding: 12px;
+        border-radius: 10px;
+      }
+
+      .spectrum {
+        justify-content: flex-start;
+        min-height: 210px;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 3px;
+        padding: 10px;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .segment {
+        width: 10px;
+        height: 7px;
+      }
+
+      .labels {
+        justify-content: flex-start;
+        overflow-x: auto;
+        gap: 3px;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .labels span {
+        width: 10px;
+        font-size: 7px;
+      }
+
+      .transport {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .transport button,
+      .file-btn {
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 8px;
+        font-size: 12px;
+        text-align: center;
+      }
+
+      .file-btn {
+        grid-column: 1 / -1;
+      }
+
+      .channel-body {
+        grid-template-columns: 1fr;
+      }
+
+      .playlist {
+        max-height: 160px;
+      }
+
+      .playlist li {
+        font-size: 13px;
+      }
+
+      .time-row {
+        grid-template-columns: 44px 1fr 44px;
+        font-size: 12px;
+      }
+
+      .fader-wrap {
+        align-items: stretch;
+      }
+
+      .slider-shell {
+        width: 100%;
+        height: auto;
+        padding: 12px;
+      }
+
+      .visual-fader,
+      .slider-shell::before {
+        display: none;
+      }
+
+      .volume-slider {
+        writing-mode: initial;
+        -webkit-appearance: auto;
+        appearance: auto;
+        width: 100%;
+        height: 42px;
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 520px) {
+      body {
+        padding: 8px;
+      }
+
+      h1 {
+        font-size: 20px;
+        text-shadow: 0 0 7px cyan;
+      }
+
+      .sub {
+        font-size: 11px;
+        margin-bottom: 12px;
       }
 
       button,
       .file-btn {
-        padding: 10px 16px;
-        font-size: 14px;
-        font-weight: bold;
-        border: none;
-        border-radius: 6px;
-        background: cyan;
-        color: black;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      button:hover,
-      .file-btn:hover {
-        background: #66ffff;
-      }
-
-      .file-btn input {
-        display: none;
-      }
-
-      .audio-off {
-        background: #666;
-        color: #fff;
-      }
-
-      .audio-on {
-        background: #00d26a;
-        color: #021a0d;
+        border-radius: 8px;
       }
 
       .box,
       .mixer-channel,
       .spectrum-panel {
-        background: #111;
-        border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.15);
-        padding: 16px;
-      }
-
-      .master-box,
-      .mic-box,
-      .spectrum-control-box {
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        padding: 10px;
       }
 
       .master-box {
-        min-width: 320px;
-      }
-
-      .mic-box,
-      .spectrum-control-box {
-        flex-direction: column;
-        align-items: flex-start;
-        min-width: 340px;
-      }
-
-      .mic-off {
-        background: #666;
-        color: #fff;
-      }
-
-      .mic-on {
-        background: #00d26a;
-        color: #021a0d;
+        grid-template-columns: 1fr;
+        text-align: left;
       }
 
       .mic-slider-row,
       .spectrum-slider-row {
-        width: 100%;
-        display: grid;
-        grid-template-columns: 92px 1fr 52px;
-        gap: 10px;
-        align-items: center;
-        margin-top: 4px;
-      }
-
-      .spectrum-panel {
-        margin-bottom: 22px;
-      }
-
-      .spectrum-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 14px;
+        grid-template-columns: 1fr;
+        gap: 6px;
       }
 
       .spectrum-head h2 {
-        margin: 0;
+        font-size: 14px;
       }
 
       .spectrum-head-right {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .clip-indicator {
-        min-width: 54px;
-        text-align: center;
-        padding: 8px 10px;
-        border-radius: 6px;
-        background: #2a0d0d;
-        color: #c88;
-        font-weight: bold;
-        letter-spacing: 1px;
-        border: 1px solid #4a2020;
-      }
-
-      .clip-indicator.active {
-        background: #ff2a2a;
-        color: #fff;
-        border-color: #ff6a6a;
-      }
-
-      .spectrum-top-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-      }
-
-      .channel-box {
-        background: #181818;
-        padding: 18px;
-        border-radius: 12px;
-        border: 1px solid #242424;
+        grid-template-columns: 1fr;
       }
 
       .channel-box h3 {
-        text-align: center;
-        margin: 0 0 12px;
+        font-size: 14px;
       }
 
       .spectrum {
-        display: flex;
-        justify-content: center;
-        align-items: flex-end;
-        gap: 6px;
-        padding: 15px;
-        background: #101010;
-        border-radius: 10px;
-        min-height: 320px;
+        min-height: 145px;
+        gap: 2px;
+        padding: 7px;
       }
 
       .band {
-        display: flex;
-        flex-direction: column-reverse;
-        gap: 3px;
-        align-items: center;
+        gap: 2px;
       }
 
       .segment {
-        width: 18px;
-        height: 10px;
-        background: #222;
-        border-radius: 2px;
-      }
-
-      .base-floor {
-        background: #002a5c !important;
-      }
-
-      .on-low {
-        background: lime;
-      }
-
-      .on-mid {
-        background: yellow;
-      }
-
-      .on-high {
-        background: orange;
-      }
-
-      .on-peak {
-        background: red;
-      }
-
-      .peak-dot {
-        background: #fff;
-      }
-
-      .labels {
-        display: flex;
-        justify-content: center;
-        gap: 6px;
-        margin-top: 10px;
-        font-size: 9px;
-        color: #aaa;
-        flex-wrap: nowrap;
+        width: 7px;
+        height: 5px;
       }
 
       .labels span {
-        width: 18px;
-        display: inline-block;
-        transform: rotate(-55deg);
-        transform-origin: top center;
+        width: 7px;
+        font-size: 6px;
       }
 
-      .mixer-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(300px, 1fr));
-        gap: 18px;
-        margin-bottom: 22px;
-      }
-
-      .channel-title-row,
-      .playlist-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
+      .channel-title-row {
+        align-items: flex-start;
       }
 
       .channel-title-row h2,
-      .playlist-head h3 {
-        margin: 0;
+      .channel-title {
+        font-size: 17px;
       }
 
       .status {
-        color: #bbb;
-        font-size: 12px;
+        font-size: 11px;
       }
 
       .transport {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin: 14px 0;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+      }
+
+      .transport button,
+      .file-btn {
+        font-size: 11px;
+        min-height: 42px;
+        padding: 9px 6px;
       }
 
       .track-box,
       .playlist-wrap,
       .fader-wrap {
-        background: #181818;
-        border-radius: 10px;
-        padding: 12px;
+        padding: 10px;
       }
 
-      .playlist-wrap {
-        min-width: 0;
-        overflow: hidden;
-      }
-
-      .time-row {
-        display: grid;
-        grid-template-columns: 52px 1fr 52px;
-        gap: 8px;
-        align-items: center;
-        margin-top: 10px;
-      }
-
-      .seek-slider,
-      #masterVolume,
-      #micVolume,
-      #spectrumGain,
-      #fallSpeed {
-        width: 100%;
-      }
-
-      .channel-body {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 110px;
-        gap: 14px;
-        margin-top: 12px;
-        align-items: stretch;
+      .track-name,
+      .playlist li,
+      .playlist-hint {
+        font-size: 12px;
       }
 
       .playlist {
-        margin: 10px 0 0;
-        padding-left: 20px;
-        max-height: 240px;
-        overflow: auto;
+        max-height: 130px;
+        padding-left: 16px;
       }
 
-      .playlist li {
-        margin-bottom: 7px;
-        padding: 8px;
-        border-radius: 6px;
-        background: #222;
-        color: #ccc;
-        cursor: pointer;
-        user-select: none;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        min-width: 0;
+      .playlist-head h3 {
+        font-size: 14px;
       }
 
-      .playlist li.active {
-        background: rgba(0, 255, 255, 0.18);
-        color: #fff;
-        box-shadow: inset 0 0 8px rgba(0, 255, 255, 0.25);
-      }
-
-      .playlist-hint {
-        margin-top: 8px;
-        color: #888;
+      .clear-btn {
+        padding: 8px 10px;
         font-size: 11px;
       }
 
-      .track-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .track-icon {
-        font-size: 12px;
-        opacity: 0.8;
-      }
-
-      .track-text {
-        flex: 1;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .fader-wrap {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        text-align: center;
-      }
-
-      .slider-shell {
-        position: relative;
-        width: 86px;
-        height: 286px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(to bottom, #0f0f0f, #050505);
-        border-radius: 16px;
-        border: 1px solid #2e2e2e;
-        box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.04);
-        padding: 10px 0;
-        overflow: hidden;
-      }
-
-      .visual-fader {
-        position: absolute;
-        inset: 10px 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        pointer-events: none;
-      }
-
-      .visual-fader-track {
-        position: absolute;
-        width: 12px;
-        height: 236px;
-        border-radius: 999px;
-        background:
-          linear-gradient(to right,
-            #080808 0%,
-            #191919 22%,
-            #2b2b2b 50%,
-            #171717 78%,
-            #060606 100%);
-        border: 1px solid #333;
-        box-shadow:
-          inset 0 0 0 1px rgba(255, 255, 255, 0.03),
-          inset 0 0 8px rgba(0, 0, 0, 0.75);
-      }
-
-      .visual-fader-cap {
-        position: absolute;
-        left: 50%;
-        width: 62px;
-        height: 38px;
-        transform: translate(-50%, 0);
-        background: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27132%27%20height%3D%2780%27%20viewBox%3D%270%200%20132%2080%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g1%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%25%27%20stop-color%3D%27%23f8f8f8%27/%3E%3Cstop%20offset%3D%2748%25%27%20stop-color%3D%27%23d7d7d7%27/%3E%3Cstop%20offset%3D%27100%25%27%20stop-color%3D%27%23a7a7a7%27/%3E%3C/linearGradient%3E%3ClinearGradient%20id%3D%27g2%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%25%27%20stop-color%3D%27%23f3f3f3%27/%3E%3Cstop%20offset%3D%27100%25%27%20stop-color%3D%27%23c4c4c4%27/%3E%3C/linearGradient%3E%3ClinearGradient%20id%3D%27g3%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%25%27%20stop-color%3D%27%23d2d2d2%27/%3E%3Cstop%20offset%3D%27100%25%27%20stop-color%3D%27%23959595%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20d%3D%27M16%2062%20L31%2018%20Q34%2010%2045%2010%20L87%2010%20Q98%2010%20101%2018%20L116%2062%20Q117%2065%20114%2068%20L18%2068%20Q15%2065%2016%2062%20Z%27%20fill%3D%27url(%23g1)%27%20stroke%3D%27%23989898%27%20stroke-width%3D%271.4%27/%3E%3Cpath%20d%3D%27M31%2018%20Q34%2010%2045%2010%20L87%2010%20Q98%2010%20101%2018%20L108%2033%20L24%2033%20Z%27%20fill%3D%27url(%23g2)%27%20stroke%3D%27%23c3c3c3%27%20stroke-width%3D%271%27/%3E%3Cpath%20d%3D%27M16%2062%20L31%2018%20L24%2033%20L18%2068%20Z%27%20fill%3D%27url(%23g3)%27/%3E%3Cpath%20d%3D%27M116%2062%20L101%2018%20L108%2033%20L114%2068%20Z%27%20fill%3D%27%239f9f9f%27/%3E%3Crect%20x%3D%2763%27%20y%3D%2710%27%20width%3D%274%27%20height%3D%2758%27%20rx%3D%271.2%27%20fill%3D%27%23111111%27/%3E%3Cg%20stroke%3D%27%23eeeeee%27%20stroke-width%3D%271.4%27%20opacity%3D%270.95%27%3E%3Cline%20x1%3D%2740%27%20y1%3D%2716%27%20x2%3D%2731%27%20y2%3D%2732%27/%3E%3Cline%20x1%3D%2747%27%20y1%3D%2715%27%20x2%3D%2738%27%20y2%3D%2732%27/%3E%3Cline%20x1%3D%2754%27%20y1%3D%2714%27%20x2%3D%2745%27%20y2%3D%2732%27/%3E%3Cline%20x1%3D%2761%27%20y1%3D%2713%27%20x2%3D%2752%27%20y2%3D%2732%27/%3E%3Cline%20x1%3D%2770%27%20y1%3D%2713%27%20x2%3D%2779%27%20y2%3D%2732%27/%3E%3Cline%20x1%3D%2777%27%20y1%3D%2714%27%20x2%3D%2786%27%20y2%3D%2732%27/%3E%3Cline%20x1%3D%2784%27%20y1%3D%2715%27%20x2%3D%2793%27%20y2%3D%2732%27/%3E%3Cline%20x1%3D%2791%27%20y1%3D%2716%27%20x2%3D%27100%27%20y2%3D%2732%27/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
-        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+      .time-row {
+        grid-template-columns: 38px 1fr 38px;
+        gap: 6px;
+        font-size: 11px;
       }
 
       .volume-slider {
-        writing-mode: bt-lr;
-        -webkit-appearance: slider-vertical;
-        appearance: slider-vertical;
-        position: relative;
-        z-index: 3;
-        width: 74px;
-        height: 236px;
-        cursor: pointer;
-        background: transparent;
-        opacity: 0.02;
-      }
-
-      .volume-slider::-webkit-slider-runnable-track {
-        width: 12px;
-        min-height: 236px;
-        background: transparent;
-        border: 0;
-      }
-
-      .volume-slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 62px;
         height: 38px;
-        margin-left: -25px;
-        background: transparent;
-        border: 0;
-        box-shadow: none;
-      }
-
-      .volume-slider::-moz-range-track {
-        width: 12px;
-        min-height: 236px;
-        background: transparent;
-        border: 0;
-      }
-
-      .volume-slider::-moz-range-thumb {
-        width: 62px;
-        height: 38px;
-        background: transparent;
-        border: 0;
-        box-shadow: none;
-      }
-
-      .slider-shell::before {
-        content: "";
-        position: absolute;
-        width: 12px;
-        height: 238px;
-        border-radius: 999px;
-        background:
-          linear-gradient(to right,
-            rgba(255, 255, 255, 0.05),
-            rgba(255, 255, 255, 0.01) 25%,
-            rgba(0, 0, 0, 0.35) 55%,
-            rgba(255, 255, 255, 0.02) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.04);
-        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.65);
-        pointer-events: none;
       }
 
       .footer {
-        margin-top: 22px;
-        color: #777;
-        font-size: 13px;
-        text-align: center;
+        font-size: 11px;
       }
-
-      @media (max-width: 1300px) {
-        .mixer-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .spectrum-top-grid {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      @media (max-width: 640px) {
-        .channel-body {
-          grid-template-columns: 1fr;
-        }
-
-        .slider-shell {
-          width: 100%;
-          height: auto;
-          padding: 10px;
-        }
-
-        .visual-fader {
-          display: none;
-        }
-
-        .volume-slider {
-          writing-mode: initial;
-          -webkit-appearance: auto;
-          appearance: auto;
-          width: 100%;
-          height: auto;
-          opacity: 1;
-        }
-
-        .mic-slider-row,
-        .spectrum-slider-row {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      /* ================================
-       DRIN ELECTRONICS - MOBILE UPGRADE
-       Added responsive layout for phones/tablets
-       ================================ */
-
-      @media (max-width: 900px) {
-        body {
-          padding: 12px;
-        }
-
-        .wrap {
-          width: 100%;
-          max-width: 100%;
-        }
-
-        h1 {
-          font-size: 24px;
-          line-height: 1.2;
-        }
-
-        .sub {
-          font-size: 13px;
-          line-height: 1.35;
-        }
-
-        .topbar {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 12px;
-          align-items: stretch;
-        }
-
-        .topbar>button,
-        .master-box,
-        .mic-box,
-        .spectrum-control-box {
-          width: 100%;
-          min-width: 0;
-        }
-
-        .master-box {
-          display: grid;
-          grid-template-columns: 125px 1fr 48px;
-          gap: 8px;
-        }
-
-        .mic-box,
-        .spectrum-control-box {
-          align-items: stretch;
-        }
-
-        .spectrum-head {
-          flex-direction: column;
-          align-items: stretch;
-          text-align: center;
-        }
-
-        .spectrum-head h2 {
-          font-size: 18px;
-          line-height: 1.25;
-        }
-
-        .spectrum-head-right {
-          width: 100%;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-        }
-
-        .clip-indicator,
-        #toggleMeterBtn {
-          width: 100%;
-        }
-
-        .spectrum-top-grid,
-        .mixer-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .channel-box,
-        .spectrum-panel,
-        .mixer-channel,
-        .box {
-          padding: 12px;
-          border-radius: 10px;
-        }
-
-        .spectrum {
-          justify-content: flex-start;
-          min-height: 210px;
-          max-width: 100%;
-          overflow-x: auto;
-          overflow-y: hidden;
-          gap: 3px;
-          padding: 10px;
-          -webkit-overflow-scrolling: touch;
-        }
-
-        .segment {
-          width: 10px;
-          height: 7px;
-        }
-
-        .labels {
-          justify-content: flex-start;
-          overflow-x: auto;
-          gap: 3px;
-          padding-bottom: 8px;
-          -webkit-overflow-scrolling: touch;
-        }
-
-        .labels span {
-          width: 10px;
-          font-size: 7px;
-        }
-
-        .transport {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 8px;
-        }
-
-        .transport button,
-        .file-btn {
-          width: 100%;
-          min-height: 44px;
-          padding: 10px 8px;
-          font-size: 12px;
-          text-align: center;
-        }
-
-        .file-btn {
-          grid-column: 1 / -1;
-        }
-
-        .channel-body {
-          grid-template-columns: 1fr;
-        }
-
-        .playlist {
-          max-height: 160px;
-        }
-
-        .playlist li {
-          font-size: 13px;
-        }
-
-        .time-row {
-          grid-template-columns: 44px 1fr 44px;
-          font-size: 12px;
-        }
-
-        .fader-wrap {
-          align-items: stretch;
-        }
-
-        .slider-shell {
-          width: 100%;
-          height: auto;
-          padding: 12px;
-        }
-
-        .visual-fader,
-        .slider-shell::before {
-          display: none;
-        }
-
-        .volume-slider {
-          writing-mode: initial;
-          -webkit-appearance: auto;
-          appearance: auto;
-          width: 100%;
-          height: 42px;
-          opacity: 1;
-        }
-      }
-
-      @media (max-width: 520px) {
-        body {
-          padding: 8px;
-        }
-
-        h1 {
-          font-size: 20px;
-          text-shadow: 0 0 7px cyan;
-        }
-
-        .sub {
-          font-size: 11px;
-          margin-bottom: 12px;
-        }
-
-        button,
-        .file-btn {
-          border-radius: 8px;
-        }
-
-        .box,
-        .mixer-channel,
-        .spectrum-panel {
-          padding: 10px;
-        }
-
-        .master-box {
-          grid-template-columns: 1fr;
-          text-align: left;
-        }
-
-        .mic-slider-row,
-        .spectrum-slider-row {
-          grid-template-columns: 1fr;
-          gap: 6px;
-        }
-
-        .spectrum-head h2 {
-          font-size: 14px;
-        }
-
-        .spectrum-head-right {
-          grid-template-columns: 1fr;
-        }
-
-        .channel-box h3 {
-          font-size: 14px;
-        }
-
-        .spectrum {
-          min-height: 145px;
-          gap: 2px;
-          padding: 7px;
-        }
-
-        .band {
-          gap: 2px;
-        }
-
-        .segment {
-          width: 7px;
-          height: 5px;
-        }
-
-        .labels span {
-          width: 7px;
-          font-size: 6px;
-        }
-
-        .channel-title-row {
-          align-items: flex-start;
-        }
-
-        .channel-title-row h2,
-        .channel-title {
-          font-size: 17px;
-        }
-
-        .status {
-          font-size: 11px;
-        }
-
-        .transport {
-          grid-template-columns: repeat(2, 1fr);
-          gap: 6px;
-        }
-
-        .transport button,
-        .file-btn {
-          font-size: 11px;
-          min-height: 42px;
-          padding: 9px 6px;
-        }
-
-        .track-box,
-        .playlist-wrap,
-        .fader-wrap {
-          padding: 10px;
-        }
-
-        .track-name,
-        .playlist li,
-        .playlist-hint {
-          font-size: 12px;
-        }
-
-        .playlist {
-          max-height: 130px;
-          padding-left: 16px;
-        }
-
-        .playlist-head h3 {
-          font-size: 14px;
-        }
-
-        .clear-btn {
-          padding: 8px 10px;
-          font-size: 11px;
-        }
-
-        .time-row {
-          grid-template-columns: 38px 1fr 38px;
-          gap: 6px;
-          font-size: 11px;
-        }
-
-        .volume-slider {
-          height: 38px;
-        }
-
-        .footer {
-          font-size: 11px;
-        }
-      }
-
-      .play-btn.active {
-        background: #00d26a !important;
-        color: white;
-        box-shadow: 0 0 15px #00d26a;
-      }
-
-      .pause-btn.active {
-        background: #ff9800 !important;
-        color: white;
-        box-shadow: 0 0 15px #ff9800;
-      }
-
-      .stop-btn.active {
-        background: #ff2a2a !important;
-        color: white;
-        box-shadow: 0 0 15px #ff2a2a;
-      }
-
-      .shop-btn {
-        text-decoration: none;
-        padding: 12px 18px;
-        border-radius: 8px;
-        background: linear-gradient(135deg, #00d26a, #00a651);
-        color: #fff;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 0 15px rgba(0, 210, 106, .5);
-        transition: .3s;
-      }
-
-      .shop-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0 25px rgba(0, 210, 106, .8);
-      }
-
-      .shop-products {
-        margin-top: 25px;
-        padding: 20px;
-        background: #111;
-        border-radius: 14px;
-        text-align: center;
-        box-shadow: 0 0 18px rgba(0, 255, 255, .15);
-      }
-
-      .shop-products h2 {
-        color: cyan;
-        margin: 0 0 8px;
-        font-size: 22px;
-      }
-
-      .shop-products p {
-        color: #ccc;
-        margin: 0 0 15px;
-      }
-
-      .shop-now-bottom {
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        padding: 14px 22px;
-        border-radius: 10px;
-        background: #00d26a;
-        color: #021a0d;
-        font-weight: bold;
-        text-decoration: none;
-        box-shadow: 0 0 18px rgba(0, 210, 106, .5);
-      }
-
-      .shop-now-bottom:hover {
-        background: #22ff8a;
-      }
-
-      .back-shop-btn {
-        position: fixed;
-        top: 15px;
-        left: 15px;
-        z-index: 9999;
-
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
-        padding: 12px 18px;
-
-        border-radius: 14px;
-
-        background: linear-gradient(135deg, #00bcd4, #0097a7);
-
-        color: #fff;
-        text-decoration: none;
-
-        font-size: 14px;
-        font-weight: 700;
-
-        box-shadow: 0 8px 25px rgba(0, 188, 212, .35);
-
-        transition: all .25s ease;
-      }
-
-      .back-shop-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 30px rgba(0, 188, 212, .55);
-      }
-    </style>
-  </head>
+    }
+
+    .play-btn.active {
+      background: #00d26a !important;
+      color: white;
+      box-shadow: 0 0 15px #00d26a;
+    }
+
+    .pause-btn.active {
+      background: #ff9800 !important;
+      color: white;
+      box-shadow: 0 0 15px #ff9800;
+    }
+
+    .stop-btn.active {
+      background: #ff2a2a !important;
+      color: white;
+      box-shadow: 0 0 15px #ff2a2a;
+    }
+
+    .shop-btn {
+      text-decoration: none;
+      padding: 8px 14px;
+      min-width: 150px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #00d26a, #00a651);
+      color: #fff;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px rgba(0, 210, 106, .5);
+      transition: .3s;
+    }
+
+
+    .shop-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(0, 210, 106, .8);
+    }
+
+    .shop-products {
+      margin-top: 25px;
+      padding: 20px;
+      background: #111;
+      border-radius: 14px;
+      text-align: center;
+      box-shadow: 0 0 18px rgba(0, 255, 255, .15);
+    }
+
+    .shop-products h2 {
+      color: cyan;
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .shop-products p {
+      color: #ccc;
+      margin: 0 0 15px;
+    }
+
+    .shop-now-bottom {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      padding: 14px 22px;
+      border-radius: 10px;
+      background: #00d26a;
+      color: #021a0d;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 0 18px rgba(0, 210, 106, .5);
+    }
+
+    .shop-now-bottom:hover {
+      background: #22ff8a;
+    }
+
+    .back-shop-btn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 9999;
+
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      padding: 12px 18px;
+
+      border-radius: 14px;
+
+      background: linear-gradient(135deg, #00bcd4, #0097a7);
+
+      color: #fff;
+      text-decoration: none;
+
+      font-size: 14px;
+      font-weight: 700;
+
+      box-shadow: 0 8px 25px rgba(0, 188, 212, .35);
+
+      transition: all .25s ease;
+    }
+
+    .back-shop-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0, 188, 212, .55);
+    }
+
+    button,
+    .file-btn,
+    .shop-btn,
+    .shop-now-bottom,
+    .back-shop-btn {
+      transition: all .25s ease;
+    }
+
+
+    /* shop buttons */
+    .shop-btn:hover,
+    .shop-now-bottom:hover {
+      background: #22ff8a !important;
+      color: #021a0d;
+    }
+
+    .shop-btn:active,
+    .shop-now-bottom:active {
+      background: #008f45 !important;
+      color: white;
+    }
+
+    /* back button */
+    .back-shop-btn:hover {
+      background: linear-gradient(135deg, #00e5ff, #00bcd4);
+    }
+
+    .back-shop-btn:active {
+      background: linear-gradient(135deg, #006b75, #004d55);
+    }
+
+    .play-btn:hover {
+      background: #00ff88;
+    }
+
+    .pause-btn:hover {
+      background: #ffb74d;
+    }
+
+    .stop-btn:hover {
+      background: #ff5252;
+    }
+
+    .confirm-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+
+    .confirm-box {
+      width: 340px;
+      background: #111;
+      border: 1px solid cyan;
+      border-radius: 16px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 0 25px rgba(0, 255, 255, .35);
+    }
+
+    .confirm-box h3 {
+      color: #ff5252;
+      margin-top: 0;
+    }
+
+    .confirm-box p {
+      color: #ccc;
+    }
+
+    .confirm-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    #confirmYes {
+      background: #ff2a2a;
+      color: white;
+    }
+
+    #confirmNo {
+      background: #00bcd4;
+      color: white;
+    }
+
+    .shop-logo {
+      height: 180px !important;
+      width: auto !important;
+      display: block;
+    }
+
+    .shop-logo:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
 
 <body>
 
@@ -1003,7 +1160,10 @@
 
     <div class="topbar">
       <a href="https://drinelectronicsph.com/" target="_blank" rel="noopener noreferrer" class="shop-btn">
-        🛒 SHOP NOW
+
+        <img src="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/logo.png"
+          alt="DRIN Logo" class="shop-logo">
+
       </a>
       <button id="audioToggleBtn" class="audio-off">AUDIO OFF</button>
 
@@ -1074,6 +1234,18 @@
     </section>
 
     <div class="footer">Developed by DRIN ELECTRONICS</div>
+  </div>
+
+  <div id="confirmModal" class="confirm-modal">
+    <div class="confirm-box">
+      <h3 id="confirmTitle">⚠ Notice</h3>
+      <p id="confirmText"></p>
+
+      <div class="confirm-actions">
+        <button id="confirmYes">OK</button>
+        <button id="confirmNo">CANCEL</button>
+      </div>
+    </div>
   </div>
 
   <template id="channelTemplate">
@@ -1520,9 +1692,11 @@
         li.appendChild(row);
 
         li.addEventListener("click", () => loadTrack(state, index, true));
-        li.addEventListener("contextmenu", (e) => {
+        li.addEventListener("contextmenu", async (e) => {
           e.preventDefault();
-          const confirmDelete = confirm(`Delete "${file.name}"?`);
+
+          const confirmDelete = await premiumConfirm(`Delete "${file.name}" from playlist?`);
+
           if (!confirmDelete) return;
 
           const deletingCurrent = state.currentIndex === index;
@@ -1643,6 +1817,12 @@
       });
 
       playBtn.addEventListener("click", async () => {
+
+        if (!state.files.length) {
+          await premiumAlert("Please load an MP3 or audio file first.");
+          return;
+        }
+
         await enableAudioSystem();
 
         setPlayerState("play", playBtn, pauseBtn, stopBtn);
@@ -1654,27 +1834,48 @@
 
         if (state.audio.src) state.audio.play();
       });
+      pauseBtn.addEventListener("click", async () => {
 
-      pauseBtn.addEventListener("click", () => {
+        if (!state.files.length) {
+          await premiumAlert("No audio loaded. Please load audio first.");
+          return;
+        }
+
         state.audio.pause();
         setPlayerState("pause", playBtn, pauseBtn, stopBtn);
       });
 
-      stopBtn.addEventListener("click", () => {
+      stopBtn.addEventListener("click", async () => {
+
+        if (!state.files.length) {
+          await premiumAlert("No audio loaded. Please load audio first.");
+          return;
+        }
+
         state.audio.pause();
         state.audio.currentTime = 0;
         status.textContent = "STOPPED";
         setPlayerState("stop", playBtn, pauseBtn, stopBtn);
       });
 
-      prevBtn.addEventListener("click", () => {
-        if (!state.files.length) return;
+      prevBtn.addEventListener("click", async () => {
+
+        if (!state.files.length) {
+          await premiumAlert("No playlist available. Please load audio files first.");
+          return;
+        }
+
         const nextIndex = state.currentIndex <= 0 ? state.files.length - 1 : state.currentIndex - 1;
         loadTrack(state, nextIndex, true);
       });
 
-      nextBtn.addEventListener("click", () => {
-        if (!state.files.length) return;
+      nextBtn.addEventListener("click", async () => {
+
+        if (!state.files.length) {
+          await premiumAlert("No playlist available. Please load audio files first.");
+          return;
+        }
+
         const nextIndex = state.currentIndex >= state.files.length - 1 ? 0 : state.currentIndex + 1;
         loadTrack(state, nextIndex, true);
       });
@@ -1768,6 +1969,30 @@
       if (micEnabled) disableMic();
       else await enableMic();
     });
+
+    function premiumConfirm(message) {
+      return new Promise((resolve) => {
+
+        const modal = document.getElementById("confirmModal");
+        const text = document.getElementById("confirmText");
+        const yes = document.getElementById("confirmYes");
+        const no = document.getElementById("confirmNo");
+
+        text.textContent = message;
+        modal.style.display = "flex";
+
+        yes.onclick = () => {
+          modal.style.display = "none";
+          resolve(true);
+        };
+
+        no.onclick = () => {
+          modal.style.display = "none";
+          resolve(false);
+        };
+
+      });
+    }
   </script>
 </body>
 
