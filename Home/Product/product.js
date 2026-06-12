@@ -12,6 +12,21 @@ const message = document.getElementById("message");
 
 let productsLoading = true;
 
+const loadingModal =
+  document.getElementById("productLoadingModal");
+
+function showLoading() {
+  if (loadingModal) {
+    loadingModal.classList.remove("hide");
+  }
+}
+
+function hideLoading() {
+  if (loadingModal) {
+    loadingModal.classList.add("hide");
+  }
+}
+
 function setProductActionsLoading(isLoading) {
   productsLoading = isLoading;
 
@@ -202,6 +217,8 @@ let product = null;
 
 async function loadProductsFromSupabase() {
 
+  showLoading();
+
   setProductActionsLoading(true);
 
   const { data, error } = await supabaseClient
@@ -210,9 +227,11 @@ async function loadProductsFromSupabase() {
     .order("created_at", { ascending: false });
 
   if (error) {
+
     console.log("PRODUCT ERROR:", error);
 
-    setProductActionsLoading(false); // 🔥 IMPORTANT FIX
+    setProductActionsLoading(false);
+    hideLoading();
 
     products = [];
     renderHomepageProducts(products);
@@ -297,21 +316,19 @@ async function loadProductsFromSupabase() {
       </div>
     `;
 
+    hideLoading();
+    setProductActionsLoading(false);
+
     return;
   }
 
   renderProduct();
   renderSuggestedProducts();
+  initLazyImages();
   loadProductVouchers();
   updateCartCount();
   setProductActionsLoading(false);
-}
-
-productsLoading = false;
-
-if (addToCartBtn) {
-  addToCartBtn.disabled = false;
-  addToCartBtn.textContent = "Add to Cart";
+  hideLoading();
 }
 
 loadProductsFromSupabase();
@@ -350,6 +367,8 @@ function renderProduct() {
       : "Out of stock";
 
   renderProductGallery();
+
+  initLazyImages();
 
   const descEl =
     document.getElementById("productDescription") ||
@@ -410,7 +429,11 @@ function renderProductGallery() {
     <div class="product-gallery-slider">
       <button type="button" class="gallery-nav prev" id="galleryPrevBtn">‹</button>
 
-      <img id="productImg" src="${images[0] || ""}" alt="Product Image" />
+     <img id="productImg"
+     class="lazy-image"
+     data-src="${images[0] || ""}"
+     src=""
+     alt="Product Image" />
 
       <button type="button" class="gallery-nav next" id="galleryNextBtn">›</button>
     </div>
@@ -843,7 +866,7 @@ function renderSuggestedProducts() {
   const container = document.getElementById("suggestedProducts");
   if (!container) return;
 
-  const list = products
+  const shuffledProducts = products
     .filter(p => {
 
       if (String(p.id) === String(product.id)) {
@@ -853,7 +876,9 @@ function renderSuggestedProducts() {
       return getProductStock(p) > 0;
 
     })
-    .slice(0, suggestedLimit);
+    .sort(() => Math.random() - 0.5);
+
+  const list = shuffledProducts.slice(0, suggestedLimit);
 
   if (!list.length) {
     container.innerHTML = `
@@ -869,7 +894,11 @@ function renderSuggestedProducts() {
   <div class="homepage-product-card" onclick="openSuggestedProduct('${item.id}')">
     
     <div class="homepage-product-image">
-      <img src="${item.image || getProductImage(item)}" alt="${item.name}">
+     <img
+  class="lazy-image"
+  data-src="${item.image || getProductImage(item)}"
+  src=""
+  alt="${item.name}">
     </div>
 
     <div class="homepage-product-info">
@@ -2064,6 +2093,9 @@ function loadMoreSuggestedProducts() {
   suggestedLimit += 10;
 
   renderSuggestedProducts();
+
+  initLazyImages();
+
 }
 
 function showPremiumLoginPopup() {
@@ -2125,7 +2157,7 @@ async function updateAuthUI() {
 
       profileDropdown.innerHTML = `
       <a href="/homeprofile/">My Profile</a>
-      <a href="#" onclick="logoutUser()">Logout</a>
+     <a href="javascript:void(0)" id="logoutBtn">Logout</a>
     `;
 
     }
@@ -2304,3 +2336,64 @@ document.addEventListener(
 
   }
 );
+
+function initLazyImages() {
+
+  const images =
+    document.querySelectorAll("img[data-src]");
+
+  const observer =
+    new IntersectionObserver((entries) => {
+
+      entries.forEach(entry => {
+
+        if (entry.isIntersecting) {
+
+          const img = entry.target;
+
+          img.src = img.dataset.src;
+
+          img.onload = () => {
+            img.classList.add("loaded");
+          };
+
+          observer.unobserve(img);
+        }
+
+      });
+
+    });
+
+  images.forEach(img => {
+    observer.observe(img);
+  });
+
+}
+
+async function logoutUser(event) {
+
+  if (event) event.preventDefault();
+
+  try {
+
+    const { error } =
+      await supabaseClient.auth.signOut();
+
+    if (error) {
+      console.log("LOGOUT ERROR:", error);
+      alert("Logout failed.");
+      return;
+    }
+
+  } catch (err) {
+    console.log("LOGOUT ERROR:", err);
+  }
+}
+
+document.addEventListener("click", function (e) {
+
+  if (e.target.id === "logoutBtn") {
+    logoutUser(e);
+  }
+
+});
