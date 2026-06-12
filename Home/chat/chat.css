@@ -480,3 +480,19 @@
     }
 
 }
+
+.chat-unread-badge,
+#mobileChatUnreadBadge {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    text-shadow: 0 0 3px rgba(0, 0, 0, .45) !important;
+}
+
+@media (max-width: 768px) {
+
+    .chat-unread-badge,
+    #mobileChatUnreadBadge {
+        color: #ffffff !important;
+        font-weight: 800 !important;
+    }
+}
