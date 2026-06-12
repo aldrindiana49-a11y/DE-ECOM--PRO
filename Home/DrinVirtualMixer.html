@@ -1970,14 +1970,39 @@
       else await enableMic();
     });
 
-    function premiumConfirm(message) {
+    function premiumAlert(message) {
       return new Promise((resolve) => {
-
         const modal = document.getElementById("confirmModal");
+        const title = document.getElementById("confirmTitle");
         const text = document.getElementById("confirmText");
         const yes = document.getElementById("confirmYes");
         const no = document.getElementById("confirmNo");
 
+        title.textContent = "⚠ Notice";
+        text.textContent = message;
+        yes.textContent = "OK";
+        no.style.display = "none";
+        modal.style.display = "flex";
+
+        yes.onclick = () => {
+          modal.style.display = "none";
+          no.style.display = "inline-flex";
+          resolve(true);
+        };
+      });
+    }
+
+    function premiumConfirm(message) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById("confirmModal");
+        const title = document.getElementById("confirmTitle");
+        const text = document.getElementById("confirmText");
+        const yes = document.getElementById("confirmYes");
+        const no = document.getElementById("confirmNo");
+
+        title.textContent = "⚠ Confirm Delete";
+        yes.textContent = "DELETE";
+        no.style.display = "inline-flex";
         text.textContent = message;
         modal.style.display = "flex";
 
@@ -1990,9 +2015,10 @@
           modal.style.display = "none";
           resolve(false);
         };
-
       });
     }
+
+
   </script>
 </body>
 
