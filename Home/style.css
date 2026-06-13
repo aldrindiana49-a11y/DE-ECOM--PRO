@@ -663,8 +663,16 @@ body {
 .homepage-product-info h3 {
   font-size: 12px;
   line-height: 1.3;
-  min-height: 30px;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+
   overflow: hidden;
+  text-overflow: ellipsis;
+
+  min-height: 32px;
+  max-height: 32px;
 }
 
 .homepage-product-category {

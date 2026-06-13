@@ -1390,18 +1390,6 @@
   margin-bottom: 0 !important;
 }
 
-.mobile-nav-logo {
-  width: 24px !important;
-  height: 24px !important;
-
-  object-fit: contain !important;
-}
-
-.mobile-nav-logo {
-  width: 18px !important;
-  height: 18px !important;
-}
-
 .home-mobile-label {
   font-size: 9px;
   font-weight: 700;
@@ -2337,3 +2325,15 @@ img.lazy-image.loaded {
   opacity: 1;
 }
 
+.current-price {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.old-price {
+  font-size: 11px;
+  color: #94a3b8;
+  text-decoration: line-through;
+  margin-left: 6px;
+}

@@ -909,8 +909,8 @@ function renderSuggestedProducts() {
       <h3>${item.name}</h3>
 
       <div class="homepage-product-pricing">
-        <span class="current-price">${formatPrice(getProductPrice(item))}</span>
-      </div>
+  ${renderSuggestedPrice(item)}
+</div>
 
       <span class="homepage-product-stock">
         Stock: ${getProductStock(item)}
@@ -948,6 +948,29 @@ function renderSuggestedProducts() {
       </div>
     `;
   }
+}
+
+function renderSuggestedPrice(item) {
+  const variant = getBestVariant(item);
+
+  const price = variant
+    ? safeNumber(variant.price)
+    : safeNumber(item.price);
+
+  const discount = variant
+    ? safeNumber(variant.discountPrice)
+    : safeNumber(item.discountPrice);
+
+  if (discount > 0 && discount < price) {
+    return `
+      <span class="current-price">${formatPrice(discount)}</span>
+      <span class="old-price">${formatPrice(price)}</span>
+    `;
+  }
+
+  return `
+    <span class="current-price">${formatPrice(price)}</span>
+  `;
 }
 
 function openSuggestedProduct(id) {
@@ -1980,9 +2003,7 @@ function renderSearchResults(list) {
         <h3>${item.name}</h3>
 
         <div class="homepage-product-pricing">
-          <span class="current-price">
-            ${formatPrice(getProductPrice(item))}
-          </span>
+           ${renderSuggestedPrice(item)}
         </div>
 
       </div>
