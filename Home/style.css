@@ -2757,3 +2757,14 @@ body {
 
 }
 
+/* HOME ONLY - HIDE TOP LOGO ON MOBILE */
+
+@media (max-width: 768px) {
+  .nav-logo-box {
+    display: none !important;
+  }
+
+  .desktop-brand-name {
+    display: none !important;
+  }
+}
