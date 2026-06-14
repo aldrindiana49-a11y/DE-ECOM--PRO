@@ -34,9 +34,9 @@ body {
 }
 
 .back-btn {
-    position: relative;
-    top: unset;
-    left: unset;
+    position: fixed;
+    top: 20px;
+    left: 24px;
     z-index: 1000;
     display: inline-flex;
     align-items: center;
