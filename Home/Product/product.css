@@ -2403,3 +2403,42 @@ img.lazy-image.loaded {
   color: #10b981;
   font-weight: 700;
 }
+
+.review-image {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+.review-image-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .85);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.review-image-modal.show {
+  display: flex;
+}
+
+.review-image-modal img {
+  max-width: 90%;
+  max-height: 85%;
+  border-radius: 10px;
+}
+
+.review-image-modal span {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+}

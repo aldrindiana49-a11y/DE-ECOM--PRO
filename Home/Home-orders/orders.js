@@ -713,6 +713,7 @@ async function submitReview() {
     const rating = Number(document.getElementById("reviewRating").value);
     const comment = document.getElementById("reviewComment").value.trim();
 
+
     const {
         data: { user }
     } = await supabaseClient.auth.getUser();
@@ -720,6 +721,33 @@ async function submitReview() {
     if (!user) {
         window.location.href = "/login/";
         return;
+    }
+
+    const imageFile =
+        document.getElementById("reviewImage")?.files?.[0];
+
+    let reviewImageUrl = null;
+
+    if (imageFile) {
+        const fileExt = imageFile.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+        const filePath = `${user.id}/${fileName}`;
+
+        const { error: uploadError } = await supabaseClient.storage
+            .from("review-images")
+            .upload(filePath, imageFile);
+
+        if (uploadError) {
+            console.error(uploadError);
+            showOrderModal("Upload Error", "Failed to upload review photo.");
+            return;
+        }
+
+        const { data: publicUrlData } = supabaseClient.storage
+            .from("review-images")
+            .getPublicUrl(filePath);
+
+        reviewImageUrl = publicUrlData.publicUrl;
     }
 
     const items = Array.isArray(selectedReviewOrder.items)
@@ -752,7 +780,8 @@ async function submitReview() {
                 selectedReviewOrder.customerName ||
                 "Anonymous",
             rating,
-            comment
+            comment,
+            review_image: reviewImageUrl
         });
 
     if (error) {

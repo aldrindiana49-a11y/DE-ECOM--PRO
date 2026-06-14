@@ -422,6 +422,7 @@ function renderProduct() {
   }
 
   loadProductReviews();
+  loadProductSoldCount();
 
 }
 
@@ -2460,8 +2461,17 @@ async function loadProductReviews() {
     return;
   }
 
-  const total = data.reduce((sum, r) => sum + Number(r.rating), 0);
-  const avg = (total / data.length).toFixed(1);
+  const ratingOffset = 12;
+  const ratingBase = 4.8;
+
+  const total =
+    data.reduce((sum, r) => sum + Number(r.rating), 0);
+
+  const avg =
+    (
+      (total + (ratingOffset * ratingBase)) /
+      (data.length + ratingOffset)
+    ).toFixed(1);
 
   const stars =
     avg >= 5 ? "★★★★★" :
@@ -2471,20 +2481,81 @@ async function loadProductReviews() {
 
   document.getElementById("productStars").textContent = stars;
   document.getElementById("productRatingText").textContent = avg;
-  document.getElementById("productSoldCount").textContent =
-    "Sold " + data.length;
 
   const reviewsList =
     document.getElementById("productReviewsList");
 
   if (reviewsList) {
     reviewsList.innerHTML = data.map(review => `
-    <div class="review-card">
-      <div class="review-stars">
-        ${"★".repeat(Number(review.rating))}
-      </div>
-      <p>${review.comment || "No comment provided."}</p>
-      <small>${maskName(review.customer_name)} • Verified Buyer</small>
-  `).join("");
+  <div class="review-card">
+
+    <div class="review-stars">
+      ${"★".repeat(Number(review.rating))}
+    </div>
+
+    ${review.comment ? `
+      <p>${review.comment}</p>
+    ` : ""}
+
+    ${review.review_image ? `
+      <img 
+        src="${review.review_image}"
+        class="review-image"
+        onclick="openReviewImage('${review.review_image}')"
+      >
+    ` : ""}
+
+    <small>
+      ${maskName(review.customer_name)} • Verified Buyer
+    </small>
+
+  </div>
+`).join("");
   }
 }
+
+async function loadProductSoldCount() {
+  const { data, error } = await supabaseClient
+    .from("orders")
+    .select("items, order_status")
+    .in("order_status", ["Delivered", "Completed"]);
+
+  if (error || !data) {
+    console.log("SOLD COUNT ERROR:", error);
+    return;
+  }
+
+  let sold = 0;
+
+  data.forEach(order => {
+    const items = Array.isArray(order.items) ? order.items : [];
+
+    items.forEach(item => {
+      const itemId =
+        item.id ||
+        item.product_id ||
+        item.productId;
+
+      if (String(itemId) === String(product.id)) {
+        sold += Number(item.quantity || item.qty || 1);
+      }
+    });
+  });
+
+  document.getElementById("productSoldCount").textContent =
+    "Sold " + sold;
+}
+
+function openReviewImage(src) {
+  document.getElementById("reviewImagePreview").src = src;
+  document.getElementById("reviewImageModal")
+    .classList.add("show");
+}
+
+function closeReviewImage() {
+  document.getElementById("reviewImageModal")
+    .classList.remove("show");
+}
+
+window.openReviewImage = openReviewImage;
+window.closeReviewImage = closeReviewImage;
