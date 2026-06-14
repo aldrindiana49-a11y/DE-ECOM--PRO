@@ -1,3 +1,40 @@
+async function checkAdminAccess() {
+
+    const { data: { session } } =
+        await supabaseClient.auth.getSession();
+
+    if (!session) {
+        window.location.href =
+            "./dashboard-index.html";
+        return;
+    }
+
+    const { data: adminData, error } =
+        await supabaseClient
+            .from("admin_users")
+            .select("role")
+            .eq("id", session.user.id)
+            .eq("role", "admin")
+            .single();
+
+    if (error || !adminData) {
+        await supabaseClient.auth.signOut();
+
+        window.location.href =
+            "./dashboard-index.html";
+        return;
+    }
+}
+
+checkAdminAccess();
+
+async function adminLogout() {
+    await supabaseClient.auth.signOut();
+
+    window.location.href =
+        "./dashboard-index.html";
+}
+
 const menuItems = document.querySelectorAll(".menu-item");
 const contentSections = document.querySelectorAll(".content-section");
 const toggleSidebarBtn = document.getElementById("toggleSidebar");
@@ -258,10 +295,7 @@ async function deleteVoucher(id) {
     loadVouchers();
 }
 
-/* AUTO LOAD */
 loadVouchers();
-
-/* END MARKETING CENTER - VOUCHERS */
 
 /* ===============================
    CUSTOM CONFIRM MODAL
@@ -489,3 +523,4 @@ async function disableGlobalMaintenance() {
     );
 
 }
+

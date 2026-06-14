@@ -5,16 +5,17 @@
 
   <link rel="icon" type="image/png" id="siteFavicon"
     href="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/logo.png" />
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Drin Electronics Admin Panel</title>
   <link rel="icon" type="image/png" id="siteFavicon" href="../Image/favicon.png" />
   <link rel="stylesheet" href="admin.css" />
+
 </head>
 
 <body>
 
+  
   <div class="admin-layout">
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-top">
@@ -78,9 +79,17 @@
             </button>
 
           </div>
-          <span class="admin-badge">
-            Admin
-          </span>
+          <div style="display:flex;gap:10px;align-items:center;">
+
+            <span class="admin-badge">
+              Admin
+            </span>
+
+            <button onclick="adminLogout()">
+              Logout
+            </button>
+
+          </div>
         </div>
       </header>
 
@@ -1015,8 +1024,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
   <script src="./supabase.js?v=10002"></script>
-  <script src="./utils.js?v=10002"></script>
 
+  
+
+  <script src="./utils.js?v=10002"></script>
   <script src="./admin.js?v=10002"></script>
   <script src="./inventory.js?v=10002"></script>
   <script src="./generator.js?v=10002"></script>
@@ -1024,26 +1035,7 @@
   <script src="./orders.js?v=10002"></script>
   <script src="./employee.js?v=10002"></script>
 
-  <script>
-    function renderFavicon() {
-
-      const settings =
-        JSON.parse(localStorage.getItem("drinStoreSettings")) || {};
-
-      const logo =
-        settings?.branding?.logo || "";
-
-      const favicon =
-        document.getElementById("siteFavicon");
-
-      if (favicon && logo) {
-        favicon.href = logo;
-      }
-
-    }
-
-    renderFavicon();
-  </script>
+  
 
 </body>
 

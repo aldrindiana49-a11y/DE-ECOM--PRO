@@ -2,10 +2,13 @@
 <html lang="en">
 
 <head>
+  <link rel="icon" type="image/png" id="siteFavicon"
+    href="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/logo.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>D-E Admin Login</title>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="./supabase.js"></script>
   <style>
     * {
       margin: 0;
@@ -118,12 +121,7 @@
       <div class="form-group">
         <label>Email</label>
 
-        <input
-          type="email"
-          id="email"
-          placeholder="example@email.com"
-          required
-        />
+        <input type="email" id="email" placeholder="example@email.com" required />
       </div>
 
       <div class="form-group">
@@ -132,18 +130,9 @@
 
         <div class="password-wrap">
 
-          <input
-            type="password"
-            id="password"
-            placeholder="Enter password"
-            maxlength="32"
-            required
-          />
+          <input type="password" id="password" placeholder="Enter password" maxlength="32" required />
 
-          <span
-            id="togglePassword"
-            class="toggle-password"
-          >
+          <span id="togglePassword" class="toggle-password">
             👁
           </span>
 
@@ -155,6 +144,10 @@
         Login
       </button>
 
+      <button type="button" id="forgotPasswordBtn" style="margin-top:10px;background:#64748b;">
+        Forgot Password?
+      </button>
+
       <div class="error" id="errorMsg">
         Invalid admin credentials.
       </div>
@@ -164,12 +157,6 @@
   </div>
 
   <script>
-
-    const ADMIN_EMAIL =
-      "admin@drinelectronicsph.com";
-
-    const ADMIN_PASSWORD =
-      "Drin@Admin2026";
 
     const loginForm =
       document.getElementById("loginForm");
@@ -185,6 +172,9 @@
 
     const togglePassword =
       document.getElementById("togglePassword");
+
+    const forgotPasswordBtn =
+      document.getElementById("forgotPasswordBtn");
 
     togglePassword.addEventListener("click", function () {
 
@@ -202,9 +192,12 @@
 
     });
 
-    loginForm.addEventListener("submit", function (e) {
+    loginForm.addEventListener("submit", async function (e) {
 
       e.preventDefault();
+
+      errorMsg.style.display = "none";
+      errorMsg.style.color = "red";
 
       const email =
         emailInput.value.trim().toLowerCase();
@@ -212,19 +205,13 @@
       const password =
         passwordInput.value.trim();
 
-      if (
-        email === ADMIN_EMAIL.toLowerCase() &&
-        password === ADMIN_PASSWORD
-      ) {
+      const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        });
 
-        localStorage.setItem(
-          "drinAdminLoggedIn",
-          "true"
-        );
-
-        window.location.href = "./index.html";
-
-      } else {
+      if (error || !data.user) {
 
         errorMsg.textContent =
           "Invalid admin credentials.";
@@ -232,7 +219,76 @@
         errorMsg.style.display =
           "block";
 
+        return;
       }
+
+      const { data: adminData, error: adminError } =
+        await supabaseClient
+          .from("admin_users")
+          .select("role")
+          .eq("id", data.user.id)
+          .eq("role", "admin")
+          .single();
+
+      if (adminError || !adminData) {
+
+        await supabaseClient.auth.signOut();
+
+        errorMsg.textContent =
+          "This account is not allowed as admin.";
+
+        errorMsg.style.display =
+          "block";
+
+        return;
+      }
+
+      window.location.href =
+        "./index.html";
+
+    });
+
+    forgotPasswordBtn.addEventListener("click", async function () {
+
+      const email =
+        emailInput.value.trim().toLowerCase();
+
+      if (!email) {
+
+        errorMsg.textContent =
+          "Enter your admin email first.";
+
+        errorMsg.style.display =
+          "block";
+
+        return;
+      }
+
+      const { error } =
+        await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo:
+            "https://drinelectronicsph.com/Home/Admin/reset-password.html"
+        });
+
+      if (error) {
+
+        errorMsg.textContent =
+          error.message;
+
+        errorMsg.style.display =
+          "block";
+
+        return;
+      }
+
+      errorMsg.textContent =
+        "Password reset link sent to your email.";
+
+      errorMsg.style.color =
+        "green";
+
+      errorMsg.style.display =
+        "block";
 
     });
 
@@ -241,4 +297,3 @@
 </body>
 
 </html>
-
