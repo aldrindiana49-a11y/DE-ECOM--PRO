@@ -701,3 +701,68 @@ function closeReviewModal() {
     document.getElementById("reviewModal").classList.remove("show");
     selectedReviewOrder = null;
 }
+
+async function submitReview() {
+    if (!selectedReviewOrder) {
+        showOrderModal("Review Error", "No order selected.");
+        return;
+    }
+
+    const rating = Number(document.getElementById("reviewRating").value);
+    const comment = document.getElementById("reviewComment").value.trim();
+
+    const {
+        data: { user }
+    } = await supabaseClient.auth.getUser();
+
+    if (!user) {
+        window.location.href = "/login/";
+        return;
+    }
+
+    const items = Array.isArray(selectedReviewOrder.items)
+        ? selectedReviewOrder.items
+        : [];
+
+    if (!items.length) {
+        showOrderModal("Review Error", "No products found in this order.");
+        return;
+    }
+
+    const productId =
+        items[0].id ||
+        items[0].product_id ||
+        items[0].productId;
+
+    if (!productId) {
+        showOrderModal("Review Error", "Product ID not found.");
+        return;
+    }
+
+    const { error } = await supabaseClient
+        .from("product_reviews")
+        .insert({
+            product_id: String(productId),
+            order_id: String(selectedReviewOrder.id),
+            user_id: user.id,
+            rating,
+            comment
+        });
+
+    if (error) {
+        console.error(error);
+        showOrderModal("Review Error", "You may have already reviewed this product.");
+        return;
+    }
+
+    closeReviewModal();
+
+    showOrderModal(
+        "Review Submitted",
+        "Thank you for your review!"
+    );
+}
+
+window.submitReview = submitReview;
+window.openReviewModal = openReviewModal;
+window.closeReviewModal = closeReviewModal;
