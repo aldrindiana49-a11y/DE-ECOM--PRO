@@ -25,7 +25,13 @@ googleLoginBtn?.addEventListener("click", async () => {
     });
 
   if (error) {
-    alert(error.message);
+    await showPremiumAlert({
+      title: "Google Login Failed",
+      message: "Unable to sign in with Google right now. Please try again in a few moments.",
+      icon: "⚠️",
+      confirmText: "Try Again"
+    });
+    return;
   }
 
 });
@@ -41,7 +47,13 @@ facebookLoginBtn?.addEventListener("click", async () => {
     });
 
   if (error) {
-    alert(error.message);
+    await showPremiumAlert({
+      title: "Facebook Login Failed",
+      message: "Unable to sign in with Facebook at the moment. Please try again later.",
+      icon: "⚠️",
+      confirmText: "Try Again"
+    });
+    return;
   }
 
 });
@@ -56,6 +68,13 @@ loginForm.addEventListener("submit", async (e) => {
   const password =
     document.getElementById("password").value;
 
+  const loginBtn =
+    document.querySelector(".login-btn");
+
+  loginBtn.disabled = true;
+  loginBtn.innerHTML =
+    '<span class="loading-spinner"></span>';
+
   const { error } =
     await supabaseClient.auth.signInWithPassword({
       email,
@@ -63,7 +82,15 @@ loginForm.addEventListener("submit", async (e) => {
     });
 
   if (error) {
-    alert(error.message);
+    loginBtn.disabled = false;
+    loginBtn.innerHTML = "Login";
+
+    await showPremiumAlert({
+      title: "Invalid Login",
+      message: "The email address or password you entered is incorrect. Please check your login details and try again.",
+      icon: "⚠️",
+      confirmText: "Try Again"
+    });
     return;
   }
 
@@ -79,7 +106,7 @@ loginForm.addEventListener("submit", async (e) => {
     "drinCart"
   );
 
-  
+
   window.location.href = redirect || "/";
 
 });

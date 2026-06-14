@@ -12,7 +12,7 @@
 
     <title>Signup | Drin Electronics</title>
 
-    <link rel="stylesheet" href="signup.css" />
+    <link rel="stylesheet" href="signup.css?v=10008" />
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
@@ -122,8 +122,97 @@
 
     </div>
 
+    <div id="signupSuccessPopup" class="popup-overlay">
+        <div class="premium-popup">
+            <div class="success-icon">✓</div>
+
+            <h2>Account Created Successfully</h2>
+
+            <p>
+                Welcome to <strong>Drin Electronics</strong> — we’re excited to have you with us.
+            </p>
+
+            <p>
+                Your account has been successfully created, and a secure verification link has been sent to your
+                registered email address.
+            </p>
+
+            <div class="popup-note">
+                📩 Please check your <strong>Inbox</strong> and open the confirmation email.<br>
+                ⚠️ If you don’t see it, kindly check your <strong>Spam</strong>, <strong>Junk</strong>, or
+                <strong>Promotions folder</strong>.
+            </div>
+
+            <div class="security-note">
+                🔒 <strong>Security Notice:</strong><br>
+                For your protection, account access will remain temporarily restricted until email verification is
+                completed.
+            </div>
+
+            <p class="small-note">
+                Didn’t receive the email? Please allow a few minutes for delivery and check all email folders.
+            </p>
+
+            <button type="button" id="checkEmailBtn">
+                Check My Email
+            </button>
+        </div>
+    </div>
+
+    <div id="emailExistsPopup" class="popup-overlay">
+        <div class="premium-popup warning-popup">
+            <div class="warning-icon">!</div>
+
+            <h2>Account Already Exists</h2>
+
+            <p>
+                This email address is already associated with a
+                <strong>Drin Electronics</strong> account.
+            </p>
+
+            <div class="popup-note">
+                Please sign in using your existing account credentials.
+                <br><br>
+                If you recently registered, kindly check your email inbox and complete your account verification.
+            </div>
+
+            <div class="security-note">
+                🔒 <strong>Security Notice:</strong><br>
+                For your protection, duplicate account registration using the same email address is not allowed.
+            </div>
+
+            <button type="button" id="goToLoginBtn">
+                Go to Login
+            </button>
+
+            <button type="button" id="useDifferentEmailBtn" class="secondary-popup-btn">
+                Use Different Email
+            </button>
+        </div>
+    </div>
+
+    <div id="passwordMismatchPopup" class="popup-overlay">
+        <div class="premium-popup warning-popup">
+            <div class="warning-icon">!</div>
+
+            <h2>Password Mismatch</h2>
+
+            <p>
+                The passwords you entered do not match.
+            </p>
+
+            <div class="popup-note">
+                Please make sure both password fields are exactly the same before creating your account.
+            </div>
+
+            <button type="button" id="retryPasswordBtn">
+                Try Again
+            </button>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="../Admin/supabase.js?v=10006"></script>
-    <script src="signup.js?v=10006"></script>
+    <script src="signup.js?v=10008"></script>
 
 </body>
