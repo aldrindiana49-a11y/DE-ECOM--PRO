@@ -282,6 +282,7 @@ async function loadProductsFromSupabase() {
             price: mainPrice,
             discountPrice: mainDiscount,
             stock: item.stock,
+            sold_count: item.sold_count || 0,
             image: item.image
           }
         ];
@@ -305,7 +306,8 @@ async function loadProductsFromSupabase() {
       gallery: Array.isArray(item.gallery) ? item.gallery : [],
       price: mainPrice,
       discountPrice: mainDiscount,
-      stock: item.stock
+      stock: item.stock,
+      sold_count: item.sold_count || 0
     };
   });
 
@@ -2515,32 +2517,7 @@ async function loadProductReviews() {
 }
 
 async function loadProductSoldCount() {
-  const { data, error } = await supabaseClient
-    .from("orders")
-    .select("items, order_status")
-    .in("order_status", ["Delivered", "Completed"]);
-
-  if (error || !data) {
-    console.log("SOLD COUNT ERROR:", error);
-    return;
-  }
-
-  let sold = 0;
-
-  data.forEach(order => {
-    const items = Array.isArray(order.items) ? order.items : [];
-
-    items.forEach(item => {
-      const itemId =
-        item.id ||
-        item.product_id ||
-        item.productId;
-
-      if (String(itemId) === String(product.id)) {
-        sold += Number(item.quantity || item.qty || 1);
-      }
-    });
-  });
+  const sold = Number(product.sold_count || 0);
 
   document.getElementById("productSoldCount").textContent =
     "Sold " + sold;
