@@ -691,6 +691,9 @@ document.addEventListener("DOMContentLoaded", () => {
 let selectedReviewOrder = null;
 
 function openReviewModal(order) {
+
+    console.log("ORDER DATA:", order);
+
     selectedReviewOrder = order;
 
     document.getElementById("reviewOrderId").value = order.id;
@@ -745,6 +748,10 @@ async function submitReview() {
             product_id: String(productId),
             order_id: String(selectedReviewOrder.id),
             user_id: user.id,
+            customer_name:
+                selectedReviewOrder.customer_name ||
+                selectedReviewOrder.customerName ||
+                "Anonymous",
             rating,
             comment
         });

@@ -2356,3 +2356,50 @@ img.lazy-image.loaded {
   font-size: 13px;
   margin-left: 4px;
 }
+
+.sold-count {
+  color: #64748b;
+  margin-left: 8px;
+  font-size: 13px;
+}
+
+.product-reviews-section {
+  grid-column: 1 / -1;
+  margin: 30px auto 0;
+  max-width: 720px;
+  width: 100%;
+  text-align: center;
+}
+
+.product-reviews-section h3 {
+  font-size: 20px;
+  margin-bottom: 14px;
+  color: #111827;
+}
+
+.review-card {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
+  margin: 12px auto 0;
+  max-width: 650px;
+  text-align: left;
+}
+
+.review-stars {
+  color: #f59e0b;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.review-card p {
+  color: #374151;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.review-card small {
+  color: #10b981;
+  font-weight: 700;
+}

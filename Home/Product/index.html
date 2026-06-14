@@ -34,7 +34,7 @@
 
   <link rel="stylesheet" href="../style.css?v=10003" />
   <link rel="stylesheet" href="../chat/chat.css?v=7">
-  <link rel="stylesheet" href="product.css?v=10007" />
+  <link rel="stylesheet" href="product.css?v=10008" />
 </head>
 
 <body>
@@ -216,7 +216,9 @@
           </h1>
 
           <div class="product-rating">
-            <span class="rating-stars">★★★★★</span>
+            <span class="rating-stars" id="productStars">★★★★★</span>
+            <span class="rating-text" id="productRatingText">4.8</span>
+            <span class="sold-count" id="productSoldCount">Sold 0</span>
           </div>
 
           <div id="titleToggle" class="title-expand">
@@ -305,7 +307,20 @@
         </div>
 
       </div>
+
     </section>
+
+    <div class="product-reviews-section">
+
+      <h3>Customer Reviews</h3>
+
+      <div id="productReviewsList">
+
+        <p>No reviews yet.</p>
+
+      </div>
+
+    </div>
 
     <section class="homepage-products">
       <div class="section-title">
@@ -528,7 +543,7 @@
 
   <script src="../Admin/supabase.js?v=50001"></script>
 
-  <script src="product.js?v=10006"></script>
+  <script src="product.js?v=10008"></script>
 
   <script src="../chat/chat.js?v=6"></script>
 

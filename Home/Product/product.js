@@ -420,6 +420,9 @@ function renderProduct() {
     addToCartBtn.disabled = true;
     addToCartBtn.textContent = "Out of Stock";
   }
+
+  loadProductReviews();
+
 }
 
 function renderProductGallery() {
@@ -2431,3 +2434,57 @@ document.addEventListener("click", function (e) {
   }
 
 });
+
+function maskName(name) {
+  if (!name) return "Anonymous";
+
+  if (name.length <= 3) {
+    return name[0] + "***";
+  }
+
+  return name.substring(0, 3) + "***";
+}
+
+async function loadProductReviews() {
+  const { data, error } = await supabaseClient
+    .from("product_reviews")
+    .select("*")
+    .eq("product_id", String(product.id));
+
+  if (error) {
+    console.log("REVIEWS ERROR:", error);
+    return;
+  }
+
+  if (!data || !data.length) {
+    return;
+  }
+
+  const total = data.reduce((sum, r) => sum + Number(r.rating), 0);
+  const avg = (total / data.length).toFixed(1);
+
+  const stars =
+    avg >= 5 ? "★★★★★" :
+      avg >= 4 ? "★★★★☆" :
+        avg >= 3 ? "★★★☆☆" :
+          avg >= 2 ? "★★☆☆☆" : "★☆☆☆☆";
+
+  document.getElementById("productStars").textContent = stars;
+  document.getElementById("productRatingText").textContent = avg;
+  document.getElementById("productSoldCount").textContent =
+    "Sold " + data.length;
+
+  const reviewsList =
+    document.getElementById("productReviewsList");
+
+  if (reviewsList) {
+    reviewsList.innerHTML = data.map(review => `
+    <div class="review-card">
+      <div class="review-stars">
+        ${"★".repeat(Number(review.rating))}
+      </div>
+      <p>${review.comment || "No comment provided."}</p>
+      <small>${maskName(review.customer_name)} • Verified Buyer</small>
+  `).join("");
+  }
+}
