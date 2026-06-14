@@ -532,7 +532,7 @@ function getActiveBanners() {
   return [
     {
       id: "default-banner-1",
-      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1400&q=80",
+      image: "https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/Banner/Banner.png",
       title: "Drin Electronics",
       description: "Quality amplifiers, electronics parts, and reliable services",
       link: "",
@@ -541,7 +541,7 @@ function getActiveBanners() {
     },
     {
       id: "default-banner-2",
-      image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=1400&q=80",
+      image: "https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/Banner/Banner2.png",
       title: "Trusted Audio Components",
       description: "Speakers, MOSFET, capacitors, and more for your projects",
       link: "",
@@ -550,7 +550,7 @@ function getActiveBanners() {
     },
     {
       id: "default-banner-3",
-      image: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=1400&q=80",
+      image: "https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/Banner/Banner3.png",
       title: "Reliable Electronics Shop",
       description: "Built for repair, upgrade, and performance",
       link: "",
