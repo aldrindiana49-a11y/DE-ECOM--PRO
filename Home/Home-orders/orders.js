@@ -692,8 +692,6 @@ let selectedReviewOrder = null;
 
 function openReviewModal(order) {
 
-    console.log("ORDER DATA:", order);
-
     selectedReviewOrder = order;
 
     document.getElementById("reviewOrderId").value = order.id;
