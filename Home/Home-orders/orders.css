@@ -550,10 +550,9 @@ body {
 
     .back-btn {
 
-        position: relative;
-
-        top: unset;
-        left: unset;
+        position: fixed;
+        top: 20px;
+        left: 24px;
 
         margin-bottom: 18px;
 
@@ -561,7 +560,7 @@ body {
     }
 
     .orders-header {
-        margin-top: 8px;
+        margin-top: 70px;
     }
 }
 
