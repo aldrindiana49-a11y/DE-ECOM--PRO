@@ -652,4 +652,20 @@ body {
     filter: brightness(1.05);
 }
 
+@media(min-width:769px) {
+    .back-btn {
+        top: 50% !important;
+        left: 14px !important;
+        transform: translateY(-50%);
+        margin-left: 0;
+        z-index: 9999;
+    }
 
+    .back-btn:hover {
+        transform: translateY(-50%) translateX(2px);
+    }
+
+    .orders-header {
+        margin-top: 0;
+    }
+}

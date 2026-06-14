@@ -759,35 +759,29 @@ async function submitReview() {
         return;
     }
 
-    const productId =
-        items[0].id ||
-        items[0].product_id ||
-        items[0].productId;
+    for (const item of items) {
 
-    if (!productId) {
-        showOrderModal("Review Error", "Product ID not found.");
-        return;
-    }
+        const productId =
+            item.id ||
+            item.product_id ||
+            item.productId;
 
-    const { error } = await supabaseClient
-        .from("product_reviews")
-        .insert({
-            product_id: String(productId),
-            order_id: String(selectedReviewOrder.id),
-            user_id: user.id,
-            customer_name:
-                selectedReviewOrder.customer_name ||
-                selectedReviewOrder.customerName ||
-                "Anonymous",
-            rating,
-            comment,
-            review_image: reviewImageUrl
-        });
+        if (!productId) continue;
 
-    if (error) {
-        console.error(error);
-        showOrderModal("Review Error", "You may have already reviewed this product.");
-        return;
+        await supabaseClient
+            .from("product_reviews")
+            .insert({
+                product_id: String(productId),
+                order_id: String(selectedReviewOrder.id),
+                user_id: user.id,
+                customer_name:
+                    selectedReviewOrder.customer_name ||
+                    selectedReviewOrder.customerName ||
+                    "Anonymous",
+                rating,
+                comment,
+                review_image: reviewImageUrl
+            });
     }
 
     await supabaseClient
