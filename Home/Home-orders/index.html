@@ -11,7 +11,7 @@
 
     <title>My Orders | Drin Electronics</title>
 
-    <link rel="stylesheet" href="./orders.css?v=20260523001" />
+    <link rel="stylesheet" href="./orders.css?v=20260614001" />
 </head>
 
 <body>
@@ -76,9 +76,31 @@
         </div>
     </div>
 
+    <div id="reviewModal" class="order-modal">
+        <div class="order-modal-card">
+            <h3>Write Review</h3>
+
+            <input type="hidden" id="reviewOrderId">
+
+            <select id="reviewRating">
+                <option value="5">★★★★★ 5</option>
+                <option value="4">★★★★☆ 4</option>
+                <option value="3">★★★☆☆ 3</option>
+                <option value="2">★★☆☆☆ 2</option>
+                <option value="1">★☆☆☆☆ 1</option>
+            </select>
+
+            <textarea id="reviewComment" placeholder="Write your comment..."
+                style="width:100%;height:90px;margin-top:12px;"></textarea>
+
+            <button onclick="submitReview()">Submit Review</button>
+            <button onclick="closeReviewModal()">Cancel</button>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-    <script src="../Admin/supabase.js?v=20260523001"></script>
-    <script src="./orders.js?v=20260523001"></script>
+    <script src="../Admin/supabase.js?v=20260614001"></script>
+    <script src="./orders.js?v=20260614001"></script>
 </body>
 
 </html>

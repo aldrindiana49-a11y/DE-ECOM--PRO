@@ -414,6 +414,17 @@ ${canRequestChange ? `
     </button>
 ` : ""}
 
+${String(order.order_status || "").toLowerCase().includes("delivered") ||
+                String(order.order_status || "").toLowerCase().includes("completed")
+                ? `
+    <button class="track-btn review-btn"
+      onclick='openReviewModal(${JSON.stringify(order).replaceAll("'", "&#39;")})'>
+      Write Review
+    </button>
+  `
+                : ""
+            }
+
   <button class="track-btn buy-again-btn"
   onclick="window.location.href='/'">
   Buy Again
@@ -676,3 +687,17 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePaymentCountdowns();
     setInterval(updatePaymentCountdowns, 1000);
 });
+
+let selectedReviewOrder = null;
+
+function openReviewModal(order) {
+    selectedReviewOrder = order;
+
+    document.getElementById("reviewOrderId").value = order.id;
+    document.getElementById("reviewModal").classList.add("show");
+}
+
+function closeReviewModal() {
+    document.getElementById("reviewModal").classList.remove("show");
+    selectedReviewOrder = null;
+}

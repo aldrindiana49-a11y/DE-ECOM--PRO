@@ -905,10 +905,14 @@ function renderSuggestedProducts() {
   alt="${item.name}">
     </div>
 
-    <div class="homepage-product-info">
-      <h3>${item.name}</h3>
+    <h3>${item.name}</h3>
 
-      <div class="homepage-product-pricing">
+<div class="product-rating">
+  <span class="rating-stars">★★★★★</span>
+  <span class="rating-text">4.8</span>
+</div>
+
+<div class="homepage-product-pricing">
   ${renderSuggestedPrice(item)}
 </div>
 
@@ -2000,13 +2004,18 @@ function renderSearchResults(list) {
 
       <div class="homepage-product-info">
 
-        <h3>${item.name}</h3>
+  <h3>${item.name}</h3>
 
-        <div class="homepage-product-pricing">
-           ${renderSuggestedPrice(item)}
-        </div>
+  <div class="product-rating">
+    <span class="rating-stars">★★★★★</span>
+    <span class="rating-text">4.8</span>
+  </div>
 
-      </div>
+  <div class="homepage-product-pricing">
+     ${renderSuggestedPrice(item)}
+  </div>
+
+</div>
 
     </div>
   `).join("");

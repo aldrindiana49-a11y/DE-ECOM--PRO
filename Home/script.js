@@ -296,6 +296,9 @@ function renderProductCards(productArray) {
       <div class="homepage-product-info">
         <span class="homepage-product-category">${escapeHtml(product.category)}</span>
         <h3>${escapeHtml(product.name)}</h3>
+        <div class="homepage-rating">
+  ★★★★☆ <span>4.8</span>
+</div>
         ${product.brand ? `<p class="homepage-product-brand">${escapeHtml(product.brand)}</p>` : ""}
         ${renderPriceBlock(product.price, product.discountPrice)}
         <p class="homepage-product-stock ${outOfStock ? "out-stock-text" : ""}">

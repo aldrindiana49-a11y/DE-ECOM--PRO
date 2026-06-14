@@ -2776,3 +2776,17 @@ body {
     display: none !important;
   }
 }
+
+.product-rating,
+.homepage-rating {
+  color: #f59e0b;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.rating-text,
+.homepage-rating span {
+  color: #64748b;
+  font-size: 13px;
+  margin-left: 4px;
+}

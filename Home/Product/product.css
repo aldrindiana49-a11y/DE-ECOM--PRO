@@ -2337,3 +2337,22 @@ img.lazy-image.loaded {
   text-decoration: line-through;
   margin-left: 6px;
 }
+
+.product-rating,
+.homepage-rating {
+  margin: 4px 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.rating-stars {
+  color: #f59e0b;
+  font-size: 13px;
+}
+
+.rating-text,
+.homepage-rating span {
+  color: #64748b;
+  font-size: 13px;
+  margin-left: 4px;
+}
