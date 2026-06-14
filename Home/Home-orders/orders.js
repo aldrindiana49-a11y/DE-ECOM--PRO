@@ -414,14 +414,15 @@ ${canRequestChange ? `
     </button>
 ` : ""}
 
-${String(order.order_status || "").toLowerCase().includes("delivered") ||
-                String(order.order_status || "").toLowerCase().includes("completed")
+${(String(order.order_status || "").toLowerCase().includes("delivered") ||
+                String(order.order_status || "").toLowerCase().includes("completed"))
+                && !order.review_submitted
                 ? `
-    <button class="track-btn review-btn"
-      onclick='openReviewModal(${JSON.stringify(order).replaceAll("'", "&#39;")})'>
-      Write Review
-    </button>
-  `
+<button class="track-btn review-btn"
+  onclick='openReviewModal(${JSON.stringify(order).replaceAll("'", "&#39;")})'>
+  Write Review
+</button>
+`
                 : ""
             }
 
@@ -760,12 +761,21 @@ async function submitReview() {
         return;
     }
 
+    await supabaseClient
+        .from("orders")
+        .update({
+            review_submitted: true
+        })
+        .eq("id", selectedReviewOrder.id);
+
     closeReviewModal();
 
     showOrderModal(
         "Review Submitted",
         "Thank you for your review!"
     );
+
+    loadOrders();
 }
 
 window.submitReview = submitReview;
