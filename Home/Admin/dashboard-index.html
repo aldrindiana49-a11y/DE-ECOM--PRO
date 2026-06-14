@@ -267,7 +267,7 @@
       const { error } =
         await supabaseClient.auth.resetPasswordForEmail(email, {
           redirectTo:
-            "https://drinelectronicsph.com/Home/Admin/reset-password.html"
+            "https://drinelectronicsph.com/admin/reset-password.html"
         });
 
       if (error) {
