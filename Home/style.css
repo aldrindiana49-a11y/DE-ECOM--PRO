@@ -392,7 +392,7 @@ body {
 .banner-shell {
   position: relative;
   width: 100%;
-  min-height: 360px;
+  min-height: 420px;
   border-radius: 20px;
   overflow: hidden;
   box-shadow: var(--shadow-md);
@@ -410,7 +410,7 @@ body {
 
 .banner-slide {
   min-width: 100%;
-  min-height: 360px;
+  min-height: 420px;
   position: relative;
   display: flex;
   align-items: flex-end;
