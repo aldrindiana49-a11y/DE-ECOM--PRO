@@ -297,7 +297,7 @@ function renderProductCards(productArray) {
         <span class="homepage-product-category">${escapeHtml(product.category)}</span>
         <h3>${escapeHtml(product.name)}</h3>
         <div class="homepage-rating">
-  ★★★★☆ <span>4.8</span>
+  ★★★★☆ <span>${product.average_rating || "4.8"}</span>
 </div>
         ${product.brand ? `<p class="homepage-product-brand">${escapeHtml(product.brand)}</p>` : ""}
         ${renderPriceBlock(product.price, product.discountPrice)}
@@ -1159,7 +1159,11 @@ async function loadProductsFromSupabase() {
           0,
           0
         );
-      }, 0)
+      }, 0),
+
+      sold_count: item.sold_count || 0,
+      average_rating: item.average_rating || 4.8
+
     };
   });
 

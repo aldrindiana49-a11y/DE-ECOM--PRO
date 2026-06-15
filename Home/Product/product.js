@@ -307,7 +307,8 @@ async function loadProductsFromSupabase() {
       price: mainPrice,
       discountPrice: mainDiscount,
       stock: item.stock,
-      sold_count: item.sold_count || 0
+      sold_count: item.sold_count || 0,
+      average_rating: item.average_rating || 4.8
     };
   });
 
@@ -915,7 +916,7 @@ function renderSuggestedProducts() {
 
 <div class="product-rating">
   <span class="rating-stars">★★★★★</span>
-  <span class="rating-text">4.8</span>
+  <span class="rating-text">${item.average_rating || 4.8}</span>
 </div>
 
 <div class="homepage-product-pricing">
@@ -2013,9 +2014,9 @@ function renderSearchResults(list) {
   <h3>${item.name}</h3>
 
   <div class="product-rating">
-    <span class="rating-stars">★★★★★</span>
-    <span class="rating-text">4.8</span>
-  </div>
+  <span class="rating-stars">★★★★★</span>
+  <span class="rating-text">${item.average_rating || 4.8}</span>
+</div>
 
   <div class="homepage-product-pricing">
      ${renderSuggestedPrice(item)}
@@ -2463,17 +2464,11 @@ async function loadProductReviews() {
     return;
   }
 
-  const ratingOffset = 12;
-  const ratingBase = 4.8;
-
   const total =
     data.reduce((sum, r) => sum + Number(r.rating), 0);
 
   const avg =
-    (
-      (total + (ratingOffset * ratingBase)) /
-      (data.length + ratingOffset)
-    ).toFixed(1);
+    (total / data.length).toFixed(1);
 
   const stars =
     avg >= 5 ? "★★★★★" :

@@ -68,8 +68,20 @@
         return "https://via.placeholder.com/400x400?text=No+Image";
     }
 
+    function getStock(product) {
+        if (Array.isArray(product.variants) && product.variants.length) {
+            return product.variants.reduce(
+                (sum, v) => sum + safeNumber(v.stock),
+                0
+            );
+        }
+
+        return safeNumber(product.stock);
+    }
+
     function getHotDeals(productList = []) {
         return productList
+            .filter(product => getStock(product) > 0)
             .map((product) => {
                 const deal = getBestDeal(product);
                 return deal ? { ...product, deal } : null;

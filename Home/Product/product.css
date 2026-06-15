@@ -2181,6 +2181,20 @@ body {
   height: 100%;
 }
 
+#suggestedProducts .homepage-product-card h3 {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+
+  line-height: 1.35 !important;
+  max-height: 2.7em !important;
+  min-height: 2.7em !important;
+}
+
 @media (min-width: 1025px) {
 
   #suggestedProducts {
