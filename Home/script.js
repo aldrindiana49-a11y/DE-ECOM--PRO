@@ -1211,7 +1211,9 @@ async function loadProductsFromSupabase() {
 
   renderBanner();
 
-  loadProductsFromSupabase();
+  await loadProductsFromSupabase();
+
+  renderCategoryShortcuts();
 
   loadVouchersFromSupabase();
 
@@ -1946,3 +1948,45 @@ document.addEventListener(
   }
 );
 
+function renderCategoryShortcuts() {
+  const shortcutGrid = document.getElementById("shortcutGrid");
+  if (!shortcutGrid) return;
+
+  // products na may stock lang
+  const availableProducts = products.filter(product =>
+    Number(product.stock || 0) > 0
+  );
+
+  // unique categories only
+  const categories = [...new Set(
+    availableProducts
+      .map(product => safeText(product.category))
+      .filter(Boolean)
+  )];
+
+  shortcutGrid.innerHTML = categories.map(category => `
+    <a href="#"
+       class="shortcut-item"
+       onclick="filterByCategory('${category.replaceAll("'", "\\'")}'); return false;">
+
+      <div class="shortcut-icon">📦</div>
+
+      <span class="shortcut-label">${escapeHtml(category)}</span>
+
+    </a>
+  `).join("");
+}
+
+function scrollShortcutLeft() {
+  document.getElementById("shortcutGrid")?.scrollBy({
+    left: -400,
+    behavior: "smooth"
+  });
+}
+
+function scrollShortcutRight() {
+  document.getElementById("shortcutGrid")?.scrollBy({
+    left: 400,
+    behavior: "smooth"
+  });
+}

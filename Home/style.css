@@ -492,7 +492,7 @@ body {
   background: white;
 }
 
-/* SHOPEE SHORTCUTS */
+/* SHOP SHORTCUTS */
 .shortcut-section {
   max-width: var(--container);
   margin: 0 auto;
@@ -518,30 +518,64 @@ body {
   font-weight: 600;
 }
 
-.shortcut-view-all:hover {
-  text-decoration: underline;
+.shortcut-grid {
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-wrap: nowrap;
+  width: 100%;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
-.shortcut-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
+.shortcut-grid::-webkit-scrollbar {
+  display: none;
 }
 
 .shortcut-item {
+  flex: 0 0 110px;
+  min-width: 110px;
+  max-width: 110px;
+  height: 95px;
   background: var(--surface);
-  border-radius: 18px;
+  border-radius: 12px;
   text-decoration: none;
   color: #111827;
-  padding: 18px 12px;
+  padding: 10px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   box-shadow: var(--shadow-sm);
   transition: 0.2s ease;
-  min-height: 120px;
+}
+
+.shortcut-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.shortcut-label {
+  width: 100%;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.1;
+  color: #374151;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .shortcut-item:hover {
@@ -549,23 +583,18 @@ body {
   box-shadow: var(--shadow-md);
 }
 
-.shortcut-icon {
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: #f3f4f6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
+/* CATEGORY IMAGE FROM SUPABASE */
+.category-image-box {
+  background: transparent !important;
+  padding: 0;
+  overflow: hidden;
 }
 
-.shortcut-label {
-  font-size: 14px;
-  font-weight: 700;
-  text-align: center;
-  line-height: 1.2;
-  color: #374151;
+.category-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 /* HOMEPAGE PRODUCTS */
@@ -1039,20 +1068,15 @@ body {
     font-size: 22px;
   }
 
-  .shortcut-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
-  }
-
   .shortcut-item {
-    min-height: 105px;
-    padding: 14px 8px;
+    min-height: 70px;
+    padding: 6px 4px;
   }
 
   .shortcut-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 24px;
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
   }
 
   .shortcut-label {
@@ -1126,11 +1150,6 @@ body {
   .homepage-products {
     padding-left: 12px;
     padding-right: 12px;
-  }
-
-  .shortcut-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 10px;
   }
 
   .shortcut-item {
@@ -1325,51 +1344,6 @@ body {
   color: var(--primary);
 }
 
-/* ===== MOBILE CATEGORY HORIZONTAL SCROLL ===== */
-@media (max-width: 768px) {
-  .shortcut-section {
-    padding: 18px 12px 8px;
-  }
-
-  .shortcut-header {
-    margin-bottom: 12px;
-  }
-
-  .shortcut-grid {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding-bottom: 8px;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .shortcut-grid::-webkit-scrollbar {
-    display: none;
-  }
-
-  .shortcut-item {
-    min-width: 92px;
-    max-width: 92px;
-    flex: 0 0 auto;
-    scroll-snap-align: start;
-    padding: 12px 8px;
-    border-radius: 14px;
-  }
-
-  .shortcut-icon {
-    font-size: 22px;
-    margin-bottom: 6px;
-  }
-
-  .shortcut-label {
-    font-size: 12px;
-    line-height: 1.2;
-    text-align: center;
-  }
-}
-
 /* DEFAULT: hide extra categories */
 .extra-category {
   display: none;
@@ -1480,6 +1454,25 @@ body {
   .cart-btn,
   .account-menu {
     display: none !important;
+  }
+
+  .shortcut-grid {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+  }
+
+  .shortcut-item {
+    flex: 0 0 88px;
+    min-width: 88px;
+    max-width: 88px;
+    height: 88px;
+    scroll-snap-align: start;
   }
 }
 
@@ -1806,26 +1799,6 @@ body {
   padding-left: 24px;
 }
 
-/* ===============================
-   SIDEBAR HOVER STYLE (LIKE IMAGE)
-================================ */
-
-.sidebar-links li a {
-  display: block;
-  padding: 12px 18px;
-  color: #e5e7eb;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  border-radius: 6px;
-}
-
-/* HOVER EFFECT (LIGHT BOX STYLE) */
-.sidebar-links li a:hover {
-  background: #e5e7eb;
-  /* light gray */
-  color: #111827;
-  /* dark text */
-}
 
 /* CATEGORY DROPDOWN ITEMS (same style) */
 .category-dropdown li a:hover {
@@ -2054,15 +2027,6 @@ body {
 
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
-
-.mobile-nav-icon.home-icon {
-  background: rgba(255, 255, 255, 0.95);
-
-  border: 1px solid rgba(0, 0, 0, 0.06);
-
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-}
-
 
 
 .mobile-nav-logo[src=""],
@@ -2789,4 +2753,65 @@ body {
   color: #64748b;
   font-size: 13px;
   margin-left: 4px;
+}
+
+.shortcut-carousel {
+  position: relative;
+}
+
+.shortcut-scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+
+  background: #ffffff;
+  color: #111827;
+
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+  transition: 0.2s ease;
+}
+
+.shortcut-scroll-btn:hover {
+  transform: translateY(-50%) scale(1.12);
+  color: var(--primary);
+  box-shadow: 0 12px 28px rgba(0, 188, 212, 0.25);
+}
+
+.shortcut-scroll-btn.left {
+  left: -14px;
+}
+
+.shortcut-scroll-btn.right {
+  right: -14px;
+}
+
+@media (max-width: 768px) {
+  .shortcut-scroll-btn {
+    display: none;
+  }
+}
+
+/* =====================================
+   TEMPORARY HIDE SEE MORE BUTTON
+   reason: disabled for redesign/testing
+   enable again later if needed
+===================================== */
+.shortcut-view-all {
+  display: none !important;
 }
