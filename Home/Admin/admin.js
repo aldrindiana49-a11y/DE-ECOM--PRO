@@ -430,17 +430,23 @@ async function loadAdminChatBadge() {
 
     if (!adminChatBadge) return;
 
-    const { count, error } = await supabaseClient
-        .from("chat_conversations")
-        .select("*", { count: "exact", head: true });
+    const { data, error } = await supabaseClient
+        .from("chat_messages")
+        .select("id")
+        .eq("sender_type", "customer")
+        .eq("is_read", false);
 
     if (error) {
         console.error(error);
         return;
     }
 
-    adminChatBadge.textContent =
-        count || 0;
+    const count = data?.length || 0;
+
+    adminChatBadge.textContent = count;
+
+    adminChatBadge.style.display =
+        count > 0 ? "flex" : "none";
 }
 
 loadAdminChatBadge();
@@ -453,7 +459,7 @@ supabaseClient
     .on(
         "postgres_changes",
         {
-            event: "INSERT",
+            event: "*",
             schema: "public",
             table: "chat_messages"
         },
