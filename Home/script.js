@@ -211,7 +211,7 @@ function renderPriceBlock(price, discountPrice) {
   `;
 }
 
-/* UPDATED: In-stock first, Out of Stock section at bottom */
+/* UPDATED: Pagination handles stock order */
 
 function renderHomepageProducts(productArray = products) {
   if (!homepageProductList) return;
@@ -227,38 +227,9 @@ function renderHomepageProducts(productArray = products) {
     return;
   }
 
-  const hasAvailableStock = (product) => {
-    if (Array.isArray(product.variants) && product.variants.length) {
-      return product.variants.some((variant) => safeNumber(variant.stock, 0) > 0);
-    }
-
-    return safeNumber(product.stock, 0) > 0;
-  };
-
-  productArray = [...productArray].sort(() => Math.random() - 0.5);
-  const inStockProducts = productArray.filter(hasAvailableStock);
-  const outOfStockProducts = productArray.filter((product) => !hasAvailableStock(product));
-
-  const visibleProducts =
-    inStockProducts.slice(0, homepageProductLimit);
-
-  homepageRenderedCount =
-    visibleProducts.length;
-
-  renderProductCards(visibleProducts);
-
-  const hasMoreProducts =
-    inStockProducts.length > homepageProductLimit;
-
-  if (outOfStockProducts.length > 0) {
-    const divider = document.createElement("div");
-    divider.className = "product-section-divider";
-    divider.innerHTML = `<span>Out of Stock</span>`;
-    homepageProductList.appendChild(divider);
-
-    renderProductCards(outOfStockProducts);
-  }
+  renderProductCards(productArray);
 }
+
 
 function renderProductCards(productArray) {
   productArray.forEach((product) => {
@@ -1835,16 +1806,32 @@ function hideProductLoader() {
 
 }
 
+function hasAvailableStock(product) {
+  if (Array.isArray(product.variants) && product.variants.length) {
+    return product.variants.some((variant) => safeNumber(variant.stock, 0) > 0);
+  }
+
+  return safeNumber(product.stock, 0) > 0;
+}
+
+function sortProductsStockLast(list = []) {
+  const inStock = list.filter(hasAvailableStock);
+  const outStock = list.filter((product) => !hasAvailableStock(product));
+
+  return [...inStock, ...outStock];
+}
+
 function renderProducts(list) {
+  const sortedList = sortProductsStockLast(list);
 
   const start = (currentPage - 1) * pageSize;
   const end = start + pageSize;
 
-  const pageItems = list.slice(start, end);
+  const pageItems = sortedList.slice(start, end);
 
   renderHomepageProducts(pageItems);
 
-  renderPagination(list);
+  renderPagination(sortedList);
 }
 
 function renderPagination(list) {

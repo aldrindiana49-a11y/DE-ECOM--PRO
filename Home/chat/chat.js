@@ -435,9 +435,6 @@ For urgent orders, please check our product list by visiting our store profile.
         .select()
         .single();
 
-    if (autoReplyData) {
-        appendChatMessage(autoReplyData);
-    }
 }
 
 async function sendWebsiteChatMessage() {
