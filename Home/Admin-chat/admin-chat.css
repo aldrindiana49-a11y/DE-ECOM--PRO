@@ -432,3 +432,10 @@ body {
 .pin-btn:hover {
     transform: scale(1.15);
 }
+
+.conversation-time {
+    font-size: 11px;
+    color: #64748b;
+    white-space: nowrap;
+    flex-shrink: 0;
+}

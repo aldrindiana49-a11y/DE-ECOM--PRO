@@ -399,6 +399,47 @@ function closeWebsiteChat() {
     document.getElementById("websiteChatModal")?.classList.remove("show");
 }
 
+async function sendOfflineAutoReplyIfNeeded(conversationId) {
+
+    if (isLiveChatAvailable()) return;
+
+    const { data: existingOfflineReply } = await supabaseClient
+        .from("chat_messages")
+        .select("id")
+        .eq("conversation_id", conversationId)
+        .eq("sender_type", "system")
+        .ilike("message", "%automatic reply%")
+        .limit(1)
+        .maybeSingle();
+
+    if (existingOfflineReply) return;
+
+    const offlineReply = `
+Hi! Thank you for messaging Drin Electronics.
+
+This is an automatic reply to let you know we’ve received your message.
+
+For any questions, just leave us a message and our team will get back to you as soon as possible.
+
+For urgent orders, please check our product list by visiting our store profile.
+    `;
+
+    const { data: autoReplyData } = await supabaseClient
+        .from("chat_messages")
+        .insert({
+            conversation_id: conversationId,
+            sender_type: "system",
+            message: offlineReply,
+            is_read: false
+        })
+        .select()
+        .single();
+
+    if (autoReplyData) {
+        appendChatMessage(autoReplyData);
+    }
+}
+
 async function sendWebsiteChatMessage() {
     const input = document.getElementById("websiteChatInput");
     if (!input) return;
@@ -429,34 +470,7 @@ async function sendWebsiteChatMessage() {
     }
 
     appendChatMessage(data);
-
-    if (!isLiveChatAvailable()) {
-
-        const offlineReply = `
-Hi! Thank you for messaging Drin Electronics.
-
-This is an automatic reply to let you know we’ve received your message.
-
-For any questions, just leave us a message and our team will get back to you as soon as possible.
-
-For urgent orders, please check our product list by visiting our store profile.
-    `;
-
-        const { data: autoReplyData } = await supabaseClient
-            .from("chat_messages")
-            .insert({
-                conversation_id: conversationId,
-                sender_type: "system",
-                message: offlineReply,
-                is_read: false
-            })
-            .select()
-            .single();
-
-        if (autoReplyData) {
-            appendChatMessage(autoReplyData);
-        }
-    }
+    await sendOfflineAutoReplyIfNeeded(conversationId);
 
     await supabaseClient
         .from("chat_conversations")
@@ -638,6 +652,8 @@ async function uploadChatMedia(file) {
     }
 
     appendChatMessage(data);
+
+    await sendOfflineAutoReplyIfNeeded(conversationId);
 
     await supabaseClient
         .from("chat_conversations")

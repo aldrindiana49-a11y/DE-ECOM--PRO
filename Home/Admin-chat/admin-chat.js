@@ -38,7 +38,29 @@ async function loadConversations() {
         return;
     }
 
-    renderConversationList(data || []);
+    const sortedConversations = (data || []).sort((a, b) => {
+
+        const unreadA = (a.chat_messages || [])
+            .filter(msg =>
+                msg.sender_type === "customer" &&
+                msg.is_read === false
+            ).length;
+
+        const unreadB = (b.chat_messages || [])
+            .filter(msg =>
+                msg.sender_type === "customer" &&
+                msg.is_read === false
+            ).length;
+
+        // may unread → priority sa taas
+        if (unreadA > 0 && unreadB === 0) return -1;
+        if (unreadA === 0 && unreadB > 0) return 1;
+
+        // parehong unread/read → newest sa taas
+        return new Date(b.updated_at) - new Date(a.updated_at);
+    });
+
+    renderConversationList(sortedConversations);
 }
 
 function renderConversationList(conversations) {
@@ -56,8 +78,19 @@ function renderConversationList(conversations) {
         return;
     }
 
-    unreadBadge.textContent =
-        conversations.length;
+    const totalUnread = conversations.reduce((total, conversation) => {
+
+        const unreadCount = (conversation.chat_messages || [])
+            .filter(msg =>
+                msg.sender_type === "customer" &&
+                msg.is_read === false
+            ).length;
+
+        return total + unreadCount;
+
+    }, 0);
+
+    unreadBadge.textContent = totalUnread;
 
     conversationList.innerHTML =
         conversations.map((conversation, index) => {
@@ -106,8 +139,8 @@ function renderConversationList(conversations) {
   </button>
 
   <div class="conversation-time">
-    ${formatTime(conversation.updated_at)}
-  </div>
+    ${formatDateTime(conversation.updated_at)}
+</div>
 
 </div>
 
@@ -206,10 +239,27 @@ function renderMessages(messages) {
             `;
 
             }
+
             else {
 
-                content = escapeHtml(msg.message || "");
+                const urlRegex = /(https?:\/\/[^\s]+)/g;
 
+                if (urlRegex.test(msg.message)) {
+
+                    const url = msg.message.match(urlRegex)[0];
+
+                    const shortUrl = new URL(url).hostname;
+
+                    content = `
+            <a href="${url}" target="_blank">
+                🔗 ${shortUrl}
+            </a>
+        `;
+
+                } else {
+
+                    content = escapeHtml(msg.message || "");
+                }
             }
 
             return `
@@ -296,7 +346,9 @@ function subscribeRealtime() {
 
                 const msg = payload.new;
 
-                await loadConversations();
+                setTimeout(async () => {
+                    await loadConversations();
+                }, 500);
 
                 if (
                     selectedConversationId &&
@@ -363,11 +415,27 @@ function appendMessage(msg) {
         `;
 
     }
+
     else {
 
-        div.textContent =
-            msg.message;
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
 
+        if (urlRegex.test(msg.message)) {
+
+            const url = msg.message.match(urlRegex)[0];
+
+            const shortUrl = new URL(url).hostname;
+
+            div.innerHTML = `
+            <a href="${url}" target="_blank">
+                🔗 ${shortUrl}
+            </a>
+        `;
+
+        } else {
+
+            div.textContent = msg.message;
+        }
     }
 
     adminChatMessages.appendChild(div);
@@ -385,6 +453,19 @@ function formatTime(date) {
             hour: "2-digit",
             minute: "2-digit"
         });
+}
+
+function formatDateTime(date) {
+
+    if (!date) return "";
+
+    return new Date(date).toLocaleString("en-PH", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
 }
 
 function escapeHtml(text = "") {
