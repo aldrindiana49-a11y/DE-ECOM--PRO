@@ -7,6 +7,46 @@ let drinChatChannel = null;
 
 let drinTypingChannel = null;
 
+function getSupportStatusText() {
+    if (isLiveChatAvailable()) {
+        return "🟢 Live chat available";
+    }
+
+    return "🔴 Offline now — auto reply active";
+}
+
+function refreshChatStatus() {
+
+    const status = document.getElementById("chatSupportStatus");
+
+    if (status) {
+        status.textContent = getSupportStatusText();
+    }
+
+    updateChatAvailability();
+}
+
+function updateChatAvailability() {
+
+    const input = document.getElementById("websiteChatInput");
+    const sendBtn = document.getElementById("chatSendButton");
+
+    if (!input || !sendBtn) return;
+
+    if (isLiveChatAvailable()) {
+
+        input.placeholder = "Type your message...";
+        sendBtn.disabled = false;
+        sendBtn.style.opacity = "1";
+
+    } else {
+
+        input.placeholder = "Leave your concern here. Drin Electronics will reply soon.";
+        sendBtn.disabled = false;
+        sendBtn.style.opacity = "1";
+    }
+}
+
 function ensureChatModal() {
     if (document.getElementById("websiteChatModal")) return;
 
@@ -20,7 +60,7 @@ function ensureChatModal() {
         <img src="${DRIN_SUPPORT_AVATAR}" alt="Drin Support">
         <div>
           <strong>Drin Support Assistant</strong>
-          <small>🟢 Online support</small>
+         <small id="chatSupportStatus">${getSupportStatusText()}</small>
         </div>
         <button type="button" class="website-chat-close" onclick="closeWebsiteChat()">×</button>
       </div>
@@ -62,7 +102,7 @@ function ensureChatModal() {
 
   <button type="button" onclick="document.getElementById('chatFileInput').click()">📎</button>
 
-  <button type="button" onclick="sendWebsiteChatMessage()">Send</button>
+  <button id="chatSendButton" type="button" onclick="sendWebsiteChatMessage()">Send</button>
 
 </div>
   `;
@@ -96,7 +136,37 @@ function ensureChatModal() {
 
 }
 
+function isLiveChatAvailable() {
+    const now = new Date();
+    const hour = now.getHours();
 
+    return hour >= 9 && hour < 21;
+}
+
+function getChatWelcomeMessage() {
+
+    if (isLiveChatAvailable()) {
+        return `
+Hi 👋 Welcome to Drin Electronics.
+
+🟢 Live Chat is currently available.
+
+Our support team is online from 9:00 AM to 9:00 PM.
+
+How can we help you today?
+        `;
+    }
+
+    return `
+Hi! Thank you for messaging Drin Electronics.
+
+This is an automatic reply to let you know we’ve received your message.
+
+For any questions, just leave us a message and our team will get back to you as soon as possible.
+
+For urgent orders, please check our product list by visiting our store profile.
+    `;
+}
 
 function renderSystemWelcome() {
     const box = document.getElementById("websiteChatMessages");
@@ -108,7 +178,7 @@ function renderSystemWelcome() {
 
     box.innerHTML += `
     <div class="chat-msg system">
-      Hi 👋 Welcome to Drin Electronics Support. How can we help you today?
+   ${getChatWelcomeMessage()}
     </div>
   `;
 
@@ -223,8 +293,24 @@ function appendChatMessage(msg, scroll = true) {
     }
     else {
 
-        div.textContent = msg.message;
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
 
+        if (urlRegex.test(msg.message)) {
+
+            const url = msg.message.match(urlRegex)[0];
+
+            const shortUrl = new URL(url).hostname;
+
+            div.innerHTML = `
+            <a href="${url}" target="_blank">
+                🔗 ${shortUrl}
+            </a>
+        `;
+
+        } else {
+
+            div.textContent = msg.message;
+        }
     }
 
     box.appendChild(div);
@@ -344,6 +430,34 @@ async function sendWebsiteChatMessage() {
 
     appendChatMessage(data);
 
+    if (!isLiveChatAvailable()) {
+
+        const offlineReply = `
+Hi! Thank you for messaging Drin Electronics.
+
+This is an automatic reply to let you know we’ve received your message.
+
+For any questions, just leave us a message and our team will get back to you as soon as possible.
+
+For urgent orders, please check our product list by visiting our store profile.
+    `;
+
+        const { data: autoReplyData } = await supabaseClient
+            .from("chat_messages")
+            .insert({
+                conversation_id: conversationId,
+                sender_type: "system",
+                message: offlineReply,
+                is_read: false
+            })
+            .select()
+            .single();
+
+        if (autoReplyData) {
+            appendChatMessage(autoReplyData);
+        }
+    }
+
     await supabaseClient
         .from("chat_conversations")
         .update({
@@ -369,6 +483,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     subscribeTypingStatus();
 
     updateChatUnreadBadge();
+
+    refreshChatStatus();
+
+    setInterval(() => {
+        refreshChatStatus();
+    }, 60000);
 });
 
 let chatTypingTimer = null;

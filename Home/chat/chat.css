@@ -496,3 +496,19 @@
         font-weight: 800 !important;
     }
 }
+
+/* =========================
+   CHAT CLICKABLE LINKS
+========================= */
+
+.chat-msg a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.chat-msg a:hover {
+    text-decoration: underline;
+}
