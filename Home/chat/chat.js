@@ -67,6 +67,20 @@ function ensureChatModal() {
 
       <div id="websiteChatMessages" class="website-chat-messages"></div>
 
+      <div id="chatProductPreview" style="display:none;">
+  
+  <div class="chat-product-card">
+
+    <small>🛒 Current Product</small>
+
+    <strong id="chatPreviewProductName"></strong>
+
+    <span id="chatPreviewProductPrice"></span>
+
+  </div>
+
+</div>
+
       <div id="emojiPanel" style="display:none; position:absolute; bottom:70px; left:10px; background:white; padding:8px; border-radius:10px;">
 
    
@@ -149,23 +163,21 @@ function getChatWelcomeMessage() {
         return `
 Hi 👋 Welcome to Drin Electronics.
 
-🟢 Live Chat is currently available.
+🟢 Our support team is currently active.
 
-Our support team is online from 9:00 AM to 9:00 PM.
+Please send us your concern and allow a few minutes for response.
 
-How can we help you today?
+🛒 You may also browse products and place orders directly on our website anytime.
         `;
     }
 
     return `
-Hi! Thank you for messaging Drin Electronics.
+Hi 👋 Welcome to Drin Electronics.
 
-This is an automatic reply to let you know we’ve received your message.
+🔴 Our live chat is currently offline.
 
-For any questions, just leave us a message and our team will get back to you as soon as possible.
-
-For urgent orders, please check our product list by visiting our store profile.
-    `;
+Please leave your concern here and our team will reply as soon as possible.
+`;
 }
 
 function renderSystemWelcome() {
@@ -377,6 +389,33 @@ async function openWebsiteChat() {
 
     modal?.classList.add("show");
 
+    const productPreview =
+        document.getElementById("chatProductPreview");
+
+    const isProductPage =
+        window.location.pathname.includes("/product/");
+
+    if (productPreview && isProductPage) {
+
+        const productName =
+            document.getElementById("productName")?.textContent?.trim() || "";
+
+        const productPrice =
+            document.getElementById("productPrice")?.textContent?.trim() || "";
+
+        document.getElementById("chatPreviewProductName").textContent =
+            productName;
+
+        document.getElementById("chatPreviewProductPrice").textContent =
+            productPrice;
+
+        productPreview.style.display = "block";
+
+    } else if (productPreview) {
+
+        productPreview.style.display = "none";
+    }
+
     await createChatConversationIfNeeded();
     await loadChatMessages();
 
@@ -403,12 +442,16 @@ async function sendOfflineAutoReplyIfNeeded(conversationId) {
 
     if (isLiveChatAvailable()) return;
 
+    const thirtyMinutesAgo =
+        new Date(Date.now() - 30 * 60 * 1000).toISOString();
+
     const { data: existingOfflineReply } = await supabaseClient
         .from("chat_messages")
         .select("id")
         .eq("conversation_id", conversationId)
         .eq("sender_type", "system")
         .ilike("message", "%automatic reply%")
+        .gte("created_at", thirtyMinutesAgo)
         .limit(1)
         .maybeSingle();
 
@@ -417,23 +460,30 @@ async function sendOfflineAutoReplyIfNeeded(conversationId) {
     const offlineReply = `
 Hi! Thank you for messaging Drin Electronics.
 
-This is an automatic reply to let you know we’ve received your message.
+We have received your message and our support team is currently offline.
 
-For any questions, just leave us a message and our team will get back to you as soon as possible.
+🛒 Looking for products?
 
-For urgent orders, please check our product list by visiting our store profile.
-    `;
+You can order directly on our website:
 
-    const { data: autoReplyData } = await supabaseClient
+• Browse products on Home Page
+• Add items to Cart
+• Proceed to Checkout
+• Place your Order instantly
+
+We will reply here as soon as possible.
+
+Thank you for choosing Drin Electronics.
+`;
+
+    await supabaseClient
         .from("chat_messages")
         .insert({
             conversation_id: conversationId,
             sender_type: "system",
             message: offlineReply,
             is_read: false
-        })
-        .select()
-        .single();
+        });
 
 }
 
