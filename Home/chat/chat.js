@@ -227,7 +227,6 @@ async function createChatConversationIfNeeded() {
                 user.user_metadata?.full_name ||
                 user.email ||
                 "Customer",
-
             page_url: window.location.href,
 
             status: "open",
