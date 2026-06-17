@@ -145,25 +145,16 @@ function isLiveChatAvailable() {
 }
 
 function getChatWelcomeMessage() {
-
-    if (isLiveChatAvailable()) {
-        return `
-Hi 👋 Welcome to Drin Electronics.
-
-🟢 Our support team is currently active.
-
-Please send us your concern and allow a few minutes for response.
-
-🛒 You may also browse products and place orders directly on our website anytime.
-        `;
-    }
-
     return `
 Hi 👋 Welcome to Drin Electronics.
 
-🔴 Our live chat is currently offline.
+Before we assist you, please send us your name first.
 
-Please leave your concern here and our team will reply as soon as possible.
+Example:
+
+Juan Dela Cruz
+
+After that, you may continue your inquiry normally 😊
 `;
 }
 
@@ -186,17 +177,22 @@ function renderSystemWelcome() {
 
 async function createChatConversationIfNeeded() {
 
-    const {
-        data: { user }
-    } = await supabaseClient.auth.getUser();
+    let guestId = localStorage.getItem("drinGuestId");
 
-    localStorage.removeItem("drinGuestId");
+    if (!guestId) {
+        guestId = "guest_" + Date.now();
+
+        localStorage.setItem(
+            "drinGuestId",
+            guestId
+        );
+    }
 
     const { data: existingConversation } =
         await supabaseClient
             .from("chat_conversations")
             .select("id")
-            .eq("customer_id", user.id)
+            .eq("guest_id", guestId)
             .order("updated_at", { ascending: false })
             .limit(1)
             .maybeSingle();
@@ -209,15 +205,10 @@ async function createChatConversationIfNeeded() {
     const { data, error } = await supabaseClient
         .from("chat_conversations")
         .insert({
-            customer_id: user.id,
-            customer_name:
-                user.user_metadata?.full_name ||
-                user.email ||
-                "Customer",
+            guest_id: guestId,
+            guest_name: "Guest Customer",
             page_url: window.location.href,
-
             status: "open",
-
             updated_at: new Date().toISOString()
         })
         .select("id")
@@ -352,17 +343,6 @@ function subscribeChatRealtime() {
 
 async function openWebsiteChat() {
 
-    const {
-        data: { user }
-    } = await supabaseClient.auth.getUser();
-
-    if (!user) {
-
-        window.location.href =
-            "https://drinelectronicsph.com/login/index.html";
-
-        return;
-    }
 
     ensureChatModal();
 
@@ -453,11 +433,36 @@ async function sendWebsiteChatMessage() {
     const message = input.value.trim();
     if (!message) return;
 
-    input.value = "";
-
     const conversationId = await createChatConversationIfNeeded();
 
-    if (!conversationId) return;
+    const { data: conversation } =
+        await supabaseClient
+            .from("chat_conversations")
+            .select("guest_name")
+            .eq("id", conversationId)
+            .single();
+
+    if (conversation?.guest_name === "Guest Customer") {
+
+        await supabaseClient
+            .from("chat_conversations")
+            .update({
+                guest_name: message,
+                customer_name: message
+            })
+            .eq("id", conversationId);
+
+        appendChatMessage({
+            sender_type: "system",
+            message: "Thank you. You may now continue your inquiry 😊"
+        });
+
+        input.value = "";
+
+        return;
+    }
+
+    input.value = "";
 
     const { data, error } = await supabaseClient
         .from("chat_messages")
@@ -490,12 +495,6 @@ async function sendWebsiteChatMessage() {
 document.addEventListener("DOMContentLoaded", async () => {
 
     ensureChatModal();
-
-    const {
-        data: { user }
-    } = await supabaseClient.auth.getUser();
-
-    if (!user) return;
 
     await createChatConversationIfNeeded();
 
