@@ -439,3 +439,8 @@ body {
     white-space: nowrap;
     flex-shrink: 0;
 }
+
+#chatProductPreview,
+.chat-product-card {
+    display: none !important;
+}
