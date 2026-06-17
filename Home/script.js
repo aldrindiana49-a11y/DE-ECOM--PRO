@@ -506,7 +506,7 @@ function getActiveBanners() {
   return [
     {
       id: "default-banner-1",
-      image: "https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/Banner/Cod%20Banner.png",
+      image: "https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/Banner/B1.png",
       title: "Drin Electronics",
       description: "Quality amplifiers, electronics parts, and reliable services",
       link: "",
@@ -515,7 +515,7 @@ function getActiveBanners() {
     },
     {
       id: "default-banner-2",
-      image: "https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/Banner/Banner%20Tech1.png",
+      image: "https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/Banner/B2.png",
       title: "Trusted Audio Components",
       description: "Speakers, MOSFET, capacitors, and more for your projects",
       link: "",
@@ -524,7 +524,7 @@ function getActiveBanners() {
     },
     {
       id: "default-banner-3",
-      image: "https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/Banner/Banner%20Inv.png",
+      image: "https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/Banner/B3.png",
       title: "Reliable Electronics Shop",
       description: "Built for repair, upgrade, and performance",
       link: "",
@@ -1186,7 +1186,9 @@ async function loadProductsFromSupabase() {
 
   renderCategoryShortcuts();
 
-  loadVouchersFromSupabase();
+  // TEMP DISABLED: Homepage voucher removed for faster loading
+  // Voucher still active on Product Page
+  // loadVouchersFromSupabase();
 
   updateCartCount();
 
@@ -1207,7 +1209,10 @@ if (selectedCategory) {
 
 }
 
-loadVouchersFromSupabase();
+// TEMP DISABLED: Homepage voucher removed for faster loading
+// Voucher still active on Product Page
+// loadVouchersFromSupabase();
+
 updateCartCount();
 
 /* GLOBAL */
@@ -1822,7 +1827,9 @@ function sortProductsStockLast(list = []) {
 }
 
 function renderProducts(list) {
-  const sortedList = sortProductsStockLast(list);
+  const sortedList = sortProductsStockLast(
+    [...list].sort(() => Math.random() - 0.5)
+  );
 
   const start = (currentPage - 1) * pageSize;
   const end = start + pageSize;
@@ -1977,3 +1984,4 @@ function scrollShortcutRight() {
     behavior: "smooth"
   });
 }
+

@@ -5,30 +5,37 @@
 
 <head>
 
-  <!-- Meta Pixel Code -->
   <script>
-    !function (f, b, e, v, n, t, s) {
-      if (f.fbq) return; n = f.fbq = function () {
-        n.callMethod ?
-          n.callMethod.apply(n, arguments) : n.queue.push(arguments)
-      };
-      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
-      n.queue = []; t = b.createElement(e); t.async = !0;
-      t.src = v; s = b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t, s)
-    }
-      (window, document, 'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        !function (f, b, e, v, n, t, s) {
+          if (f.fbq) return;
+          n = f.fbq = function () {
+            n.callMethod ?
+              n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+          };
+          if (!f._fbq) f._fbq = n;
+          n.push = n;
+          n.loaded = !0;
+          n.version = "2.0";
+          n.queue = [];
+          t = b.createElement(e);
+          t.async = !0;
+          t.src = v;
+          s = b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t, s);
+        }(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
 
-    fbq('init', '4266303070285606');
-    fbq('track', 'PageView');
+        fbq("init", "4266303070285606");
+        fbq("track", "PageView");
+      }, 1500);
+    });
   </script>
 
   <noscript>
     <img height="1" width="1" style="display:none"
       src="https://www.facebook.com/tr?id=4266303070285606&ev=PageView&noscript=1" />
   </noscript>
-  <!-- End Meta Pixel Code -->
 
   <link rel="icon" type="image/png" id="siteFavicon" href="Image/favicon.png" />
 
@@ -45,7 +52,6 @@
      audio equipment, electronic components, repair services, and quality electronics products. We provide reliable products for hobbyists, 
      technicians, installers, and audio enthusiasts nationwide." />
 
-  <!-- SOCIAL MEDIA PREVIEW -->
 
   <meta property="og:title" content="Drin Electronics" />
 
@@ -57,7 +63,6 @@
 
   <meta property="og:type" content="website" />
 
-  <!-- TWITTER / X -->
 
   <meta name="twitter:card" content="summary_large_image" />
 
@@ -77,21 +82,23 @@
   <!-- PARTNER PROGRAM CSS -->
   <link rel="stylesheet" href="./PartnerProgram/partner-program.css?v=1">
 
-  <style>
-    .voucher-list {
-      display: flex !important;
-      gap: 14px !important;
-      overflow-x: auto !important;
-      padding-bottom: 10px !important;
-      flex-wrap: nowrap !important;
-    }
+  <!--
+<style>
+  .voucher-list {
+    display: flex !important;
+    gap: 14px !important;
+    overflow-x: auto !important;
+    padding-bottom: 10px !important;
+    flex-wrap: nowrap !important;
+  }
 
-    .voucher-card {
-      min-width: 170px !important;
-      max-width: 170px !important;
-      flex-shrink: 0 !important;
-    }
-  </style>
+  .voucher-card {
+    min-width: 170px !important;
+    max-width: 170px !important;
+    flex-shrink: 0 !important;
+  }
+</style>
+-->
 
 </head>
 
@@ -327,19 +334,23 @@
 
     </section>
 
-    <!-- START DYNAMIC VOUCHERS -->
-    <section class="voucher-section" id="voucherSection">
+    <!--
+START TEMP REMOVED - HOMEPAGE SPEED OPTIMIZATION
+June 2026
+Voucher still active on Product Page
 
-      <div class="voucher-header">
-        <h2>🎟️ Vouchers</h2>
-      </div>
+<section class="voucher-section" id="voucherSection">
 
-      <div class="voucher-list" id="voucherList">
-        <!-- Dynamic vouchers from admin -->
-      </div>
+  <div class="voucher-header">
+    <h2>🎟️ Vouchers</h2>
+  </div>
 
-    </section>
-    <!-- END DYNAMIC VOUCHERS -->
+  <div class="voucher-list" id="voucherList"></div>
+
+</section>
+
+END TEMP REMOVED
+-->
 
     <section id="trendingProductsSection"></section>
     <section id="hotDealsSection"></section>
@@ -696,7 +707,17 @@
   <script src="./Trending/trending-products.js?v=2026.06.15.99"></script>
   <script src="script.js?v=2026.06.15.99"></script>
   <script src="./PartnerProgram/partner-program.js?v=2026.06.15.99"></script>
-  <script src="./chat/chat.js?v=2026.06.15.99"></script>
+  <script>
+    // DELAY CHAT LOAD - homepage speed optimization
+    // Chat loads after main products so customers see items faster
+    window.addEventListener("load", function () {
+      setTimeout(function () {
+        const chatScript = document.createElement("script");
+        chatScript.src = "./chat/chat.js?v=2026.06.15.99";
+        document.body.appendChild(chatScript);
+      }, 2000);
+    });
+  </script>
 
 </body>
 
