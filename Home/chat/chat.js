@@ -67,19 +67,6 @@ function ensureChatModal() {
 
       <div id="websiteChatMessages" class="website-chat-messages"></div>
 
-      <div id="chatProductPreview" style="display:none;">
-  
-  <div class="chat-product-card">
-
-    <small>🛒 Current Product</small>
-
-    <strong id="chatPreviewProductName"></strong>
-
-    <span id="chatPreviewProductPrice"></span>
-
-  </div>
-
-</div>
 
       <div id="emojiPanel" style="display:none; position:absolute; bottom:70px; left:10px; background:white; padding:8px; border-radius:10px;">
 
@@ -387,33 +374,6 @@ async function openWebsiteChat() {
     }
 
     modal?.classList.add("show");
-
-    const productPreview =
-        document.getElementById("chatProductPreview");
-
-    const isProductPage =
-        window.location.pathname.includes("/product/");
-
-    if (productPreview && isProductPage) {
-
-        const productName =
-            document.getElementById("productName")?.textContent?.trim() || "";
-
-        const productPrice =
-            document.getElementById("productPrice")?.textContent?.trim() || "";
-
-        document.getElementById("chatPreviewProductName").textContent =
-            productName;
-
-        document.getElementById("chatPreviewProductPrice").textContent =
-            productPrice;
-
-        productPreview.style.display = "block";
-
-    } else if (productPreview) {
-
-        productPreview.style.display = "none";
-    }
 
     await createChatConversationIfNeeded();
     await loadChatMessages();
@@ -775,3 +735,9 @@ document.addEventListener(
     "DOMContentLoaded",
     initGlobalChat
 );
+
+function forceRemoveChatProductPreview() {
+    document.getElementById("chatProductPreview")?.remove();
+}
+
+setInterval(forceRemoveChatProductPreview, 300);
