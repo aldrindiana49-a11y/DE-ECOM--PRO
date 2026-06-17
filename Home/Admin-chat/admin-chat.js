@@ -1,3 +1,30 @@
+
+async function checkAdminAccess() {
+    const { data: { session } } =
+        await supabaseClient.auth.getSession();
+
+    if (!session) {
+        window.location.href = "./dashboard-index.html";
+        return false;
+    }
+
+    const { data: adminData, error } =
+        await supabaseClient
+            .from("admin_users")
+            .select("role")
+            .eq("id", session.user.id)
+            .eq("role", "admin")
+            .single();
+
+    if (error || !adminData) {
+        await supabaseClient.auth.signOut();
+        window.location.href = "./dashboard-index.html";
+        return false;
+    }
+
+    return true;
+}
+
 let selectedConversationId = null;
 
 const conversationList =
@@ -476,11 +503,21 @@ function escapeHtml(text = "") {
         .replace(/>/g, "&gt;");
 }
 
-loadConversations();
+(async function initAdminChat() {
 
-subscribeRealtime();
+    const allowed = await checkAdminAccess();
 
-setInterval(loadConversations, 5000);
+    if (!allowed) return;
+
+    loadConversations();
+
+    subscribeRealtime();
+
+    setInterval(loadConversations, 5000);
+
+    subscribeTypingRealtime();
+
+})();
 
 let adminTypingTimer = null;
 
@@ -571,7 +608,6 @@ document.addEventListener("visibilitychange", () => {
 
 });
 
-subscribeTypingRealtime();
 
 document.addEventListener("visibilitychange", () => {
 

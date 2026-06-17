@@ -610,11 +610,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     ensureChatModal();
 
-    await createChatConversationIfNeeded();
-
-    subscribeChatRealtime();
-    subscribeTypingStatus();
-
     updateChatUnreadBadge();
 
     refreshChatStatus();
@@ -841,17 +836,6 @@ async function updateChatUnreadBadge() {
     });
 
 }
-
-function initGlobalChat() {
-
-    ensureChatModal();
-
-}
-
-document.addEventListener(
-    "DOMContentLoaded",
-    initGlobalChat
-);
 
 function forceRemoveChatProductPreview() {
     document.getElementById("chatProductPreview")?.remove();
