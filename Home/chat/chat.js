@@ -65,7 +65,32 @@ function ensureChatModal() {
         <button type="button" class="website-chat-close" onclick="closeWebsiteChat()">×</button>
       </div>
 
-      <div id="websiteChatMessages" class="website-chat-messages"></div>
+      
+      <div id="guestNameForm" class="guest-name-form">
+  <p>
+    Hi 👋 Welcome to Drin Electronics.
+    <br>
+    Please enter your name to start chatting.
+  </p>
+
+  <input
+    id="guestNameInput"
+    type="text"
+    placeholder="Your name"
+    autocomplete="name"
+  >
+
+  <button
+    type="button"
+    onclick="startGuestChat()"
+  >
+    Start Chat
+  </button>
+</div>
+
+<div id="chatMainUI">
+  <div id="websiteChatMessages" class="website-chat-messages"></div>
+</div>
 
 
       <div id="emojiPanel" style="display:none; position:absolute; bottom:70px; left:10px; background:white; padding:8px; border-radius:10px;">
@@ -83,7 +108,7 @@ function ensureChatModal() {
 
 </div>
 
-      <div class="website-chat-input-row">
+     <div id="chatInputRow" class="website-chat-input-row" style="display:none;">
 
       <input
   type="file"
@@ -145,16 +170,25 @@ function isLiveChatAvailable() {
 }
 
 function getChatWelcomeMessage() {
+
+    if (isLiveChatAvailable()) {
+        return `
+Hi 👋 Welcome to Drin Electronics.
+
+🟢 Our support team is currently active.
+
+Please send us your concern and allow a few minutes for response.
+
+🛒 You may also browse products and place orders directly on our website anytime.
+        `;
+    }
+
     return `
 Hi 👋 Welcome to Drin Electronics.
 
-Before we assist you, please send us your name first.
+🔴 Our live chat is currently offline.
 
-Example:
-
-Juan Dela Cruz
-
-After that, you may continue your inquiry normally 😊
+Please leave your concern here and our team will reply as soon as possible.
 `;
 }
 
@@ -239,13 +273,14 @@ async function loadChatMessages() {
     }
 
     box.innerHTML = "";
+    delete box.dataset.welcomeShown;
 
-    if (!data || data.length === 0) {
-        renderSystemWelcome();
-        return;
-    }
+    renderSystemWelcome();
+
+    if (!data || data.length === 0) return;
 
     data.forEach((msg) => appendChatMessage(msg, false));
+
     box.scrollTop = box.scrollHeight;
 }
 
@@ -355,7 +390,29 @@ async function openWebsiteChat() {
 
     modal?.classList.add("show");
 
-    await createChatConversationIfNeeded();
+    const conversationId =
+        await createChatConversationIfNeeded();
+
+    const { data: conversation } =
+        await supabaseClient
+            .from("chat_conversations")
+            .select("guest_name")
+            .eq("id", conversationId)
+            .single();
+
+    if (
+        conversation?.guest_name === "Guest Customer"
+    ) {
+        document.getElementById("guestNameForm").style.display = "block";
+        document.getElementById("chatMainUI").classList.remove("active");
+        document.getElementById("chatInputRow").style.display = "none";
+        return;
+    }
+
+    document.getElementById("guestNameForm").style.display = "none";
+    document.getElementById("chatMainUI").classList.add("active");
+    document.getElementById("chatInputRow").style.display = "flex";
+
     await loadChatMessages();
 
     await supabaseClient
@@ -377,6 +434,51 @@ function closeWebsiteChat() {
     document.getElementById("websiteChatModal")?.classList.remove("show");
 }
 
+async function startGuestChat() {
+    const nameInput =
+        document.getElementById("guestNameInput");
+
+    const guestName =
+        nameInput?.value.trim();
+
+    if (!guestName) {
+        alert("Please enter your name first.");
+        return;
+    }
+
+    const conversationId =
+        await createChatConversationIfNeeded();
+
+    if (!conversationId) return;
+
+    await supabaseClient
+        .from("chat_conversations")
+        .update({
+            guest_name: guestName,
+            customer_name: guestName,
+            updated_at: new Date().toISOString()
+        })
+        .eq("id", conversationId);
+
+    await supabaseClient
+        .from("chat_typing_status")
+        .upsert({
+            conversation_id: conversationId,
+            sender_type: "customer",
+            is_typing: false,
+            draft_text: "",
+            updated_at: new Date().toISOString()
+        });
+
+    document.getElementById("guestNameForm").style.display = "none";
+    document.getElementById("chatMainUI").classList.add("active");
+    document.getElementById("chatInputRow").style.display = "flex";
+
+    await loadChatMessages();
+
+    document.getElementById("websiteChatInput")?.focus();
+}
+
 async function sendOfflineAutoReplyIfNeeded(conversationId) {
 
     if (isLiveChatAvailable()) return;
@@ -384,12 +486,25 @@ async function sendOfflineAutoReplyIfNeeded(conversationId) {
     const thirtyMinutesAgo =
         new Date(Date.now() - 30 * 60 * 1000).toISOString();
 
+    // Stop auto reply only if admin manually replied within last 30 minutes
+    const { data: recentAdminReply } = await supabaseClient
+        .from("chat_messages")
+        .select("id")
+        .eq("conversation_id", conversationId)
+        .eq("sender_type", "admin")
+        .gte("created_at", thirtyMinutesAgo)
+        .limit(1)
+        .maybeSingle();
+
+    if (recentAdminReply) return;
+
+    // Prevent repeated offline auto reply within 30 minutes
     const { data: existingOfflineReply } = await supabaseClient
         .from("chat_messages")
         .select("id")
         .eq("conversation_id", conversationId)
         .eq("sender_type", "system")
-        .ilike("message", "%automatic reply%")
+        .ilike("message", "%support team is currently offline%")
         .gte("created_at", thirtyMinutesAgo)
         .limit(1)
         .maybeSingle();
@@ -423,7 +538,6 @@ Thank you for choosing Drin Electronics.
             message: offlineReply,
             is_read: false
         });
-
 }
 
 async function sendWebsiteChatMessage() {
@@ -515,12 +629,16 @@ let chatTypingTimer = null;
 async function setWebsiteTypingStatus(isTyping) {
     if (!drinChatConversationId) return;
 
+    const input =
+        document.getElementById("websiteChatInput");
+
     await supabaseClient
         .from("chat_typing_status")
         .upsert({
             conversation_id: drinChatConversationId,
             sender_type: "customer",
             is_typing: isTyping,
+            draft_text: isTyping ? input?.value || "" : "",
             updated_at: new Date().toISOString()
         });
 }
@@ -740,3 +858,32 @@ function forceRemoveChatProductPreview() {
 }
 
 setInterval(forceRemoveChatProductPreview, 300);
+
+document.addEventListener("input", async (event) => {
+    if (event.target?.id !== "guestNameInput") return;
+
+    if (!drinChatConversationId) {
+        await createChatConversationIfNeeded();
+    }
+
+    const { error } = await supabaseClient
+        .from("chat_typing_status")
+        .upsert({
+            conversation_id: drinChatConversationId,
+            sender_type: "customer",
+            is_typing: true,
+            draft_text: event.target.value,
+            updated_at: new Date().toISOString()
+        });
+
+    if (error) {
+        console.error("SUPABASE TYPING ERROR:", error);
+    }
+});
+
+window.openWebsiteChat = openWebsiteChat;
+window.closeWebsiteChat = closeWebsiteChat;
+window.startGuestChat = startGuestChat;
+window.sendWebsiteChatMessage = sendWebsiteChatMessage;
+window.toggleEmojiPanel = toggleEmojiPanel;
+window.addEmoji = addEmoji;

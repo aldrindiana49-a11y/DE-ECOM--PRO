@@ -32,7 +32,7 @@
 
     background: #fff;
 
-    box-shadow: none;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
 
     display: none;
     overflow: hidden;
@@ -511,4 +511,63 @@
 
 .chat-msg a:hover {
     text-decoration: underline;
+}
+
+/* ===== Guest Name Form ===== */
+
+.guest-name-form {
+    padding: 20px;
+    text-align: center;
+}
+
+.guest-name-form p {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+#guestNameInput {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    margin-bottom: 12px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.guest-name-form button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.guest-name-form button:hover {
+    opacity: 0.9;
+}
+
+/* chat area after form */
+
+#chatMainUI {
+    flex: 1;
+    min-height: 0;
+    display: none;
+    flex-direction: column;
+}
+
+#chatMainUI.active {
+    display: flex;
+}
+
+#chatMainUI .website-chat-messages {
+    flex: 1;
+    min-height: 0;
 }
