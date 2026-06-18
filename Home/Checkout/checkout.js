@@ -1227,14 +1227,14 @@ async function placeOrder() {
 
   try {
 
+    await deductOrderStock(order);
+
     const syncResult =
       await syncOrderToSupabase(order);
 
     if (syncResult === false) {
       return resetPlaceOrder();
     }
-
-    await deductOrderStock(order);
 
     saveOrder(order);
 
