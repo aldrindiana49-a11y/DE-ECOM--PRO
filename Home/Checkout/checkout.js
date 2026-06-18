@@ -1173,6 +1173,36 @@ async function placeOrder() {
     data: { user }
   } = await supabaseClient.auth.getUser();
 
+  if (!user) {
+    showOrderModal(
+      "Login Required",
+      `
+    <div class="premium-login-alert">
+      <div class="premium-login-icon">🔒</div>
+
+      <h4>Secure Checkout Required</h4>
+
+      <p>
+        Please login or create your account first
+        to continue with secure checkout.
+      </p>
+
+      <div class="premium-login-actions">
+        <button type="button" onclick="window.location.href='https://drinelectronicsph.com/login/'">
+          Login Account
+        </button>
+
+        <button type="button" class="secondary-btn" onclick="window.location.href='https://drinelectronicsph.com/signup/'">
+          Create Account
+        </button>
+      </div>
+    </div>
+    `
+    );
+
+    return resetPlaceOrder();
+  }
+
   const voucherCode = localStorage.getItem("claimedVoucherCode");
 
   if (voucherCode && user) {
