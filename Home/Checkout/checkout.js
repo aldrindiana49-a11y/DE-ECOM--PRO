@@ -30,18 +30,34 @@ const API_BASE_URL = "https://de-ecom-pro.onrender.com";
 let cartItems = JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
 
 function redirectIfNoCheckoutItems() {
-  const items = JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
+  const checkout = JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
+  const cart = JSON.parse(localStorage.getItem("drinCart")) || [];
 
-  if (!items.length) {
-    console.warn("No checkout items found.");
-    return;
+  const validCheckout = checkout.filter(orderItem =>
+    cart.some(cartItem =>
+      String(cartItem.id) === String(orderItem.id) &&
+      String(cartItem.variantLabel || "") === String(orderItem.variantLabel || "")
+    )
+  );
+
+  localStorage.setItem("drinCheckoutItems", JSON.stringify(validCheckout));
+  cartItems = validCheckout;
+
+  if (!validCheckout.length) {
+    localStorage.removeItem("drinCheckoutItems");
+    window.location.href = "../Cart/index.html";
+    return false;
   }
+
+  return true;
 }
 
 redirectIfNoCheckoutItems();
 
 window.addEventListener("pageshow", function () {
-  redirectIfNoCheckoutItems();
+  if (redirectIfNoCheckoutItems()) {
+    renderCheckout();
+  }
 });
 
 
