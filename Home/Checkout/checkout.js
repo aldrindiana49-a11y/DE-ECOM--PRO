@@ -2021,7 +2021,7 @@ function showNonCodPremiumPopup(items) {
   popup.innerHTML = `
     <div class="premium-noncod-box">
 
-      <div class="premium-noncod-icon">💳</div>
+      <div class="premium-noncod-icon">🔒</div>
 
       <h2>Online Payment Required</h2>
 
