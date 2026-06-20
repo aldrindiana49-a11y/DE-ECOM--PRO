@@ -1118,7 +1118,11 @@ async function placeOrder() {
   const selectedCourierNow = courierSelect?.value || selectedCourier || "";
 
   const nonCodItems =
-    cartItems.filter(item => item.allow_cod === false);
+    cartItems.filter(item =>
+      item.allow_cod === false ||
+      item.allowCOD === false ||
+      item.codEnabled === false
+    );
 
   if (paymentMain === "COD" && nonCodItems.length) {
 

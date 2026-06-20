@@ -680,6 +680,7 @@ addToCartBtn.addEventListener("click", () => {
   } else {
     cartData.push({
 
+      allow_cod: product.allow_cod,
       weight: Number(parcelSource.weight ?? product.weight ?? 0.01),
       length: Number(parcelSource.length ?? product.length ?? 1),
       width: Number(parcelSource.width ?? product.width ?? 1),
@@ -755,6 +756,7 @@ buyNowBtn?.addEventListener("click", () => {
   }
 
   const checkoutItem = {
+    allow_cod: product.allow_cod,
     id: product.id,
     name: product.name,
     variantLabel: selectedVariant?.label || "",
@@ -1462,6 +1464,9 @@ document.addEventListener("click", (e) => {
 
   } else {
     cartData.push({
+
+      allow_cod: product.allow_cod,
+
       id: product.id,
       name: product.name,
       variantLabel: selectedVariant.label,

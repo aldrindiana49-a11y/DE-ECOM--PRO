@@ -67,6 +67,8 @@ buyNowBtn?.addEventListener(
 
         const checkoutItem = {
 
+            allow_cod: product.allow_cod,
+
             weight: Number(
                 selectedVariant?.weight ??
                 product.weight ??
