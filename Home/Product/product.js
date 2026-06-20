@@ -294,7 +294,7 @@ async function loadProductsFromSupabase() {
       length: safeNumber(item.length || firstVariation.length, 0),
       width: safeNumber(item.width || firstVariation.width, 0),
       height: safeNumber(item.height || firstVariation.height, 0),
-
+      allow_cod: item.allow_cod,
       id: item.id,
       name: item.title,
       brand: item.brand || "",
@@ -372,6 +372,14 @@ function renderProduct() {
     stock > 0
       ? `Stock: ${stock} available`
       : "Out of stock";
+
+  const codNotice =
+    document.getElementById("codNotice");
+
+  if (codNotice) {
+    codNotice.style.display =
+      product.allow_cod === false ? "block" : "none";
+  }
 
   renderProductGallery();
 
@@ -2222,3 +2230,4 @@ function closeReviewImage() {
 
 window.openReviewImage = openReviewImage;
 window.closeReviewImage = closeReviewImage;
+

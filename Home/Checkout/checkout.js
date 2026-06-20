@@ -1117,6 +1117,16 @@ async function placeOrder() {
 
   const selectedCourierNow = courierSelect?.value || selectedCourier || "";
 
+  const nonCodItems =
+    cartItems.filter(item => item.allow_cod === false);
+
+  if (paymentMain === "COD" && nonCodItems.length) {
+
+    showNonCodPremiumPopup(nonCodItems);
+
+    return resetPlaceOrder();
+  }
+
   if (!cartItems.length) {
     showOrderModal("No Items", "Please select items first.");
     return resetPlaceOrder();
@@ -1981,3 +1991,71 @@ document.addEventListener(
 
   }
 );
+
+function showNonCodPremiumPopup(items) {
+
+  const itemList = items.map(item => `
+    <div class="noncod-item">
+      <span>📦</span>
+      <div>
+
+        <strong>${item.name}</strong>
+
+        ${item.variantLabel
+      ? `<small>${item.variantLabel}</small>`
+      : ""
+    }
+
+      </div>
+    </div>
+  `).join("");
+
+  const popup = document.createElement("div");
+
+  popup.className = "premium-noncod-popup";
+
+  popup.innerHTML = `
+    <div class="premium-noncod-box">
+
+      <div class="premium-noncod-icon">💳</div>
+
+      <h2>Online Payment Required</h2>
+
+      <p>
+        The following item(s) require Online Payment for secure shipping.
+     </p>
+
+      <div class="premium-noncod-list">
+        ${itemList}
+      </div>
+
+      <button onclick="switchToOnlinePayment()">
+         Switch to Online Payment
+       </button>
+
+    </div>
+  `;
+
+  document.body.appendChild(popup);
+}
+
+function switchToOnlinePayment() {
+
+  const onlineOption =
+    document.querySelector(
+      'input[name="payment"][value="ONLINE"]'
+    );
+
+  if (onlineOption) {
+
+    onlineOption.checked = true;
+
+    onlineOption.dispatchEvent(
+      new Event("change")
+    );
+  }
+
+  document
+    .querySelector(".premium-noncod-popup")
+    ?.remove();
+}
