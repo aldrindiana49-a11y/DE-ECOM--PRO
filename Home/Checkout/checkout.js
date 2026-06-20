@@ -29,25 +29,44 @@ const API_BASE_URL = "https://de-ecom-pro.onrender.com";
 
 let cartItems = JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
 
+function getCartItemKey(item) {
+  const id =
+    item.productId ||
+    item.id ||
+    item.product_id ||
+    "";
+
+  const variant =
+    item.variantLabel ||
+    item.variant ||
+    item.variation ||
+    item.variantName ||
+    item.selectedVariation ||
+    item.option ||
+    "";
+
+  return `${String(id)}__${String(variant)}`;
+}
+
 function redirectIfNoCheckoutItems() {
   const checkout = JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
   const cart = JSON.parse(localStorage.getItem("drinCart")) || [];
 
-  const validCheckout = checkout.filter(orderItem =>
-    cart.some(cartItem =>
-      String(cartItem.id) === String(orderItem.id) &&
-      String(cartItem.variantLabel || "") === String(orderItem.variantLabel || "")
-    )
+  const cartKeys = new Set(cart.map(getCartItemKey));
+
+  const validCheckout = checkout.filter(item =>
+    cartKeys.has(getCartItemKey(item))
   );
 
-  localStorage.setItem("drinCheckoutItems", JSON.stringify(validCheckout));
-  cartItems = validCheckout;
-
   if (!validCheckout.length) {
+    cartItems = [];
     localStorage.removeItem("drinCheckoutItems");
     window.location.href = "../Cart/index.html";
     return false;
   }
+
+  localStorage.setItem("drinCheckoutItems", JSON.stringify(validCheckout));
+  cartItems = validCheckout;
 
   return true;
 }
@@ -1577,6 +1596,8 @@ async function loadClaimedVoucher() {
 
 (async function initCheckout() {
 
+  if (!redirectIfNoCheckoutItems()) return;
+
   await loadSPXAddresses();
 
   await loadClaimedVoucher();
@@ -1591,7 +1612,6 @@ async function loadClaimedVoucher() {
 
   updateParcelEstimate();
   updateTotalsDisplay();
-  // scheduleShippingQuote();
 
 })();
 
