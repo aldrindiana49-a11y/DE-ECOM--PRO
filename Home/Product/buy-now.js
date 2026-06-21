@@ -122,6 +122,16 @@ buyNowBtn?.addEventListener(
             JSON.stringify([checkoutItem])
         );
 
+        if (typeof fbq !== "undefined") {
+            fbq("track", "AddToCart", {
+                content_ids: [product.id],
+                content_name: product.name,
+                value: selectedPrice * qty,
+                currency: "PHP"
+            });
+        }
+
+
         window.location.href =
             "../Cart/Checkout/";
     }

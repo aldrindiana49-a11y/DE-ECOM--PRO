@@ -1377,6 +1377,13 @@ async function placeOrder() {
 
     }
 
+    if (typeof fbq !== "undefined") {
+      fbq("track", "Purchase", {
+        value: totalNumber,
+        currency: "PHP"
+      });
+    }
+
     clearCheckedCartItems();
     localStorage.removeItem("drinCart");
 

@@ -562,6 +562,13 @@ function goToCheckout() {
 
   localStorage.setItem("drinCheckoutItems", JSON.stringify(checkoutItems));
 
+  if (typeof fbq !== "undefined") {
+    fbq("track", "InitiateCheckout", {
+      value: totalValue,
+      currency: "PHP"
+    });
+  }
+  
   window.location.href = "../Checkout/checkout.html";
 }
 /* ===============================
