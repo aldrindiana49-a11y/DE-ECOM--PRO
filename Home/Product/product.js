@@ -342,7 +342,7 @@ async function loadProductsFromSupabase() {
       content_ids: [product.id],
       content_name: product.name,
       content_type: "product",
-      value: getProductPrice(product),
+      value: Number(getProductPrice(product)),
       currency: "PHP"
     });
   }
@@ -720,7 +720,8 @@ addToCartBtn.addEventListener("click", () => {
     fbq("track", "AddToCart", {
       content_ids: [product.id],
       content_name: product.name,
-      value: selectedPrice * qty,
+      content_type: "product",
+      value: Number(selectedPrice * qty),
       currency: "PHP"
     });
   }
@@ -835,10 +836,11 @@ buyNowBtn?.addEventListener("click", () => {
   updateCartCount();
 
   if (typeof fbq !== "undefined") {
-    fbq("track", "InitiateCheckout", {
+    fbq("track", "AddToCart", {
       content_ids: [product.id],
       content_name: product.name,
-      value: checkoutItem.price * qty,
+      content_type: "product",
+      value: Number(checkoutItem.price * qty),
       currency: "PHP"
     });
   }
@@ -1528,11 +1530,14 @@ document.addEventListener("click", (e) => {
     fbq("track", "AddToCart", {
       content_ids: [product.id],
       content_name: product.name,
-      value: (
-        safeNumber(selectedVariant.discountPrice) > 0
-          ? safeNumber(selectedVariant.discountPrice)
-          : safeNumber(selectedVariant.price)
-      ) * qty,
+      content_type: "product",
+      value: Number(
+        (
+          safeNumber(selectedVariant.discountPrice) > 0
+            ? safeNumber(selectedVariant.discountPrice)
+            : safeNumber(selectedVariant.price)
+        ) * qty
+      ),
       currency: "PHP"
     });
   }

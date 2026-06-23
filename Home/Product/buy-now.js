@@ -127,7 +127,7 @@ buyNowBtn?.addEventListener(
                 content_ids: [product.id],
                 content_name: product.name,
                 content_type: "product",
-                value: selectedPrice * qty,
+                value: Number(checkoutItem.price * qty),
                 currency: "PHP"
             });
         }
