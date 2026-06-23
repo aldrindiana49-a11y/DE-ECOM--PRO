@@ -1379,8 +1379,11 @@ async function placeOrder() {
 
     if (typeof fbq !== "undefined") {
       fbq("track", "Purchase", {
+        content_ids: order.items.map(item => item.id),
+        content_type: "product",
         value: totalNumber,
-        currency: "PHP"
+        currency: "PHP",
+        num_items: order.items.length
       });
     }
 
