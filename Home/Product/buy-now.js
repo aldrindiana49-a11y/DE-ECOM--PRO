@@ -126,13 +126,13 @@ buyNowBtn?.addEventListener(
             fbq("track", "AddToCart", {
                 content_ids: [product.id],
                 content_name: product.name,
+                content_type: "product",
                 value: selectedPrice * qty,
                 currency: "PHP"
             });
         }
 
-
         window.location.href =
-            "../Cart/Checkout/";
+            "../Cart/index.html";
     }
 );

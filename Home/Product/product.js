@@ -341,6 +341,7 @@ async function loadProductsFromSupabase() {
     fbq("track", "ViewContent", {
       content_ids: [product.id],
       content_name: product.name,
+      content_type: "product",
       value: getProductPrice(product),
       currency: "PHP"
     });
