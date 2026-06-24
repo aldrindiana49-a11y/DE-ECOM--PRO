@@ -1207,7 +1207,7 @@ async function placeOrder() {
   if (paymentMain !== "COD" && totalNumber < 100) {
     showOrderModal(
       "Minimum Online Payment",
-      "Online payment requires a minimum total order of ₱100 including shipping."
+      "Your order is below the ₱100 minimum. Add more products to continue with Online Payment."
     );
 
     return resetPlaceOrder();
