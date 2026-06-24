@@ -2483,3 +2483,13 @@ img.lazy-image.loaded {
   margin: 3px 0 0;
   color: #92400e;
 }
+
+.cod-available {
+  background: #ecfdf5;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+}

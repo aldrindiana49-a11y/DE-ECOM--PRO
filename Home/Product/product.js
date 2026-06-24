@@ -386,9 +386,19 @@ function renderProduct() {
   const codNotice =
     document.getElementById("codNotice");
 
-  if (codNotice) {
-    codNotice.style.display =
-      product.allow_cod === false ? "block" : "none";
+  const codAvailable =
+    document.getElementById("codAvailable");
+
+  if (codNotice && codAvailable) {
+
+    if (product.allow_cod === false) {
+      codNotice.style.display = "block";
+      codAvailable.style.display = "none";
+    } else {
+      codNotice.style.display = "none";
+      codAvailable.style.display = "block";
+    }
+
   }
 
   renderProductGallery();
