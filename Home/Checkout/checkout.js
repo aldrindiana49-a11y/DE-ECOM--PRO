@@ -1189,7 +1189,7 @@ async function placeOrder() {
   if (paymentMain === "COD" && totalNumber < 300) {
     showOrderModal(
       "COD Minimum Order",
-      "Cash on Delivery requires a minimum total order of ₱300 including shipping."
+      "Need ₱300 minimum for Cash on Delivery. Add more products to unlock COD, or continue now using Online Payment."
     );
 
     return resetPlaceOrder();
