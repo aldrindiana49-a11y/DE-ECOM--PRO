@@ -606,7 +606,8 @@ app.post("/api/create-payment", async (req, res) => {
       customerPhone,
       items,
       address,
-      parcelInfo
+      parcelInfo,
+      courier
     } = req.body;
 
     const response = await fetch("https://api.xendit.co/v2/invoices", {

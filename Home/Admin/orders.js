@@ -487,6 +487,40 @@ async function loadAdminOrders() {
    ORDER MODAL
 ================================ */
 
+function getShipmentButton(order, orderId) {
+  const courier = String(order.courier || "").toLowerCase();
+
+  if (courier.includes("lalamove") || courier.includes("same day")) {
+    return `
+      <button
+        class="primary-btn"
+        type="button"
+        onclick="bookLalamoveShipment('${escapeAttribute(orderId)}', this)"
+      >
+        Book Lalamove
+      </button>
+    `;
+  }
+
+  if (courier.includes("spx")) {
+    return `
+      <button
+        class="primary-btn"
+        type="button"
+        onclick="createSPXShipment('${escapeAttribute(orderId)}', this)"
+      >
+        Create SPX Shipment
+      </button>
+    `;
+  }
+
+  return `
+    <button class="secondary-btn" type="button" disabled>
+      No Courier Selected
+    </button>
+  `;
+}
+
 function openOrderModal(orderId) {
   const order = adminOrders.find(o =>
     String(o.external_id || o.id) === String(orderId)
@@ -506,29 +540,12 @@ function openOrderModal(orderId) {
     <p><strong>Phone:</strong> ${escapeHtml(order.customer_phone || "-")}</p>
     <p><strong>Amount:</strong> ₱${Number(order.amount || 0).toLocaleString("en-PH")}</p>
     <p><strong>Status:</strong> ${escapeHtml(order.order_status || "Processing")}</p>
-    <p><strong>Courier:</strong> ${escapeHtml(order.courier || "-")}</p>
+    <p><strong>Courier RAW:</strong> ${escapeHtml(order.courier)}</p>
     <p><strong>Tracking:</strong> ${escapeHtml(order.tracking_number || "-")}</p>
 
     <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
       
-${order.courier === "Same Day Delivery / Lalamove" ? `
-<button
-  class="primary-btn"
-  type="button"
-  onclick="bookLalamoveShipment('${escapeAttribute(orderId)}', this)"
->
-  Book Lalamove
-</button>
-` : `
-<button
-  class="primary-btn"
-  type="button"
-  onclick="createSPXShipment('${escapeAttribute(orderId)}', this)"
->
-  Create SPX Shipment
-</button>
-`}
-
+  
 <button
   class="small-btn"
   type="button"
