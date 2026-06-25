@@ -33,9 +33,9 @@ let deliveryMarker = null;
 const API_BASE_URL = "https://de-ecom-pro.onrender.com";
 
 const LALAMOVE_PICKUP = {
-  lat: "14.5995",
-  lng: "120.9842",
-  address: "Drin Electronics Metro Manila Pickup Point"
+  lat: "14.5429244",
+  lng: "121.1000368",
+  address: "Villa Esguerra Half Court, Nagpayong Pinalad Rd, Brgy Pinagbuhatan, Pasig City"
 };
 
 let cartItems = JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
