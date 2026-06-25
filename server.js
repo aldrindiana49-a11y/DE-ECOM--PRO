@@ -652,6 +652,7 @@ app.post("/api/create-payment", async (req, res) => {
       parcelInfo,
       subtotal,
       shippingFee,
+      courier,
       checkoutUrl: data.invoice_url
     });
 

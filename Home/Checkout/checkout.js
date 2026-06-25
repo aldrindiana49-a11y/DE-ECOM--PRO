@@ -946,7 +946,7 @@ async function calculateLalamoveFee() {
 
       setShippingUI(
         "failed",
-        "Same Day Delivery is not available for this address. Please use SPX.",
+        "Location not verified. Same Day Delivery currently covers Metro Manila and selected nearby areas. Please check your street or landmark details, or use SPX delivery.",
         null
       );
       return;
@@ -980,7 +980,7 @@ async function calculateLalamoveFee() {
 
     setShippingUI(
       "failed",
-      "Same Day Delivery is not available for this address. Please use SPX.",
+      "Location not verified. Same Day Delivery currently covers Metro Manila and selected nearby areas. Please check your street or landmark details, or use SPX delivery.",
       null
     );
   }
@@ -1266,7 +1266,12 @@ async function placeOrder() {
       ?.trim()
       ?.toUpperCase() || "ONLINE";
 
-  const selectedCourierNow = courierSelect?.value || selectedCourier || "";
+  const selectedCourierNow = courierSelect?.value || "";
+
+  if (!selectedCourierNow) {
+    showOrderModal("Courier Required", "Please select SPX or Same Day Delivery before placing your order.");
+    return resetPlaceOrder();
+  }
 
   const nonCodItems =
     cartItems.filter(item =>
@@ -1327,7 +1332,7 @@ async function placeOrder() {
       currentShippingQuote?.overweight
         ? "Same Day Delivery is only available for parcels up to 20kg. Please choose SPX Standard Delivery."
         : selectedCourierNow === "Same Day Delivery / Lalamove"
-          ? "Same Day Delivery is not available for this address yet. Please choose SPX Standard Delivery."
+          ? "Location not verified. Same Day Delivery currently covers Metro Manila and selected nearby areas. Please check your street or landmark details, or use SPX delivery."
           : "SPX delivery is currently unavailable in this area.\n\nPlease contact our support team for manual shipping assistance."
     );
 
@@ -1441,7 +1446,7 @@ async function placeOrder() {
     userId: user?.id || null,
     customer: { name, phone, email },
     address,
-    courier: selectedCourier || courierSelect?.value,
+    courier: selectedCourierNow,
     payment: { method: paymentMain },
     items: normalizedItems,
     subtotal: subtotalNumber,
@@ -2052,11 +2057,11 @@ function loadCustomerCheckoutInfo() {
 
         }
 
-        if (courierSelect) {
+        if (courierSelect && saved.courier) {
 
-          courierSelect.value = "";
+          courierSelect.value = saved.courier;
 
-          selectedCourier = "";
+          selectedCourier = saved.courier;
 
         }
 

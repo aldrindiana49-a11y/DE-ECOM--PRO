@@ -518,98 +518,52 @@ function openOrderModal(orderId) {
     <p><strong>Phone:</strong> ${escapeHtml(order.customer_phone || "-")}</p>
     <p><strong>Amount:</strong> ₱${Number(order.amount || 0).toLocaleString("en-PH")}</p>
     <p><strong>Status:</strong> ${escapeHtml(order.order_status || "Processing")}</p>
-    <p><strong>Courier RAW:</strong> ${escapeHtml(order.courier)}</p>
+    <p>
+  <strong>Courier:</strong>
+  ${String(order.courier || "").toLowerCase().includes("lalamove") ||
+      String(order.courier || "").toLowerCase().includes("same day")
+      ? `<span style="background:#f97316;color:#fff;padding:4px 8px;border-radius:8px;font-weight:700;">
+          LALAMOVE / SAME DAY - MANUAL BOOKING
+        </span>`
+      : `<span style="background:#2563eb;color:#fff;padding:4px 8px;border-radius:8px;font-weight:700;">
+          SPX
+        </span>`
+    }
+</p>
     <p><strong>Tracking:</strong> ${escapeHtml(order.tracking_number || "-")}</p>
 
-    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
-      
-  ${getShipmentButton(order, orderId)}
+    <div class="order-modal-actions">
+      ${getShipmentButton(order, orderId)}
 
-    <button
-      class="small-btn"
-      type="button"
-      onclick="markOrderShipped('${escapeAttribute(orderId)}', this)"
-    >
-      Mark Shipped
-    </button>
+      <button class="small-btn" type="button" onclick="markOrderShipped('${escapeAttribute(orderId)}', this)">Mark Shipped</button>
+      <button class="small-btn" type="button" onclick="markOrderInTransit('${escapeAttribute(orderId)}', this)">In Transit</button>
+      <button class="danger-btn" type="button" onclick="markOrderFailed('${escapeAttribute(orderId)}', this)">Failed Delivery</button>
+      <button class="small-btn" type="button" onclick="markOrderDelivered('${escapeAttribute(orderId)}', this)">Mark Delivered</button>
+      <button class="secondary-btn" type="button" onclick="openAWB('${escapeAttribute(orderId)}')">Print AWB</button>
+      <button class="secondary-btn" type="button" onclick="openTracking('${escapeAttribute(orderId)}')">Track Order</button>
 
-    <button
-      class="small-btn"
-      type="button"
-      onclick="markOrderInTransit('${escapeAttribute(orderId)}', this)"
-    >
-      In Transit
-    </button>
+      ${order.order_request_status ? `
+        <button class="small-btn" type="button" onclick="handleOrderRequestAction('${escapeAttribute(orderId)}')">
+          Customer Request
+        </button>
+      ` : ""}
+    </div>
 
-<button
-  class="danger-btn"
-  type="button"
-  onclick="markOrderFailed('${escapeAttribute(orderId)}', this)"
->
-  Failed Delivery
-</button>
+    <div class="order-cancel-actions">
+      <select id="cancelReason-${escapeAttribute(orderId)}" class="cancel-reason-dropdown">
+        <option value="">Select reason</option>
+        <option>Out of stock</option>
+        <option>Price error</option>
+        <option>Wrong item listing</option>
+        <option>Cannot fulfill order</option>
+        <option>Customer unreachable</option>
+        <option>Other reason</option>
+      </select>
 
-<button
-  class="small-btn"
-  type="button"
-  onclick="markOrderDelivered('${escapeAttribute(orderId)}', this)"
->
-  Mark Delivered
-</button>
-
-<button
-  class="secondary-btn"
-  type="button"
-  onclick="openAWB('${escapeAttribute(orderId)}')"
->
-  Print AWB
-</button>
-
-<button
-  class="secondary-btn"
-  type="button"
-  onclick="openTracking('${escapeAttribute(orderId)}')"
->
-  Track Order
-</button>
-
-${order.order_request_status ? `
-
-<button
-  class="small-btn"
-  type="button"
-  onclick="handleOrderRequestAction('${escapeAttribute(orderId)}')"
->
-  Customer Request
-</button>
-
-` : ""}
-
-<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-
-  <select
-    id="cancelReason-${escapeAttribute(orderId)}"
-    class="cancel-reason-dropdown"
-  >
-    <option value="">Select reason</option>
-
-    <option>Out of stock</option>
-    <option>Price error</option>
-    <option>Wrong item listing</option>
-    <option>Cannot fulfill order</option>
-    <option>Customer unreachable</option>
-    <option>Other reason</option>
-  </select>
-
-  <button
-    class="danger-btn"
-    type="button"
-    onclick="cancelOrder('${escapeAttribute(orderId)}', this)"
-  >
-    Cancel Order
-  </button>
-
-</div>
+      <button class="danger-btn" type="button" onclick="cancelOrder('${escapeAttribute(orderId)}', this)">
+        Cancel Order
+      </button>
+    </div>
   `;
 
   modal.style.display = "flex";
@@ -855,6 +809,8 @@ async function arrangeShipment(orderId, btn) {
   );
 
   const courier = String(order?.courier || "").toLowerCase();
+
+  alert("Courier detected: " + courier);
 
   if (courier.includes("lalamove") || courier.includes("same day")) {
     return bookLalamoveShipment(orderId, btn);

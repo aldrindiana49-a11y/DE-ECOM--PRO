@@ -1529,3 +1529,52 @@ body {
 .summary-box:hover {
   background: #f8fafc;
 }
+
+#orderModal {
+  z-index: 99999;
+}
+
+#orderModal .modal-box {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+#orderModalContent {
+  display: block;
+}
+
+#orderModalContent>div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+#orderModalContent button,
+#orderModalContent select {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px;
+}
+
+.order-modal-actions,
+.order-cancel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  align-items: center;
+}
+
+.order-cancel-actions {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 14px;
+}
+
+.cancel-reason-dropdown {
+  min-width: 220px;
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
