@@ -708,11 +708,11 @@ function clearCheckedCartItems() {
   let cart =
     JSON.parse(localStorage.getItem("drinCart")) || [];
 
+  const checkedKeys =
+    new Set(checkedOutItems.map(getCartItemKey));
+
   cart = cart.filter(cartItem => {
-    return !checkedOutItems.some(orderItem =>
-      String(orderItem.id) === String(cartItem.id) &&
-      String(orderItem.variantLabel || "") === String(cartItem.variantLabel || "")
-    );
+    return !checkedKeys.has(getCartItemKey(cartItem));
   });
 
   localStorage.setItem("drinCart", JSON.stringify(cart));
@@ -1340,8 +1340,7 @@ async function placeOrder() {
     }
 
     clearCheckedCartItems();
-    localStorage.removeItem("drinCart");
-
+    
     localStorage.removeItem("drinCheckoutItems");
 
     closeOrderModal();
@@ -1389,6 +1388,13 @@ async function placeOrder() {
 </div>
 `
       );
+
+      const okBtn =
+        document.getElementById("orderModalOk");
+
+      if (okBtn) {
+        okBtn.style.display = "none";
+      }
 
       return;
     }
@@ -1445,7 +1451,6 @@ async function placeOrder() {
 
       clearCheckedCartItems();
 
-      localStorage.removeItem("drinCart");
       localStorage.removeItem("drinCheckoutItems");
 
       if (isGuestCheckout) {
