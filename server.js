@@ -1323,6 +1323,96 @@ app.post("/api/lalamove/quotation", async (req, res) => {
   }
 });
 
+// ================= LALAMOVE CREATE ORDER =================
+app.post("/api/orders/:orderId/lalamove-create", async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    let orders = await readOrders();
+
+    const index = orders.findIndex(
+      order => String(order.external_id) === String(orderId)
+    );
+
+    if (index === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    const order = orders[index];
+
+    const savedAddress = order.address || {};
+
+    // TEMPORARY payload muna
+    const path = "/v3/orders";
+    const method = "POST";
+
+    const payload = {
+      data: {
+        serviceType: "MOTORCYCLE",
+        specialRequests: [],
+        stops: [
+          {
+            coordinates: {
+              lat: "14.5995",
+              lng: "120.9842"
+            },
+            address: "Your Pickup Address"
+          },
+          {
+            coordinates: {
+              lat: "14.6760",
+              lng: "121.0437"
+            },
+            address: `${savedAddress.fullAddress}, ${savedAddress.city}`
+          }
+        ]
+      }
+    };
+
+    const body = JSON.stringify(payload);
+
+    const { time, signature } =
+      generateLalamoveSignature(method, path, body);
+
+    const response = await axios.post(
+      `${process.env.LALAMOVE_BASE_URL}${path}`,
+      body,
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `hmac ${process.env.LALAMOVE_API_KEY}:${time}:${signature}`,
+          Market: process.env.LALAMOVE_MARKET || "PH",
+          "Request-ID": `drin-book-${Date.now()}`
+        }
+      }
+    );
+
+    orders[index].courier = "Lalamove";
+    orders[index].shipping_status = "BOOKED";
+    orders[index].lalamove_booking = response.data;
+    orders[index].updated_at = new Date().toISOString();
+
+    await saveOrders(orders);
+
+    res.json({
+      success: true,
+      booking: response.data
+    });
+
+  } catch (err) {
+    console.error("LALAMOVE BOOK ERROR:", err.response?.data || err.message);
+
+    res.status(500).json({
+      success: false,
+      message: "Lalamove booking failed",
+      error: err.response?.data || err.message
+    });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

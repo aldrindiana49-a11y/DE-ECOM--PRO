@@ -24,9 +24,19 @@ const courierStatus = document.getElementById("courierStatus");
 const nameInput = document.getElementById("custName");
 const phoneInput = document.getElementById("custPhone");
 const emailInput = document.getElementById("custEmail");
+const deliveryLatInput = document.getElementById("deliveryLat");
+const deliveryLngInput = document.getElementById("deliveryLng");
+const pinStatus = document.getElementById("pinStatus");
 
+let deliveryMap = null;
+let deliveryMarker = null;
 const API_BASE_URL = "https://de-ecom-pro.onrender.com";
 
+const LALAMOVE_PICKUP = {
+  lat: "14.5995",
+  lng: "120.9842",
+  address: "Drin Electronics Metro Manila Pickup Point"
+};
 
 let cartItems = JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
 
@@ -776,20 +786,11 @@ function scheduleShippingQuote() {
   // SAME DAY / LALAMOVE
   if (selectedCourier === "Same Day Delivery / Lalamove") {
 
-    currentShippingFee = 0;
-
-    currentShippingQuote = {
-      success: true,
-      courier: selectedCourier,
-      fallback: true,
-      message: "Same day delivery selected",
-    };
-
-    setShippingUI(
-      "ready",
-      "Shipping fee will be paid upon delivery.",
-      null
+    shippingQuoteTimer = setTimeout(
+      calculateLalamoveFee,
+      200
     );
+
     return;
   }
 
@@ -803,6 +804,188 @@ function scheduleShippingQuote() {
 function estimateFallbackShippingFee(courier) {
   return 0;
 }
+
+function initDeliveryMap() {
+  const mapBox = document.getElementById("deliveryMap");
+
+  if (!mapBox || typeof L === "undefined") return;
+
+  deliveryMap = L.map("deliveryMap").setView(
+    [14.5995, 120.9842],
+    12
+  );
+
+  L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap"
+    }
+  ).addTo(deliveryMap);
+
+  deliveryMap.on("click", function (e) {
+    const lat = e.latlng.lat.toFixed(6);
+    const lng = e.latlng.lng.toFixed(6);
+
+    if (deliveryMarker) {
+      deliveryMarker.setLatLng(e.latlng);
+    } else {
+      deliveryMarker = L.marker(e.latlng).addTo(deliveryMap);
+    }
+
+    deliveryLatInput.value = lat;
+    deliveryLngInput.value = lng;
+
+    if (pinStatus) {
+      pinStatus.textContent =
+        `Pinned location: ${lat}, ${lng}`;
+    }
+
+    saveCustomerCheckoutInfo();
+    scheduleShippingQuote();
+  });
+
+  setTimeout(() => {
+    deliveryMap.invalidateSize();
+  }, 500);
+}
+
+async function geocodeAddress(address) {
+  const fullAddress = [
+    address.fullAddress,
+    address.barangay,
+    address.city,
+    address.province,
+    "Philippines"
+  ].filter(Boolean).join(", ");
+
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`
+  );
+
+  const data = await res.json();
+
+  if (!data.length) {
+    throw new Error("Address could not be located");
+  }
+
+  return {
+    lat: data[0].lat,
+    lng: data[0].lon,
+    address: fullAddress
+  };
+}
+
+async function calculateLalamoveFee() {
+  setShippingUI("loading", "Checking Same Day Delivery availability...", null);
+
+  try {
+    const address = getSelectedAddress();
+
+    currentParcelInfo = calculateParcelInfo();
+
+    if (currentParcelInfo.parcelWeight > 20) {
+      currentShippingFee = null;
+
+      currentShippingQuote = {
+        success: false,
+        unsupportedArea: true,
+        overweight: true
+      };
+
+      setShippingUI(
+        "failed",
+        "Same Day Delivery is only available up to 20kg. Please use SPX.",
+        null
+      );
+
+      return;
+    }
+
+    const dropoff = await geocodeAddress(address);
+
+    const res = await fetch(`${API_BASE_URL}/api/lalamove/quotation`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        data: {
+          serviceType: "MOTORCYCLE",
+          language: "en_PH",
+          stops: [
+            {
+              coordinates: {
+                lat: LALAMOVE_PICKUP.lat,
+                lng: LALAMOVE_PICKUP.lng
+              },
+              address: LALAMOVE_PICKUP.address
+            },
+            {
+              coordinates: {
+                lat: dropoff.lat,
+                lng: dropoff.lng
+              },
+              address: dropoff.address
+            }
+          ]
+        }
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      currentShippingFee = null;
+      currentShippingQuote = {
+        success: false,
+        unsupportedArea: true,
+        courier: "Same Day Delivery / Lalamove",
+        lalamoveError: data
+      };
+
+      setShippingUI(
+        "failed",
+        "Same Day Delivery is not available for this address. Please use SPX.",
+        null
+      );
+      return;
+    }
+
+    const quote = data.data?.data;
+    const totalFee = Number(quote?.priceBreakdown?.total || 0);
+
+    currentShippingFee = totalFee;
+    currentShippingQuote = {
+      success: true,
+      courier: "Same Day Delivery / Lalamove",
+      lalamove: quote
+    };
+
+    setShippingUI(
+      "ready",
+      `Same Day Delivery Available: ${formatPrice(totalFee)}`,
+      totalFee
+    );
+
+  } catch (error) {
+    console.error("LALAMOVE FEE ERROR:", error);
+
+    currentShippingFee = null;
+    currentShippingQuote = {
+      success: false,
+      unsupportedArea: true,
+      error: error.message
+    };
+
+    setShippingUI(
+      "failed",
+      "Same Day Delivery is not available for this address. Please use SPX.",
+      null
+    );
+  }
+}
+
 async function calculateShippingFee() {
   showOrderModal(
     "Checking SPX Shipping Fee",
@@ -1129,13 +1312,23 @@ async function placeOrder() {
   }
 
   if (currentShippingFee === null) {
-    await calculateShippingFee();
+    if (selectedCourierNow === "Same Day Delivery / Lalamove") {
+      await calculateLalamoveFee();
+    } else {
+      await calculateShippingFee();
+    }
   }
 
   if (currentShippingQuote?.unsupportedArea) {
     showOrderModal(
-      "Delivery Not Available",
-      "SPX delivery is currently unavailable in this area.\n\nPlease contact our support team for manual shipping assistance."
+      currentShippingQuote?.overweight
+        ? "Parcel Too Heavy for Same Day Delivery"
+        : "Same Day Delivery Not Available",
+      currentShippingQuote?.overweight
+        ? "Same Day Delivery is only available for parcels up to 20kg. Please choose SPX Standard Delivery."
+        : selectedCourierNow === "Same Day Delivery / Lalamove"
+          ? "Same Day Delivery is not available for this address yet. Please choose SPX Standard Delivery."
+          : "SPX delivery is currently unavailable in this area.\n\nPlease contact our support team for manual shipping assistance."
     );
 
     return resetPlaceOrder();
@@ -1228,8 +1421,14 @@ async function placeOrder() {
 
   if (currentShippingQuote?.unsupportedArea) {
     showOrderModal(
-      "Delivery Not Available",
-      "SPX delivery is currently unavailable in this area.\n\nPlease contact our support team for manual shipping assistance."
+      currentShippingQuote?.overweight
+        ? "Parcel Too Heavy for Same Day Delivery"
+        : "Same Day Delivery Not Available",
+      currentShippingQuote?.overweight
+        ? "Same Day Delivery is only available for parcels up to 20kg. Please choose SPX Standard Delivery."
+        : selectedCourierNow === "Same Day Delivery / Lalamove"
+          ? "Same Day Delivery is not available for this address yet. Please choose SPX Standard Delivery."
+          : "SPX delivery is currently unavailable in this area.\n\nPlease contact our support team for manual shipping assistance."
     );
 
     return resetPlaceOrder();
@@ -1340,7 +1539,7 @@ async function placeOrder() {
     }
 
     clearCheckedCartItems();
-    
+
     localStorage.removeItem("drinCheckoutItems");
 
     closeOrderModal();
@@ -1652,6 +1851,13 @@ async function loadClaimedVoucher() {
 
   updateParcelEstimate();
   updateTotalsDisplay();
+  initDeliveryMap();
+
+  setTimeout(() => {
+    if (deliveryMap) {
+      deliveryMap.invalidateSize();
+    }
+  }, 800);
 
 })();
 

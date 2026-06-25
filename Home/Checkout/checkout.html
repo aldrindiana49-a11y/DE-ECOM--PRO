@@ -3,6 +3,8 @@
 
 <head>
 
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
   <script>
     !function (f, b, e, v, n, t, s) {
       if (f.fbq) return;
@@ -170,6 +172,20 @@
           </label>
 
           <textarea id="fullAddress" maxlength="200" placeholder="House No., Street, Landmark"></textarea>
+
+          <small class="helper-text">
+            Pin your exact delivery location for Same Day Delivery accuracy.
+          </small>
+
+          <div id="deliveryMap" style="height:280px;border-radius:14px;margin-top:10px;"></div>
+
+          <input type="hidden" id="deliveryLat" />
+          <input type="hidden" id="deliveryLng" />
+
+          <small class="helper-text" id="pinStatus">
+            Tap the map to pin exact location.
+          </small>
+
         </div>
 
       </div>
@@ -269,7 +285,10 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="checkout.js?v=100006" defer></script>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script src="checkout.js?v=100007" defer></script>
 </body>
 
 </html>

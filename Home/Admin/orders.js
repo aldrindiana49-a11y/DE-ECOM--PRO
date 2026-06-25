@@ -511,13 +511,23 @@ function openOrderModal(orderId) {
 
     <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
       
+${order.courier === "Same Day Delivery / Lalamove" ? `
+<button
+  class="primary-btn"
+  type="button"
+  onclick="bookLalamoveShipment('${escapeAttribute(orderId)}', this)"
+>
+  Book Lalamove
+</button>
+` : `
 <button
   class="primary-btn"
   type="button"
   onclick="createSPXShipment('${escapeAttribute(orderId)}', this)"
 >
-  Arrange Shipment
+  Create SPX Shipment
 </button>
+`}
 
 <button
   class="small-btn"
@@ -787,6 +797,58 @@ async function createSPXShipment(orderId, btn) {
       btn.innerText = "Arrange Shipment";
     }
 
+  }
+}
+
+async function bookLalamoveShipment(orderId, btn) {
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.innerText = "Booking Rider...";
+    }
+
+    const res = await fetch(
+      `https://de-ecom-pro.onrender.com/api/orders/${orderId}/lalamove-create`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    const result = await res.json();
+
+    if (!result.success) {
+      showToast(
+        result.message || "Lalamove booking failed",
+        "error"
+      );
+      return;
+    }
+
+    showToast(
+      "Lalamove rider booked successfully!",
+      "success"
+    );
+
+    closeOrderModal();
+
+    await loadAdminOrders();
+
+  } catch (err) {
+    console.error(err);
+
+    showToast(
+      "Lalamove server error",
+      "error"
+    );
+
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "Book Lalamove";
+    }
   }
 }
 
@@ -1393,6 +1455,7 @@ window.openOrderModal = openOrderModal;
 window.closeOrderModal = closeOrderModal;
 window.cancelOrder = cancelOrder;
 window.createSPXShipment = createSPXShipment;
+window.bookLalamoveShipment = bookLalamoveShipment;
 window.openAWB = openAWB;
 window.openTracking = openTracking;
 window.toggleShowAllOrderItems = toggleShowAllOrderItems;
