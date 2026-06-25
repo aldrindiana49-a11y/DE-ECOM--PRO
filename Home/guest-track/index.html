@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <link rel="icon" type="image/png" id="siteFavicon"
+        href="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/logo.png" />
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guest Order Tracking</title>
+    <link rel="stylesheet" href="guest-track.css">
+</head>
+
+<body>
+
+    <div class="track-container">
+
+        <div class="track-card">
+
+            <h2>Track Your Order</h2>
+
+            <p>
+                Enter the email you used during checkout.
+            </p>
+
+            <input type="email" id="trackEmail" placeholder="Enter your email address">
+
+            <button onclick="checkGuestOrder()">
+                Check My Order
+            </button>
+
+            <div id="trackResult"></div>
+
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="guest-track.js"></script>
+
+</body>
+
+</html>

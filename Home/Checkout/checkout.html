@@ -36,7 +36,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Checkout - Drin Electronics</title>
-  <link rel="stylesheet" href="checkout.css?v=50001" />
+  <link rel="stylesheet" href="checkout.css?v=50002" />
 </head>
 
 <body>
@@ -108,6 +108,11 @@
         <div class="form-group">
           <label for="custPhone">Phone Number</label>
           <input type="text" id="custPhone" maxlength="11" inputmode="numeric" placeholder="09XXXXXXXXX" />
+        </div>
+
+        <div class="form-group">
+          <label for="custEmail">Email Address</label>
+          <input type="email" id="custEmail" maxlength="80" placeholder="example@email.com" />
         </div>
 
         <h3>Delivery Address</h3>
@@ -264,7 +269,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="checkout.js?v=100004" defer></script>
+  <script src="checkout.js?v=100005" defer></script>
 </body>
 
 </html>

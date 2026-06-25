@@ -23,6 +23,7 @@ const courierSelect = document.getElementById("courierSelect");
 const courierStatus = document.getElementById("courierStatus");
 const nameInput = document.getElementById("custName");
 const phoneInput = document.getElementById("custPhone");
+const emailInput = document.getElementById("custEmail");
 
 const API_BASE_URL = "https://de-ecom-pro.onrender.com";
 
@@ -570,6 +571,8 @@ if (phoneInput) {
   });
 }
 
+
+
 function cleanImageForOrder(image) {
   const img = String(image || "");
 
@@ -658,45 +661,8 @@ async function syncOrderToSupabase(order) {
     data: { user }
   } = await supabaseClient.auth.getUser();
 
-  if (!user) {
-
-    showOrderModal(
-      "Login Required",
-      `
-      <div class="premium-login-alert">
-
-        <div class="premium-login-icon">
-          🔒
-        </div>
-
-        <h4>
-          Secure Checkout Required
-        </h4>
-
-        <p>
-          Please login or create your account first
-          to continue with secure checkout.
-        </p>
-
-        <div class="premium-login-actions">
-
-  <button type="button" onclick="window.location.href='https://drinelectronicsph.com/login/'">
-  Login Account
-</button>
-
-<button type="button" class="secondary-btn" onclick="window.location.href='https://drinelectronicsph.com/signup/'">
-  Create Account
-</button>
-
-</div>
-      `
-    );
-
-    return false;
-  }
-
   console.log("SAVING ORDER TO SUPABASE:", {
-    user_id: user.id,
+    user_id: user?.id || null,
     external_id: order.id,
     items: order.items,
     amount: order.total
@@ -706,7 +672,9 @@ async function syncOrderToSupabase(order) {
     .from("orders")
     .insert([
       {
-        user_id: user.id,
+        user_id: user?.id || null,
+        guest_order: order.guestOrder,
+        guest_tracking_code: order.guestTrackingCode,
         external_id: order.id,
         items: order.items,
         amount: order.total,
@@ -715,6 +683,7 @@ async function syncOrderToSupabase(order) {
         address: order.address,
         customer_name: order.customer.name,
         customer_phone: order.customer.phone,
+        customer_email: order.customer.email,
         subtotal: order.subtotal,
         shipping_fee: order.shippingFee,
         voucher_code: order.voucherCode,
@@ -1002,7 +971,7 @@ async function deductOrderStock(order) {
         "deduct_stock",
         {
           p_product_id:
-            Number(item.id),
+            Number(item.productId || item.id),
 
           p_variant_label:
             item.variantLabel ||
@@ -1019,10 +988,8 @@ async function deductOrderStock(order) {
 
     if (error) {
 
-      console.error(
-        "RPC ERROR:",
-        error
-      );
+      console.error("RPC ERROR FULL:", JSON.stringify(error, null, 2));
+      alert(JSON.stringify(error, null, 2));
 
       const itemName =
         item.name || "Item";
@@ -1109,6 +1076,7 @@ async function placeOrder() {
 
   const name = nameInput?.value.trim() || "";
   const phone = phoneInput?.value.trim() || "";
+  const email = emailInput?.value.trim() || "";
   const paymentMain =
     document.querySelector('input[name="payment"]:checked')
       ?.value
@@ -1143,6 +1111,15 @@ async function placeOrder() {
 
   if (!phone || phone.length !== 11 || !phone.startsWith("09")) {
     showOrderModal("Invalid Number", "Enter a valid 11-digit phone number (09XXXXXXXXX).");
+    return resetPlaceOrder();
+  }
+
+  if (!email || !email.includes("@")) {
+    showOrderModal(
+      "Invalid Email",
+      "Please enter a valid email address."
+    );
+
     return resetPlaceOrder();
   }
 
@@ -1222,35 +1199,7 @@ async function placeOrder() {
     data: { user }
   } = await supabaseClient.auth.getUser();
 
-  if (!user) {
-    showOrderModal(
-      "Login Required",
-      `
-    <div class="premium-login-alert">
-      <div class="premium-login-icon">🔒</div>
-
-      <h4>Secure Checkout Required</h4>
-
-      <p>
-        Please login or create your account first
-        to continue with secure checkout.
-      </p>
-
-      <div class="premium-login-actions">
-        <button type="button" onclick="window.location.href='https://drinelectronicsph.com/login/'">
-          Login Account
-        </button>
-
-        <button type="button" class="secondary-btn" onclick="window.location.href='https://drinelectronicsph.com/signup/'">
-          Create Account
-        </button>
-      </div>
-    </div>
-    `
-    );
-
-    return resetPlaceOrder();
-  }
+  const isGuestCheckout = !user;
 
   const voucherCode = localStorage.getItem("claimedVoucherCode");
 
@@ -1288,7 +1237,10 @@ async function placeOrder() {
 
   const order = {
     id: "ORD-" + Date.now(),
-    customer: { name, phone },
+    guestOrder: isGuestCheckout,
+    guestTrackingCode: isGuestCheckout ? "GUEST-" + Date.now() : "",
+    userId: user?.id || null,
+    customer: { name, phone, email },
     address,
     courier: selectedCourier || courierSelect?.value,
     payment: { method: paymentMain },
@@ -1394,6 +1346,53 @@ async function placeOrder() {
 
     closeOrderModal();
 
+    if (isGuestCheckout) {
+
+      showOrderModal(
+        "Order Successfully Placed",
+        `
+<div class="elite-order-box">
+   <div class="elite-checkmark">✓</div>
+
+   <h3>Order Successfully Secured</h3>
+
+   <div class="elite-badge">
+      PREMIUM ORDER ACCESS AVAILABLE
+   </div>
+
+   <p class="elite-desc">
+      Your order is already confirmed and reserved.
+   </p>
+
+   <p class="elite-warning">
+      Create your account now to unlock full control of this order.
+   </p>
+
+   <div class="premium-login-actions">
+
+  <button onclick="window.location.href='https://drinelectronicsph.com/signup/'">
+    Unlock My Account
+  </button>
+
+  <button class="secondary-btn"
+    onclick="window.location.href='https://drinelectronicsph.com/login/'">
+     Access Existing Account
+  </button>
+
+  <button class="guest-btn"
+    onclick="window.location.href='https://drinelectronicsph.com/'">
+    Continue Shopping
+  </button>
+
+</div>
+
+</div>
+`
+      );
+
+      return;
+    }
+
     showOrderModal(
       "Thank You!",
       `Your order has been placed successfully.`
@@ -1402,7 +1401,9 @@ async function placeOrder() {
     setTimeout(() => {
       window.location.href = "/home-orders";
     }, 1200);
+
     return;
+
   }
 
   try {
@@ -1446,6 +1447,14 @@ async function placeOrder() {
 
       localStorage.removeItem("drinCart");
       localStorage.removeItem("drinCheckoutItems");
+
+      if (isGuestCheckout) {
+
+        sessionStorage.setItem("guestCheckout", "true");
+        sessionStorage.setItem("guestOrderEmail", email);
+        sessionStorage.setItem("guestOrderId", order.id);
+
+      }
 
       sessionStorage.setItem("paymentStarted", "true");
 
@@ -1501,6 +1510,7 @@ saveCustomerBtn?.addEventListener("click", () => {
     [
       nameInput,
       phoneInput,
+      emailInput,
       fullAddressInput,
       areaGroupSelect,
       provinceSelect,
@@ -1545,6 +1555,7 @@ saveCustomerBtn?.addEventListener("click", () => {
     [
       nameInput,
       phoneInput,
+      emailInput,
       fullAddressInput,
       areaGroupSelect,
       provinceSelect,
@@ -1642,6 +1653,7 @@ async function loadClaimedVoucher() {
 [
   nameInput,
   phoneInput,
+  emailInput,
   fullAddressInput,
   areaGroupSelect,
   provinceSelect,
@@ -1687,6 +1699,7 @@ function saveCustomerCheckoutInfo() {
   const data = {
     name: nameInput?.value || "",
     phone: phoneInput?.value || "",
+    email: emailInput?.value || "",
     areaGroup: areaGroupSelect?.value || "",
     province: provinceSelect?.value || "",
     city: citySelect?.value || "",
@@ -1772,6 +1785,10 @@ function loadCustomerCheckoutInfo() {
 
   if (phoneInput) {
     phoneInput.value = saved.phone || "";
+  }
+
+  if (emailInput) {
+    emailInput.value = saved.email || "";
   }
 
   if (fullAddressInput) {
@@ -1878,6 +1895,7 @@ function loadCustomerCheckoutInfo() {
     [
       nameInput,
       phoneInput,
+      emailInput,
       fullAddressInput,
       areaGroupSelect,
       provinceSelect,
