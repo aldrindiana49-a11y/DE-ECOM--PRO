@@ -14,6 +14,7 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
+const CryptoJS = require("crypto-js");
 const { createClient } = require("@supabase/supabase-js");
 
 const supabase = createClient(
@@ -26,6 +27,25 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
+
+function generateLalamoveSignature(method, path, body = "") {
+  const time = new Date().getTime().toString();
+
+  const rawSignature =
+    `${time}\r\n${method}\r\n${path}\r\n\r\n${body}`;
+
+  const signature = CryptoJS
+    .HmacSHA256(
+      rawSignature,
+      process.env.LALAMOVE_SECRET
+    )
+    .toString();
+
+  return {
+    time,
+    signature
+  };
+}
 
 const ORDERS_FILE = path.join(__dirname, "data", "orders.json");
 
@@ -1261,6 +1281,46 @@ app.post("/test-webhook", (req, res) => {
     message: "Test webhook working",
     body: req.body
   });
+});
+
+// ================= LALAMOVE QUOTATION =================
+app.post("/api/lalamove/quotation", async (req, res) => {
+  try {
+    const path = "/v3/quotations";
+    const method = "POST";
+
+    const body = JSON.stringify(req.body);
+
+    const { time, signature } =
+      generateLalamoveSignature(method, path, body);
+
+    const response = await axios.post(
+      `${process.env.LALAMOVE_BASE_URL}${path}`,
+      body,
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          Authorization: `hmac ${process.env.LALAMOVE_API_KEY}:${time}:${signature}`,
+          Market: process.env.LALAMOVE_MARKET || "PH",
+          "Request-ID": `drin-${Date.now()}`
+        }
+      }
+    );
+
+    res.json({
+      success: true,
+      data: response.data
+    });
+
+  } catch (err) {
+    console.error("LALAMOVE QUOTATION ERROR:", err.response?.data || err.message);
+
+    res.status(500).json({
+      success: false,
+      message: "Lalamove quotation failed",
+      error: err.response?.data || err.message
+    });
+  }
 });
 
 app.listen(PORT, () => {
