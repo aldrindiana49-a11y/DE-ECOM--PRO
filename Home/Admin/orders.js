@@ -488,35 +488,13 @@ async function loadAdminOrders() {
 ================================ */
 
 function getShipmentButton(order, orderId) {
-  const courier = String(order.courier || "").toLowerCase();
-
-  if (courier.includes("lalamove") || courier.includes("same day")) {
-    return `
-      <button
-        class="primary-btn"
-        type="button"
-        onclick="bookLalamoveShipment('${escapeAttribute(orderId)}', this)"
-      >
-        Book Lalamove
-      </button>
-    `;
-  }
-
-  if (courier.includes("spx")) {
-    return `
-      <button
-        class="primary-btn"
-        type="button"
-        onclick="createSPXShipment('${escapeAttribute(orderId)}', this)"
-      >
-        Create SPX Shipment
-      </button>
-    `;
-  }
-
   return `
-    <button class="secondary-btn" type="button" disabled>
-      No Courier Selected
+    <button
+      class="primary-btn"
+      type="button"
+      onclick="arrangeShipment('${escapeAttribute(orderId)}', this)"
+    >
+      Arrange Shipment
     </button>
   `;
 }
@@ -545,22 +523,23 @@ function openOrderModal(orderId) {
 
     <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
       
-  
-<button
-  class="small-btn"
-  type="button"
-  onclick="markOrderShipped('${escapeAttribute(orderId)}', this)"
->
-  Mark Shipped
-</button>
+  ${getShipmentButton(order, orderId)}
 
-<button
-  class="small-btn"
-  type="button"
-  onclick="markOrderInTransit('${escapeAttribute(orderId)}', this)"
->
-  In Transit
-</button>
+    <button
+      class="small-btn"
+      type="button"
+      onclick="markOrderShipped('${escapeAttribute(orderId)}', this)"
+    >
+      Mark Shipped
+    </button>
+
+    <button
+      class="small-btn"
+      type="button"
+      onclick="markOrderInTransit('${escapeAttribute(orderId)}', this)"
+    >
+      In Transit
+    </button>
 
 <button
   class="danger-btn"
@@ -824,6 +803,7 @@ async function bookLalamoveShipment(orderId, btn) {
       btn.innerText = "Booking Rider...";
     }
 
+
     const res = await fetch(
       `https://de-ecom-pro.onrender.com/api/orders/${orderId}/lalamove-create`,
       {
@@ -867,6 +847,20 @@ async function bookLalamoveShipment(orderId, btn) {
       btn.innerText = "Book Lalamove";
     }
   }
+}
+
+async function arrangeShipment(orderId, btn) {
+  const order = adminOrders.find(o =>
+    String(o.external_id || o.id) === String(orderId)
+  );
+
+  const courier = String(order?.courier || "").toLowerCase();
+
+  if (courier.includes("lalamove") || courier.includes("same day")) {
+    return bookLalamoveShipment(orderId, btn);
+  }
+
+  return createSPXShipment(orderId, btn);
 }
 
 function openAWB(orderId) {
@@ -1442,8 +1436,7 @@ async function bulkArrangeShipment() {
 
   for (const orderId of selectedOrders) {
 
-    await createSPXShipment(orderId);
-
+    await arrangeShipment(orderId);
   }
 
   showToast(
@@ -1473,6 +1466,7 @@ window.closeOrderModal = closeOrderModal;
 window.cancelOrder = cancelOrder;
 window.createSPXShipment = createSPXShipment;
 window.bookLalamoveShipment = bookLalamoveShipment;
+window.arrangeShipment = arrangeShipment;
 window.openAWB = openAWB;
 window.openTracking = openTracking;
 window.toggleShowAllOrderItems = toggleShowAllOrderItems;
