@@ -517,13 +517,8 @@ function updateCourierOptions() {
     courierSelect.appendChild(opt);
   });
 
-  if (currentValue) {
-    courierSelect.value = currentValue;
-    selectedCourier = currentValue;
-  } else {
-    courierSelect.value = "SPX";
-    selectedCourier = "SPX";
-  }
+  courierSelect.value = "";
+  selectedCourier = "";
 
   if (courierStatus) {
     courierStatus.textContent = selectedCourier
@@ -531,7 +526,11 @@ function updateCourierOptions() {
       : "Please select courier";
   }
 
-  saveCustomerCheckoutInfo();
+  if (selectedCourier) {
+    saveCustomerCheckoutInfo();
+  }
+
+  scheduleShippingQuote();
 }
 
 function showOrderModal(title, message, showLoader = false) {
@@ -2089,11 +2088,12 @@ function loadCustomerCheckoutInfo() {
 
         }
 
-        if (courierSelect && saved.courier) {
+        // RESET COURIER ONLY
+        if (courierSelect) {
 
-          courierSelect.value = saved.courier;
+          courierSelect.value = "";
 
-          selectedCourier = saved.courier;
+          selectedCourier = "";
 
         }
 
