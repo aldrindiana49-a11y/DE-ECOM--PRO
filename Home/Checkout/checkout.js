@@ -520,6 +520,9 @@ function updateCourierOptions() {
   if (currentValue) {
     courierSelect.value = currentValue;
     selectedCourier = currentValue;
+  } else {
+    courierSelect.value = "SPX";
+    selectedCourier = "SPX";
   }
 
   if (courierStatus) {
@@ -527,6 +530,8 @@ function updateCourierOptions() {
       ? `${selectedCourier} selected`
       : "Please select courier";
   }
+
+  saveCustomerCheckoutInfo();
 }
 
 function showOrderModal(title, message, showLoader = false) {
@@ -811,7 +816,7 @@ function initDeliveryMap() {
   if (!mapBox || typeof L === "undefined") return;
 
   deliveryMap = L.map("deliveryMap").setView(
-    [14.5995, 120.9842],
+    [14.5429244, 121.1000368],
     12
   );
 
@@ -1219,6 +1224,15 @@ async function deductOrderStock(order) {
   }
 }
 
+function focusCustomerEdit() {
+  enableCustomerEdit();
+
+  document.getElementById("saveCustomerBtn")?.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+}
+
 async function placeOrder() {
 
   if (isPlacingOrder) return;
@@ -1293,16 +1307,19 @@ async function placeOrder() {
   }
 
   if (!name || name.length < 3) {
+    focusCustomerEdit();
     showOrderModal("Invalid Name", "Name must be at least 3 characters.");
     return resetPlaceOrder();
   }
 
   if (!phone || phone.length !== 11 || !phone.startsWith("09")) {
+    focusCustomerEdit();
     showOrderModal("Invalid Number", "Enter a valid 11-digit phone number (09XXXXXXXXX).");
     return resetPlaceOrder();
   }
 
   if (!email || !email.includes("@")) {
+    focusCustomerEdit();
     showOrderModal(
       "Invalid Email",
       "Please enter a valid email address."
@@ -1312,6 +1329,7 @@ async function placeOrder() {
   }
 
   if (!isAddressComplete()) {
+    focusCustomerEdit();
     showOrderModal("Incomplete Details", "Please complete all address fields.");
     return resetPlaceOrder();
   }
@@ -1971,19 +1989,33 @@ function enableCustomerEdit() {
 
   if (body) {
     body.classList.remove("collapsed");
-    const toggleBtn =
-      document.getElementById(
-        "toggleCustomerBtn"
-      );
-
-    if (toggleBtn) {
-      toggleBtn.textContent =
-        "Show Less";
-    }
   }
 
-  const btn = document.getElementById("toggleCustomerBtn");
-  if (btn) btn.textContent = "Show Less";
+  const toggleBtn = document.getElementById("toggleCustomerBtn");
+  if (toggleBtn) {
+    toggleBtn.textContent = "Show Less";
+  }
+
+  // RE-ENABLE INPUTS
+  [
+    nameInput,
+    phoneInput,
+    emailInput,
+    fullAddressInput,
+    areaGroupSelect,
+    provinceSelect,
+    citySelect,
+    barangaySelect
+  ].forEach(input => {
+    if (input) input.disabled = false;
+  });
+
+  // SAVE BUTTON ACTIVE AGAIN
+  if (saveCustomerBtn) {
+    saveCustomerBtn.textContent = "Save";
+  }
+
+  customerSaved = false;
 }
 
 function loadCustomerCheckoutInfo() {
