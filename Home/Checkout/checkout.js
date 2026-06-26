@@ -881,6 +881,12 @@ async function geocodeAddress(address) {
 }
 
 async function calculateLalamoveFee() {
+  showOrderModal(
+    "Checking Same Day Delivery",
+    "Please wait while we check Lalamove availability and shipping rate...",
+    true
+  );
+
   setShippingUI("loading", "Checking Same Day Delivery availability...", null);
 
   try {
@@ -902,7 +908,7 @@ async function calculateLalamoveFee() {
         "Same Day Delivery is only available up to 20kg. Please use SPX.",
         null
       );
-
+      closeOrderModal();
       return;
     }
 
@@ -953,6 +959,7 @@ async function calculateLalamoveFee() {
         "Location not verified. Same Day Delivery currently covers Metro Manila and selected nearby areas. Please check your street or landmark details, or use SPX delivery.",
         null
       );
+      closeOrderModal();
       return;
     }
 
@@ -972,6 +979,14 @@ async function calculateLalamoveFee() {
       totalFee
     );
 
+    document.querySelector(".checkout-summary")
+      ?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+    closeOrderModal();
+
   } catch (error) {
     console.error("LALAMOVE FEE ERROR:", error);
 
@@ -987,8 +1002,10 @@ async function calculateLalamoveFee() {
       "Location not verified. Same Day Delivery currently covers Metro Manila and selected nearby areas. Please check your street or landmark details, or use SPX delivery.",
       null
     );
+    closeOrderModal();
   }
 }
+
 
 async function calculateShippingFee() {
   showOrderModal(
