@@ -879,7 +879,7 @@ async function searchLocation(query) {
     return;
   }
 
-  if (!query || query.length < 3) {
+  if (!query || query.length < 4) {
     mapSearchResults.innerHTML = "";
     return;
   }
@@ -2561,8 +2561,30 @@ function switchToOnlinePayment() {
     ?.remove();
 }
 
+const mapSearchBtn = document.getElementById("mapSearchBtn");
+
+if (mapSearchBtn) {
+  mapSearchBtn.addEventListener("click", function () {
+    const query = mapSearchInput.value.trim();
+
+    if (query.length < 4) {
+      mapSearchResults.innerHTML = `
+        <div class="map-result-item">
+          Please enter a more specific location.
+        </div>
+      `;
+      return;
+    }
+
+    searchLocation(query);
+  });
+}
+
 if (mapSearchInput) {
-  mapSearchInput.addEventListener("input", function () {
-    searchLocation(this.value);
+  mapSearchInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      mapSearchBtn?.click();
+    }
   });
 }

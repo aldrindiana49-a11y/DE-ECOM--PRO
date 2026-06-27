@@ -38,7 +38,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Checkout - Drin Electronics</title>
-  <link rel="stylesheet" href="checkout.css?v=50012" />
+  <link rel="stylesheet" href="checkout.css?v=50013" />
 </head>
 
 <body>
@@ -178,6 +178,14 @@
           <input type="text" id="mapSearchInput" class="map-search-input"
             placeholder="Search street, building, subdivision, or landmark" autocomplete="off" />
 
+          <button type="button" id="mapSearchBtn" class="map-search-btn">
+            Search Location
+          </button>
+
+          <small class="map-search-note">
+            ⌨️ Type your location then press <strong>Enter</strong> or tap Search Location
+          </small>
+
           <div id="mapSearchResults" class="map-search-results"></div>
 
           <div id="deliveryMap" style="height:280px;border-radius:14px;margin-top:10px;"></div>
@@ -291,7 +299,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <script src="checkout.js?v=1000018" defer></script>
+  <script src="checkout.js?v=1000020" defer></script>
 </body>
 
 </html>

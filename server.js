@@ -1290,23 +1290,27 @@ app.get("/api/location-search", async (req, res) => {
   try {
     const q = req.query.q;
 
-    if (!q || q.length < 3) {
+    if (!q || q.length < 4) {
       return res.json([]);
     }
 
     const url =
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q + ", Philippines")}&limit=5`;
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q + ", Philippines")}&limit=3`;
 
     const response = await axios.get(url, {
       headers: {
-        "User-Agent": "DrinElectronics/1.0"
-      }
+        "User-Agent": "Mozilla/5.0 DrinElectronics contact@drinelectronicsph.com"
+      },
+      timeout: 5000
     });
 
     res.json(response.data);
 
   } catch (error) {
-    console.error("LOCATION SEARCH ERROR:", error.message);
+    console.error(
+      "LOCATION SEARCH ERROR FULL:",
+      error.response?.data || error.message
+    );
 
     res.status(500).json({
       success: false,
