@@ -27,6 +27,8 @@ const emailInput = document.getElementById("custEmail");
 const deliveryLatInput = document.getElementById("deliveryLat");
 const deliveryLngInput = document.getElementById("deliveryLng");
 const pinStatus = document.getElementById("pinStatus");
+const mapSearchInput = document.getElementById("mapSearchInput");
+const mapSearchResults = document.getElementById("mapSearchResults");
 
 let deliveryMap = null;
 let deliveryMarker = null;
@@ -757,6 +759,18 @@ function getSelectedAddress() {
 function isAddressComplete() {
   const address = getSelectedAddress();
 
+  const isLalamove =
+    courierSelect?.value === "Same Day Delivery / Lalamove";
+
+  if (isLalamove) {
+    return Boolean(
+      address.areaGroup &&
+      address.province &&
+      address.city &&
+      address.barangay
+    );
+  }
+
   return Boolean(
     address.areaGroup &&
     address.province &&
@@ -857,6 +871,81 @@ function initDeliveryMap() {
   }, 500);
 }
 
+async function searchLocation(query) {
+  console.log("Searching location:", query);
+
+  if (!mapSearchInput || !mapSearchResults) {
+    console.log("Search input/results missing");
+    return;
+  }
+
+  if (!query || query.length < 3) {
+    mapSearchResults.innerHTML = "";
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/api/location-search?q=${encodeURIComponent(query)}`
+    );
+
+    const data = await res.json();
+
+    console.log("Map search results:", data);
+
+    mapSearchResults.innerHTML = "";
+
+    if (!data.length) {
+      mapSearchResults.innerHTML = `
+        <div class="map-result-item">
+          No location found. Try adding city name.
+        </div>
+      `;
+      return;
+    }
+
+    data.forEach(place => {
+      const div = document.createElement("div");
+      div.className = "map-result-item";
+      div.textContent = place.display_name;
+
+      div.onclick = function () {
+        const lat = parseFloat(place.lat);
+        const lng = parseFloat(place.lon);
+
+        deliveryMap.setView([lat, lng], 17);
+
+        if (deliveryMarker) {
+          deliveryMarker.setLatLng([lat, lng]);
+        } else {
+          deliveryMarker = L.marker([lat, lng]).addTo(deliveryMap);
+        }
+
+        deliveryLatInput.value = lat;
+        deliveryLngInput.value = lng;
+
+        pinStatus.textContent = "Location selected successfully";
+        mapSearchInput.value = place.display_name;
+        mapSearchResults.innerHTML = "";
+
+        saveCustomerCheckoutInfo();
+        scheduleShippingQuote();
+      };
+
+      mapSearchResults.appendChild(div);
+    });
+
+  } catch (error) {
+    console.error("MAP SEARCH ERROR:", error);
+
+    mapSearchResults.innerHTML = `
+      <div class="map-result-item">
+        Search service unavailable. Try again.
+      </div>
+    `;
+  }
+}
+
 async function geocodeAddress(address) {
   const fullAddress = [
     address.fullAddress,
@@ -867,7 +956,7 @@ async function geocodeAddress(address) {
   ].filter(Boolean).join(", ");
 
   const res = await fetch(
-    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`
+    `${API_BASE_URL}/api/location-search?q=${encodeURIComponent(fullAddress)}`
   );
 
   const data = await res.json();
@@ -915,7 +1004,47 @@ async function calculateLalamoveFee() {
       return;
     }
 
-    const dropoff = await geocodeAddress(address);
+    const pinnedLat = deliveryLatInput?.value;
+    const pinnedLng = deliveryLngInput?.value;
+
+    if (!pinnedLat || !pinnedLng) {
+      showOrderModal(
+        "Location Required",
+        "Please search and select your exact delivery location for Same Day Delivery."
+      );
+
+      const okBtn = document.getElementById("orderModalOk");
+
+      if (okBtn) {
+        okBtn.onclick = function () {
+          closeOrderModal();
+          enableCustomerEdit();
+
+          mapSearchInput?.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
+
+          setTimeout(() => {
+            mapSearchInput?.focus();
+          }, 400);
+        };
+      }
+
+      return;
+    }
+
+    const dropoff = {
+      lat: pinnedLat,
+      lng: pinnedLng,
+      address: [
+        address.fullAddress,
+        address.barangay,
+        address.city,
+        address.province,
+        "Philippines"
+      ].filter(Boolean).join(", ")
+    };
 
     const res = await fetch(`${API_BASE_URL}/api/lalamove/quotation`, {
       method: "POST",
@@ -1743,10 +1872,59 @@ async function placeOrder() {
   }
 }
 
+function updateDeliveryAddressUI() {
+  const isLalamove =
+    courierSelect?.value === "Same Day Delivery / Lalamove";
+
+  const fullAddressGroup = fullAddressInput?.closest(".form-group");
+  const mapSearchBox = mapSearchInput;
+  const mapResultsBox = mapSearchResults;
+  const mapBox = document.getElementById("deliveryMap");
+
+  if (fullAddressInput) {
+    fullAddressInput.disabled = isLalamove;
+    fullAddressInput.required = !isLalamove;
+
+    if (isLalamove) {
+      fullAddressInput.value = "";
+      fullAddressInput.placeholder = "Not needed for Lalamove. Use location search below.";
+    } else {
+      fullAddressInput.placeholder = "House No., Street, Landmark";
+    }
+  }
+
+  if (mapSearchBox) {
+    mapSearchBox.style.display = isLalamove ? "block" : "none";
+  }
+
+  if (mapResultsBox) {
+    mapResultsBox.style.display = isLalamove ? "block" : "none";
+  }
+
+  if (mapBox) {
+    mapBox.style.display = isLalamove ? "block" : "none";
+  }
+
+  if (pinStatus) {
+    pinStatus.style.display = isLalamove ? "block" : "none";
+    pinStatus.textContent = isLalamove
+      ? "Search and select exact location for Same Day Delivery."
+      : "";
+  }
+
+  setTimeout(() => {
+    if (isLalamove && deliveryMap) {
+      deliveryMap.invalidateSize();
+    }
+  }, 300);
+}
+
 
 courierSelect?.addEventListener("change", function () {
 
   selectedCourier = this.value;
+
+  updateDeliveryAddressUI();
 
   if (courierStatus) {
 
@@ -2381,4 +2559,10 @@ function switchToOnlinePayment() {
   document
     .querySelector(".premium-noncod-popup")
     ?.remove();
+}
+
+if (mapSearchInput) {
+  mapSearchInput.addEventListener("input", function () {
+    searchLocation(this.value);
+  });
 }

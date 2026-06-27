@@ -164,8 +164,6 @@
           </select>
         </div>
 
-
-
         <div class="form-group">
           <label for="fullAddress">
             House No. / Street / Landmark
@@ -174,8 +172,13 @@
           <textarea id="fullAddress" maxlength="200" placeholder="House No., Street, Landmark"></textarea>
 
           <small class="helper-text">
-            Pin your exact delivery location for Same Day Delivery accuracy.
+            Search your exact location for Same Day Delivery.
           </small>
+
+          <input type="text" id="mapSearchInput" class="map-search-input"
+            placeholder="Search street, building, subdivision, or landmark" autocomplete="off" />
+
+          <div id="mapSearchResults" class="map-search-results"></div>
 
           <div id="deliveryMap" style="height:280px;border-radius:14px;margin-top:10px;"></div>
 
@@ -183,7 +186,7 @@
           <input type="hidden" id="deliveryLng" />
 
           <small class="helper-text" id="pinStatus">
-            Tap the map to pin exact location.
+            Search your exact location for Same Day Delivery.
           </small>
 
         </div>
@@ -288,7 +291,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <script src="checkout.js?v=1000015" defer></script>
+  <script src="checkout.js?v=1000018" defer></script>
 </body>
 
 </html>

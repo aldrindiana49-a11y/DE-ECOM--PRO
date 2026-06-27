@@ -1285,6 +1285,36 @@ app.post("/test-webhook", (req, res) => {
   });
 });
 
+// ================= LOCATION SEARCH PROXY =================
+app.get("/api/location-search", async (req, res) => {
+  try {
+    const q = req.query.q;
+
+    if (!q || q.length < 3) {
+      return res.json([]);
+    }
+
+    const url =
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q + ", Philippines")}&limit=5`;
+
+    const response = await axios.get(url, {
+      headers: {
+        "User-Agent": "DrinElectronics/1.0"
+      }
+    });
+
+    res.json(response.data);
+
+  } catch (error) {
+    console.error("LOCATION SEARCH ERROR:", error.message);
+
+    res.status(500).json({
+      success: false,
+      message: "Location search failed"
+    });
+  }
+});
+
 // ================= LALAMOVE QUOTATION =================
 app.post("/api/lalamove/quotation", async (req, res) => {
   try {
