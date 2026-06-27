@@ -65,11 +65,18 @@ function redirectIfNoCheckoutItems() {
   const checkout = JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
   const cart = JSON.parse(localStorage.getItem("drinCart")) || [];
 
-  const cartKeys = new Set(cart.map(getCartItemKey));
-
-  const validCheckout = checkout.filter(item =>
-    cartKeys.has(getCartItemKey(item))
+  const cartMap = new Map(
+    cart.map(item => [getCartItemKey(item), item])
   );
+
+  const validCheckout = checkout
+    .map(item => {
+      const latestCartItem =
+        cartMap.get(getCartItemKey(item));
+
+      return latestCartItem || null;
+    })
+    .filter(Boolean);
 
   if (!validCheckout.length) {
     cartItems = [];
@@ -1432,6 +1439,16 @@ async function placeOrder() {
   if (isPlacingOrder) return;
 
   isPlacingOrder = true;
+
+  if (!redirectIfNoCheckoutItems()) {
+    isPlacingOrder = false;
+    return;
+  }
+
+  renderCheckout();
+
+  cartItems =
+    JSON.parse(localStorage.getItem("drinCheckoutItems")) || [];
 
   const resetPlaceOrder = () => {
     isPlacingOrder = false;
