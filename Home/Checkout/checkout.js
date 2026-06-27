@@ -868,8 +868,11 @@ function initDeliveryMap() {
     deliveryLngInput.value = lng;
 
     if (pinStatus) {
+      pinStatus.classList.remove("pin-warning");
+      pinStatus.classList.add("pin-success");
+
       pinStatus.textContent =
-        `Pinned location: ${lat}, ${lng}`;
+        "✅ Pinned location selected";
     }
 
     saveCustomerCheckoutInfo();
@@ -905,10 +908,17 @@ async function searchLocation(query) {
 
     mapSearchResults.innerHTML = "";
 
+    mapSearchResults.innerHTML = `
+
+  <div class="map-tap-hint">
+    👇 Tap one address below to confirm your delivery pin
+  </div>
+  `;
+
     if (!data.length) {
       mapSearchResults.innerHTML = `
         <div class="map-result-item">
-          No location found. Try adding city name.
+          ❌ No address found. Try adding city or landmark.
         </div>
       `;
       return;
@@ -934,7 +944,9 @@ async function searchLocation(query) {
         deliveryLatInput.value = lat;
         deliveryLngInput.value = lng;
 
-        pinStatus.textContent = "Location selected successfully";
+        pinStatus.classList.remove("pin-warning");
+        pinStatus.classList.add("pin-success");
+        pinStatus.textContent = "✅ Location selected successfully";
         mapSearchInput.value = place.display_name;
         mapSearchResults.innerHTML = "";
 
@@ -1593,6 +1605,33 @@ async function placeOrder() {
     return resetPlaceOrder();
   }
 
+  const latestCart =
+    JSON.parse(localStorage.getItem("drinCart")) || [];
+
+  const latestMap =
+    new Map(latestCart.map(item => [getCartItemKey(item), item]));
+
+  const verifiedItems =
+    cartItems.map(item =>
+      latestMap.get(getCartItemKey(item))
+    ).filter(Boolean);
+
+  if (verifiedItems.length !== cartItems.length) {
+    showOrderModal(
+      "Cart Updated",
+      "Your cart changed. Please review your checkout again."
+    );
+
+    localStorage.removeItem("drinCheckoutItems");
+
+    return resetPlaceOrder();
+  }
+
+  cartItems = verifiedItems;
+
+  renderCheckout();
+  updateTotalsDisplay();
+
   const subtotalNumber = getCheckoutTotal();
   const handlingFee = 25;
 
@@ -1996,9 +2035,13 @@ function updateDeliveryAddressUI() {
   }
 
   if (pinStatus) {
+    pinStatus.classList.remove("pin-warning");
+    pinStatus.classList.remove("pin-success");
+
     pinStatus.style.display = isLalamove ? "block" : "none";
+
     pinStatus.textContent = isLalamove
-      ? "Search and select exact location for Same Day Delivery."
+      ? "Search location then tap one address below to confirm pin."
       : "";
   }
 
@@ -2692,8 +2735,11 @@ if (mapSearchInput) {
       if (deliveryLngInput) deliveryLngInput.value = "";
 
       if (pinStatus) {
+        pinStatus.classList.remove("pin-warning");
+        pinStatus.classList.remove("pin-success");
+
         pinStatus.textContent =
-          "Search and select exact location for Same Day Delivery.";
+          "Search location then tap one address below to confirm pin.";
       }
 
       currentShippingFee = null;

@@ -999,18 +999,6 @@ body {
   z-index: 99999;
 }
 
-.map-result-item {
-  padding: 12px;
-  font-size: 13px;
-  border-bottom: 1px solid #f1f5f9;
-  cursor: pointer;
-  color: #111827;
-  background: white;
-}
-
-.map-result-item:hover {
-  background: #ecfeff;
-}
 
 .map-search-btn {
   width: 100%;
@@ -1035,4 +1023,83 @@ body {
   border-color: #dc2626 !important;
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
   background: #fff5f5 !important;
+}
+
+#pinStatus {
+  display: block;
+  margin-top: 8px;
+  font-weight: 700;
+}
+
+#pinStatus.pin-warning {
+  color: #c2410c;
+  background: #fff7ed;
+  border: 1px solid #fb923c;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+#pinStatus.pin-success {
+  color: #166534;
+  background: #f0fdf4;
+  border: 1px solid #22c55e;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+.map-results-active {
+  border: 2px solid #fb923c;
+  box-shadow: 0 0 0 4px rgba(251, 146, 60, 0.18);
+}
+
+
+.map-tap-hint {
+  margin-bottom: 8px;
+  padding: 10px;
+  background: #fff7ed;
+  border: 2px solid #fb923c;
+  border-radius: 10px;
+  color: #c2410c;
+  font-weight: 700;
+  font-size: 13px;
+  animation: pulseHint 1.2s infinite;
+}
+
+
+.map-result-item {
+  padding: 12px;
+  font-size: 13px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #111827;
+  border: 2px solid #fdba74;
+  background: #fffaf5;
+  transition: 0.2s ease;
+}
+
+/* mas highlighted first suggestion */
+.map-result-item:first-of-type {
+  border: 2px solid #f97316;
+  background: #fff7ed;
+  font-weight: 700;
+}
+
+.map-result-item:hover {
+  background: #ecfeff;
+  transform: scale(1.01);
+}
+
+@keyframes pulseHint {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.01);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
