@@ -1876,20 +1876,22 @@ function updateDeliveryAddressUI() {
   const isLalamove =
     courierSelect?.value === "Same Day Delivery / Lalamove";
 
-  const fullAddressGroup = fullAddressInput?.closest(".form-group");
   const mapSearchBox = mapSearchInput;
   const mapResultsBox = mapSearchResults;
   const mapBox = document.getElementById("deliveryMap");
+  const mapSearchBtn = document.getElementById("mapSearchBtn");
+  const mapSearchNote = document.querySelector(".map-search-note");
 
   if (fullAddressInput) {
-    fullAddressInput.disabled = isLalamove;
-    fullAddressInput.required = !isLalamove;
+    fullAddressInput.disabled = false;
+    fullAddressInput.required = true;
 
     if (isLalamove) {
-      fullAddressInput.value = "";
-      fullAddressInput.placeholder = "Not needed for Lalamove. Use location search below.";
+      fullAddressInput.placeholder =
+        "Enter complete address for admin booking (House No., Street, Landmark)";
     } else {
-      fullAddressInput.placeholder = "House No., Street, Landmark";
+      fullAddressInput.placeholder =
+        "House No., Street, Landmark";
     }
   }
 
@@ -1903,6 +1905,14 @@ function updateDeliveryAddressUI() {
 
   if (mapBox) {
     mapBox.style.display = isLalamove ? "block" : "none";
+  }
+
+  if (mapSearchBtn) {
+    mapSearchBtn.style.display = isLalamove ? "block" : "none";
+  }
+
+  if (mapSearchNote) {
+    mapSearchNote.style.display = isLalamove ? "block" : "none";
   }
 
   if (pinStatus) {
@@ -2095,6 +2105,7 @@ async function loadClaimedVoucher() {
   updateParcelEstimate();
   updateTotalsDisplay();
   initDeliveryMap();
+  updateDeliveryAddressUI();
 
   setTimeout(() => {
     if (deliveryMap) {
