@@ -1389,6 +1389,41 @@ function focusCustomerEdit() {
   });
 }
 
+function markRequiredFields(fields) {
+  let firstEmpty = null;
+
+  fields.forEach((field) => {
+    if (!field) return;
+
+    field.classList.remove("input-error");
+
+    if (!field.value || !field.value.trim()) {
+      field.classList.add("input-error");
+
+      if (!firstEmpty) {
+        firstEmpty = field;
+      }
+    }
+  });
+
+  if (firstEmpty) {
+    enableCustomerEdit();
+
+    firstEmpty.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+    setTimeout(() => {
+      firstEmpty.focus();
+    }, 400);
+
+    return false;
+  }
+
+  return true;
+}
+
 async function placeOrder() {
 
   if (isPlacingOrder) return;
@@ -1407,22 +1442,22 @@ async function placeOrder() {
     return;
   };
 
-  if (
-    !nameInput?.value ||
-    !phoneInput?.value ||
-    !fullAddressInput?.value
-  ) {
-    enableCustomerEdit();
+  const requiredFields = [
+    nameInput,
+    phoneInput,
+    emailInput,
+    areaGroupSelect,
+    provinceSelect,
+    citySelect,
+    barangaySelect,
+    fullAddressInput
+  ];
 
+  if (!markRequiredFields(requiredFields)) {
     showOrderModal(
-      "Customer Details Required",
-      "Please fill up and save your customer details first."
+      "Incomplete Details",
+      "Please fill up all highlighted required fields."
     );
-
-    document.getElementById("customerDetailsBody")?.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
 
     return resetPlaceOrder();
   }
