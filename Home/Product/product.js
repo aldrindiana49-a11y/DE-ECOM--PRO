@@ -2294,3 +2294,12 @@ function closeReviewImage() {
 window.openReviewImage = openReviewImage;
 window.closeReviewImage = closeReviewImage;
 
+
+
+function openDeliveryInfo() {
+  document.getElementById("deliveryModal").classList.add("show");
+}
+
+function closeDeliveryInfo() {
+  document.getElementById("deliveryModal").classList.remove("show");
+}

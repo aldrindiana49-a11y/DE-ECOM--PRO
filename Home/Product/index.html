@@ -62,7 +62,7 @@
 
   <link rel="stylesheet" href="../style.css?v=10003" />
   <link rel="stylesheet" href="../chat/chat.css?v=20">
-  <link rel="stylesheet" href="product.css?v=10009" />
+  <link rel="stylesheet" href="product.css?v=10020" />
 </head>
 
 <body>
@@ -261,10 +261,19 @@
 
           <div class="delivery-badge">
             <div class="delivery-icon">⚡</div>
+
             <div class="delivery-text">
+
               <strong>GET IT TODAY</strong>
+
               <span>Same Day Delivery via Lalamove</span>
+
               <small>📍 Metro Manila & Nearby Areas</small>
+
+              <button class="delivery-note-btn" onclick="openDeliveryInfo()">
+                ⓘ Learn how Same Day Delivery works
+              </button>
+
             </div>
           </div>
 
@@ -592,6 +601,36 @@
   </div>
 
   <div id="cartToast" class="cart-toast"></div>
+
+  <div id="deliveryModal" class="delivery-modal">
+
+    <div class="delivery-modal-box">
+
+      <button class="delivery-close-btn" onclick="closeDeliveryInfo()">
+        ✕
+      </button>
+
+      <h3>🚚 Same Day Delivery</h3>
+
+      <div class="delivery-info-list">
+
+        <p>✓ Available for Metro Manila & Nearby Areas</p>
+
+        <p>✓ Place your order through our platform</p>
+
+        <p>✓ We verify your address after checkout</p>
+
+        <p>✓ Shipping fee depends on Lalamove rates</p>
+
+        <p>✓ Once confirmed, we dispatch immediately</p>
+
+        <p>⚡ Need urgent delivery? Contact us after checkout</p>
+
+      </div>
+
+    </div>
+
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
