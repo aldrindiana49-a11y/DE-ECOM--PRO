@@ -2493,3 +2493,46 @@ img.lazy-image.loaded {
   font-size: 14px;
   font-weight: 700;
 }
+
+.delivery-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+  color: white;
+  box-shadow: 0 6px 18px rgba(245, 158, 11, .35);
+}
+
+.delivery-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.delivery-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+
+.delivery-text strong {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.delivery-text span {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.delivery-text small {
+  font-size: 12px;
+}
