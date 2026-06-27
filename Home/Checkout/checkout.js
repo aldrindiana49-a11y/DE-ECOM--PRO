@@ -355,10 +355,13 @@ function updateTotalsDisplay() {
 
   }
 
+  const isLalamove =
+    selectedCourier === "Same Day Delivery / Lalamove";
+
   const grandTotal =
     subtotal -
     voucherDiscount +
-    (Number(currentShippingFee) || 0) +
+    (isLalamove ? 0 : (Number(currentShippingFee) || 0)) +
     HANDLING_FEE;
 
   if (checkoutSubtotal) {
@@ -975,9 +978,17 @@ async function calculateLalamoveFee() {
 
     setShippingUI(
       "ready",
-      `Same Day Delivery Available: ${formatPrice(totalFee)}`,
+      `Estimated Shipping Fee: ${formatPrice(totalFee)}
+Actual shipping fee depends on final parcel size, weight, route, waiting time, and rider adjustments.`,
       totalFee
     );
+
+    if (shippingStatus) {
+      shippingStatus.innerHTML =
+        `Minimum estimated fee only.<br>
+    Actual shipping fee may vary depending on parcel size, route distance, waiting time, and rider adjustments.<br><br>
+    This delivery fee is not included in checkout and will be paid directly to the Lalamove rider upon delivery.`;
+    }
 
     document.querySelector(".checkout-summary")
       ?.scrollIntoView({
@@ -1375,7 +1386,15 @@ async function placeOrder() {
 
   const subtotalNumber = getCheckoutTotal();
   const handlingFee = 25;
-  const shippingFeeNumber = Number(currentShippingFee) || 0;
+
+  const isLalamoveOrder =
+    selectedCourierNow === "Same Day Delivery / Lalamove";
+
+  const shippingFeeNumber =
+    isLalamoveOrder ? 0 : Number(currentShippingFee) || 0;
+
+  const estimatedLalamoveFee =
+    isLalamoveOrder ? Number(currentShippingFee) || 0 : 0;
 
   const totalNumber =
     subtotalNumber -
@@ -1485,6 +1504,13 @@ async function placeOrder() {
     items: normalizedItems,
     subtotal: subtotalNumber,
     shippingFee: shippingFeeNumber,
+
+    estimatedLalamoveFee: estimatedLalamoveFee,
+
+    shippingNote: isLalamoveOrder
+      ? "Lalamove fee is estimated only. Customer pays rider directly."
+      : "",
+
     voucherCode: voucherCode || "",
     voucherDiscount: voucherDiscount || 0,
     parcelInfo: currentParcelInfo,
