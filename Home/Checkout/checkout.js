@@ -753,6 +753,9 @@ function getSelectedAddress() {
     barangay: barangaySelect?.value || "",
     zip: cityData?.zip || "",
     fullAddress: fullAddressInput?.value.trim() || "",
+    lat: deliveryLatInput?.value || "",
+    lng: deliveryLngInput?.value || "",
+    pinAddress: mapSearchInput?.value.trim() || ""
   };
 }
 
@@ -1523,6 +1526,31 @@ async function placeOrder() {
     focusCustomerEdit();
     showOrderModal("Incomplete Details", "Please complete all address fields.");
     return resetPlaceOrder();
+  }
+
+  if (selectedCourierNow === "Same Day Delivery / Lalamove") {
+    const pinnedLat = deliveryLatInput?.value;
+    const pinnedLng = deliveryLngInput?.value;
+
+    if (!pinnedLat || !pinnedLng) {
+      enableCustomerEdit();
+
+      showOrderModal(
+        "Location Required",
+        "Please search and select your exact delivery location for Same Day Delivery."
+      );
+
+      mapSearchInput?.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+
+      setTimeout(() => {
+        mapSearchInput?.focus();
+      }, 400);
+
+      return resetPlaceOrder();
+    }
   }
 
   if (currentShippingFee === null) {
@@ -2631,6 +2659,29 @@ if (mapSearchInput) {
     if (e.key === "Enter") {
       e.preventDefault();
       mapSearchBtn?.click();
+    }
+  });
+}
+
+if (mapSearchInput) {
+  mapSearchInput.addEventListener("input", function () {
+    if (!mapSearchInput.value.trim()) {
+      if (deliveryMarker && deliveryMap) {
+        deliveryMap.removeLayer(deliveryMarker);
+        deliveryMarker = null;
+      }
+
+      if (deliveryLatInput) deliveryLatInput.value = "";
+      if (deliveryLngInput) deliveryLngInput.value = "";
+
+      if (pinStatus) {
+        pinStatus.textContent =
+          "Search and select exact location for Same Day Delivery.";
+      }
+
+      currentShippingFee = null;
+      currentShippingQuote = null;
+      updateTotalsDisplay();
     }
   });
 }

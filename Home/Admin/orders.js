@@ -511,11 +511,58 @@ function openOrderModal(orderId) {
 
   if (!modal || !content) return;
 
+  const address = order.address || {};
+
+  const pinnedLat =
+    order.delivery_lat ||
+    address.deliveryLat ||
+    address.lat ||
+    "-";
+
+  const pinnedLng =
+    order.delivery_lng ||
+    address.deliveryLng ||
+    address.lng ||
+    "-";
+
+  const fullAddress =
+    typeof address === "string"
+      ? address
+      : [
+        address.fullAddress,
+        address.barangay,
+        address.city,
+        address.province,
+        address.country
+      ].filter(Boolean).join(", ");
+
   content.innerHTML = `
     <h3>Order: ${escapeHtml(order.external_id || order.id || "-")}</h3>
 
     <p><strong>Customer:</strong> ${escapeHtml(order.customer_name || "-")}</p>
     <p><strong>Phone:</strong> ${escapeHtml(order.customer_phone || "-")}</p>
+    <p><strong>Address:</strong> ${escapeHtml(fullAddress || "-")}</p>
+
+    ${String(order.courier || "").toLowerCase().includes("lalamove") ||
+          String(order.courier || "").toLowerCase().includes("same day")
+          ? `
+        <div style="
+          margin-top:10px;
+          padding:10px;
+          background:#fff7ed;
+          border-radius:8px;
+        ">
+          <strong>Pinned Delivery Address</strong><br>
+          ${escapeHtml(address.pinAddress || "-")}
+
+          <br><br>
+          <small>
+            Coordinates: ${escapeHtml(pinnedLat)}, ${escapeHtml(pinnedLng)}
+          </small>
+        </div>
+        `
+          : ""}
+
     <p><strong>Amount:</strong> ₱${Number(order.amount || 0).toLocaleString("en-PH")}</p>
     <p><strong>Status:</strong> ${escapeHtml(order.order_status || "Processing")}</p>
     <p>
@@ -809,8 +856,6 @@ async function arrangeShipment(orderId, btn) {
   );
 
   const courier = String(order?.courier || "").toLowerCase();
-
-  alert("Courier detected: " + courier);
 
   if (courier.includes("lalamove") || courier.includes("same day")) {
     return bookLalamoveShipment(orderId, btn);
