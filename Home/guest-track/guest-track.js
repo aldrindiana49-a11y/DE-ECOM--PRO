@@ -19,7 +19,6 @@ async function checkGuestOrder() {
         .from("orders")
         .select("*")
         .eq("customer_email", email)
-        .eq("guest_order", true)
         .order("created_at", { ascending: false });
 
     if (error) {
@@ -32,18 +31,53 @@ async function checkGuestOrder() {
         return;
     }
 
-    result.innerHTML = data.map(order => `
-    <div class="result-box">
-      <p><strong>Order ID:</strong> ${order.external_id}</p>
-      <p><strong>Status:</strong> ${order.order_status}</p>
-      <p><strong>Courier:</strong> ${order.courier}</p>
-      <p><strong>Total:</strong> ₱${Number(order.amount || 0).toLocaleString()}</p>
-      <p><strong>Tracking Number:</strong> ${order.tracking_number || "Not available yet"}</p>
+    result.innerHTML =
+        data.map(order => `
+        <div class="result-box">
 
-      ${order.tracking_link
-            ? `<button onclick="window.open('${order.tracking_link}', '_blank')">Track Shipment</button>`
-            : `<p>Tracking link not available yet.</p>`
-        }
-    </div>
-  `).join("");
+            <p><strong>Order ID:</strong> ${order.external_id}</p>
+
+            <p><strong>Status:</strong> ${order.order_status}</p>
+
+            <p><strong>Courier:</strong> ${order.courier}</p>
+
+            <p><strong>Total:</strong> ₱${Number(order.amount || 0).toLocaleString()}</p>
+
+            <p><strong>Tracking Number:</strong> ${order.tracking_number || "Not available yet"}</p>
+
+            ${order.tracking_link
+                ? `<button onclick="window.open('${order.tracking_link}', '_blank')">
+                     Track Shipment
+                   </button>`
+                : `<p>Tracking link not available yet.</p>`
+            }
+
+        </div>
+        `).join("")
+
+        +
+
+        `
+
+        <div class="signup-benefit-box">
+
+            <h3>
+                Upgrade Your Shopping Experience
+            </h3>
+
+            <p>
+                Create your Drin Electronics account to unlock faster checkout,
+                easy return & refund requests, complete purchase history,
+                priority support, and exclusive member-only benefits.
+            </p>
+
+            <button onclick="window.location.href='https://drinelectronicsph.com/signup/'">
+
+                Activate My Account
+
+            </button>
+
+        </div>
+
+        `;
 }
