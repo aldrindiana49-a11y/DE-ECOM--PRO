@@ -63,8 +63,31 @@ body {
     padding: 18px;
     border-radius: 14px;
     border: 1px solid #eee;
+    margin-bottom: 15px;
 }
 
 .result-box p {
     margin: 8px 0;
+}
+
+.track-actions {
+    margin-top: 22px;
+}
+
+.track-card .back-home-btn {
+    background: linear-gradient(135deg, #00bcd4, #0097a7) !important;
+    border-radius: 14px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    box-shadow: 0 8px 20px rgba(0, 188, 212, .25);
+    transition: all 0.25s ease;
+}
+
+.track-card .back-home-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(0, 188, 212, .35);
+}
+
+.track-card .back-home-btn:active {
+    transform: scale(0.98);
 }

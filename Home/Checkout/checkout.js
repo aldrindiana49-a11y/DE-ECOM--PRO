@@ -1881,8 +1881,17 @@ async function placeOrder() {
 
    <div class="premium-login-actions">
 
+  <p>Your Tracking Code:</p>
+  <h2>${order.guestTrackingCode}</h2>
+  <small>Save this code or screenshot this page.</small>
+
   <button onclick="window.location.href='https://drinelectronicsph.com/signup/'">
     Unlock My Account
+  </button>
+
+  <button class="secondary-btn"
+    onclick="window.location.href='https://drinelectronicsph.com/guest-track/?track=${order.guestTrackingCode}'">
+    Track My Order
   </button>
 
   <button class="secondary-btn"
