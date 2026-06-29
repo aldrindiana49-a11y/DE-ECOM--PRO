@@ -296,7 +296,7 @@ function setShippingUI(status, message, fee = null) {
     if (status) shippingRow.classList.add(status);
   }
 
-  if (shippingStatus) shippingStatus.textContent = message;
+  if (shippingStatus) shippingStatus.innerHTML = message;
   if (checkoutShippingFee) checkoutShippingFee.textContent = fee === null ? "To be confirmed" : formatPrice(fee);
 
   updateTotalsDisplay();
@@ -814,8 +814,33 @@ function scheduleShippingQuote() {
   }
 
 
-  // SAME DAY / LALAMOVE
   if (selectedCourier === "Same Day Delivery / Lalamove") {
+
+    const noPin =
+      !deliveryLatInput?.value || !deliveryLngInput?.value;
+
+    if (noPin) {
+
+      setShippingUI(
+        "ready",
+        `
+      <div class="delivery-notice-box">
+        <strong>⚠ Same Day Delivery Notice</strong><br><br>
+
+        Final delivery fee will be confirmed after address verification.<br><br>
+
+        Delivery charges may vary depending on parcel size, actual weight, route distance, and courier booking conditions.<br><br>
+
+        <span class="delivery-payment-warning">
+          Shipping fee is NOT included in checkout and must be paid separately to the rider upon delivery.
+        </span>
+      </div>
+      `,
+        null
+      );
+
+      return;
+    }
 
     shippingQuoteTimer = setTimeout(
       calculateLalamoveFee,
@@ -824,7 +849,6 @@ function scheduleShippingQuote() {
 
     return;
   }
-
 
   // REAL SPX API
   setShippingUI("loading", "Checking delivery availability and shipping fee...", null);
@@ -911,14 +935,20 @@ async function searchLocation(query) {
     mapSearchResults.innerHTML = `
 
   <div class="map-tap-hint">
-    👇 Tap one address below to confirm your delivery pin
+    👇 Select one address below to confirm location and estimate shipping fee
   </div>
   `;
 
     if (!data.length) {
       mapSearchResults.innerHTML = `
-        <div class="map-result-item">
-          ❌ No address found. Try adding city or landmark.
+        <div class="map-result-item no-address-box">
+          ⚠ Exact location not found.<br><br>
+
+          No worries — you can still place your order.<br><br>
+
+          Enter your complete address and nearest landmark.<br><br>
+
+          Our team will manually verify your delivery location and confirm the final Same Day Delivery fee before booking.
         </div>
       `;
       return;
@@ -1099,6 +1129,8 @@ async function calculateLalamoveFee() {
 
     const data = await res.json();
 
+    console.log("FULL LALAMOVE API RESPONSE:", data);
+
     if (!res.ok || !data.success) {
       currentShippingFee = null;
       currentShippingQuote = {
@@ -1135,10 +1167,19 @@ Actual shipping fee depends on final parcel size, weight, route, waiting time, a
     );
 
     if (shippingStatus) {
-      shippingStatus.innerHTML =
-        `Minimum estimated fee only.<br>
-    Actual shipping fee may vary depending on parcel size, route distance, waiting time, and rider adjustments.<br><br>
-    This delivery fee is not included in checkout and will be paid directly to the Lalamove rider upon delivery.`;
+      shippingStatus.innerHTML = `
+        <div class="shipping-estimate-box">
+          <strong>⚠ Shipping Fee Notice</strong><br><br>
+
+          Minimum estimated fee only.<br><br>
+
+          Actual shipping fee may vary depending on parcel size, route distance, waiting time, and rider adjustments.<br><br>
+
+          <span class="shipping-estimate-warning">
+            This delivery fee is NOT included in checkout and will be paid directly to the Lalamove rider upon delivery.
+          </span>
+        </div>
+      `;
     }
 
     document.querySelector(".checkout-summary")
@@ -1557,34 +1598,74 @@ async function placeOrder() {
     return resetPlaceOrder();
   }
 
-  if (selectedCourierNow === "Same Day Delivery / Lalamove") {
-    const pinnedLat = deliveryLatInput?.value;
-    const pinnedLng = deliveryLngInput?.value;
+  const isManualLalamoveVerification =
+    selectedCourierNow === "Same Day Delivery / Lalamove" &&
+    (!deliveryLatInput?.value || !deliveryLngInput?.value);
 
-    if (!pinnedLat || !pinnedLng) {
-      enableCustomerEdit();
 
-      showOrderModal(
-        "Location Required",
-        "Please search and select your exact delivery location for Same Day Delivery."
-      );
+  const lalamoveAllowedArea =
+    areaGroupSelect?.value === "Metro Manila" ||
+    provinceSelect?.value === "Rizal" ||
+    provinceSelect?.value === "Cavite" ||
+    provinceSelect?.value === "Laguna" ||
+    provinceSelect?.value === "Bulacan";
 
-      mapSearchInput?.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-      });
+  if (
+    selectedCourierNow === "Same Day Delivery / Lalamove" &&
+    !lalamoveAllowedArea
+  ) {
+    showOrderModal(
+      "Same Day Delivery Not Available",
+      "Same Day Delivery is only available in selected nearby service areas. Please choose SPX delivery."
+    );
 
-      setTimeout(() => {
-        mapSearchInput?.focus();
-      }, 400);
-
-      return resetPlaceOrder();
-    }
+    return resetPlaceOrder();
   }
 
   if (currentShippingFee === null) {
     if (selectedCourierNow === "Same Day Delivery / Lalamove") {
-      await calculateLalamoveFee();
+      if (isManualLalamoveVerification) {
+        currentShippingFee = 0;
+        currentShippingQuote = {
+          success: true,
+          manualVerification: true,
+          courier: "Same Day Delivery / Lalamove"
+        };
+
+        setShippingUI(
+          "ready",
+          `
+          <div class="delivery-notice-box">
+            <strong>⚠ Same Day Delivery Notice</strong><br><br>
+
+            Final delivery fee will be confirmed after address verification.<br><br>
+
+            Delivery charges may vary depending on parcel size, actual weight, route distance, and courier booking conditions.<br><br>
+
+            <span class="delivery-payment-warning">
+              Shipping fee is NOT included in checkout and must be paid separately to the rider upon delivery.
+            </span>
+          </div>
+          `,
+          null
+        );
+
+
+      } else {
+
+        await calculateLalamoveFee();
+
+        if (
+          !currentShippingQuote ||
+          currentShippingQuote.success !== true ||
+          currentShippingQuote.unsupportedArea === true ||
+          !currentShippingFee ||
+          currentShippingFee <= 0
+        ) {
+          return resetPlaceOrder();
+        }
+
+      }
     } else {
       await calculateShippingFee();
     }
@@ -1755,16 +1836,22 @@ async function placeOrder() {
 
     estimatedLalamoveFee: estimatedLalamoveFee,
 
-    shippingNote: isLalamoveOrder
-      ? "Lalamove fee is estimated only. Customer pays rider directly."
-      : "",
+    shippingNote: isManualLalamoveVerification
+      ? "Same Day Delivery fee will be confirmed after address verification."
+      : isLalamoveOrder
+        ? "Lalamove fee is estimated only. Customer pays rider directly."
+        : "",
 
     voucherCode: voucherCode || "",
     voucherDiscount: voucherDiscount || 0,
     parcelInfo: currentParcelInfo,
     shippingQuote: currentShippingQuote,
     total: totalNumber,
-    status: paymentMain === "COD" ? "Pending COD" : "Pending Payment",
+    status: isManualLalamoveVerification
+      ? "Pending Address Verification"
+      : paymentMain === "COD"
+        ? "Pending COD"
+        : "Pending Payment",
     date: new Date().toLocaleString(),
   };
 
@@ -2008,7 +2095,7 @@ function updateDeliveryAddressUI() {
   const mapResultsBox = mapSearchResults;
   const mapBox = document.getElementById("deliveryMap");
   const mapSearchBtn = document.getElementById("mapSearchBtn");
-  const mapSearchNote = document.querySelector(".map-search-note");
+  const mapSearchNote = document.querySelectorAll(".map-search-note, .lalamove-only");
 
   if (fullAddressInput) {
     fullAddressInput.disabled = false;
@@ -2039,9 +2126,9 @@ function updateDeliveryAddressUI() {
     mapSearchBtn.style.display = isLalamove ? "block" : "none";
   }
 
-  if (mapSearchNote) {
-    mapSearchNote.style.display = isLalamove ? "block" : "none";
-  }
+  mapSearchNote.forEach(note => {
+    note.style.display = isLalamove ? "block" : "none";
+  });
 
   if (pinStatus) {
     pinStatus.classList.remove("pin-warning");
@@ -2050,7 +2137,7 @@ function updateDeliveryAddressUI() {
     pinStatus.style.display = isLalamove ? "block" : "none";
 
     pinStatus.textContent = isLalamove
-      ? "Search location then tap one address below to confirm pin."
+      ? "Search and pin your exact location to calculate your estimated Same Day Delivery fee."
       : "";
   }
 
@@ -2748,7 +2835,7 @@ if (mapSearchInput) {
         pinStatus.classList.remove("pin-success");
 
         pinStatus.textContent =
-          "Search location then tap one address below to confirm pin.";
+          "Search and pin your exact location to calculate your estimated Same Day Delivery fee.";
       }
 
       currentShippingFee = null;
