@@ -18,6 +18,9 @@ let expandedOrderItems = {};
 const cancelledOrdersTableBody =
   document.getElementById("cancelledOrdersTableBody");
 
+const returnRefundRequestsBody =
+  document.getElementById("returnRefundRequestsBody");
+
 let cancelledOrders = [];
 
 /* ===============================
@@ -448,6 +451,24 @@ function toggleShowAllOrderItems(orderId) {
    LOAD ORDERS
 ================================ */
 
+function normalizeOrder(order) {
+  return {
+    ...order,
+    order_id: order.external_id || order.order_id || order.id,
+    payment_status: order.payment_status || order.status || "Pending Payment",
+    order_status:
+      order.order_status ||
+      (String(order.status || "").toUpperCase() === "PAID"
+        ? "Processing"
+        : "Pending Payment"),
+    subtotal: Number(order.subtotal || 0),
+    shipping_fee: Number(order.shipping_fee || 0),
+    voucher_discount: Number(order.voucher_discount || 0),
+    amount: Number(order.amount || 0),
+    items: Array.isArray(order.items) ? order.items : []
+  };
+}
+
 async function loadAdminOrders() {
   try {
     if (adminOrdersTableBody) {
@@ -464,9 +485,9 @@ async function loadAdminOrders() {
     }
 
     /* REMOVE CANCELLED ORDERS FROM MAIN DASHBOARD */
-    adminOrders = data.orders.filter(order => {
-      return order.order_status !== "Cancelled";
-    });
+    adminOrders = data.orders
+      .map(normalizeOrder)
+      .filter(order => order.order_status !== "Cancelled");
 
     renderAdminOrders();
     updateOrdersSummary();
@@ -544,8 +565,8 @@ function openOrderModal(orderId) {
     <p><strong>Address:</strong> ${escapeHtml(fullAddress || "-")}</p>
 
     ${String(order.courier || "").toLowerCase().includes("lalamove") ||
-          String(order.courier || "").toLowerCase().includes("same day")
-          ? `
+      String(order.courier || "").toLowerCase().includes("same day")
+      ? `
         <div style="
           margin-top:10px;
           padding:10px;
@@ -561,7 +582,7 @@ function openOrderModal(orderId) {
           </small>
         </div>
         `
-          : ""}
+      : ""}
 
     <p><strong>Amount:</strong> ₱${Number(order.amount || 0).toLocaleString("en-PH")}</p>
     <p><strong>Status:</strong> ${escapeHtml(order.order_status || "Processing")}</p>
@@ -1352,7 +1373,42 @@ async function markOrderFailed(orderId, btn) {
 }
 
 async function markOrderDelivered(orderId, btn) {
-  await forceUpdateOrderStatus(orderId, "Delivered", btn);
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.innerText = "Updating...";
+    }
+
+    const res = await fetch("https://de-ecom-pro.onrender.com/api/orders/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderId,
+        order_status: "Delivered",
+        delivered_at: new Date().toISOString()
+      })
+    });
+
+    const result = await res.json();
+
+    if (!result.success) {
+      showToast(result.message || "Failed to mark delivered", "error");
+      return;
+    }
+
+    showToast("Order marked as Delivered.", "success");
+    closeOrderModal();
+    await loadAdminOrders();
+
+  } catch (err) {
+    console.error(err);
+    showToast("Mark delivered server error", "error");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "Mark Delivered";
+    }
+  }
 }
 
 async function forceUpdateOrderStatus(orderId, status, btn) {

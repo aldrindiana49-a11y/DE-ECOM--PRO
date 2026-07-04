@@ -41,6 +41,7 @@ function closeOrderModal() {
 }
 
 async function loadOrders() {
+
     const {
         data: { user }
     } = await supabaseClient.auth.getUser();
@@ -49,6 +50,7 @@ async function loadOrders() {
         window.location.href = "/login/";
         return;
     }
+
 
     const { data: orders, error } = await supabaseClient
         .from("orders")
@@ -203,6 +205,20 @@ async function loadOrders() {
 `;
 
         const statusText = String(order.order_status || "").toLowerCase();
+
+        const deliveredAt =
+            order.delivered_at ||
+            order.deliveredAt;
+
+        const deliveredTime = new Date(deliveredAt).getTime();
+        const returnRefundDeadline = deliveredTime + 7 * 24 * 60 * 60 * 1000;
+
+        const canReturnRefund =
+            (statusText.includes("delivered") ||
+                statusText.includes("completed")) &&
+            Date.now() <= returnRefundDeadline &&
+            !order.return_refund_status;
+
         const createdTime = new Date(order.created_at).getTime();
         const expiryTime = createdTime + 60 * 60 * 1000;
         const remainingMs = expiryTime - Date.now();
@@ -263,18 +279,20 @@ async function loadOrders() {
                 ? "cancelled-status"
                 : ""}
 ">
-
   ${order.order_status || "Processing"}
-${String(order.order_status || "").toLowerCase().includes("cancelled") && order.cancel_type
-                ? ` • ${order.cancel_type}`
-                : ""}
-${String(order.order_status || "").toLowerCase().includes("cancelled") && order.cancel_reason
-                ? ` • ${order.cancel_reason}`
-                : ""}
-
 </div>
 
       </div>
+
+${String(order.order_status || "").toLowerCase().includes("cancelled")
+                ? `
+<div class="cancel-details">
+    <strong>Cancellation Type:</strong> ${order.cancel_type || "-"}<br>
+    <strong>Reason:</strong> ${order.cancel_reason || "-"}
+</div>
+`
+                : ""
+            }
 
       <div class="order-items">
         ${itemsHtml}
@@ -422,6 +440,25 @@ ${(String(order.order_status || "").toLowerCase().includes("delivered") ||
   onclick='openReviewModal(${JSON.stringify(order).replaceAll("'", "&#39;")})'>
   Write Review
 </button>
+`
+                : ""
+            }
+
+${(String(order.order_status || "").toLowerCase().includes("delivered") ||
+                String(order.order_status || "").toLowerCase().includes("completed"))
+                ? `
+
+${canReturnRefund
+                    ? `
+<button
+    class="track-btn return-refund-btn"
+    onclick="openReturnRefundModal('${order.id}')">
+    Return / Refund
+</button>
+`
+                    : ""
+                }
+
 `
                 : ""
             }
@@ -628,6 +665,101 @@ document.addEventListener("click", e => {
     }
 });
 
+let selectedReturnRefundOrderId = null;
+
+function openReturnRefundModal(orderId) {
+    selectedReturnRefundOrderId = orderId;
+
+    document
+        .getElementById("returnRefundModal")
+        .classList.add("show");
+}
+
+function closeReturnRefundModal() {
+    document
+        .getElementById("returnRefundModal")
+        .classList.remove("show");
+
+    selectedReturnRefundOrderId = null;
+
+    document.getElementById("returnRefundReason").value = "";
+    document.getElementById("returnRefundDetails").value = "";
+    document.getElementById("returnRefundImage").value = "";
+}
+
+async function submitReturnRefundRequest() {
+    if (!selectedReturnRefundOrderId) {
+        showOrderModal("Request Error", "No order selected.");
+        return;
+    }
+
+    const reason = document.getElementById("returnRefundReason").value;
+    const details = document.getElementById("returnRefundDetails").value.trim();
+    const imageFiles = [...document.getElementById("returnRefundImage").files];
+
+    if (!reason) {
+        showOrderModal("Required", "Please select a reason.");
+        return;
+    }
+
+    if (imageFiles.length > 3) {
+        showOrderModal("Maximum Limit", "You can upload up to 3 photos only.");
+        return;
+    }
+
+    const uploadedImages = [];
+
+    for (const imageFile of imageFiles) {
+        const fileExt = imageFile.name.split(".").pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+        const filePath = `${selectedReturnRefundOrderId}/${fileName}`;
+
+        const { error: uploadError } = await supabaseClient.storage
+            .from("return-refund-images")
+            .upload(filePath, imageFile);
+
+        if (uploadError) {
+            console.error(uploadError);
+            showOrderModal("Upload Error", "Failed to upload photo.");
+            return;
+        }
+
+        const { data: publicUrlData } = supabaseClient.storage
+            .from("return-refund-images")
+            .getPublicUrl(filePath);
+
+        uploadedImages.push(publicUrlData.publicUrl);
+    }
+
+    const { error } = await supabaseClient
+        .from("orders")
+        .update({
+            return_refund_status: "Pending Admin Review",
+            return_refund_reason: reason,
+            return_refund_details: details,
+            return_refund_images: uploadedImages,
+            return_refund_requested_at: new Date().toISOString()
+        })
+        .eq("id", selectedReturnRefundOrderId);
+
+    if (error) {
+        console.error(error);
+        showOrderModal("Request Error", "Failed to submit return/refund request.");
+        return;
+    }
+
+    closeReturnRefundModal();
+
+    showOrderModal(
+        "Request Submitted",
+        "Your return/refund request has been submitted."
+    );
+
+    loadOrders();
+}
+
+window.submitReturnRefundRequest = submitReturnRefundRequest;
+
 let selectedCancelOrderId = null;
 
 function requestOrderChange(orderId) {
@@ -645,6 +777,9 @@ function closeCancelRequestModal() {
 
     selectedCancelOrderId = null;
 }
+
+window.openReturnRefundModal = openReturnRefundModal;
+window.closeReturnRefundModal = closeReturnRefundModal;
 
 async function submitCancelRequest() {
     const reason =

@@ -23,6 +23,10 @@
 body {
   background: var(--bg);
   color: var(--text);
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .cart-navbar {
@@ -60,12 +64,18 @@ body {
 }
 
 .cart-page {
+  flex: 1;
+
+  width: 100%;
   max-width: 1280px;
+
   margin: 0 auto;
-  padding: 24px 20px 40px;
+
+  padding: 18px 16px 30px;
+
   display: grid;
   grid-template-columns: 1.6fr 0.8fr;
-  gap: 24px;
+  gap: 18px;
 }
 
 .section-head {
@@ -712,4 +722,149 @@ body {
 
   }
 
+}
+
+/* =========================
+   CLEAN PREMIUM FOOTER
+========================= */
+
+.footer-container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 40px 20px 30px;
+}
+
+/* TOP */
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+/* BRAND */
+
+.footer-brand {
+  max-width: 340px;
+}
+
+.footer-brand h3 {
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.footer-brand p {
+  color: #cbd5e1;
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+/* LINKS */
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.footer-links a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 14px;
+  transition: .2s ease;
+}
+
+.footer-links a:hover {
+  color: #00bcd4;
+}
+
+/* PAYMENT */
+
+.footer-payments {
+  margin-top: 35px;
+}
+
+.footer-payments h4 {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.footer-payments p {
+  color: #cbd5e1;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.payment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 14px;
+}
+
+.payment-grid img {
+  width: 100%;
+  height: 40px;
+  object-fit: contain;
+  background: white;
+  border-radius: 10px;
+  padding: 5px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .06);
+  transition: .2s ease;
+}
+
+.payment-grid img:hover {
+  transform: translateY(-2px);
+}
+
+/* BOTTOM */
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  text-align: center;
+  padding: 16px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+/* MOBILE */
+
+@media (max-width:768px) {
+
+  .footer-top {
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .footer-links {
+    gap: 14px;
+  }
+
+  .payment-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .payment-grid img {
+    height: 36px;
+  }
+
+}
+
+.site-footer {
+  background: #0f172a;
+  color: white;
+  margin-top: auto !important;
+  margin-bottom: 0;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.checkout-page {
+  flex: 1;
 }

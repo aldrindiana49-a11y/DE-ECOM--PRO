@@ -2653,3 +2653,13 @@ img.lazy-image.loaded {
   color: #475569;
   line-height: 1.5;
 }
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.checkout-page {
+  flex: 1;
+}

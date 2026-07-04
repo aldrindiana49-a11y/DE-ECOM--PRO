@@ -15,7 +15,7 @@
 
 <body>
 
-  
+
   <div class="admin-layout">
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-top">
@@ -48,6 +48,11 @@
         <button class="menu-item" data-section="cancelledOrdersSection">
           Cancelled Orders
         </button>
+
+        <button class="menu-item" data-section="returnRefundSection">
+          Return / Refund Requests
+        </button>
+
         <button class="menu-item" data-section="employeeDashboardSection">
           Employee Dashboard
         </button>
@@ -684,6 +689,27 @@
 
       </section>
 
+      <section class="content-section" id="returnRefundSection">
+
+        <div class="section-header">
+          <h2>Return / Refund Requests</h2>
+          <p>Review customer return/refund requests with photo proof.</p>
+        </div>
+
+        <div class="orders-toolbar">
+          <button class="secondary-btn" type="button" onclick="loadReturnRefundRequests()">
+            Refresh
+          </button>
+        </div>
+
+        <div id="returnRefundRequestsBody" class="admin-orders-list">
+          <div class="empty-box">
+            No return/refund requests yet.
+          </div>
+        </div>
+
+      </section>
+
       <section class="content-section" id="employeeDashboardSection">
 
         <div class="section-header">
@@ -1025,7 +1051,7 @@
 
   <script src="./supabase.js?v=10002"></script>
 
-  
+
 
   <script src="./utils.js?v=10002"></script>
   <script src="./admin.js?v=10002"></script>
@@ -1035,7 +1061,7 @@
   <script src="./orders.js?v=10005"></script>
   <script src="./employee.js?v=10002"></script>
 
-  
+
 
 </body>
 
