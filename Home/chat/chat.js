@@ -162,6 +162,38 @@ function ensureChatModal() {
 
 }
 
+function showChatAlert(title, message) {
+    let modal = document.getElementById("chatAlertModal");
+
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "chatAlertModal";
+        modal.className = "chat-alert-modal";
+
+        modal.innerHTML = `
+            <div class="chat-alert-box">
+                <div class="chat-alert-icon">!</div>
+                <h3 id="chatAlertTitle">Notice</h3>
+                <p id="chatAlertMessage">Message here</p>
+                <button type="button" onclick="closeChatAlert()">
+                    OK
+                </button>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+    }
+
+    document.getElementById("chatAlertTitle").textContent = title;
+    document.getElementById("chatAlertMessage").textContent = message;
+
+    modal.classList.add("show");
+}
+
+function closeChatAlert() {
+    document.getElementById("chatAlertModal")?.classList.remove("show");
+}
+
 function isLiveChatAvailable() {
     const now = new Date();
     const hour = now.getHours();
@@ -442,7 +474,12 @@ async function startGuestChat() {
         nameInput?.value.trim();
 
     if (!guestName) {
-        alert("Please enter your name first.");
+
+        showChatAlert(
+            "Name Required",
+            "Please enter your name to start chatting."
+        );
+
         return;
     }
 
@@ -871,3 +908,4 @@ window.startGuestChat = startGuestChat;
 window.sendWebsiteChatMessage = sendWebsiteChatMessage;
 window.toggleEmojiPanel = toggleEmojiPanel;
 window.addEmoji = addEmoji;
+window.closeChatAlert = closeChatAlert;

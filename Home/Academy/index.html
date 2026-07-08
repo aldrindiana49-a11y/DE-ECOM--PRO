@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>🎓 Drin Electronics Academy</title>
+
+    <meta name="description"
+        content="Free electronics PDF downloads, amplifier diagrams, wiring guides, PCB layouts, repair guides, and DIY tutorials from Drin Electronics Academy." />
+
+    <link rel="icon" type="image/png" id="siteFavicon"
+        href="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/logo.png" />
+
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="academy.css">
+</head>
+
+<body>
+
+    <header class="academy-header">
+        <nav class="academy-nav">
+            <a href="/Home/Academy/index.html" class="academy-brand">
+                <img src="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/logo.png"
+                    alt="Drin Electronics Logo" />
+                <span>Drin Electronics Academy</span>
+            </a>
+
+            <a href="../index.html" class="back-home-btn">
+                ← Back to Store
+            </a>
+        </nav>
+    </header>
+
+    <main class="academy-main">
+
+        <section class="academy-hero">
+            <div class="academy-hero-content">
+                <span class="academy-badge">Free DIY Learning Hub</span>
+
+                <h1>🎓 Drin Electronics Academy</h1>
+
+                <p>
+                    Download free amplifier diagrams, wiring guides, PCB layouts,
+                    repair references, and electronics tutorials for DIYers and technicians.
+                </p>
+
+                <div class="academy-search-box">
+                    <input type="text" id="academySearchInput" placeholder="Search PDF, diagram, guide..." />
+
+                    <button type="button" id="academySearchBtn">
+                        🔍 Search
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="academy-category-section">
+            <div class="academy-category-tabs" id="academyCategoryTabs">
+                <button class="category-tab active" data-category="All">All</button>
+                <button class="category-tab" data-category="Wiring Diagram">Wiring Diagram</button>
+                <button class="category-tab" data-category="PCB Layout">PCB Layout</button>
+                <button class="category-tab" data-category="Repair Guide">Repair Guide</button>
+                <button class="category-tab" data-category="Tutorial">Tutorial</button>
+                <button class="category-tab" data-category="Service Manual">Service Manual</button>
+            </div>
+        </section>
+
+        <section class="academy-content-section">
+            <div class="section-heading">
+                <h2>📄 Free Downloads</h2>
+                <p>Choose a diagram or guide, then download the PDF file.</p>
+            </div>
+
+            <div class="academy-grid" id="academyFileGrid">
+                <!-- PDF cards will be loaded by academy.js -->
+            </div>
+
+            <div class="academy-empty" id="academyEmpty" style="display:none;">
+                <h3>No results found</h3>
+                <p>Try another keyword or category.</p>
+            </div>
+        </section>
+
+        <!-- ===========================================
+RECOMMENDED PRODUCTS
+=========================================== -->
+
+        <section class="homepage-products">
+
+            <div class="section-title">
+
+                <h2>🛒 Recommended Products</h2>
+
+                <p>
+                    Products you may need for your DIY project.
+                </p>
+
+            </div>
+
+            <div id="recommendedProductList" class="homepage-product-grid">
+
+            </div>
+
+            <div id="recommendedPagination" class="pagination"></div>
+
+        </section>
+
+    </main>
+
+    <footer class="academy-footer">
+        <p>
+            © 2026 Drin Electronics. Learn. Build. Repair.
+        </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="../Admin/supabase.js"></script>
+    <script src="academy.js"></script>
+
+</body>
+
+</html>
+```

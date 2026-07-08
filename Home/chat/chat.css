@@ -571,3 +571,80 @@
     flex: 1;
     min-height: 0;
 }
+
+/* ===== Premium Chat Alert ===== */
+
+.chat-alert-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, .55);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    padding: 20px;
+}
+
+.chat-alert-modal.show {
+    display: flex;
+}
+
+.chat-alert-box {
+    width: min(90%, 340px);
+    background: #fff;
+    border-radius: 22px;
+    padding: 24px 22px;
+    text-align: center;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, .28);
+    animation: chatAlertPop .22s ease;
+}
+
+.chat-alert-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00bcd4, #0097a7);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+}
+
+.chat-alert-box h3 {
+    font-size: 22px;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+.chat-alert-box p {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 18px;
+}
+
+.chat-alert-box button {
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    padding: 13px;
+    background: linear-gradient(135deg, #00bcd4, #0097a7);
+    color: white;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+@keyframes chatAlertPop {
+    from {
+        opacity: 0;
+        transform: scale(.92) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}

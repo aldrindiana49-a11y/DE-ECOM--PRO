@@ -2820,3 +2820,50 @@ body {
 .homepage #voucherSection {
   display: none !important;
 }
+
+/* ==========================================
+   DRIN ELECTRONICS ACADEMY
+========================================== */
+
+.sidebar-academy-link {
+  margin: 0;
+}
+
+.sidebar-academy-link a {
+  display: block;
+  padding: 12px 18px;
+  text-decoration: none;
+  color: #e5e7eb;
+  border-left: 4px solid #00bcd4;
+  transition: .25s;
+}
+
+.sidebar-academy-link a:hover {
+  background: rgba(255, 255, 255, .06);
+  color: #fff;
+}
+
+.sidebar-academy-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sidebar-academy-subtitle {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 3px;
+}
+
+.academy-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 6px;
+  background: #00bcd4;
+  color: #fff;
+  font-size: 9px;
+  border-radius: 20px;
+  font-weight: bold;
+  vertical-align: middle;
+}

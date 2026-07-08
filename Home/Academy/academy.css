@@ -1,0 +1,314 @@
+```css
+/* ==========================================
+   DRIN ELECTRONICS ACADEMY
+========================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+}
+
+body {
+    background: #f5f7fb;
+    color: #222;
+}
+
+/* ===========================
+HEADER
+=========================== */
+
+.academy-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: #00bcd4;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+}
+
+.academy-nav {
+    max-width: 1300px;
+    margin: auto;
+    height: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 25px;
+}
+
+.academy-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #fff;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.academy-brand img {
+    width: 42px;
+    height: 42px;
+}
+
+.back-home-btn {
+    color: #fff;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, .35);
+    padding: 10px 18px;
+    border-radius: 8px;
+    transition: .3s;
+}
+
+.back-home-btn:hover {
+    background: #fff;
+    color: #00bcd4;
+}
+
+/* ===========================
+HERO
+=========================== */
+
+.academy-hero {
+    background: linear-gradient(135deg, #00bcd4, #0097a7);
+    color: #fff;
+    text-align: center;
+    padding: 70px 20px;
+}
+
+.academy-hero h1 {
+    font-size: 42px;
+    margin: 15px 0;
+}
+
+.academy-hero p {
+    max-width: 760px;
+    margin: auto;
+    font-size: 17px;
+    line-height: 1.8;
+}
+
+.academy-badge {
+    display: inline-block;
+    background: #fff;
+    color: #00bcd4;
+    padding: 7px 16px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+/* ===========================
+SEARCH
+=========================== */
+
+.academy-search-box {
+    max-width: 720px;
+    margin: 35px auto 0;
+    display: flex;
+    background: #fff;
+    border-radius: 50px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, .15);
+}
+
+.academy-search-box input {
+    flex: 1;
+    border: none;
+    padding: 18px;
+    font-size: 15px;
+    outline: none;
+}
+
+.academy-search-box button {
+    border: none;
+    background: #0097a7;
+    color: #fff;
+    padding: 0 30px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+/* ===========================
+CATEGORY
+=========================== */
+
+.academy-category-section {
+    background: #fff;
+    padding: 25px;
+}
+
+.academy-category-tabs {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+}
+
+.category-tab {
+    border: none;
+    background: #eceff1;
+    padding: 12px 22px;
+    border-radius: 30px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.category-tab.active {
+    background: #00bcd4;
+    color: #fff;
+}
+
+/* ===========================
+CONTENT
+=========================== */
+
+.academy-content-section {
+    max-width: 1300px;
+    margin: auto;
+    padding: 50px 20px;
+}
+
+.section-heading {
+    margin-bottom: 30px;
+}
+
+.section-heading h2 {
+    font-size: 32px;
+}
+
+.section-heading p {
+    color: #666;
+    margin-top: 8px;
+}
+
+/* ===========================
+GRID
+=========================== */
+
+.academy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 25px;
+}
+
+/* ===========================
+CARD
+=========================== */
+
+.academy-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+    transition: .25s;
+}
+
+.academy-card:hover {
+    transform: translateY(-5px);
+}
+
+.pdf-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: #e0f7fa;
+    color: #00bcd4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin-bottom: 18px;
+}
+
+.pdf-category {
+    color: #00bcd4;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.pdf-title {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 12px 0;
+}
+
+.pdf-description {
+    color: #666;
+    line-height: 1.7;
+    margin-bottom: 20px;
+}
+
+.download-btn {
+    display: inline-block;
+    text-decoration: none;
+    background: #00bcd4;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    transition: .25s;
+}
+
+.download-btn:hover {
+    background: #0097a7;
+}
+
+/* ===========================
+EMPTY
+=========================== */
+
+.academy-empty {
+    text-align: center;
+    padding: 80px;
+}
+
+/* ===========================
+FOOTER
+=========================== */
+
+.academy-footer {
+    background: #111827;
+    color: #fff;
+    text-align: center;
+    padding: 25px;
+    margin-top: 50px;
+}
+
+/* ===========================
+RESPONSIVE
+=========================== */
+
+@media(max-width:768px) {
+
+    .academy-nav {
+        flex-direction: column;
+        height: auto;
+        padding: 20px;
+        gap: 15px;
+    }
+
+    .academy-hero h1 {
+        font-size: 32px;
+    }
+
+    .academy-search-box {
+        flex-direction: column;
+        border-radius: 15px;
+    }
+
+    .academy-search-box button {
+        padding: 15px;
+    }
+
+    .section-heading h2 {
+        font-size: 26px;
+    }
+
+    .academy-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+```
