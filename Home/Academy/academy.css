@@ -311,4 +311,74 @@ RESPONSIVE
 
 }
 
-```
+/* ===========================
+PREMIUM COMING SOON NOTICE
+=========================== */
+
+.academy-premium-notice {
+    max-width: 1200px;
+    margin: 28px auto;
+    padding: 22px;
+    background: linear-gradient(135deg, #ffffff, #f0fbfd);
+    border: 1px solid rgba(0, 188, 212, .22);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, .08);
+}
+
+.notice-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #00bcd4, #0097a7);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    flex-shrink: 0;
+}
+
+.notice-badge {
+    display: inline-block;
+    margin-bottom: 8px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: #fff3cd;
+    color: #b45309;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.notice-content h3 {
+    font-size: 20px;
+    color: #111827;
+    margin-bottom: 6px;
+}
+
+.notice-content p {
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+@media(max-width:768px) {
+    .academy-premium-notice {
+        margin: 20px 14px;
+        align-items: flex-start;
+    }
+
+    .notice-icon {
+        width: 52px;
+        height: 52px;
+        font-size: 24px;
+    }
+
+    .notice-content h3 {
+        font-size: 17px;
+    }
+}
