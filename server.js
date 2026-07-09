@@ -665,10 +665,22 @@ app.post("/api/create-payment", async (req, res) => {
       checkoutUrl: data.invoice_url,
       order
     });
+
   } catch (err) {
-    console.error("XENDIT ERROR:", err);
-    res.status(500).json({ success: false, message: "Xendit failed" });
+    console.error("XENDIT FULL ERROR:", {
+      message: err.message,
+      response: err.response?.data,
+      status: err.response?.status,
+      stack: err.stack
+    });
+
+    res.status(500).json({
+      success: false,
+      message: "Xendit failed",
+      error: err.response?.data || err.message
+    });
   }
+
 });
 
 // ================= MAYA =================
