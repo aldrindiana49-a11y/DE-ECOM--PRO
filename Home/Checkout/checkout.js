@@ -1861,11 +1861,13 @@ async function placeOrder() {
       await deductOrderStock(order);
     }
 
-    const syncResult =
-      await syncOrderToSupabase(order);
+    if (!isGuestCheckout) {
+      const syncResult =
+        await syncOrderToSupabase(order);
 
-    if (syncResult === false) {
-      return resetPlaceOrder();
+      if (syncResult === false) {
+        return resetPlaceOrder();
+      }
     }
 
     saveOrder(order);
@@ -1916,6 +1918,7 @@ async function placeOrder() {
           shippingFee: shippingFeeNumber,
           customerName: name,
           customerPhone: phone,
+          customerEmail: email,
           paymentMethod: "COD",
           courier: order.courier,
           address,
