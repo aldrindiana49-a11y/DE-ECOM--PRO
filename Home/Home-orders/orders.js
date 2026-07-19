@@ -51,8 +51,21 @@ async function loadOrders() {
         return;
     }
 
+    try {
+        const { data: claimedCount, error: claimError } =
+            await supabaseClient.rpc("claim_guest_orders");
+
+        if (claimError) {
+            console.error("CLAIM GUEST ORDERS ERROR:", claimError);
+        } else {
+            console.log("GUEST ORDERS CLAIMED:", claimedCount);
+        }
+    } catch (claimException) {
+        console.error("CLAIM GUEST ORDERS EXCEPTION:", claimException);
+    }
 
     const { data: orders, error } = await supabaseClient
+
         .from("orders")
         .select("*")
         .eq("user_id", user.id)

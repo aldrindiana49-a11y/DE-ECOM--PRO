@@ -1919,6 +1919,8 @@ async function placeOrder() {
           customerName: name,
           customerPhone: phone,
           customerEmail: email,
+          guestOrder: order.guestOrder === true,
+          guestTrackingCode: order.guestTrackingCode,
           paymentMethod: "COD",
           courier: order.courier,
           address,
@@ -2041,6 +2043,7 @@ async function placeOrder() {
       body: JSON.stringify({
         orderId: order.id,
         guestOrder: order.guestOrder === true,
+        guestTrackingCode: order.guestTrackingCode,
 
         amount: Number(totalNumber),
 
