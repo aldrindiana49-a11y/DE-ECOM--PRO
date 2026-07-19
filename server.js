@@ -599,6 +599,7 @@ app.post("/api/create-payment", async (req, res) => {
   try {
     const {
       orderId,
+      guestOrder,
       amount,
       subtotal,
       shippingFee,
@@ -609,6 +610,11 @@ app.post("/api/create-payment", async (req, res) => {
       parcelInfo,
       courier
     } = req.body;
+
+    const successRedirectUrl =
+      guestOrder === true
+        ? "https://drinelectronicsph.com/guest-track/?payment=success"
+        : "https://drinelectronicsph.com/home-orders/";
 
     const response = await fetch("https://api.xendit.co/v2/invoices", {
       method: "POST",
@@ -626,7 +632,7 @@ app.post("/api/create-payment", async (req, res) => {
           given_names: customerName || "Customer",
           mobile_number: customerPhone || ""
         },
-        success_redirect_url: "https://drinelectronicsph.com/home-orders/",
+        success_redirect_url: successRedirectUrl,
         failure_redirect_url: "https://drinelectronicsph.com/Checkout/checkout.html"
       })
     });

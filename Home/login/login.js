@@ -1,3 +1,37 @@
+async function claimGuestOrdersAfterAuthentication() {
+  try {
+    const {
+      data: { user },
+      error: userError
+    } = await supabaseClient.auth.getUser();
+
+    if (userError) {
+      console.error("GET USER ERROR:", userError);
+      return 0;
+    }
+
+    if (!user) {
+      console.log("No authenticated user.");
+      return 0;
+    }
+
+    const { data, error } =
+      await supabaseClient.rpc("claim_guest_orders");
+
+    if (error) {
+      console.error("CLAIM GUEST ORDERS ERROR:", error);
+      return 0;
+    }
+
+    console.log(`${data || 0} guest order(s) synced.`);
+
+    return Number(data || 0);
+  } catch (error) {
+    console.error("GUEST ORDER SYNC ERROR:", error);
+    return 0;
+  }
+}
+
 const loginForm =
   document.getElementById("loginForm");
 
@@ -93,6 +127,8 @@ loginForm.addEventListener("submit", async (e) => {
     });
     return;
   }
+
+  await claimGuestOrdersAfterAuthentication();
 
   localStorage.removeItem(
     "drinCustomerCheckoutInfo"
@@ -270,3 +306,17 @@ forgotPasswordBtn?.addEventListener(
 
   }
 );
+
+window.addEventListener("load", async () => {
+  try {
+    const {
+      data: { session }
+    } = await supabaseClient.auth.getSession();
+
+    if (!session?.user) return;
+
+    await claimGuestOrdersAfterAuthentication();
+  } catch (error) {
+    console.error("AUTO CLAIM GUEST ORDER ERROR:", error);
+  }
+});

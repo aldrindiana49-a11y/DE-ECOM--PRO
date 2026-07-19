@@ -1857,7 +1857,9 @@ async function placeOrder() {
 
   try {
 
-    await deductOrderStock(order);
+    if (paymentMain === "COD") {
+      await deductOrderStock(order);
+    }
 
     const syncResult =
       await syncOrderToSupabase(order);
@@ -2032,9 +2034,13 @@ async function placeOrder() {
     const res = await fetch(paymentUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+
       body: JSON.stringify({
         orderId: order.id,
+        guestOrder: order.guestOrder === true,
+
         amount: Number(totalNumber),
+
         subtotal: Number(subtotalNumber),
         shippingFee: Number(shippingFeeNumber),
 
