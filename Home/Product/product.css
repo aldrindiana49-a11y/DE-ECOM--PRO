@@ -2663,3 +2663,251 @@ body {
 .checkout-page {
   flex: 1;
 }
+
+/* =====================================
+   PRODUCT OUT OF STOCK DESIGN
+===================================== */
+
+.product-image {
+  position: relative;
+}
+
+/* Medyo blurred at faded ang image */
+.product-container.is-out-of-stock .product-image img {
+  filter: blur(2px) grayscale(35%);
+  opacity: 0.55;
+}
+
+/* Dark transparent cover */
+.product-container.is-out-of-stock .product-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.22);
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* OUT OF STOCK watermark */
+.product-container.is-out-of-stock .product-image::after {
+  content: "OUT OF STOCK";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 11;
+
+  transform: translate(-50%, -50%) rotate(-12deg);
+
+  width: 85%;
+  padding: 14px 10px;
+
+  border: 4px solid rgba(220, 38, 38, 0.9);
+  border-radius: 10px;
+
+  color: #dc2626;
+  background: rgba(255, 255, 255, 0.86);
+
+  font-size: clamp(23px, 4vw, 42px);
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-align: center;
+
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+/* Medyo faded ang product information */
+.product-container.is-out-of-stock .product-info {
+  opacity: 0.78;
+}
+
+/* Pero panatilihing malinaw at clickable ang buttons */
+.product-container.is-out-of-stock .product-action-buttons,
+.product-container.is-out-of-stock .product-action-buttons button {
+  opacity: 1;
+}
+
+/* Out of stock button design */
+.product-container.is-out-of-stock #addToCartBtn,
+.product-container.is-out-of-stock #buyNowBtn {
+  background: #94a3b8 !important;
+  color: white !important;
+  cursor: pointer !important;
+}
+
+/* Mobile Add Cart at Buy Now */
+.mobile-bottom-nav.product-out-of-stock .mobile-nav-item:nth-child(3) .mobile-nav-icon,
+.mobile-bottom-nav.product-out-of-stock .buy-now-mobile .mobile-nav-icon {
+  background: #94a3b8 !important;
+  box-shadow: none !important;
+  filter: grayscale(1);
+}
+
+/* =====================================
+   PREMIUM OUT OF STOCK POPUP
+===================================== */
+
+.out-stock-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.25s ease;
+}
+
+.out-stock-popup.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.out-stock-popup-box {
+  position: relative;
+
+  width: 100%;
+  max-width: 390px;
+
+  padding: 32px 24px 24px;
+
+  background: linear-gradient(145deg,
+      #ffffff,
+      #f8fafc);
+
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 24px;
+
+  box-shadow:
+    0 30px 70px rgba(15, 23, 42, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  text-align: center;
+
+  transform: scale(0.85) translateY(20px);
+  transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.out-stock-popup.show .out-stock-popup-box {
+  transform: scale(1) translateY(0);
+}
+
+.out-stock-popup-icon {
+  width: 82px;
+  height: 82px;
+
+  margin: -72px auto 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: linear-gradient(135deg,
+      #ef4444,
+      #b91c1c);
+
+  color: white;
+  font-size: 38px;
+
+  border: 7px solid white;
+
+  box-shadow:
+    0 12px 30px rgba(220, 38, 38, 0.35);
+}
+
+.out-stock-popup-box h3 {
+  margin: 0 0 10px;
+
+  color: #0f172a;
+
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.out-stock-popup-box p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.out-stock-popup-note {
+  margin-top: 16px;
+  padding: 12px;
+
+  border-radius: 12px;
+
+  background: #fff1f2;
+  color: #be123c;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.out-stock-popup-actions {
+  display: flex;
+  gap: 10px;
+
+  margin-top: 22px;
+}
+
+.out-stock-popup-actions button {
+  flex: 1;
+  min-height: 46px;
+
+  border: none;
+  border-radius: 14px;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.out-stock-popup-close {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.out-stock-popup-shop {
+  background: linear-gradient(135deg,
+      #00bcd4,
+      #008fa1);
+
+  color: white;
+
+  box-shadow:
+    0 8px 20px rgba(0, 188, 212, 0.3);
+}
+
+.out-stock-popup-actions button:active {
+  transform: scale(0.96);
+}
+
+@media (max-width: 480px) {
+  .out-stock-popup-box {
+    max-width: 340px;
+    padding: 30px 18px 20px;
+  }
+
+  .out-stock-popup-box h3 {
+    font-size: 21px;
+  }
+
+  .out-stock-popup-actions {
+    flex-direction: column;
+  }
+}

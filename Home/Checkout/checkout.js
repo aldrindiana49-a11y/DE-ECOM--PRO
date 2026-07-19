@@ -2034,20 +2034,46 @@ async function placeOrder() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         orderId: order.id,
-        amount: totalNumber,
-        subtotal: subtotalNumber,
-        shippingFee: shippingFeeNumber,
+        amount: Number(totalNumber),
+        subtotal: Number(subtotalNumber),
+        shippingFee: Number(shippingFeeNumber),
+
         customerName: name,
         customerPhone: phone,
+        customerEmail: email,
+
         paymentMethod: "XENDIT",
         courier: order.courier,
+
+        isLalamoveOrder: selectedCourierNow === "Same Day Delivery / Lalamove",
+        lalamoveShippingPaidByCustomer: true,
+        estimatedLalamoveFee: Number(estimatedLalamoveFee || 0),
+
         address,
         parcelInfo: currentParcelInfo,
         items: order.items,
       }),
     });
 
-    const data = await res.json();
+    let data = {};
+
+    try {
+      data = await res.json();
+    } catch (e) {
+      data = {};
+    }
+
+    console.log("CREATE PAYMENT STATUS:", res.status);
+    console.log("CREATE PAYMENT RESPONSE:", data);
+
+    if (!res.ok) {
+      showOrderModal(
+        "Payment Server Error",
+        data.message || data.error || "Create payment failed."
+      );
+
+      return resetPlaceOrder();
+    }
 
     const redirectUrl =
       data.checkoutUrl ||

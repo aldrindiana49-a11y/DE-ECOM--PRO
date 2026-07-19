@@ -95,7 +95,12 @@ function renderVariantSelector() {
     button.addEventListener("click", function () {
       const variant = variants[Number(this.dataset.index)];
 
-      if (!variant || safeNumber(variant.stock) <= 0) return;
+      if (!variant) return;
+
+      if (safeNumber(variant.stock) <= 0) {
+        showOutOfStockAlert();
+        return;
+      }
 
       if (window.innerWidth > 768) {
         buttons.forEach(btn => btn.classList.remove("active"));
@@ -136,8 +141,126 @@ function updateVariantUI(variant) {
   quantityInput.max = safeNumber(variant.stock);
   quantityInput.value = safeNumber(variant.stock) > 0 ? 1 : 0;
 
-  addToCartBtn.disabled = safeNumber(variant.stock) <= 0;
-  addToCartBtn.textContent = safeNumber(variant.stock) <= 0 ? "Out of Stock" : "Add to Cart";
+  updateOutOfStockDisplay(variant.stock);
+}
+
+function showOutOfStockAlert() {
+  let popup =
+    document.getElementById("outStockPopup");
+
+  if (!popup) {
+    popup = document.createElement("div");
+    popup.id = "outStockPopup";
+    popup.className = "out-stock-popup";
+
+    popup.innerHTML = `
+      <div class="out-stock-popup-box">
+        <div class="out-stock-popup-icon">
+          ⚠️
+        </div>
+
+        <h3>Currently Out of Stock</h3>
+
+        <p>
+          Sorry, this product is currently unavailable.
+          Please check again later or browse our other available products.
+        </p>
+
+        <div class="out-stock-popup-note">
+          We are working to restock this item as soon as possible.
+        </div>
+
+        <div class="out-stock-popup-actions">
+          <button
+            type="button"
+            class="out-stock-popup-close"
+            onclick="closeOutOfStockAlert()"
+          >
+            Close
+          </button>
+
+          <button
+            type="button"
+            class="out-stock-popup-shop"
+            onclick="window.location.href='../index.html'"
+          >
+            Browse Products
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(popup);
+
+    popup.addEventListener("click", (event) => {
+      if (event.target === popup) {
+        closeOutOfStockAlert();
+      }
+    });
+  }
+
+  requestAnimationFrame(() => {
+    popup.classList.add("show");
+  });
+}
+
+function closeOutOfStockAlert() {
+  const popup =
+    document.getElementById("outStockPopup");
+
+  if (!popup) return;
+
+  popup.classList.remove("show");
+}
+
+function updateOutOfStockDisplay(stock) {
+  const isOutOfStock = safeNumber(stock) <= 0;
+
+  const productContainer =
+    document.querySelector(".product-container");
+
+  const mobileBottomNav =
+    document.querySelector(".mobile-bottom-nav");
+
+  const buyNowButton =
+    document.getElementById("buyNowBtn");
+
+  productContainer?.classList.toggle(
+    "is-out-of-stock",
+    isOutOfStock
+  );
+
+  mobileBottomNav?.classList.toggle(
+    "product-out-of-stock",
+    isOutOfStock
+  );
+
+  if (addToCartBtn) {
+    addToCartBtn.disabled = false;
+
+    addToCartBtn.textContent = isOutOfStock
+      ? "Out of Stock"
+      : "🛒 Add to Cart";
+  }
+
+  if (buyNowButton) {
+    buyNowButton.disabled = false;
+
+    buyNowButton.textContent = isOutOfStock
+      ? "Out of Stock"
+      : "⚡ Buy Now";
+  }
+
+  if (quantityInput) {
+    quantityInput.disabled = isOutOfStock;
+
+    if (isOutOfStock) {
+      quantityInput.value = 0;
+    }
+  }
+
+  plusBtn?.toggleAttribute("disabled", isOutOfStock);
+  minusBtn?.toggleAttribute("disabled", isOutOfStock);
 }
 
 function safeNumber(value, fallback = 0) {
@@ -446,11 +569,7 @@ function renderProduct() {
 
   quantityInput.max = stock;
 
-  if (stock <= 0) {
-    quantityInput.value = 0;
-    addToCartBtn.disabled = true;
-    addToCartBtn.textContent = "Out of Stock";
-  }
+  updateOutOfStockDisplay(stock);
 
   loadProductReviews();
   loadProductSoldCount();
@@ -615,8 +734,16 @@ quantityInput.addEventListener("input", validateQuantity);
 
 addToCartBtn.addEventListener("click", () => {
   if (productsLoading) return;
+
   const stock = getProductStock(product);
+
+  if (stock <= 0) {
+    showOutOfStockAlert();
+    return;
+  }
+
   const qty = validateQuantity();
+
   const variants = getVariants(product);
 
   if (variants.length > 1 && window.innerWidth <= 768) {
@@ -642,11 +769,6 @@ addToCartBtn.addEventListener("click", () => {
       });
     }
 
-    return;
-  }
-
-  if (stock <= 0) {
-    showMessage("Out of stock.", "error");
     return;
   }
 
@@ -758,6 +880,11 @@ buyNowBtn?.addEventListener("click", () => {
   const stock =
     getProductStock(product);
 
+  if (stock <= 0) {
+    showOutOfStockAlert();
+    return;
+  }
+
   const qty =
     validateQuantity();
 
@@ -775,13 +902,6 @@ buyNowBtn?.addEventListener("click", () => {
       behavior: "smooth",
       block: "center"
     });
-
-    return;
-  }
-
-  if (stock <= 0) {
-
-    showMessage("Out of stock.", "error");
 
     return;
   }
@@ -1363,7 +1483,10 @@ function openVariantPopup() {
 
         if (!variant) return;
 
-        if (safeNumber(variant.stock) <= 0) return;
+        if (safeNumber(variant.stock) <= 0) {
+          showOutOfStockAlert();
+          return;
+        }
 
         variantPopupOptions
           .querySelectorAll(".variant-popup-option")
