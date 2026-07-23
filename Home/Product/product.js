@@ -453,6 +453,7 @@ async function loadProductsFromSupabase() {
   }
 
   renderProduct();
+  await initializeWishlist();
   renderSuggestedProducts();
   initLazyImages();
   loadProductVouchers();
@@ -985,7 +986,10 @@ function showMessage(text, type) {
 
   if (window.innerWidth > 768) {
 
-    const btn = document.getElementById("addToCartBtn");
+    const btn =
+      document.activeElement?.id === "wishlistBtn"
+        ? document.getElementById("wishlistBtn")
+        : document.getElementById("addToCartBtn");
 
     if (btn && toast) {
 
@@ -2123,7 +2127,10 @@ supabaseClient.auth.onAuthStateChange(async (event) => {
 
   if (event === "SIGNED_OUT") {
     localStorage.removeItem("drinUser");
-    window.location.href = "/";
+
+    wishlistUser = null;
+    updateWishlistButton(false);
+    await updateAuthUI();
   }
 
 });
@@ -2426,3 +2433,292 @@ function openDeliveryInfo() {
 function closeDeliveryInfo() {
   document.getElementById("deliveryModal").classList.remove("show");
 }
+
+/* =====================================
+   PRODUCT WISHLIST
+===================================== */
+
+const wishlistBtn = document.getElementById("wishlistBtn");
+const wishlistIcon = document.getElementById("wishlistIcon");
+
+let wishlistUser = null;
+let productIsWishlisted = false;
+
+async function initializeWishlist() {
+  if (!wishlistBtn) return;
+
+  wishlistBtn.disabled = true;
+
+  try {
+
+    const {
+      data: { session },
+      error: sessionError
+    } = await supabaseClient.auth.getSession();
+
+    if (sessionError) {
+      console.error("Wishlist session error:", sessionError);
+    }
+
+    const user = session?.user || null;
+
+    wishlistUser = user;
+
+    if (!wishlistUser || !product?.id) {
+      updateWishlistButton(false);
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from("wishlists")
+      .select("id")
+      .eq("user_id", wishlistUser.id)
+      .eq("product_id", String(product.id))
+      .maybeSingle();
+
+    if (error) {
+      console.error("Wishlist check error:", error);
+      return;
+    }
+
+    productIsWishlisted = Boolean(data);
+    updateWishlistButton(productIsWishlisted);
+
+  } finally {
+    wishlistBtn.disabled = false;
+  }
+}
+
+function updateWishlistButton(isWishlisted) {
+  productIsWishlisted = isWishlisted;
+
+  if (!wishlistBtn || !wishlistIcon) return;
+
+  wishlistBtn.classList.toggle("active", isWishlisted);
+  wishlistIcon.textContent = isWishlisted ? "♥" : "♡";
+
+  wishlistBtn.setAttribute(
+    "aria-label",
+    isWishlisted
+      ? "Remove product from wishlist"
+      : "Add product to wishlist"
+  );
+
+  wishlistBtn.title = isWishlisted
+    ? "Remove from Wishlist"
+    : "Add to Wishlist";
+}
+
+async function toggleWishlist() {
+  if (!wishlistBtn || !product?.id) return;
+
+  const {
+    data: { session },
+    error: sessionError
+  } = await supabaseClient.auth.getSession();
+
+  if (sessionError) {
+    console.error("Wishlist session error:", sessionError);
+  }
+
+  const user = session?.user || null;
+
+  if (!user) {
+    await supabaseClient.auth.signOut();
+
+    showWishlistLoginPopup();
+    return;
+  }
+
+  wishlistUser = user;
+  wishlistBtn.disabled = true;
+
+  try {
+    if (productIsWishlisted) {
+      const { error } = await supabaseClient
+        .from("wishlists")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("product_id", String(product.id));
+
+      if (error) throw error;
+
+      updateWishlistButton(false);
+      showMessage("Removed from wishlist.", "success");
+
+    } else {
+      const { error } = await supabaseClient
+        .from("wishlists")
+        .insert({
+          user_id: user.id,
+          product_id: String(product.id)
+        });
+
+      if (error && error.code !== "23505") {
+        throw error;
+      }
+
+      updateWishlistButton(true);
+      showWishlistSuccessPopup();
+    }
+
+  } catch (error) {
+    console.error("Wishlist update error:", error);
+    showMessage("Unable to update wishlist.", "error");
+
+  } finally {
+    wishlistBtn.disabled = false;
+  }
+}
+
+function showWishlistLoginPopup() {
+  document.querySelector(".wishlist-login-overlay")?.remove();
+
+  const overlay = document.createElement("div");
+
+  overlay.className =
+    "premium-login-overlay wishlist-login-overlay";
+
+  overlay.innerHTML = `
+    <div class="premium-login-box">
+
+      <div class="premium-login-icon">
+        ♡
+      </div>
+
+      <h3>Save this product</h3>
+
+      <p>
+        Create an account or log in to save products
+        and access your wishlist anytime from your profile.
+      </p>
+
+      <div class="premium-login-actions">
+
+        <button
+          type="button"
+          class="premium-login-btn signup-wishlist-btn"
+        >
+          Create Account
+        </button>
+
+        <button
+          type="button"
+          class="wishlist-login-btn login-wishlist-btn"
+        >
+          Login
+        </button>
+
+        <button
+          type="button"
+          class="premium-cancel-btn"
+        >
+          Not Now
+        </button>
+
+      </div>
+
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const returnUrl =
+    encodeURIComponent(window.location.href);
+
+  overlay
+    .querySelector(".signup-wishlist-btn")
+    ?.addEventListener("click", () => {
+      window.location.href =
+        `../signup/?redirect=${returnUrl}`;
+    });
+
+  overlay
+    .querySelector(".login-wishlist-btn")
+    ?.addEventListener("click", () => {
+      window.location.href =
+        `../login/?redirect=${returnUrl}`;
+    });
+
+  overlay
+    .querySelector(".premium-cancel-btn")
+    ?.addEventListener("click", () => {
+      overlay.remove();
+    });
+
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay) {
+      overlay.remove();
+    }
+  });
+}
+
+function showWishlistSuccessPopup() {
+  document.querySelector(".wishlist-success-overlay")?.remove();
+
+  const overlay = document.createElement("div");
+
+  overlay.className =
+    "wishlist-success-overlay";
+
+  overlay.innerHTML = `
+    <div class="wishlist-success-box">
+
+      <div class="wishlist-success-icon">
+        ♥
+      </div>
+
+      <h3>Saved to Wishlist</h3>
+
+      <p>
+        This product has been saved.
+        You can view it anytime from your profile.
+      </p>
+
+      <div class="wishlist-success-actions">
+
+        <button
+          type="button"
+          class="wishlist-view-btn"
+        >
+          View Wishlist
+        </button>
+
+        <button
+          type="button"
+          class="wishlist-continue-btn"
+        >
+          Continue Shopping
+        </button>
+
+      </div>
+
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  overlay
+    .querySelector(".wishlist-view-btn")
+    ?.addEventListener("click", () => {
+      window.location.href = "../homeprofile/";
+    });
+
+  overlay
+    .querySelector(".wishlist-continue-btn")
+    ?.addEventListener("click", () => {
+      overlay.remove();
+    });
+
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay) {
+      overlay.remove();
+    }
+  });
+
+  setTimeout(() => {
+    overlay.remove();
+  }, 6000);
+}
+
+wishlistBtn?.addEventListener("click", toggleWishlist);

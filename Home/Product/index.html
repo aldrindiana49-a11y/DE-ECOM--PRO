@@ -239,9 +239,16 @@
 
         <div class="product-info">
 
-          <h1 id="productName" class="product-title">
-            Product Name
-          </h1>
+          <div class="product-title-row">
+            <h1 id="productName" class="product-title">
+              Product Name
+            </h1>
+
+            <button id="wishlistBtn" class="wishlist-heart-btn" type="button" aria-label="Add to wishlist"
+              title="Add to Wishlist">
+              <span id="wishlistIcon">♡</span>
+            </button>
+          </div>
 
           <div id="titleToggle" class="title-expand">
             Read more
@@ -351,8 +358,15 @@
           </div>
 
           <div class="product-action-buttons">
-            <button id="addToCartBtn" class="add-cart-btn" type="button">🛒 Add to Cart</button>
-            <button id="buyNowBtn" class="buy-now-btn" type="button">⚡ Buy Now</button>
+
+            <button id="addToCartBtn" class="add-cart-btn" type="button">
+              🛒 Add to Cart
+            </button>
+
+            <button id="buyNowBtn" class="buy-now-btn" type="button">
+              ⚡ Buy Now
+            </button>
+
           </div>
 
           <p id="message" class="message"></p>

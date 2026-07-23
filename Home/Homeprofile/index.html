@@ -12,7 +12,7 @@
 
     <title>My Profile | Drin Electronics</title>
 
-    <link rel="stylesheet" href="profile.css?v=3" />
+    <link rel="stylesheet" href="profile.css?v=4" />
 
 </head>
 
@@ -22,7 +22,7 @@
 
         <div class="profile-card">
 
-            <a href="/" class="back-btn">
+            <a href="../index.html" class="back-btn">
                 ← Back to Home
             </a>
 
@@ -39,6 +39,7 @@
                     <p class="profile-subtitle">
                         Your checkout details are automatically synced and securely saved.
                     </p>
+
                     <div class="profile-badge">
 
                         <span>✔ Secure Profile</span>
@@ -48,24 +49,68 @@
                         <span>✔ Checkout Linked</span>
 
                     </div>
+
                 </div>
 
             </div>
 
-
             <form id="profileForm">
 
-                <button type="button" class="save-btn"
-                    onclick="window.location.href='https://drinelectronicsph.com/checkout/checkout'">
+                <button type="button" class="save-btn" onclick="window.location.href='../checkout/checkout.html'">
                     Update Details in Checkout
                 </button>
 
-                <button type="button" class="save-btn"
-                    onclick="window.location.href='https://drinelectronicsph.com/home-orders/'">
+                <button type="button" class="save-btn" onclick="window.location.href='../home-orders/'">
                     View My Orders
                 </button>
 
             </form>
+
+            <section class="profile-wishlist-section">
+
+                <div class="profile-wishlist-header">
+
+                    <div>
+
+                        <h2>My Wishlist</h2>
+
+                        <p>
+                            Products you saved for later.
+                        </p>
+
+                    </div>
+
+                    <span id="wishlistCount" class="profile-wishlist-count">
+                        0 items
+                    </span>
+
+                </div>
+
+                <div id="profileWishlistLoading" class="profile-wishlist-loading">
+                    Loading wishlist...
+                </div>
+
+                <div id="profileWishlistEmpty" class="profile-wishlist-empty" style="display:none;">
+
+                    <div class="profile-wishlist-empty-icon">
+                        ♡
+                    </div>
+
+                    <h3>Your wishlist is empty</h3>
+
+                    <p>
+                        Save products you like and they will appear here.
+                    </p>
+
+                    <button type="button" onclick="window.location.href='../index.html'">
+                        Browse Products
+                    </button>
+
+                </div>
+
+                <div id="profileWishlistGrid" class="profile-wishlist-grid"></div>
+
+            </section>
 
         </div>
 
@@ -75,7 +120,7 @@
 
     <script src="../Admin/supabase.js?v=50000"></script>
 
-    <script src="profile.js?v=3"></script>
+    <script src="profile.js?v=6"></script>
 
 </body>
 
