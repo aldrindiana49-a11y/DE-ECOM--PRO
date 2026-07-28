@@ -8,7 +8,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Drin Electronics Admin Panel</title>
-  <link rel="icon" type="image/png" id="siteFavicon" href="../Image/favicon.png" />
   <link rel="stylesheet" href="admin.css" />
 
 </head>
@@ -569,7 +568,7 @@
           </div>
 
           <div class="orders-summary-card">
-            <span>Pending Payment</span>
+            <span>Pending Orders</span>
             <strong id="ordersPendingCount">0</strong>
           </div>
 
@@ -589,11 +588,11 @@
 
           <div class="orders-toolbar-left">
 
-            <button class="order-filter-btn" data-filter="Pending Payment">
-              Pending
+            <button class="order-filter-btn" data-filter="Pending">
+              Pending Cod
             </button>
 
-            <button class="order-filter-btn active" data-filter="Processing">
+            <button class="order-filter-btn" data-filter="Processing">
               Processing
             </button>
 
@@ -617,6 +616,10 @@
               Paid
             </button>
 
+            <button class="order-filter-btn" data-filter="Pending Payment">
+              Pending Payment
+            </button>
+
             <button class="order-filter-btn" data-filter="Failed Delivery">
               Failed Delivery
             </button>
@@ -625,7 +628,7 @@
               Expired
             </button>
 
-            <button class="order-filter-btn" data-filter="ALL">
+            <button class="order-filter-btn active" data-filter="ALL">
               All
             </button>
 
@@ -1058,7 +1061,7 @@
   <script src="./inventory.js?v=10002"></script>
   <script src="./generator.js?v=10002"></script>
   <script src="./categories.js?v=10002"></script>
-  <script src="./orders.js?v=10005"></script>
+  <script src="./orders.js?v=10007"></script>
   <script src="./employee.js?v=10002"></script>
 
 

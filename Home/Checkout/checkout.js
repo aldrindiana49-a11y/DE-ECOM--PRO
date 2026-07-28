@@ -712,6 +712,13 @@ async function syncOrderToSupabase(order) {
         customer_email: order.customer.email,
         subtotal: order.subtotal,
         shipping_fee: order.shippingFee,
+
+        service_fee: Number(
+          order.serviceFee ||
+          order.handlingFee ||
+          0
+        ),
+
         voucher_code: order.voucherCode,
         voucher_discount: order.voucherDiscount,
       }
@@ -1833,6 +1840,8 @@ async function placeOrder() {
     items: normalizedItems,
     subtotal: subtotalNumber,
     shippingFee: shippingFeeNumber,
+    handlingFee: handlingFee,
+    serviceFee: handlingFee,
 
     estimatedLalamoveFee: estimatedLalamoveFee,
 
@@ -1916,6 +1925,8 @@ async function placeOrder() {
           amount: totalNumber,
           subtotal: subtotalNumber,
           shippingFee: shippingFeeNumber,
+          serviceFee: handlingFee,
+          handlingFee: handlingFee,
           customerName: name,
           customerPhone: phone,
           customerEmail: email,
@@ -2049,6 +2060,9 @@ async function placeOrder() {
 
         subtotal: Number(subtotalNumber),
         shippingFee: Number(shippingFeeNumber),
+
+        serviceFee: Number(handlingFee),
+        handlingFee: Number(handlingFee),
 
         customerName: name,
         customerPhone: phone,

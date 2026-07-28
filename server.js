@@ -88,6 +88,8 @@ async function savePendingOrder({
   amount,
   subtotal,
   shippingFee,
+  serviceFee,
+  handlingFee,
   customerName,
   customerPhone,
   customerEmail,
@@ -107,6 +109,11 @@ async function savePendingOrder({
     amount: Number(amount),
     subtotal: Number(subtotal || amount || 0),
     shipping_fee: Number(shippingFee || 0),
+    service_fee: Number(
+      serviceFee ??
+      handlingFee ??
+      0
+    ),
     customer_name: customerName || "Customer",
     customer_phone: customerPhone || "",
     customer_email: customerEmail || "",
@@ -551,6 +558,8 @@ app.post("/api/orders/cod", async (req, res) => {
       amount,
       subtotal,
       shippingFee,
+      serviceFee,
+      handlingFee,
       customerName,
       customerPhone,
       customerEmail,
@@ -567,6 +576,8 @@ app.post("/api/orders/cod", async (req, res) => {
       amount,
       subtotal,
       shippingFee,
+      serviceFee,
+      handlingFee,
       customerName,
       customerPhone,
       customerEmail,
@@ -616,6 +627,8 @@ app.post("/api/create-payment", async (req, res) => {
       amount,
       subtotal,
       shippingFee,
+      serviceFee,
+      handlingFee,
       customerName,
       customerPhone,
       customerEmail,
@@ -675,6 +688,8 @@ app.post("/api/create-payment", async (req, res) => {
       parcelInfo,
       subtotal,
       shippingFee,
+      serviceFee,
+      handlingFee,
       courier,
       checkoutUrl: data.invoice_url
     });

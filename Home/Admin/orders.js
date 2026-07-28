@@ -12,7 +12,7 @@ const dashboardShipped = document.getElementById("dashboardShipped");
 const dashboardDelivered = document.getElementById("dashboardDelivered");
 
 let adminOrders = [];
-let currentOrderFilter = "Processing";
+let currentOrderFilter = "ALL";
 let expandedOrderItems = {};
 
 const cancelledOrdersTableBody =
@@ -46,7 +46,14 @@ function escapeAttribute(text) {
 
 function getOrderStatusClass(status) {
   if (status === "PAID") return "status-paid";
-  if (status === "Pending Payment") return "status-pending";
+
+  if (
+    status === "Pending" ||
+    status === "Pending Payment"
+  ) {
+    return "status-pending";
+  }
+
   if (status === "Processing") return "status-processing";
   if (status === "Packed") return "status-processing";
   if (status === "To Ship") return "status-processing";
@@ -55,6 +62,8 @@ function getOrderStatusClass(status) {
   if (status === "In Transit") return "status-shipped";
   if (status === "Delivered") return "status-delivered";
   if (status === "Cancelled") return "status-inactive";
+  if (status === "Expired") return "status-inactive";
+
   return "status-default";
 }
 
@@ -63,23 +72,35 @@ function getOrderStatusClass(status) {
 ================================ */
 
 function updateOrdersSummary() {
-  if (ordersTotalCount) ordersTotalCount.textContent = adminOrders.length;
+  if (ordersTotalCount) {
+    ordersTotalCount.textContent = adminOrders.length;
+  }
 
   if (ordersPendingCount) {
     ordersPendingCount.textContent =
-      adminOrders.filter(o => o.status === "Pending Payment").length;
+      adminOrders.filter(order =>
+        order.order_status === "Pending" ||
+        order.order_status === "Pending Payment"
+      ).length;
   }
 
   if (ordersPaidCount) {
     ordersPaidCount.textContent =
-      adminOrders.filter(o => o.status === "PAID").length;
+      adminOrders.filter(order =>
+        String(
+          order.payment_status ||
+          order.status ||
+          ""
+        ).toUpperCase() === "PAID"
+      ).length;
   }
 
   if (ordersToShipCount) {
     ordersToShipCount.textContent =
-      adminOrders.filter(o =>
-        o.order_status === "To Ship" ||
-        o.order_status === "Processing"
+      adminOrders.filter(order =>
+        order.order_status === "Processing" ||
+        order.order_status === "Packed" ||
+        order.order_status === "To Ship"
       ).length;
   }
 }
@@ -87,23 +108,26 @@ function updateOrdersSummary() {
 function updateDashboardOrders() {
   if (dashboardToShip) {
     dashboardToShip.textContent =
-      adminOrders.filter(o =>
-        o.order_status === "To Ship" ||
-        o.order_status === "Processing"
+      adminOrders.filter(order =>
+        order.order_status === "Processing" ||
+        order.order_status === "Packed" ||
+        order.order_status === "To Ship"
       ).length;
   }
 
   if (dashboardShipped) {
     dashboardShipped.textContent =
-      adminOrders.filter(o =>
-        o.order_status === "Shipped" ||
-        o.order_status === "In Transit"
+      adminOrders.filter(order =>
+        order.order_status === "Shipped" ||
+        order.order_status === "In Transit"
       ).length;
   }
 
   if (dashboardDelivered) {
     dashboardDelivered.textContent =
-      adminOrders.filter(o => o.order_status === "Delivered").length;
+      adminOrders.filter(order =>
+        order.order_status === "Delivered"
+      ).length;
   }
 }
 
@@ -144,29 +168,99 @@ function renderAdminOrders() {
   if (currentOrderFilter !== "ALL") {
 
     filteredOrders = filteredOrders.filter(order => {
+      const selectedFilter = String(
+        currentOrderFilter || ""
+      ).trim().toLowerCase();
 
-      const status =
-        String(order.order_status || "").toLowerCase();
+      const orderStatus = String(
+        order.order_status || ""
+      ).trim().toLowerCase();
+
+      const paymentStatus = String(
+        order.payment_status ||
+        order.status ||
+        order.xendit_status ||
+        ""
+      ).trim().toLowerCase();
+
+      const paymentMethod = String(
+        order.payment_method ||
+        order.paymentMethod ||
+        order.payment_type ||
+        order.payment_option ||
+        order.payment_channel ||
+        order.method ||
+        ""
+      ).trim().toLowerCase();
+
+      const paymentText =
+        `${paymentStatus} ${paymentMethod}`;
+
+      const isCOD =
+        paymentText.includes("cod") ||
+        paymentText.includes("cash on delivery");
 
       const createdTime =
         new Date(order.created_at).getTime();
 
-      const expiryTime =
-        createdTime + 60 * 60 * 1000;
+      const explicitExpiryTime =
+        new Date(
+          order.expires_at ||
+          order.expiry_date ||
+          order.invoice_expiry_date ||
+          ""
+        ).getTime();
 
-      const isExpired =
-        status.includes("pending payment") &&
+      const fallbackExpiryTime =
+        Number.isFinite(createdTime)
+          ? createdTime + 60 * 60 * 1000
+          : NaN;
+
+      const expiryTime =
+        Number.isFinite(explicitExpiryTime)
+          ? explicitExpiryTime
+          : fallbackExpiryTime;
+
+      const explicitlyExpired =
+        orderStatus === "expired" ||
+        paymentStatus.includes("expired");
+
+      const pendingOnlinePayment =
+        !isCOD &&
+        (
+          paymentStatus === "pending" ||
+          paymentStatus === "pending payment" ||
+          orderStatus === "pending payment"
+        );
+
+      const timedOut =
+        pendingOnlinePayment &&
+        Number.isFinite(expiryTime) &&
         Date.now() > expiryTime;
 
-      if (currentOrderFilter === "Expired") {
+      const isExpired =
+        explicitlyExpired || timedOut;
+
+      if (selectedFilter === "expired") {
         return isExpired;
       }
 
-      return (
-        order.status === currentOrderFilter ||
-        order.order_status === currentOrderFilter
-      );
+      if (selectedFilter === "pending") {
+        return isCOD && orderStatus === "pending";
+      }
 
+      if (selectedFilter === "pending payment") {
+        return !isCOD && !isExpired && (
+          orderStatus === "pending payment" ||
+          paymentStatus === "pending" ||
+          paymentStatus === "pending payment"
+        );
+      }
+
+      return (
+        orderStatus === selectedFilter ||
+        paymentStatus === selectedFilter
+      );
     });
 
   }
@@ -182,10 +276,15 @@ function renderAdminOrders() {
 
   adminOrdersTableBody.innerHTML = filteredOrders.map(order => {
     const orderId = order.external_id || order.id || "";
-    const paymentStatus = order.status || "Pending Payment";
+
+    const paymentStatus =
+      order.payment_status ||
+      order.status ||
+      "Pending Payment";
+
     const orderStatus =
       order.order_status ||
-      (paymentStatus === "PAID" ? "Processing" : "Waiting Payment");
+      "Pending";
 
     const items = getOrderItems(order);
     const isExpanded = expandedOrderItems[orderId];
@@ -200,7 +299,7 @@ function renderAdminOrders() {
 
 
     const subtotal =
-      Number(order.subtotal || order.amount || 0);
+      Number(order.subtotal || 0);
 
     const voucher =
       Number(order.voucher_discount || 0);
@@ -208,8 +307,21 @@ function renderAdminOrders() {
     const shipping =
       Number(order.shipping_fee || 0);
 
+    const serviceFee =
+      Number(
+        order.service_fee ??
+        order.serviceFee ??
+        order.handling_fee ??
+        order.handlingFee ??
+        0
+      );
+
     const total =
-      Number(order.amount || 0);
+      Number(
+        order.amount ||
+        order.total ||
+        0
+      );
 
     return `
       <div class="warehouse-order-card">
@@ -342,7 +454,15 @@ ${hasOrderRequest ? `
   </div>
 
   <div>
+    <span style="color:#7c3aed;">Service Fee</span>
+    <strong style="color:#7c3aed;">
+      ₱${serviceFee.toLocaleString("en-PH")}
+    </strong>
+  </div>
+
+  <div>
     <span>Total</span>
+
     <strong style="
   font-size:16px;
   color:#2563eb;
@@ -452,20 +572,113 @@ function toggleShowAllOrderItems(orderId) {
 ================================ */
 
 function normalizeOrder(order) {
+  const paymentStatus =
+    order.payment_status ||
+    order.status ||
+    order.xendit_status ||
+    "";
+
+  const paymentMethod =
+    order.payment_method ||
+    order.paymentMethod ||
+    order.payment_type ||
+    order.payment_option ||
+    order.payment_channel ||
+    order.method ||
+    "";
+
+  const paymentText = String(
+    `${paymentStatus} ${paymentMethod}`
+  )
+    .trim()
+    .toUpperCase();
+
+  const isCOD =
+    paymentText.includes("COD") ||
+    paymentText.includes("CASH ON DELIVERY");
+
+  const isPaid =
+    (
+      paymentText === "PAID" ||
+      paymentText.includes(" PAID")
+    ) &&
+    !paymentText.includes("UNPAID");
+
+  const isPaymentExpired =
+    paymentText.includes("EXPIRED") ||
+    paymentText.includes("PAYMENT EXPIRED");
+
+  let orderStatus = String(
+    order.order_status || ""
+  ).trim();
+
+  if (isCOD) {
+    if (
+      !orderStatus ||
+      orderStatus === "Pending Payment" ||
+      orderStatus === "Pending"
+    ) {
+      orderStatus = "Pending";
+    }
+  } else if (isPaymentExpired) {
+    orderStatus = "Expired";
+  } else if (isPaid) {
+    if (
+      !orderStatus ||
+      orderStatus === "Pending Payment" ||
+      orderStatus === "Pending"
+    ) {
+      orderStatus = "Processing";
+    }
+  } else if (!orderStatus) {
+    orderStatus = "Pending Payment";
+  }
+
   return {
     ...order,
-    order_id: order.external_id || order.order_id || order.id,
-    payment_status: order.payment_status || order.status || "Pending Payment",
-    order_status:
-      order.order_status ||
-      (String(order.status || "").toUpperCase() === "PAID"
-        ? "Processing"
-        : "Pending Payment"),
+
+    order_id:
+      order.external_id ||
+      order.order_id ||
+      order.id,
+
+    payment_status:
+      paymentStatus || (isCOD ? "COD" : "Pending Payment"),
+
+    payment_method: paymentMethod,
+    order_status: orderStatus,
+
     subtotal: Number(order.subtotal || 0),
-    shipping_fee: Number(order.shipping_fee || 0),
-    voucher_discount: Number(order.voucher_discount || 0),
-    amount: Number(order.amount || 0),
-    items: Array.isArray(order.items) ? order.items : []
+
+    shipping_fee: Number(
+      order.shipping_fee ||
+      order.shippingFee ||
+      0
+    ),
+
+    service_fee: Number(
+      order.service_fee ??
+      order.serviceFee ??
+      order.handling_fee ??
+      order.handlingFee ??
+      0
+    ),
+
+    voucher_discount: Number(
+      order.voucher_discount ||
+      order.voucherDiscount ||
+      0
+    ),
+
+    amount: Number(
+      order.amount ||
+      order.total ||
+      0
+    ),
+
+    items: Array.isArray(order.items)
+      ? order.items
+      : []
   };
 }
 
@@ -585,7 +798,7 @@ function openOrderModal(orderId) {
       : ""}
 
     <p><strong>Amount:</strong> ₱${Number(order.amount || 0).toLocaleString("en-PH")}</p>
-    <p><strong>Status:</strong> ${escapeHtml(order.order_status || "Processing")}</p>
+    <p><strong>Status:</strong> ${escapeHtml(order.order_status || "Pending")}</p>
     <p>
   <strong>Courier:</strong>
   ${String(order.courier || "").toLowerCase().includes("lalamove") ||
@@ -603,7 +816,23 @@ function openOrderModal(orderId) {
     <div class="order-modal-actions">
       ${getShipmentButton(order, orderId)}
 
-      <button class="small-btn" type="button" onclick="markOrderShipped('${escapeAttribute(orderId)}', this)">Mark Shipped</button>
+
+<button
+  class="small-btn"
+  type="button"
+  onclick="markOrderPacked('${escapeAttribute(orderId)}', this)"
+>
+  Mark Packed
+</button>
+
+<button
+  class="small-btn"
+  type="button"
+  onclick="markOrderShipped('${escapeAttribute(orderId)}', this)"
+>
+  Mark Shipped
+</button>
+
       <button class="small-btn" type="button" onclick="markOrderInTransit('${escapeAttribute(orderId)}', this)">In Transit</button>
       <button class="danger-btn" type="button" onclick="markOrderFailed('${escapeAttribute(orderId)}', this)">Failed Delivery</button>
       <button class="small-btn" type="button" onclick="markOrderDelivered('${escapeAttribute(orderId)}', this)">Mark Delivered</button>
@@ -726,7 +955,6 @@ async function cancelOrder(orderId, btn) {
 
 async function createSPXShipment(orderId, btn) {
   try {
-
     const order = adminOrders.find(o =>
       String(o.external_id || o.id) === String(orderId)
     );
@@ -736,23 +964,20 @@ async function createSPXShipment(orderId, btn) {
       return;
     }
 
-    const paymentStatus =
-      String(order.status || "").toUpperCase();
+    const paymentStatus = String(
+      order.payment_status ||
+      order.status ||
+      ""
+    ).toUpperCase();
 
-
-    const isCOD =
-      paymentStatus.includes("COD");
-
-    const isPaid =
-      paymentStatus === "PAID";
+    const isCOD = paymentStatus.includes("COD");
+    const isPaid = paymentStatus === "PAID";
 
     if (!isCOD && !isPaid) {
-
       showToast(
-        "Only COD or PAID orders can be shipped.",
+        "Only COD or PAID orders can arrange shipment.",
         "error"
       );
-
       return;
     }
 
@@ -761,72 +986,127 @@ async function createSPXShipment(orderId, btn) {
       btn.innerText = "Arranging Shipment...";
     }
 
-
-    const res = await fetch(
+    /*
+      STEP 1:
+      Gumawa ng SPX shipment / waybill.
+    */
+    const shipmentResponse = await fetch(
       `https://de-ecom-pro.onrender.com/api/orders/${orderId}/spx-create`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" }
+        headers: {
+          "Content-Type": "application/json"
+        }
       }
     );
 
-    const result = await res.json();
+    const shipmentResult =
+      await shipmentResponse.json();
 
-    if (!result.success) {
-      showToast(result.message || "SPX shipment failed", "error");
-      return;
+    if (!shipmentResponse.ok || !shipmentResult.success) {
+      throw new Error(
+        shipmentResult.message ||
+        "SPX shipment failed"
+      );
     }
 
-    await fetch(
+    /*
+      STEP 2:
+      Pag successful ang Arrange Shipment,
+      Processing muna—not Shipped.
+    */
+    const updateResponse = await fetch(
       "https://de-ecom-pro.onrender.com/api/orders/update",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
 
         body: JSON.stringify({
           orderId,
-          order_status: "Shipped"
+          order_status: "Processing",
+          shipment_arranged_at:
+            new Date().toISOString()
         })
       }
     );
 
+    const updateResult =
+      await updateResponse.json();
+
+    if (!updateResponse.ok || !updateResult.success) {
+      throw new Error(
+        updateResult.message ||
+        "Shipment created but status update failed"
+      );
+    }
+
     showToast(
-      "Shipment arranged. Order moved to Shipped!",
+      "Shipment arranged. Order moved to Processing.",
       "success"
     );
 
     closeOrderModal();
-
     await loadAdminOrders();
 
-  } catch (err) {
-
-    console.error(err);
+  } catch (error) {
+    console.error(
+      "SPX shipment error:",
+      error
+    );
 
     showToast(
-      "SPX server error",
+      error.message || "SPX server error",
       "error"
     );
 
   } finally {
-
     if (btn) {
       btn.disabled = false;
       btn.innerText = "Arrange Shipment";
     }
-
   }
 }
 
 async function bookLalamoveShipment(orderId, btn) {
   try {
+    const order = adminOrders.find(o =>
+      String(o.external_id || o.id) === String(orderId)
+    );
+
+    if (!order) {
+      showToast("Order not found", "error");
+      return;
+    }
+
+    const paymentStatus = String(
+      order.payment_status ||
+      order.status ||
+      ""
+    ).toUpperCase();
+
+    const isCOD = paymentStatus.includes("COD");
+    const isPaid = paymentStatus === "PAID";
+
+    if (!isCOD && !isPaid) {
+      showToast(
+        "Only COD or PAID orders can arrange shipment.",
+        "error"
+      );
+      return;
+    }
+
     if (btn) {
       btn.disabled = true;
       btn.innerText = "Booking Rider...";
     }
 
-
-    const res = await fetch(
+    /*
+      STEP 1:
+      Book Lalamove rider.
+    */
+    const bookingResponse = await fetch(
       `https://de-ecom-pro.onrender.com/api/orders/${orderId}/lalamove-create`,
       {
         method: "POST",
@@ -836,37 +1116,71 @@ async function bookLalamoveShipment(orderId, btn) {
       }
     );
 
-    const result = await res.json();
+    const bookingResult =
+      await bookingResponse.json();
 
-    if (!result.success) {
-      showToast(
-        result.message || "Lalamove booking failed",
-        "error"
+    if (!bookingResponse.ok || !bookingResult.success) {
+      throw new Error(
+        bookingResult.message ||
+        "Lalamove booking failed"
       );
-      return;
+    }
+
+    /*
+      STEP 2:
+      Pag successful ang booking,
+      Processing muna.
+    */
+    const updateResponse = await fetch(
+      "https://de-ecom-pro.onrender.com/api/orders/update",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          orderId,
+          order_status: "Processing",
+          shipment_arranged_at:
+            new Date().toISOString()
+        })
+      }
+    );
+
+    const updateResult =
+      await updateResponse.json();
+
+    if (!updateResponse.ok || !updateResult.success) {
+      throw new Error(
+        updateResult.message ||
+        "Booking successful but status update failed"
+      );
     }
 
     showToast(
-      "Lalamove rider booked successfully!",
+      "Rider booked. Order moved to Processing.",
       "success"
     );
 
     closeOrderModal();
-
     await loadAdminOrders();
 
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(
+      "Lalamove booking error:",
+      error
+    );
 
     showToast(
-      "Lalamove server error",
+      error.message || "Lalamove server error",
       "error"
     );
 
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerText = "Book Lalamove";
+      btn.innerText = "Arrange Shipment";
     }
   }
 }
@@ -1295,6 +1609,86 @@ async function bulkMarkPacked() {
   await loadAdminOrders();
 }
 
+async function markOrderPacked(orderId, btn) {
+  try {
+    const order = adminOrders.find(o =>
+      String(o.external_id || o.id) === String(orderId)
+    );
+
+    if (!order) {
+      showToast("Order not found", "error");
+      return;
+    }
+
+    const currentStatus =
+      String(order.order_status || "");
+
+    if (currentStatus !== "Processing") {
+      showToast(
+        "Processing orders only can be marked as Packed.",
+        "error"
+      );
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerText = "Packing...";
+    }
+
+    const response = await fetch(
+      "https://de-ecom-pro.onrender.com/api/orders/update",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          orderId,
+          order_status: "Packed",
+          packed_at: new Date().toISOString()
+        })
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.message ||
+        "Failed to mark order as Packed"
+      );
+    }
+
+    showToast(
+      "Order marked as Packed.",
+      "success"
+    );
+
+    closeOrderModal();
+    await loadAdminOrders();
+
+  } catch (error) {
+    console.error(
+      "Mark packed error:",
+      error
+    );
+
+    showToast(
+      error.message ||
+      "Mark packed server error",
+      "error"
+    );
+
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "Mark Packed";
+    }
+  }
+}
+
 async function markOrderShipped(orderId, btn) {
   try {
 
@@ -1307,8 +1701,11 @@ async function markOrderShipped(orderId, btn) {
       return;
     }
 
-    const paymentStatus =
-      String(order.status || "").toUpperCase();
+    const paymentStatus = String(
+      order.payment_status ||
+      order.status ||
+      ""
+    ).toUpperCase();
 
     const isCOD =
       paymentStatus.includes("COD");
@@ -1423,8 +1820,11 @@ async function forceUpdateOrderStatus(orderId, status, btn) {
       return;
     }
 
-    const paymentStatus =
-      String(order.status || "").toUpperCase();
+    const paymentStatus = String(
+      order.payment_status ||
+      order.status ||
+      ""
+    ).toUpperCase();
 
     const isCOD =
       paymentStatus.includes("COD");
@@ -1507,6 +1907,7 @@ async function bulkArrangeShipment() {
    GLOBALS
 ================================ */
 
+window.markOrderPacked = markOrderPacked;
 window.handleOrderRequestAction = handleOrderRequestAction;
 window.approveOrderRequest = approveOrderRequest;
 window.rejectOrderRequest = rejectOrderRequest;
