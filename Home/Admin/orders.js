@@ -40,6 +40,58 @@ function escapeAttribute(text) {
   return String(text ?? "").replaceAll('"', "&quot;");
 }
 
+function setButtonLoading(button, loadingText = "Updating...") {
+  if (!button) return;
+
+  button.dataset.originalHtml =
+    button.dataset.originalHtml || button.innerHTML;
+
+  button.disabled = true;
+
+  button.innerHTML = `
+    <span class="admin-btn-spinner"></span>
+    ${escapeHtml(loadingText)}
+  `;
+}
+
+function resetButtonLoading(button) {
+  if (!button) return;
+
+  button.disabled = false;
+  button.innerHTML =
+    button.dataset.originalHtml || "Update";
+
+  delete button.dataset.originalHtml;
+}
+
+if (!document.getElementById("admin-button-spinner-style")) {
+  const style = document.createElement("style");
+
+  style.id = "admin-button-spinner-style";
+
+  style.textContent = `
+    .admin-btn-spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      margin-right: 6px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      vertical-align: -2px;
+      animation: adminButtonSpin 0.7s linear infinite;
+    }
+
+    @keyframes adminButtonSpin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+}
+
 /* ===============================
    STATUS CLASS
 ================================ */
@@ -245,7 +297,10 @@ function renderAdminOrders() {
         return isExpired;
       }
 
-      if (selectedFilter === "pending") {
+      if (
+        selectedFilter === "pending" ||
+        selectedFilter === "pending cod"
+      ) {
         return isCOD && orderStatus === "pending";
       }
 
@@ -981,10 +1036,7 @@ async function createSPXShipment(orderId, btn) {
       return;
     }
 
-    if (btn) {
-      btn.disabled = true;
-      btn.innerText = "Arranging Shipment...";
-    }
+    setButtonLoading(btn, "Arranging Shipment...");
 
     /*
       STEP 1:
@@ -1062,10 +1114,7 @@ async function createSPXShipment(orderId, btn) {
     );
 
   } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerText = "Arrange Shipment";
-    }
+    resetButtonLoading(btn);
   }
 }
 
@@ -1097,10 +1146,7 @@ async function bookLalamoveShipment(orderId, btn) {
       return;
     }
 
-    if (btn) {
-      btn.disabled = true;
-      btn.innerText = "Booking Rider...";
-    }
+    setButtonLoading(btn, "Booking Rider...");
 
     /*
       STEP 1:
@@ -1178,10 +1224,7 @@ async function bookLalamoveShipment(orderId, btn) {
     );
 
   } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerText = "Arrange Shipment";
-    }
+    resetButtonLoading(btn);
   }
 }
 
@@ -1721,10 +1764,7 @@ async function markOrderShipped(orderId, btn) {
       return;
     }
 
-    if (btn) {
-      btn.disabled = true;
-      btn.innerText = "Updating...";
-    }
+    setButtonLoading(btn, "Updating...");
 
     const res = await fetch(
       "https://de-ecom-pro.onrender.com/api/orders/update",
@@ -1754,10 +1794,7 @@ async function markOrderShipped(orderId, btn) {
     showToast("Mark shipped server error", "error");
 
   } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerText = "Mark Shipped";
-    }
+    resetButtonLoading(btn);
   }
 }
 

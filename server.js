@@ -127,7 +127,7 @@ async function savePendingOrder({
     checkout_url: checkoutUrl || "",
     status: "Pending Payment",
     order_status: paymentProvider === "COD"
-      ? "Pending COD"
+      ? "Pending"
       : "Pending Payment",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
@@ -596,7 +596,7 @@ app.post("/api/orders/cod", async (req, res) => {
 
     if (index !== -1) {
       orders[index].status = "COD";
-      orders[index].order_status = "To Ship";
+      orders[index].order_status = "Pending";
       orders[index].updated_at = new Date().toISOString();
 
       await saveOrders(orders);
