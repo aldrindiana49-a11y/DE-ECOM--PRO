@@ -18,6 +18,15 @@
     "crypto-js": "^4.2.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "sharp": "^0.35.3",
     "xlsx": "^0.18.5"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aldrindiana49-a11y/DE-ECOM--PRO.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aldrindiana49-a11y/DE-ECOM--PRO/issues"
+  },
+  "homepage": "https://github.com/aldrindiana49-a11y/DE-ECOM--PRO#readme"
 }
