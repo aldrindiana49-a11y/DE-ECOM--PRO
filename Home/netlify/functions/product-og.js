@@ -15,6 +15,8 @@ const LOGO_URL =
 const FALLBACK_IMAGE =
     `${SITE_URL}/Image/social-preview.png`;
 
+
+
 /* =====================================
    HELPERS
 ===================================== */
@@ -263,7 +265,7 @@ async function generatePremiumCard(product) {
           <text
             x="620"
             y="${120 + index * 42}"
-            font-family="sans-serif"
+           font-family="Arial"
             font-size="28"
             font-weight="700"
             fill="#222222"
@@ -280,9 +282,9 @@ async function generatePremiumCard(product) {
         <text
           x="620"
           y="215"
-          font-family="sans-serif"
+         font-family="Arial"
           font-size="22"
-          font-weight="600"
+          font-weight="700"
           fill="#8a8a8a"
           text-decoration="line-through"
         >
@@ -303,7 +305,8 @@ async function generatePremiumCard(product) {
       viewBox="0 0 1200 630"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect
+      
+            <rect
         x="8"
         y="8"
         width="1184"
@@ -339,9 +342,9 @@ async function generatePremiumCard(product) {
       <text
         x="620"
         y="270"
-        font-family="sans-serif"
+       font-family="Arial"
         font-size="42"
-        font-weight="800"
+        font-weight="700"
         fill="#f15a24"
       >
         ${escapeXml(formatPrice(finalPrice))}
@@ -350,7 +353,7 @@ async function generatePremiumCard(product) {
       <text
         x="620"
         y="325"
-        font-family="sans-serif"
+        font-family="Arial"
         font-size="22"
         font-weight="700"
         fill="#ff6b00"
@@ -371,7 +374,7 @@ async function generatePremiumCard(product) {
         x="1055"
         y="394"
         text-anchor="middle"
-        font-family="sans-serif"
+        font-family="Arial"
         font-size="20"
         font-weight="700"
         fill="#ffffff"
@@ -391,7 +394,7 @@ async function generatePremiumCard(product) {
       <text
         x="26"
         y="487"
-        font-family="sans-serif"
+        font-family="Arial"
         font-size="15"
         font-weight="700"
         fill="#ffffff"
@@ -403,7 +406,7 @@ async function generatePremiumCard(product) {
       <text
         x="24"
         y="548"
-        font-family="sans-serif"
+       font-family="Arial"
         font-size="20"
         font-weight="400"
         fill="#7a7a7a"
@@ -414,7 +417,7 @@ async function generatePremiumCard(product) {
       <text
         x="24"
         y="590"
-        font-family="sans-serif"
+        font-family="Arial"
         font-size="20"
         font-weight="700"
         fill="#222222"
@@ -529,10 +532,7 @@ exports.handler = async event => {
             versionParam;
 
         const previewImageUrl =
-            `${SITE_URL}/.netlify/functions/product-og` +
-            `?id=${encodeURIComponent(id)}` +
-            `&image=1` +
-            versionParam;
+            FALLBACK_IMAGE;
 
         const productUrl =
             `${SITE_URL}/product/index.html` +
