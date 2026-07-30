@@ -62,7 +62,7 @@
 
   <link rel="stylesheet" href="../style.css?v=10003" />
   <link rel="stylesheet" href="../chat/chat.css?v=20">
-  <link rel="stylesheet" href="product.css?v=10021" />
+  <link rel="stylesheet" href="product.css?v=10022" />
 </head>
 
 <body>
@@ -227,14 +227,38 @@
           ←
         </button>
 
-        <button id="shareBtn" class="share-top-btn" type="button">
-          ↗
-        </button>
-
         <div class="product-left">
+
           <div class="product-image">
             <img id="productImg" src="" alt="Product Image" />
           </div>
+
+          <div class="product-share-row">
+            <span class="share-label">Share:</span>
+
+            <button type="button" class="social-share messenger" aria-label="Share on Messenger"
+              title="Share on Messenger">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 2C6.477 2 2 6.145 2 11.258c0 2.915 1.455 5.514 3.728 7.21V22l3.405-1.87c.91.252 1.872.387 2.867.387 5.523 0 10-4.145 10-9.259C22 6.145 17.523 2 12 2zm.994 12.468-2.548-2.72-4.974 2.72 5.47-5.806 2.612 2.72 4.91-2.72-5.47 5.806z" />
+              </svg>
+            </button>
+
+            <button type="button" class="social-share facebook" aria-label="Share on Facebook"
+              title="Share on Facebook">
+              f
+            </button>
+
+            <button type="button" class="social-share pinterest" aria-label="Share on Pinterest"
+              title="Share on Pinterest">
+              p
+            </button>
+
+            <button type="button" class="social-share twitter" aria-label="Share on X" title="Share on X">
+              𝕏
+            </button>
+          </div>
+
         </div>
 
         <div class="product-info">
@@ -654,7 +678,7 @@
 
   <script src="../Admin/supabase.js?v=50001"></script>
 
-  <script src="product.js?v=10021"></script>
+  <script src="product.js?v=10022"></script>
 
   <script src="../chat/chat.js?v=10021"></script>
 

@@ -1578,3 +1578,39 @@ body {
   border: 1px solid #e5e7eb;
   border-radius: 10px;
 }
+
+.order-filter-btn {
+  position: relative;
+}
+
+.order-filter-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+  background: #ef4444;
+  color: #ffffff;
+
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+
+  pointer-events: none;
+  z-index: 2;
+}
+
+.order-filter-btn.active .order-filter-count {
+  background: #f59e0b;
+}

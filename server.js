@@ -79,6 +79,7 @@ async function saveOrders(orders) {
 
     if (error) {
       console.error("SUPABASE SAVE ORDER ERROR:", error);
+      throw error;
     }
   }
 }
@@ -613,6 +614,106 @@ app.post("/api/orders/cod", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "COD order save failed"
+    });
+  }
+});
+
+// ================= SKYRO TEST MODE =================
+app.post("/api/skyro/test-create-order", async (req, res) => {
+  try {
+    const {
+      orderId,
+      amount,
+      subtotal,
+      shippingFee,
+      serviceFee,
+      handlingFee,
+      customerName,
+      customerPhone,
+      customerEmail,
+      guestOrder,
+      guestTrackingCode,
+      items,
+      address,
+      parcelInfo,
+      courier
+    } = req.body;
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing order ID"
+      });
+    }
+
+    if (!Number(amount) || Number(amount) <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order amount"
+      });
+    }
+
+    if (!Array.isArray(items) || !items.length) {
+      return res.status(400).json({
+        success: false,
+        message: "No order items found"
+      });
+    }
+
+    const skyroOrderId =
+      `TEST-SKYRO-${Date.now()}`;
+
+    let order = await savePendingOrder({
+      orderId,
+      amount,
+      subtotal,
+      shippingFee,
+      serviceFee,
+      handlingFee,
+
+      customerName,
+      customerPhone,
+      customerEmail,
+
+      guestOrder,
+      guestTrackingCode,
+
+      items,
+      address,
+      parcelInfo,
+      courier,
+
+      paymentProvider: "SKYRO",
+
+      checkoutUrl:
+        "https://drinelectronicsph.com/home-orders/?skyro=test"
+    });
+
+    order.payment_provider = "SKYRO";
+    order.status = "Pending Payment";
+    order.order_status = "Installment Application";
+    order.updated_at = new Date().toISOString();
+
+    await saveOrders([order]);
+
+    return res.json({
+      success: true,
+      testMode: true,
+      skyroOrderId,
+
+      checkoutUrl:
+        "https://drinelectronicsph.com/home-orders/?skyro=test",
+
+      order
+    });
+
+  } catch (error) {
+    console.error("SKYRO TEST ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Skyro test order failed",
+      error: error.message
     });
   }
 });

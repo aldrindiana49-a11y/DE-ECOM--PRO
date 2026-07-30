@@ -4,11 +4,11 @@
 <head>
 
   <link rel="icon" type="image/png" id="siteFavicon"
-    href="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/logo.png" />
-  <meta charset="UTF-8" />
+    href="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/logo.png?v=10010" <meta
+    charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Drin Electronics Admin Panel</title>
-  <link rel="stylesheet" href="admin.css" />
+  <link rel="stylesheet" href="admin.css?v=10010" />
 
 </head>
 
@@ -589,47 +589,58 @@
           <div class="orders-toolbar-left">
 
             <button class="order-filter-btn" data-filter="Pending">
-              Pending Cod
+              Pending COD
+              <span class="order-filter-count" id="countPendingCod">0</span>
             </button>
 
             <button class="order-filter-btn" data-filter="Processing">
               Processing
+              <span class="order-filter-count" id="countProcessing">0</span>
             </button>
 
             <button class="order-filter-btn" data-filter="Packed">
               Packed
+              <span class="order-filter-count" id="countPacked">0</span>
             </button>
 
             <button class="order-filter-btn" data-filter="Shipped">
               Shipped
+              <span class="order-filter-count" id="countShipped">0</span>
             </button>
 
             <button class="order-filter-btn" data-filter="In Transit">
               In Transit
+              <span class="order-filter-count" id="countInTransit">0</span>
             </button>
 
             <button class="order-filter-btn" data-filter="Delivered">
               Delivered
+              <span class="order-filter-count" id="countDelivered">0</span>
             </button>
 
             <button class="order-filter-btn" data-filter="PAID">
               Paid
+              <span class="order-filter-count" id="countPaid">0</span>
             </button>
 
             <button class="order-filter-btn" data-filter="Pending Payment">
               Pending Payment
+              <span class="order-filter-count" id="countPendingPayment">0</span>
             </button>
 
             <button class="order-filter-btn" data-filter="Failed Delivery">
               Failed Delivery
+              <span class="order-filter-count" id="countFailedDelivery">0</span>
             </button>
 
             <button class="order-filter-btn" data-filter="Expired">
               Expired
+              <span class="order-filter-count" id="countExpired">0</span>
             </button>
 
             <button class="order-filter-btn active" data-filter="ALL">
               All
+              <span class="order-filter-count" id="countAll">0</span>
             </button>
 
           </div>
@@ -1052,19 +1063,14 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
-  <script src="./supabase.js?v=10002"></script>
-
-
-
-  <script src="./utils.js?v=10002"></script>
-  <script src="./admin.js?v=10002"></script>
-  <script src="./inventory.js?v=10002"></script>
-  <script src="./generator.js?v=10002"></script>
-  <script src="./categories.js?v=10002"></script>
-  <script src="./orders.js?v=10007"></script>
-  <script src="./employee.js?v=10002"></script>
-
-
+  <script src="./supabase.js?v=10010"></script>
+  <script src="./utils.js?v=10010"></script>
+  <script src="./admin.js?v=10010"></script>
+  <script src="./inventory.js?v=10010"></script>
+  <script src="./generator.js?v=10010"></script>
+  <script src="./categories.js?v=10010"></script>
+  <script src="./orders.js?v=10010"></script>
+  <script src="./employee.js?v=10010"></script>
 
 </body>
 

@@ -808,7 +808,18 @@ if (productForm) {
     try {
 
       let finalImage = safeText(existingImageData?.value);
+
       let galleryImages = [];
+
+      const editingProduct = products.find(
+        (item) =>
+          String(item.id).trim() ===
+          String(productId?.value || "").trim()
+      );
+
+      if (editingProduct && Array.isArray(editingProduct.gallery)) {
+        galleryImages = editingProduct.gallery;
+      }
 
       const uploadedFiles = Array.from(productImageFile?.files || []);
 
@@ -837,6 +848,11 @@ if (productForm) {
 
       const firstVariant = variants[0] || {};
 
+      const totalStock = variants.reduce(
+        (sum, variant) => sum + safeNumber(variant.stock, 0),
+        0
+      );
+
       const productData = {
         title: safeText(nameInput?.value),
         brand: safeText(brandInput?.value),
@@ -844,7 +860,7 @@ if (productForm) {
         discount_price: safeNumber(firstVariant.discountPrice, 0),
         category: safeText(categoryInput?.value),
         description: safeText(descriptionInput?.value),
-        stock: safeNumber(firstVariant.stock, 0),
+        stock: totalStock,
         image: safeText(finalImage),
         gallery: galleryImages,
         variant_title: currentMode === "variant"
@@ -880,20 +896,33 @@ if (productForm) {
       const editingId = safeText(productId?.value);
 
       let error;
+      let savedRows = [];
 
       if (editingId) {
         const result = await supabaseClient
           .from("products")
           .update(productData)
-          .eq("id", editingId);
+          .eq("id", editingId)
+          .select("id, stock, variations");
 
         error = result.error;
+        savedRows = result.data || [];
+
+        if (!error && savedRows.length === 0) {
+          showToast(
+            "No product was updated. Check Supabase UPDATE policy.",
+            "error"
+          );
+          return;
+        }
       } else {
         const result = await supabaseClient
           .from("products")
-          .insert([productData]);
+          .insert([productData])
+          .select("id, stock, variations");
 
         error = result.error;
+        savedRows = result.data || [];
       }
 
       if (error) {
@@ -964,7 +993,13 @@ function editProduct(id) {
     if (singleDiscountPriceInput) {
       singleDiscountPriceInput.value = single.discountPrice || "";
     }
-    if (singleStockInput) singleStockInput.value = single.stock || "";
+
+    if (singleStockInput) {
+      singleStockInput.value = String(
+        safeNumber(single.stock, 0)
+      );
+    }
+
     if (singleSkuInput) singleSkuInput.value = safeText(single.sku);
     if (singleWeightInput) singleWeightInput.value = single.weight || "";
     if (singleLengthInput) singleLengthInput.value = single.length || "";
@@ -1048,6 +1083,7 @@ async function loadAdminProductsFromSupabase() {
     productType: item.variations && item.variations.length > 1 ? "variant" : "single",
     variantTitle: item.variant_title || "Options",
     image: item.image,
+    gallery: Array.isArray(item.gallery) ? item.gallery : [],
     description: item.description,
     weight: item.weight,
     length: item.length,

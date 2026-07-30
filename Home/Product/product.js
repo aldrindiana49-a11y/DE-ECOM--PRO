@@ -2722,3 +2722,195 @@ function showWishlistSuccessPopup() {
 }
 
 wishlistBtn?.addEventListener("click", toggleWishlist);
+
+/* =====================================
+   PRODUCT SOCIAL SHARE
+===================================== */
+
+function getProductPreviewUrl() {
+  if (!product?.id) {
+    return window.location.href;
+  }
+
+  return (
+    "https://drinelectronicsph.com/.netlify/functions/product-og" +
+    "?id=" +
+    encodeURIComponent(product.id)
+  );
+}
+
+function getProductShareTitle() {
+  return (
+    product?.name ||
+    document.getElementById("productName")?.textContent?.trim() ||
+    "Drin Electronics Product"
+  );
+}
+
+function getProductShareImage() {
+  return (
+    selectedVariant?.image ||
+    getProductImage(product) ||
+    document.getElementById("productImg")?.src ||
+    ""
+  );
+}
+
+/* FACEBOOK NEWS FEED */
+document
+  .querySelector(".social-share.facebook")
+  ?.addEventListener("click", () => {
+    const previewUrl =
+      encodeURIComponent(getProductPreviewUrl());
+
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${previewUrl}`,
+      "_blank",
+      "width=650,height=550,noopener,noreferrer"
+    );
+  });
+
+/* MESSENGER */
+document
+  .querySelector(".social-share.messenger")
+  ?.addEventListener("click", async () => {
+    const previewUrl = getProductPreviewUrl();
+    const title = getProductShareTitle();
+
+    /*
+      Sa mobile, bubuksan nito ang native share menu.
+      Puwedeng piliin ang Messenger.
+    */
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title,
+          text: "Check this product from Drin Electronics",
+          url: previewUrl
+        });
+
+        return;
+
+      } catch (error) {
+        if (error?.name === "AbortError") {
+          return;
+        }
+
+        console.error("Native share error:", error);
+      }
+    }
+
+    /*
+      Desktop fallback:
+      direktang Facebook Messenger Send Dialog.
+    */
+    const encodedUrl =
+      encodeURIComponent(previewUrl);
+
+    const appId =
+      "4266303070285606";
+
+    const messengerUrl =
+      "https://www.facebook.com/dialog/send" +
+      `?app_id=${encodeURIComponent(appId)}` +
+      `&link=${encodedUrl}` +
+      `&redirect_uri=${encodedUrl}`;
+
+    window.open(
+      messengerUrl,
+      "_blank",
+      "width=650,height=650,noopener,noreferrer"
+    );
+  });
+
+/* PINTEREST */
+document
+  .querySelector(".social-share.pinterest")
+  ?.addEventListener("click", () => {
+    const previewUrl =
+      encodeURIComponent(getProductPreviewUrl());
+
+    const image =
+      encodeURIComponent(getProductShareImage());
+
+    const description =
+      encodeURIComponent(getProductShareTitle());
+
+    window.open(
+      "https://pinterest.com/pin/create/button/" +
+      `?url=${previewUrl}` +
+      `&media=${image}` +
+      `&description=${description}`,
+      "_blank",
+      "width=750,height=650,noopener,noreferrer"
+    );
+  });
+
+/* X / TWITTER */
+document
+  .querySelector(".social-share.twitter")
+  ?.addEventListener("click", () => {
+    const previewUrl =
+      encodeURIComponent(getProductPreviewUrl());
+
+    const title =
+      encodeURIComponent(getProductShareTitle());
+
+    window.open(
+      `https://twitter.com/intent/tweet?url=${previewUrl}&text=${title}`,
+      "_blank",
+      "width=650,height=500,noopener,noreferrer"
+    );
+  });
+
+document
+  .querySelector(".social-share.twitter")
+  ?.addEventListener("click", () => {
+    window.open(
+      `https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareTitle}`,
+      "_blank",
+      "width=650,height=500"
+    );
+  });
+
+document
+  .querySelector(".social-share.pinterest")
+  ?.addEventListener("click", () => {
+    const image = encodeURIComponent(
+      document.getElementById("productImg")?.src || ""
+    );
+
+    window.open(
+      `https://pinterest.com/pin/create/button/?url=${shareUrl}&media=${image}&description=${shareTitle}`,
+      "_blank",
+      "width=750,height=650"
+    );
+  });
+
+document
+  .querySelector(".social-share.messenger")
+  ?.addEventListener("click", () => {
+
+    const previewUrl =
+      `https://drinelectronicsph.com/.netlify/functions/product-og` +
+      `?id=${encodeURIComponent(product.id)}`;
+
+    const facebookAppId =
+      "ILAGAY_DITO_ANG_TUNAY_NA_FACEBOOK_APP_ID";
+
+    const encodedPreviewUrl =
+      encodeURIComponent(previewUrl);
+
+    const messengerUrl =
+      "https://www.facebook.com/dialog/send" +
+      `?app_id=${encodeURIComponent(facebookAppId)}` +
+      `&link=${encodedPreviewUrl}` +
+      `&redirect_uri=${encodedPreviewUrl}`;
+
+    window.open(
+      messengerUrl,
+      "_blank",
+      "width=650,height=650"
+    );
+
+  });

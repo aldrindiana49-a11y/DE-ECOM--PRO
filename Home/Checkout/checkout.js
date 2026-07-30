@@ -1864,6 +1864,17 @@ async function placeOrder() {
     date: new Date().toLocaleString(),
   };
 
+  if (paymentMain === "SKYRO") {
+    console.log("SKYRO TEST MODE SELECTED");
+
+    showOrderModal(
+      "Skyro Test Mode",
+      "Skyro test payment selected. No order was saved and no stock was deducted."
+    );
+
+    return resetPlaceOrder();
+  }
+
   try {
 
     if (paymentMain === "COD") {
@@ -1967,7 +1978,7 @@ async function placeOrder() {
       showOrderModal(
         "Order Successfully Placed",
         `
-<div class="elite-order-box">
+  <div class="elite-order-box">
    <div class="elite-checkmark">✓</div>
 
    <h3>Order Successfully Secured</h3>
@@ -2045,7 +2056,6 @@ async function placeOrder() {
       "Redirecting to secure payment gateway... Please do not close this window.",
       true
     );
-
 
     const res = await fetch(paymentUrl, {
       method: "POST",

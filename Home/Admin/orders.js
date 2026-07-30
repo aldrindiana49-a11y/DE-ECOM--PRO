@@ -13,8 +13,10 @@ const dashboardDelivered = document.getElementById("dashboardDelivered");
 
 let adminOrders = [];
 let currentOrderFilter = "ALL";
+let expandedOrderSummary = {};
 let expandedOrderItems = {};
-
+let currentOrdersPage = 1;
+const ordersPerPage = 10;
 const cancelledOrdersTableBody =
   document.getElementById("cancelledOrdersTableBody");
 
@@ -22,6 +24,640 @@ const returnRefundRequestsBody =
   document.getElementById("returnRefundRequestsBody");
 
 let cancelledOrders = [];
+const sellerInfo = {
+  name: "Drin Electronics",
+  address: "Pinalad Rd, Camachille St., Nagpayong, Brgy Pinagbuhatan Pasig City",
+  phone: "09157765642",
+  email: "drinelectronics@gmail.com"
+};
+
+
+function getCustomerFullAddress(order) {
+  const address = order.address || {};
+
+  if (typeof address === "string") {
+    return address;
+  }
+
+  return [
+    address.fullAddress,
+    address.street,
+    address.barangay,
+    address.city,
+    address.province,
+    address.postalCode,
+    address.country
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
+function printOrderInvoice(orderId) {
+  const order = adminOrders.find(o =>
+    String(o.external_id || o.id) === String(orderId)
+  );
+
+  if (!order) {
+    showToast("Order not found.", "error");
+    return;
+  }
+
+  const customerAddress =
+    getCustomerFullAddress(order) || "-";
+
+  const items = Array.isArray(order.items)
+    ? order.items
+    : [];
+
+  const subtotal = Number(order.subtotal || 0);
+
+  const voucher = Number(
+    order.voucher_discount ||
+    order.voucherDiscount ||
+    0
+  );
+
+  const shipping = Number(
+    order.shipping_fee ||
+    order.shippingFee ||
+    0
+  );
+
+  const serviceFee = Number(
+    order.service_fee ??
+    order.serviceFee ??
+    order.handling_fee ??
+    order.handlingFee ??
+    0
+  );
+
+  const total = Number(
+    order.amount ||
+    order.total ||
+    0
+  );
+
+  const paymentStatus =
+    order.payment_status ||
+    order.status ||
+    "-";
+
+  const courier =
+    order.courier || "-";
+
+  const tracking =
+    order.tracking_number || "-";
+
+  const itemsHtml = items.length
+    ? items.map(item => {
+      const itemName =
+        item.name ||
+        item.product_name ||
+        item.title ||
+        "Product";
+
+      const variant =
+        getItemVariant(item) || "-";
+
+      const quantity =
+        Number(item.quantity || item.qty || 1);
+
+      const unitPrice =
+        Number(
+          item.price ||
+          item.unit_price ||
+          item.unitPrice ||
+          item.selling_price ||
+          0
+        );
+
+      const lineTotal =
+        Number(
+          item.total ||
+          item.line_total ||
+          item.lineTotal ||
+          unitPrice * quantity
+        );
+
+      return `
+          <tr>
+            <td>
+              <strong>${escapeHtml(itemName)}</strong>
+
+              ${variant !== "-"
+          ? `<div class="variant">
+                      Variation: ${escapeHtml(variant)}
+                    </div>`
+          : ""
+        }
+            </td>
+
+            <td class="center">
+              ${quantity}
+            </td>
+
+            <td class="right">
+              ₱${unitPrice.toLocaleString("en-PH", {
+          minimumFractionDigits: 2
+        })}
+            </td>
+
+            <td class="right">
+              ₱${lineTotal.toLocaleString("en-PH", {
+          minimumFractionDigits: 2
+        })}
+            </td>
+          </tr>
+        `;
+    }).join("")
+    : `
+      <tr>
+        <td colspan="4" class="center">
+          No item details found.
+        </td>
+      </tr>
+    `;
+
+  const invoiceWindow =
+    window.open("", "_blank");
+
+  if (!invoiceWindow) {
+    showToast(
+      "Please allow popups to open the invoice.",
+      "error"
+    );
+    return;
+  }
+
+  invoiceWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+
+      <title>
+        Invoice ${escapeHtml(orderId)}
+      </title>
+
+      <style>
+        * {
+          box-sizing: border-box;
+        }
+
+        body {
+          margin: 0;
+          padding: 30px;
+          background: #f3f4f6;
+          color: #111827;
+          font-family: Arial, sans-serif;
+        }
+
+        .invoice {
+          width: 100%;
+          max-width: 900px;
+          margin: auto;
+          padding: 40px;
+          background: #ffffff;
+          border-radius: 16px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .invoice-header {
+          display: flex;
+          justify-content: space-between;
+          gap: 30px;
+          padding-bottom: 24px;
+          border-bottom: 2px solid #2563eb;
+        }
+
+        .brand h1 {
+          margin: 0 0 8px;
+          color: #2563eb;
+          font-size: 28px;
+        }
+
+        .brand p,
+        .invoice-meta p {
+          margin: 4px 0;
+          color: #4b5563;
+          font-size: 14px;
+          line-height: 1.5;
+        }
+
+        .invoice-meta {
+          text-align: right;
+        }
+
+        .invoice-title {
+          margin: 0 0 10px;
+          font-size: 24px;
+          letter-spacing: 1px;
+        }
+
+        .details-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 24px;
+          margin-top: 28px;
+        }
+
+        .details-box {
+          padding: 18px;
+          background: #f9fafb;
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
+        }
+
+        .details-box h3 {
+          margin: 0 0 12px;
+          color: #2563eb;
+          font-size: 15px;
+          text-transform: uppercase;
+        }
+
+        .details-box p {
+          margin: 6px 0;
+          line-height: 1.5;
+          font-size: 14px;
+        }
+
+        table {
+          width: 100%;
+          margin-top: 28px;
+          border-collapse: collapse;
+        }
+
+        th {
+          padding: 12px;
+          background: #2563eb;
+          color: #ffffff;
+          font-size: 13px;
+          text-align: left;
+        }
+
+        td {
+          padding: 14px 12px;
+          border-bottom: 1px solid #e5e7eb;
+          font-size: 14px;
+          vertical-align: top;
+        }
+
+        .variant {
+          margin-top: 5px;
+          color: #6b7280;
+          font-size: 12px;
+        }
+
+        .center {
+          text-align: center;
+        }
+
+        .right {
+          text-align: right;
+        }
+
+        .summary-area {
+          display: flex;
+          justify-content: flex-end;
+          margin-top: 25px;
+        }
+
+        .summary {
+          width: 100%;
+          max-width: 380px;
+        }
+
+        .summary-row {
+          display: flex;
+          justify-content: space-between;
+          gap: 20px;
+          padding: 9px 0;
+          border-bottom: 1px solid #e5e7eb;
+          font-size: 14px;
+        }
+
+        .summary-row.voucher {
+          color: #16a34a;
+        }
+
+        .summary-row.service {
+          color: #7c3aed;
+        }
+
+        .summary-row.total {
+          margin-top: 8px;
+          padding: 14px 0;
+          border-top: 2px solid #2563eb;
+          border-bottom: none;
+          color: #2563eb;
+          font-size: 19px;
+          font-weight: 700;
+        }
+
+        .shipping-info {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+          margin-top: 28px;
+          padding: 18px;
+          background: #eff6ff;
+          border-radius: 12px;
+          font-size: 14px;
+        }
+
+        .shipping-info p {
+          margin: 5px 0;
+        }
+
+        .invoice-footer {
+          margin-top: 35px;
+          padding-top: 20px;
+          border-top: 1px solid #e5e7eb;
+          color: #6b7280;
+          text-align: center;
+          font-size: 13px;
+        }
+
+        .invoice-actions {
+          display: flex;
+          justify-content: center;
+          gap: 12px;
+          margin: 25px auto;
+        }
+
+        .invoice-actions button {
+          padding: 12px 20px;
+          border: none;
+          border-radius: 8px;
+          background: #2563eb;
+          color: #ffffff;
+          cursor: pointer;
+          font-weight: 700;
+        }
+
+        .invoice-actions button.secondary {
+          background: #111827;
+        }
+
+        @media print {
+          body {
+            padding: 0;
+            background: #ffffff;
+          }
+
+          .invoice {
+            max-width: none;
+            padding: 20px;
+            border-radius: 0;
+            box-shadow: none;
+          }
+
+          .invoice-actions {
+            display: none;
+          }
+        }
+
+        @media (max-width: 650px) {
+          body {
+            padding: 12px;
+          }
+
+          .invoice {
+            padding: 22px;
+          }
+
+          .invoice-header,
+          .details-grid,
+          .shipping-info {
+            grid-template-columns: 1fr;
+            display: grid;
+          }
+
+          .invoice-meta {
+            text-align: left;
+          }
+        }
+      </style>
+    </head>
+
+    <body>
+      <div class="invoice">
+
+        <div class="invoice-header">
+          <div class="brand">
+            <h1>
+              ${escapeHtml(sellerInfo.name)}
+            </h1>
+
+            <p>
+              ${escapeHtml(sellerInfo.address)}
+            </p>
+
+            <p>
+              ${escapeHtml(sellerInfo.phone)}
+            </p>
+
+            <p>
+              ${escapeHtml(sellerInfo.email)}
+            </p>
+          </div>
+
+          <div class="invoice-meta">
+            <h2 class="invoice-title">
+              INVOICE
+            </h2>
+
+            <p>
+              <strong>Invoice No.:</strong>
+              ${escapeHtml(orderId)}
+            </p>
+
+            <p>
+              <strong>Date:</strong>
+              ${order.created_at
+      ? escapeHtml(
+        new Date(
+          order.created_at
+        ).toLocaleString("en-PH")
+      )
+      : "-"
+    }
+            </p>
+
+            <p>
+              <strong>Status:</strong>
+              ${escapeHtml(order.order_status || "-")}
+            </p>
+          </div>
+        </div>
+
+        <div class="details-grid">
+          <div class="details-box">
+            <h3>Seller Details</h3>
+
+            <p>
+              <strong>
+                ${escapeHtml(sellerInfo.name)}
+              </strong>
+            </p>
+
+            <p>
+              ${escapeHtml(sellerInfo.address)}
+            </p>
+
+            <p>
+              ${escapeHtml(sellerInfo.phone)}
+            </p>
+
+            <p>
+              ${escapeHtml(sellerInfo.email)}
+            </p>
+          </div>
+
+          <div class="details-box">
+            <h3>Bill To</h3>
+
+            <p>
+              <strong>
+                ${escapeHtml(
+      order.customer_name || "-"
+    )}
+              </strong>
+            </p>
+
+            <p>
+              ${escapeHtml(
+      order.customer_phone || "-"
+    )}
+            </p>
+
+            <p>
+              ${escapeHtml(customerAddress)}
+            </p>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th class="center">Qty</th>
+              <th class="right">Unit Price</th>
+              <th class="right">Amount</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
+
+        <div class="summary-area">
+          <div class="summary">
+
+            <div class="summary-row">
+              <span>Subtotal</span>
+
+              <strong>
+                ₱${subtotal.toLocaleString("en-PH", {
+      minimumFractionDigits: 2
+    })}
+              </strong>
+            </div>
+
+            <div class="summary-row voucher">
+              <span>Voucher Discount</span>
+
+              <strong>
+                -₱${voucher.toLocaleString("en-PH", {
+      minimumFractionDigits: 2
+    })}
+              </strong>
+            </div>
+
+            <div class="summary-row">
+              <span>Shipping Fee</span>
+
+              <strong>
+                ₱${shipping.toLocaleString("en-PH", {
+      minimumFractionDigits: 2
+    })}
+              </strong>
+            </div>
+
+            <div class="summary-row service">
+              <span>Service Fee</span>
+
+              <strong>
+                ₱${serviceFee.toLocaleString("en-PH", {
+      minimumFractionDigits: 2
+    })}
+              </strong>
+            </div>
+
+            <div class="summary-row total">
+              <span>Grand Total</span>
+
+              <span>
+                ₱${total.toLocaleString("en-PH", {
+      minimumFractionDigits: 2
+    })}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="shipping-info">
+          <div>
+            <p>
+              <strong>Payment:</strong>
+              ${escapeHtml(paymentStatus)}
+            </p>
+
+            <p>
+              <strong>Courier:</strong>
+              ${escapeHtml(courier)}
+            </p>
+          </div>
+
+          <div>
+            <p>
+              <strong>Tracking Number:</strong>
+              ${escapeHtml(tracking)}
+            </p>
+
+            <p>
+              <strong>Order Number:</strong>
+              ${escapeHtml(orderId)}
+            </p>
+          </div>
+        </div>
+
+        <div class="invoice-footer">
+          <strong>Temporary Document Notice:</strong><br>
+          This invoice is for order reference only and is not yet a BIR-registered official invoice.
+          Shipping charges shown are temporary references and remain subject to final accounting treatment.
+        </div>
+      </div>
+
+      <div class="invoice-actions">
+        <button onclick="window.print()">
+          Print Invoice
+        </button>
+
+        <button
+          class="secondary"
+          onclick="window.print()"
+        >
+          Save as PDF
+        </button>
+      </div>
+    </body>
+    </html>
+  `);
+
+  invoiceWindow.document.close();
+}
 
 /* ===============================
    SAFE TEXT HELPERS
@@ -183,6 +819,130 @@ function updateDashboardOrders() {
   }
 }
 
+function updateOrderFilterCounts() {
+  const counts = {
+    all: adminOrders.length,
+    pendingCod: 0,
+    processing: 0,
+    packed: 0,
+    shipped: 0,
+    inTransit: 0,
+    delivered: 0,
+    paid: 0,
+    pendingPayment: 0,
+    failedDelivery: 0,
+    expired: 0
+  };
+
+  adminOrders.forEach(order => {
+    const orderStatus = String(
+      order.order_status || ""
+    ).trim().toLowerCase();
+
+    const paymentStatus = String(
+      order.payment_status ||
+      order.status ||
+      order.xendit_status ||
+      ""
+    ).trim().toLowerCase();
+
+    const paymentMethod = String(
+      order.payment_provider ||
+      order.paymentProvider ||
+      order.payment_method ||
+      order.paymentMethod ||
+      order.payment_type ||
+      order.payment_option ||
+      order.payment_channel ||
+      order.method ||
+      ""
+    ).trim().toLowerCase();
+
+    const paymentText =
+      `${paymentStatus} ${paymentMethod}`;
+
+    const isCOD =
+      paymentText.includes("cod") ||
+      paymentText.includes("cash on delivery");
+
+    const isExpired =
+      orderStatus === "expired" ||
+      orderStatus === "payment expired" ||
+      paymentStatus.includes("expired");
+
+    if (isCOD && orderStatus === "pending") {
+      counts.pendingCod++;
+    }
+
+    if (orderStatus === "processing") {
+      counts.processing++;
+    }
+
+    if (orderStatus === "packed") {
+      counts.packed++;
+    }
+
+    if (orderStatus === "shipped") {
+      counts.shipped++;
+    }
+
+    if (orderStatus === "in transit") {
+      counts.inTransit++;
+    }
+
+    if (orderStatus === "delivered") {
+      counts.delivered++;
+    }
+
+    if (paymentStatus === "paid") {
+      counts.paid++;
+    }
+
+    if (
+      !isCOD &&
+      !isExpired &&
+      (
+        orderStatus === "pending payment" ||
+        paymentStatus === "pending" ||
+        paymentStatus === "pending payment"
+      )
+    ) {
+      counts.pendingPayment++;
+    }
+
+    if (orderStatus === "failed delivery") {
+      counts.failedDelivery++;
+    }
+
+    if (isExpired) {
+      counts.expired++;
+    }
+  });
+
+  const countMap = {
+    countAll: counts.all,
+    countPendingCod: counts.pendingCod,
+    countProcessing: counts.processing,
+    countPacked: counts.packed,
+    countShipped: counts.shipped,
+    countInTransit: counts.inTransit,
+    countDelivered: counts.delivered,
+    countPaid: counts.paid,
+    countPendingPayment: counts.pendingPayment,
+    countFailedDelivery: counts.failedDelivery,
+    countExpired: counts.expired
+  };
+
+  Object.entries(countMap).forEach(([id, count]) => {
+    const badge = document.getElementById(id);
+
+    if (badge) {
+      badge.textContent = count;
+      badge.style.display = count > 0 ? "inline-flex" : "none";
+    }
+  });
+}
+
 /* ===============================
    ITEM HELPERS
 ================================ */
@@ -324,13 +1084,32 @@ function renderAdminOrders() {
     new Date(b.created_at) - new Date(a.created_at)
   );
 
+  const startIndex =
+    (currentOrdersPage - 1) * ordersPerPage;
+
+  const paginatedOrders =
+    filteredOrders.slice(
+      startIndex,
+      startIndex + ordersPerPage
+    );
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredOrders.length / ordersPerPage)
+  );
+
   if (!filteredOrders.length) {
     adminOrdersTableBody.innerHTML = `<div class="empty-box">No orders found.</div>`;
     return;
   }
 
-  adminOrdersTableBody.innerHTML = filteredOrders.map(order => {
+  adminOrdersTableBody.innerHTML = paginatedOrders.map(order => {
+
+
     const orderId = order.external_id || order.id || "";
+
+    const isSummaryExpanded =
+      expandedOrderSummary[orderId] === true;
 
     const paymentStatus =
       order.payment_status ||
@@ -454,6 +1233,8 @@ ${hasOrderRequest ? `
           </div>
         `;
         }).join("")
+
+
         : `<div class="empty-box">No item details found.</div>`
       }
 
@@ -470,6 +1251,7 @@ ${hasOrderRequest ? `
         : ""
       }
           </div>
+
 
 <div
   class="warehouse-order-info summary-box"
@@ -490,9 +1272,11 @@ ${hasOrderRequest ? `
     </span>
 
     <strong>
-  ₱${subtotal.toLocaleString("en-PH")}
-</strong>
-</div>
+      ₱${subtotal.toLocaleString("en-PH")}
+    </strong>
+  </div>
+
+  ${isSummaryExpanded ? `
 
   <div>
     <span style="color:#16a34a;">Voucher</span>
@@ -519,9 +1303,9 @@ ${hasOrderRequest ? `
     <span>Total</span>
 
     <strong style="
-  font-size:16px;
-  color:#2563eb;
-">
+      font-size:16px;
+      color:#2563eb;
+    ">
       ₱${total.toLocaleString("en-PH")}
     </strong>
   </div>
@@ -540,9 +1324,17 @@ ${hasOrderRequest ? `
     <span>Tracking</span>
     <strong>${escapeHtml(order.tracking_number || "-")}</strong>
   </div>
+` : ""}
+
+<button
+  class="show-more-items-btn"
+  type="button"
+  onclick="toggleOrderSummary('${escapeAttribute(orderId)}')"
+>
+  ${isSummaryExpanded ? "Hide Summary" : "Show Summary"}
+</button>
 
 </div>
-
 
 ${hasOrderRequest ? `
 
@@ -590,14 +1382,6 @@ ${hasOrderRequest ? `
 >
 
   <button
-    class="mini-summary-btn"
-    type="button"
-    onclick="openOrderModal('${escapeAttribute(orderId)}')"
-  >
-    Order Summary
-  </button>
-
-  <button
     class="mini-manage-btn"
     type="button"
     onclick="openOrderModal('${escapeAttribute(orderId)}')"
@@ -612,6 +1396,42 @@ ${hasOrderRequest ? `
           
     `;
   }).join("");
+
+  adminOrdersTableBody.innerHTML += `
+  <div
+    style="
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:12px;
+      margin-top:18px;
+      padding:12px;
+    "
+  >
+    <button
+      type="button"
+      class="secondary-btn"
+      onclick="changeOrdersPage(-1)"
+      ${currentOrdersPage <= 1 ? "disabled" : ""}
+    >
+      Previous
+    </button>
+
+    <span style="font-weight:700;">
+      Page ${currentOrdersPage} of ${totalPages}
+    </span>
+
+    <button
+      type="button"
+      class="secondary-btn"
+      onclick="changeOrdersPage(1)"
+      ${currentOrdersPage >= totalPages ? "disabled" : ""}
+    >
+      Next
+    </button>
+  </div>
+`;
+
 }
 /* ===============================
    SHOW ALL ITEMS TOGGLE
@@ -620,6 +1440,63 @@ ${hasOrderRequest ? `
 function toggleShowAllOrderItems(orderId) {
   expandedOrderItems[orderId] = !expandedOrderItems[orderId];
   renderAdminOrders();
+}
+
+function toggleOrderSummary(orderId) {
+  expandedOrderSummary[orderId] =
+    !expandedOrderSummary[orderId];
+
+  renderAdminOrders();
+}
+
+function changeOrdersPage(direction) {
+  const filteredOrders = adminOrders.filter(order => {
+    if (currentOrderFilter === "ALL") {
+      return true;
+    }
+
+    const selectedFilter = String(
+      currentOrderFilter || ""
+    ).trim().toLowerCase();
+
+    const orderStatus = String(
+      order.order_status || ""
+    ).trim().toLowerCase();
+
+    const paymentStatus = String(
+      order.payment_status ||
+      order.status ||
+      order.xendit_status ||
+      ""
+    ).trim().toLowerCase();
+
+    return (
+      orderStatus === selectedFilter ||
+      paymentStatus === selectedFilter
+    );
+  });
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredOrders.length / ordersPerPage)
+  );
+
+  currentOrdersPage += direction;
+
+  if (currentOrdersPage < 1) {
+    currentOrdersPage = 1;
+  }
+
+  if (currentOrdersPage > totalPages) {
+    currentOrdersPage = totalPages;
+  }
+
+  renderAdminOrders();
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 }
 
 /* ===============================
@@ -760,6 +1637,7 @@ async function loadAdminOrders() {
     renderAdminOrders();
     updateOrdersSummary();
     updateDashboardOrders();
+    updateOrderFilterCounts();
 
   } catch (error) {
     console.error(error);
@@ -892,6 +1770,15 @@ function openOrderModal(orderId) {
       <button class="danger-btn" type="button" onclick="markOrderFailed('${escapeAttribute(orderId)}', this)">Failed Delivery</button>
       <button class="small-btn" type="button" onclick="markOrderDelivered('${escapeAttribute(orderId)}', this)">Mark Delivered</button>
       <button class="secondary-btn" type="button" onclick="openAWB('${escapeAttribute(orderId)}')">Print AWB</button>
+
+<button
+  class="secondary-btn"
+  type="button"
+  onclick="printOrderInvoice('${escapeAttribute(orderId)}')"
+>
+  Print Invoice
+</button>
+
       <button class="secondary-btn" type="button" onclick="openTracking('${escapeAttribute(orderId)}')">Track Order</button>
 
       ${order.order_request_status ? `
@@ -956,10 +1843,7 @@ async function cancelOrder(orderId, btn) {
   if (!confirmCancel) return;
 
   try {
-    if (btn) {
-      btn.disabled = true;
-      btn.innerText = "Cancelling...";
-    }
+    setButtonLoading(btn, "Cancelling...");
 
     const res = await fetch(
       `https://de-ecom-pro.onrender.com/api/orders/${orderId}/cancel`,
@@ -1001,10 +1885,7 @@ async function cancelOrder(orderId, btn) {
     showToast("Cancel order server error", "error");
 
   } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerText = "Cancel Order";
-    }
+    resetButtonLoading(btn);
   }
 }
 
@@ -1458,7 +2339,7 @@ function renderCancelledOrders() {
 
           </div>
 
-         <div
+<div
   class="warehouse-order-info summary-box"
   style="
     border-top:1px solid #e5e7eb;
@@ -1674,10 +2555,7 @@ async function markOrderPacked(orderId, btn) {
       return;
     }
 
-    if (btn) {
-      btn.disabled = true;
-      btn.innerText = "Packing...";
-    }
+    setButtonLoading(btn, "Packing...");
 
     const response = await fetch(
       "https://de-ecom-pro.onrender.com/api/orders/update",
@@ -1725,10 +2603,7 @@ async function markOrderPacked(orderId, btn) {
     );
 
   } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerText = "Mark Packed";
-    }
+    resetButtonLoading(btn);
   }
 }
 
@@ -1808,10 +2683,8 @@ async function markOrderFailed(orderId, btn) {
 
 async function markOrderDelivered(orderId, btn) {
   try {
-    if (btn) {
-      btn.disabled = true;
-      btn.innerText = "Updating...";
-    }
+
+    setButtonLoading(btn, "Updating...");
 
     const res = await fetch("https://de-ecom-pro.onrender.com/api/orders/update", {
       method: "POST",
@@ -1838,10 +2711,7 @@ async function markOrderDelivered(orderId, btn) {
     console.error(err);
     showToast("Mark delivered server error", "error");
   } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerText = "Mark Delivered";
-    }
+    resetButtonLoading(btn);
   }
 }
 
@@ -1879,10 +2749,7 @@ async function forceUpdateOrderStatus(orderId, status, btn) {
       return;
     }
 
-    if (btn) {
-      btn.disabled = true;
-      btn.innerText = "Updating...";
-    }
+    setButtonLoading(btn, "Updating...");
 
     const res = await fetch("https://de-ecom-pro.onrender.com/api/orders/update", {
       method: "POST",
@@ -1906,10 +2773,7 @@ async function forceUpdateOrderStatus(orderId, status, btn) {
     showToast("Order update server error", "error");
 
   } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerText = status;
-    }
+    resetButtonLoading(btn);
   }
 }
 
@@ -1963,8 +2827,11 @@ window.createSPXShipment = createSPXShipment;
 window.bookLalamoveShipment = bookLalamoveShipment;
 window.arrangeShipment = arrangeShipment;
 window.openAWB = openAWB;
+window.printOrderInvoice = printOrderInvoice;
 window.openTracking = openTracking;
 window.toggleShowAllOrderItems = toggleShowAllOrderItems;
+window.toggleOrderSummary = toggleOrderSummary;
+window.changeOrdersPage = changeOrdersPage;
 window.markOrderInTransit = markOrderInTransit;
 window.markOrderFailed = markOrderFailed;
 window.markOrderDelivered = markOrderDelivered;
@@ -1990,7 +2857,7 @@ document
 
       currentOrderFilter =
         button.dataset.filter;
-
+      currentOrdersPage = 1;
       renderAdminOrders();
 
     });

@@ -3035,3 +3035,309 @@ body {
     border-radius: 20px;
   }
 }
+
+/* DESKTOP PRODUCT GALLERY — THUMBNAILS LEFT */
+@media (min-width: 1025px) {
+
+  .product-left {
+    display: block !important;
+    width: 100%;
+    min-width: 0;
+  }
+
+  /*
+    Ang slider at thumbnails ay nasa loob ng product-image,
+    kaya product-image ang dapat gawing grid.
+  */
+  .product-image {
+    display: grid !important;
+    grid-template-columns: 74px minmax(0, 1fr) !important;
+    grid-template-areas: "thumbs main" !important;
+    align-items: start !important;
+    gap: 14px !important;
+
+    width: 100%;
+    min-width: 0;
+
+    aspect-ratio: auto !important;
+    overflow: visible !important;
+    background: transparent !important;
+    border: none !important;
+  }
+
+  /* Main large image sa kanan ng thumbnails */
+  .product-gallery-slider {
+    grid-area: main !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    aspect-ratio: 1 / 1;
+    overflow: hidden !important;
+
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #f8fafc;
+  }
+
+  .product-gallery-slider #productImg {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+
+    aspect-ratio: 1 / 1;
+    object-fit: contain !important;
+
+    display: block;
+  }
+
+  /* Small images sa kaliwang labas ng main box */
+  .product-thumbnails {
+    grid-area: thumbs !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+
+    gap: 10px !important;
+    margin: 0 !important;
+    padding: 0 3px 4px 0 !important;
+
+    width: 74px !important;
+    max-height: 520px;
+
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  .product-thumb {
+    width: 68px !important;
+    height: 68px !important;
+    min-width: 68px !important;
+    flex: 0 0 68px !important;
+
+    border-radius: 10px;
+  }
+}
+
+/* FIX BACK AND SHARE BUTTONS ABOVE PRODUCT GALLERY */
+.back-btn,
+.share-top-btn {
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+
+  background: rgba(255, 255, 255, 0.96) !important;
+  color: #111827 !important;
+
+  border: 1px solid #e5e7eb !important;
+
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.18) !important;
+
+  backdrop-filter: blur(8px);
+}
+
+/* Desktop positioning */
+@media (min-width: 1025px) {
+
+  .back-btn {
+    display: inline-flex !important;
+
+    /* Ilayo sa vertical thumbnails */
+    left: 112px !important;
+    top: 36px !important;
+  }
+
+  .share-top-btn {
+    display: inline-flex !important;
+
+    /*
+      Ilagay malapit sa upper-right
+      ng main product image.
+    */
+    right: calc(50% + 40px) !important;
+    top: 36px !important;
+  }
+}
+
+/* DESKTOP SOCIAL SHARE ROW */
+.desktop-share-row {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 12px;
+
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.share-label {
+  padding-right: 4px;
+
+  color: #111827;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.social-share {
+  width: 30px;
+  height: 30px;
+
+  border: none;
+  border-radius: 50%;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: white;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.social-share:hover {
+  transform: translateY(-2px) scale(1.06);
+}
+
+.social-share.messenger {
+  background: #168aff;
+}
+
+.social-share.facebook {
+  background: #1877f2;
+  font-family: Arial, sans-serif;
+  font-size: 20px;
+}
+
+.social-share.pinterest {
+  background: #e60023;
+  font-family: Georgia, serif;
+  font-size: 19px;
+}
+
+.social-share.twitter {
+  background: #000;
+  font-size: 14px;
+}
+
+/* Keep compact share button on mobile */
+@media (max-width: 768px) {
+  .desktop-share-row {
+    display: none;
+  }
+}
+
+/* FINAL SHARE ROW BELOW PRODUCT IMAGE */
+.product-share-row {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+
+  margin-top: 12px;
+  padding: 10px 4px;
+
+  border-top: 1px solid #e5e7eb;
+
+  box-sizing: border-box;
+}
+
+.product-share-row .share-label {
+  margin-right: 2px;
+  padding: 0;
+
+  color: #111827;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.product-share-row .social-share {
+  width: 32px;
+  height: 32px;
+
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.product-share-row .social-share svg {
+  width: 19px;
+  height: 19px;
+
+  display: block;
+  fill: currentColor;
+}
+
+.product-share-row .messenger {
+  background: #168aff;
+}
+
+.product-share-row .facebook {
+  background: #1877f2;
+  font-family: Arial, sans-serif;
+  font-size: 20px;
+}
+
+.product-share-row .pinterest {
+  background: #e60023;
+  font-family: Georgia, serif;
+  font-size: 19px;
+}
+
+.product-share-row .twitter {
+  background: #000000;
+  font-size: 14px;
+}
+
+.product-share-row .social-share:hover {
+  transform: translateY(-2px) scale(1.06);
+}
+
+.product-share-row .social-share:active {
+  transform: scale(0.94);
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .product-share-row {
+    display: flex !important;
+    justify-content: center;
+
+    width: 100%;
+
+    margin-top: 10px;
+    padding: 10px 0 2px;
+  }
+
+  .product-share-row .social-share {
+    width: 34px;
+    height: 34px;
+  }
+}
