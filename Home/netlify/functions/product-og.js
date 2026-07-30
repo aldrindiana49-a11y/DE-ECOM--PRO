@@ -122,61 +122,17 @@ function getProductImage(product) {
     );
 }
 
-function wrapTitle(text, maxChars = 25) {
-    const words =
-        String(text || "").trim().split(/\s+/);
-
-    const lines = [];
-    let currentLine = "";
-
-    for (const word of words) {
-        const possibleLine =
-            currentLine
-                ? `${currentLine} ${word}`
-                : word;
-
-        if (
-            possibleLine.length <= maxChars
-        ) {
-            currentLine = possibleLine;
-        } else {
-            if (currentLine) {
-                lines.push(currentLine);
-            }
-
-            currentLine = word;
-        }
-
-        if (lines.length === 2) {
-            break;
-        }
-    }
-
-    if (
-        currentLine &&
-        lines.length < 3
-    ) {
-        lines.push(currentLine);
-    }
-
-    const originalText =
+function wrapTitle(text, maxChars = 28) {
+    const cleanTitle =
         String(text || "").trim();
 
-    const joined =
-        lines.join(" ");
-
-    if (
-        joined.length < originalText.length &&
-        lines.length
-    ) {
-        const lastIndex =
-            lines.length - 1;
-
-        lines[lastIndex] =
-            `${lines[lastIndex].slice(0, 22)}…`;
+    if (cleanTitle.length <= maxChars) {
+        return [cleanTitle];
     }
 
-    return lines.slice(0, 3);
+    return [
+        `${cleanTitle.slice(0, maxChars - 3).trim()}...`
+    ];
 }
 
 async function fetchBuffer(url) {
@@ -236,7 +192,7 @@ async function generatePremiumCard(product) {
         "Drin Electronics Product";
 
     const titleLines =
-        wrapTitle(title, 24);
+        wrapTitle(title, 28);
 
     const {
         regularPrice,
@@ -270,6 +226,8 @@ async function generatePremiumCard(product) {
         await sharp(productImageBuffer)
             .resize(630, 530, {
                 fit: "contain",
+                withoutEnlargement: true,
+                kernel: sharp.kernel.lanczos3,
                 background: {
                     r: 248,
                     g: 250,
@@ -277,6 +235,7 @@ async function generatePremiumCard(product) {
                     alpha: 1
                 }
             })
+            .sharpen()
             .png()
             .toBuffer();
 
@@ -305,7 +264,7 @@ async function generatePremiumCard(product) {
           <text
             x="700"
             y="${205 + index * 52}"
-            font-family="Arial, Helvetica, sans-serif"
+            font-family="DejaVu Sans, sans-serif"
             font-size="39"
             font-weight="800"
             fill="#0f172a"
@@ -322,7 +281,7 @@ async function generatePremiumCard(product) {
         <text
           x="700"
           y="447"
-          font-family="Arial, Helvetica, sans-serif"
+          font-family="DejaVu Sans, sans-serif"
           font-size="25"
           font-weight="600"
           fill="#94a3b8"
@@ -344,7 +303,7 @@ async function generatePremiumCard(product) {
           x="925"
           y="444"
           text-anchor="middle"
-          font-family="Arial, Helvetica, sans-serif"
+          font-family="DejaVu Sans, sans-serif"
           font-size="21"
           font-weight="800"
           fill="#ffffff"
@@ -416,7 +375,6 @@ async function generatePremiumCard(product) {
         stroke-width="2"
       />
 
-      <!-- Product image section -->
       <rect
         x="55"
         y="52"
@@ -426,7 +384,6 @@ async function generatePremiumCard(product) {
         fill="#f8fafc"
       />
 
-      <!-- Divider -->
       <line
         x1="670"
         y1="82"
@@ -436,7 +393,6 @@ async function generatePremiumCard(product) {
         stroke-width="2"
       />
 
-      <!-- Small premium label -->
       <rect
         x="700"
         y="112"
@@ -450,7 +406,7 @@ async function generatePremiumCard(product) {
         x="787"
         y="138"
         text-anchor="middle"
-        font-family="Arial, Helvetica, sans-serif"
+        font-family="DejaVu Sans, sans-serif"
         font-size="17"
         font-weight="800"
         fill="#0891b2"
@@ -460,12 +416,11 @@ async function generatePremiumCard(product) {
 
       ${titleSvg}
 
-      <!-- Current price -->
       <text
         x="700"
         y="402"
-        font-family="Arial, Helvetica, sans-serif"
-        font-size="52"
+        font-family="DejaVu Sans, sans-serif"
+        font-size="58"
         font-weight="900"
         fill="#e11d48"
       >
@@ -474,7 +429,6 @@ async function generatePremiumCard(product) {
 
       ${oldPriceSvg}
 
-      <!-- Benefits -->
       <circle
         cx="713"
         cy="493"
@@ -486,18 +440,18 @@ async function generatePremiumCard(product) {
         x="713"
         y="500"
         text-anchor="middle"
-        font-family="Arial"
-        font-size="16"
+        font-family="DejaVu Sans, sans-serif"
+        font-size="10"
         font-weight="900"
         fill="#ffffff"
       >
-        ✓
+        OK
       </text>
 
       <text
         x="740"
         y="501"
-        font-family="Arial, Helvetica, sans-serif"
+        font-family="DejaVu Sans, sans-serif"
         font-size="21"
         font-weight="700"
         fill="#334155"
@@ -516,18 +470,18 @@ async function generatePremiumCard(product) {
         x="713"
         y="542"
         text-anchor="middle"
-        font-family="Arial"
-        font-size="16"
+        font-family="DejaVu Sans, sans-serif"
+        font-size="7"
         font-weight="900"
         fill="#ffffff"
       >
-        ⚡
+        FAST
       </text>
 
       <text
         x="740"
         y="543"
-        font-family="Arial, Helvetica, sans-serif"
+        font-family="DejaVu Sans, sans-serif"
         font-size="21"
         font-weight="700"
         fill="#334155"
@@ -535,7 +489,6 @@ async function generatePremiumCard(product) {
         Fast &amp; Same Day Delivery
       </text>
 
-      <!-- Footer -->
       <rect
         x="0"
         y="582"
@@ -547,7 +500,7 @@ async function generatePremiumCard(product) {
       <text
         x="55"
         y="614"
-        font-family="Arial, Helvetica, sans-serif"
+        font-family="DejaVu Sans, sans-serif"
         font-size="19"
         font-weight="700"
         fill="#ffffff"
@@ -559,7 +512,7 @@ async function generatePremiumCard(product) {
         x="1145"
         y="614"
         text-anchor="end"
-        font-family="Arial, Helvetica, sans-serif"
+        font-family="DejaVu Sans, sans-serif"
         font-size="19"
         font-weight="700"
         fill="#ffffff"
@@ -617,6 +570,14 @@ exports.handler = async event => {
     const imageMode =
         event.queryStringParameters?.image === "1";
 
+    const version =
+        event.queryStringParameters?.v || "";
+
+    const versionParam =
+        version
+            ? `&v=${encodeURIComponent(version)}`
+            : "";
+
     if (!id) {
         return {
             statusCode: 400,
@@ -635,10 +596,6 @@ exports.handler = async event => {
             };
         }
 
-        /*
-          IMAGE REQUEST
-          /product-og?id=PRODUCT_ID&image=1
-        */
         if (imageMode) {
             const image =
                 await generatePremiumCard(product);
@@ -666,12 +623,14 @@ exports.handler = async event => {
 
         const sharePageUrl =
             `${SITE_URL}/.netlify/functions/product-og` +
-            `?id=${encodeURIComponent(id)}`;
+            `?id=${encodeURIComponent(id)}` +
+            versionParam;
 
         const previewImageUrl =
             `${SITE_URL}/.netlify/functions/product-og` +
             `?id=${encodeURIComponent(id)}` +
-            `&image=1`;
+            `&image=1` +
+            versionParam;
 
         const productUrl =
             `${SITE_URL}/product/index.html` +
