@@ -41,7 +41,7 @@ function safeNumber(value, fallback = 0) {
 }
 
 function formatPrice(value) {
-    return `₱${safeNumber(value).toLocaleString("en-PH")}`;
+    return `PHP ${safeNumber(value).toLocaleString("en-PH")}`;
 }
 
 function getFirstVariation(product) {
@@ -192,12 +192,11 @@ async function generatePremiumCard(product) {
         "Drin Electronics Product";
 
     const titleLines =
-        wrapTitle(title, 28);
+        wrapTitle(title, 38);
 
     const {
         regularPrice,
         finalPrice,
-        discountPercent,
         hasDiscount
     } = getPricing(product);
 
@@ -224,14 +223,14 @@ async function generatePremiumCard(product) {
 
     const resizedProductImage =
         await sharp(productImageBuffer)
-            .resize(630, 530, {
+            .resize(560, 420, {
                 fit: "contain",
                 withoutEnlargement: true,
                 kernel: sharp.kernel.lanczos3,
                 background: {
-                    r: 248,
-                    g: 250,
-                    b: 252,
+                    r: 255,
+                    g: 255,
+                    b: 255,
                     alpha: 1
                 }
             })
@@ -244,7 +243,7 @@ async function generatePremiumCard(product) {
     if (logoBuffer) {
         resizedLogo =
             await sharp(logoBuffer)
-                .resize(210, 78, {
+                .resize(150, 58, {
                     fit: "contain",
                     background: {
                         r: 255,
@@ -262,12 +261,12 @@ async function generatePremiumCard(product) {
             .map(
                 (line, index) => `
           <text
-            x="700"
-            y="${205 + index * 52}"
-            font-family="DejaVu Sans, sans-serif"
-            font-size="39"
-            font-weight="800"
-            fill="#0f172a"
+            x="620"
+            y="${120 + index * 42}"
+            font-family="sans-serif"
+            font-size="28"
+            font-weight="700"
+            fill="#222222"
           >
             ${escapeXml(line)}
           </text>
@@ -279,39 +278,23 @@ async function generatePremiumCard(product) {
         hasDiscount
             ? `
         <text
-          x="700"
-          y="447"
-          font-family="DejaVu Sans, sans-serif"
-          font-size="25"
+          x="620"
+          y="215"
+          font-family="sans-serif"
+          font-size="22"
           font-weight="600"
-          fill="#94a3b8"
+          fill="#8a8a8a"
           text-decoration="line-through"
         >
           ${escapeXml(formatPrice(regularPrice))}
         </text>
-
-        <rect
-          x="875"
-          y="414"
-          width="100"
-          height="43"
-          rx="21"
-          fill="#dc2626"
-        />
-
-        <text
-          x="925"
-          y="444"
-          text-anchor="middle"
-          font-family="DejaVu Sans, sans-serif"
-          font-size="21"
-          font-weight="800"
-          fill="#ffffff"
-        >
-          -${discountPercent}%
-        </text>
       `
             : "";
+
+    const footerTitle =
+        String(title || "").length > 52
+            ? `${String(title).slice(0, 49).trim()}...`
+            : String(title);
 
     const overlaySvg = `
     <svg
@@ -320,204 +303,123 @@ async function generatePremiumCard(product) {
       viewBox="0 0 1200 630"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <defs>
-        <linearGradient
-          id="background"
-          x1="0"
-          y1="0"
-          x2="1"
-          y2="1"
-        >
-          <stop
-            offset="0%"
-            stop-color="#ffffff"
-          />
-
-          <stop
-            offset="100%"
-            stop-color="#ecfeff"
-          />
-        </linearGradient>
-
-        <linearGradient
-          id="footer"
-          x1="0"
-          y1="0"
-          x2="1"
-          y2="0"
-        >
-          <stop
-            offset="0%"
-            stop-color="#0891b2"
-          />
-
-          <stop
-            offset="100%"
-            stop-color="#00bcd4"
-          />
-        </linearGradient>
-      </defs>
-
       <rect
-        width="1200"
-        height="630"
-        fill="url(#background)"
-      />
-
-      <rect
-        x="28"
-        y="26"
-        width="1144"
-        height="556"
-        rx="34"
+        x="8"
+        y="8"
+        width="1184"
+        height="614"
+        rx="18"
         fill="#ffffff"
-        stroke="#dbeafe"
+        stroke="#d9d9d9"
         stroke-width="2"
       />
 
+      <!-- left image area -->
       <rect
-        x="55"
-        y="52"
-        width="590"
-        height="500"
-        rx="27"
-        fill="#f8fafc"
+        x="24"
+        y="24"
+        width="560"
+        height="420"
+        fill="#ffffff"
       />
 
-      <line
-        x1="670"
-        y1="82"
-        x2="670"
-        y2="530"
-        stroke="#e2e8f0"
-        stroke-width="2"
-      />
-
+      <!-- right details area -->
       <rect
-        x="700"
-        y="112"
-        width="174"
-        height="38"
-        rx="19"
-        fill="#ecfeff"
+        x="600"
+        y="24"
+        width="576"
+        height="420"
+        fill="#ffffff"
       />
-
-      <text
-        x="787"
-        y="138"
-        text-anchor="middle"
-        font-family="DejaVu Sans, sans-serif"
-        font-size="17"
-        font-weight="800"
-        fill="#0891b2"
-      >
-        PREMIUM PRODUCT
-      </text>
 
       ${titleSvg}
 
+      ${oldPriceSvg}
+
       <text
-        x="700"
-        y="402"
-        font-family="DejaVu Sans, sans-serif"
-        font-size="58"
-        font-weight="900"
-        fill="#e11d48"
+        x="620"
+        y="270"
+        font-family="sans-serif"
+        font-size="42"
+        font-weight="800"
+        fill="#f15a24"
       >
         ${escapeXml(formatPrice(finalPrice))}
       </text>
 
-      ${oldPriceSvg}
-
-      <circle
-        cx="713"
-        cy="493"
-        r="14"
-        fill="#10b981"
-      />
-
       <text
-        x="713"
-        y="500"
-        text-anchor="middle"
-        font-family="DejaVu Sans, sans-serif"
-        font-size="10"
-        font-weight="900"
-        fill="#ffffff"
-      >
-        OK
-      </text>
-
-      <text
-        x="740"
-        y="501"
-        font-family="DejaVu Sans, sans-serif"
-        font-size="21"
+        x="620"
+        y="325"
+        font-family="sans-serif"
+        font-size="22"
         font-weight="700"
-        fill="#334155"
+        fill="#ff6b00"
       >
-        Cash on Delivery Available
-      </text>
-
-      <circle
-        cx="713"
-        cy="535"
-        r="14"
-        fill="#f59e0b"
-      />
-
-      <text
-        x="713"
-        y="542"
-        text-anchor="middle"
-        font-family="DejaVu Sans, sans-serif"
-        font-size="7"
-        font-weight="900"
-        fill="#ffffff"
-      >
-        FAST
-      </text>
-
-      <text
-        x="740"
-        y="543"
-        font-family="DejaVu Sans, sans-serif"
-        font-size="21"
-        font-weight="700"
-        fill="#334155"
-      >
-        Fast &amp; Same Day Delivery
+        5.0 Rating
       </text>
 
       <rect
-        x="0"
-        y="582"
-        width="1200"
-        height="48"
-        fill="url(#footer)"
+        x="980"
+        y="360"
+        width="150"
+        height="54"
+        fill="#f15a24"
+        rx="4"
       />
 
       <text
-        x="55"
-        y="614"
-        font-family="DejaVu Sans, sans-serif"
-        font-size="19"
+        x="1055"
+        y="394"
+        text-anchor="middle"
+        font-family="sans-serif"
+        font-size="20"
         font-weight="700"
         fill="#ffffff"
       >
-        Quality Electronics • Trusted Seller
+        DRIN
+      </text>
+
+      <!-- bottom strip -->
+      <rect
+        x="8"
+        y="458"
+        width="1184"
+        height="46"
+        fill="#1aa7c9"
+      />
+
+      <text
+        x="26"
+        y="487"
+        font-family="sans-serif"
+        font-size="15"
+        font-weight="700"
+        fill="#ffffff"
+      >
+        DRINELECTRONICSPH.COM
+      </text>
+
+      <!-- bottom content -->
+      <text
+        x="24"
+        y="548"
+        font-family="sans-serif"
+        font-size="20"
+        font-weight="400"
+        fill="#7a7a7a"
+      >
+        DRINELECTRONICSPH.COM
       </text>
 
       <text
-        x="1145"
-        y="614"
-        text-anchor="end"
-        font-family="DejaVu Sans, sans-serif"
-        font-size="19"
+        x="24"
+        y="590"
+        font-family="sans-serif"
+        font-size="20"
         font-weight="700"
-        fill="#ffffff"
+        fill="#222222"
       >
-        drinelectronicsph.com
+        ${escapeXml(footerTitle)}
       </text>
     </svg>
   `;
@@ -530,16 +432,16 @@ async function generatePremiumCard(product) {
         },
         {
             input: resizedProductImage,
-            top: 38,
-            left: 35
+            top: 24,
+            left: 24
         }
     ];
 
     if (resizedLogo) {
         compositeImages.push({
             input: resizedLogo,
-            top: 40,
-            left: 930
+            top: 28,
+            left: 1000
         });
     }
 
