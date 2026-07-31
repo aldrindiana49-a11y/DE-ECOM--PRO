@@ -1293,3 +1293,73 @@ body {
 .checkout-page {
   flex: 1;
 }
+
+.pickup-store-box {
+  margin: 18px 0 22px;
+  padding: 18px;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  background: #eff6ff;
+  color: #1f2937;
+  line-height: 1.6;
+}
+
+.pickup-store-title {
+  margin-bottom: 8px;
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.pickup-store-box p {
+  margin: 7px 0;
+}
+
+.pickup-map {
+  margin-top: 14px;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #bfdbfe;
+  background: #ffffff;
+}
+
+.pickup-map iframe {
+  display: block;
+  width: 100%;
+  min-height: 240px;
+}
+
+.pickup-map-link {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 9px;
+  background: #2563eb;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.pickup-map-link:hover {
+  background: #1d4ed8;
+}
+
+.pickup-store-box>small {
+  display: block;
+  margin-top: 12px;
+  color: #6b7280;
+}
+
+@media (max-width: 600px) {
+  .pickup-store-box {
+    padding: 14px;
+  }
+
+  .pickup-map iframe {
+    height: 220px;
+  }
+
+  .pickup-map-link {
+    display: block;
+    text-align: center;
+  }
+}

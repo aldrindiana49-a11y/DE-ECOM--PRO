@@ -823,6 +823,8 @@ function updateOrderFilterCounts() {
   const counts = {
     all: adminOrders.length,
     pendingCod: 0,
+    pendingSkyro: 0,
+    approvedSkyro: 0,
     processing: 0,
     packed: 0,
     shipped: 0,
@@ -865,6 +867,9 @@ function updateOrderFilterCounts() {
       paymentText.includes("cod") ||
       paymentText.includes("cash on delivery");
 
+    const isSkyro =
+      paymentText.includes("skyro");
+
     const isExpired =
       orderStatus === "expired" ||
       orderStatus === "payment expired" ||
@@ -872,6 +877,20 @@ function updateOrderFilterCounts() {
 
     if (isCOD && orderStatus === "pending") {
       counts.pendingCod++;
+    }
+
+    if (
+      isSkyro &&
+      orderStatus === "pending skyro application"
+    ) {
+      counts.pendingSkyro++;
+    }
+
+    if (
+      isSkyro &&
+      orderStatus === "skyro approved"
+    ) {
+      counts.approvedSkyro++;
     }
 
     if (orderStatus === "processing") {
@@ -922,6 +941,8 @@ function updateOrderFilterCounts() {
   const countMap = {
     countAll: counts.all,
     countPendingCod: counts.pendingCod,
+    countPendingSkyro: counts.pendingSkyro,
+    countApprovedSkyro: counts.approvedSkyro,
     countProcessing: counts.processing,
     countPacked: counts.packed,
     countShipped: counts.shipped,
@@ -1052,6 +1073,20 @@ function renderAdminOrders() {
 
       const isExpired =
         explicitlyExpired || timedOut;
+
+      if (selectedFilter === "pending skyro") {
+        return (
+          paymentText.includes("skyro") &&
+          orderStatus === "pending skyro application"
+        );
+      }
+
+      if (selectedFilter === "skyro approved") {
+        return (
+          paymentText.includes("skyro") &&
+          orderStatus === "skyro approved"
+        );
+      }
 
       if (selectedFilter === "expired") {
         return isExpired;
@@ -1529,6 +1564,9 @@ function normalizeOrder(order) {
     paymentText.includes("COD") ||
     paymentText.includes("CASH ON DELIVERY");
 
+  const isSkyro =
+    paymentText.includes("SKYRO");
+
   const isPaid =
     (
       paymentText === "PAID" ||
@@ -1544,7 +1582,16 @@ function normalizeOrder(order) {
     order.order_status || ""
   ).trim();
 
-  if (isCOD) {
+  if (isSkyro) {
+    if (
+      !orderStatus ||
+      orderStatus === "Pending Payment" ||
+      orderStatus === "Pending"
+    ) {
+      orderStatus = "Pending Skyro Application";
+    }
+
+  } else if (isCOD) {
     if (
       !orderStatus ||
       orderStatus === "Pending Payment" ||
@@ -1552,8 +1599,10 @@ function normalizeOrder(order) {
     ) {
       orderStatus = "Pending";
     }
+
   } else if (isPaymentExpired) {
     orderStatus = "Expired";
+
   } else if (isPaid) {
     if (
       !orderStatus ||
@@ -1562,6 +1611,7 @@ function normalizeOrder(order) {
     ) {
       orderStatus = "Processing";
     }
+
   } else if (!orderStatus) {
     orderStatus = "Pending Payment";
   }
@@ -1575,7 +1625,9 @@ function normalizeOrder(order) {
       order.id,
 
     payment_status:
-      paymentStatus || (isCOD ? "COD" : "Pending Payment"),
+      isSkyro
+        ? "Pending Skyro Approval"
+        : paymentStatus || (isCOD ? "COD" : "Pending Payment"),
 
     payment_method: paymentMethod,
     order_status: orderStatus,
@@ -1747,6 +1799,24 @@ function openOrderModal(orderId) {
     <p><strong>Tracking:</strong> ${escapeHtml(order.tracking_number || "-")}</p>
 
     <div class="order-modal-actions">
+
+${String(order.payment_method || "")
+      .toUpperCase()
+      .includes("SKYRO") &&
+      String(order.order_status || "")
+        .toUpperCase() === "PENDING SKYRO APPLICATION"
+      ? `
+    <button
+      class="primary-btn"
+      type="button"
+      onclick="approveSkyroOrder('${escapeAttribute(orderId)}', this)"
+    >
+      Approve Skyro
+    </button>
+  `
+      : ""
+    }
+
       ${getShipmentButton(order, orderId)}
 
 
@@ -1906,14 +1976,33 @@ async function createSPXShipment(orderId, btn) {
       ""
     ).toUpperCase();
 
-    const isCOD = paymentStatus.includes("COD");
-    const isPaid = paymentStatus === "PAID";
+    const isCOD =
+      paymentStatus.includes("COD");
 
-    if (!isCOD && !isPaid) {
+    const isPaid =
+      paymentStatus === "PAID";
+
+    const isSkyroApproved =
+      String(order.payment_method || "")
+        .toUpperCase()
+        .includes("SKYRO") &&
+      String(order.order_status || "")
+        .toUpperCase() === "SKYRO APPROVED";
+
+    if (
+      !isCOD &&
+      !isPaid &&
+      !isSkyroApproved
+    ) {
       showToast(
-        "Only COD or PAID orders can arrange shipment.",
+        String(order.payment_method || "")
+          .toUpperCase()
+          .includes("SKYRO")
+          ? "Skyro application must be approved before arranging shipment."
+          : "Only COD, PAID, or Skyro Approved orders can arrange shipment.",
         "error"
       );
+
       return;
     }
 
@@ -2777,6 +2866,96 @@ async function forceUpdateOrderStatus(orderId, status, btn) {
   }
 }
 
+async function approveSkyroOrder(orderId, btn) {
+  const order = adminOrders.find(o =>
+    String(o.external_id || o.id) === String(orderId)
+  );
+
+  if (!order) {
+    showToast("Order not found.", "error");
+    return;
+  }
+
+  const isSkyro =
+    String(order.payment_method || "")
+      .toUpperCase()
+      .includes("SKYRO");
+
+  if (!isSkyro) {
+    showToast(
+      "Skyro orders only.",
+      "error"
+    );
+    return;
+  }
+
+  const isPendingSkyro =
+    String(order.order_status || "")
+      .toUpperCase() === "PENDING SKYRO APPLICATION";
+
+  if (!isPendingSkyro) {
+    showToast(
+      "Pending Skyro applications only.",
+      "error"
+    );
+    return;
+  }
+
+  const ok = confirm(
+    "Approve this Skyro application?"
+  );
+
+  if (!ok) return;
+
+  try {
+    setButtonLoading(btn, "Approving...");
+
+    const res = await fetch(
+      "https://de-ecom-pro.onrender.com/api/orders/update",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          orderId,
+          order_status: "Skyro Approved"
+        })
+      }
+    );
+
+    const result = await res.json();
+
+    if (!res.ok || !result.success) {
+      throw new Error(
+        result.message ||
+        "Failed to approve Skyro order"
+      );
+    }
+
+    showToast(
+      "Skyro application approved.",
+      "success"
+    );
+
+    closeOrderModal();
+    await loadAdminOrders();
+
+  } catch (error) {
+    console.error(error);
+
+    showToast(
+      error.message ||
+      "Skyro approval server error",
+      "error"
+    );
+
+  } finally {
+    resetButtonLoading(btn);
+  }
+
+}
+
 async function bulkArrangeShipment() {
 
   const selectedOrders =
@@ -2811,6 +2990,7 @@ async function bulkArrangeShipment() {
 window.markOrderPacked = markOrderPacked;
 window.handleOrderRequestAction = handleOrderRequestAction;
 window.approveOrderRequest = approveOrderRequest;
+window.approveSkyroOrder = approveSkyroOrder;
 window.rejectOrderRequest = rejectOrderRequest;
 window.updateOrderRequestStatus = updateOrderRequestStatus;
 window.bulkMarkPacked = bulkMarkPacked;

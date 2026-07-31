@@ -3341,3 +3341,46 @@ body {
     height: 34px;
   }
 }
+
+.skyro-available {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+
+  padding: 10px 14px;
+  border-radius: 10px;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.skyro-available-icon {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+  border-radius: 10px;
+
+  background: #dbeafe;
+  font-size: 18px;
+}
+
+.skyro-available strong,
+.skyro-available small {
+  display: block;
+}
+
+.skyro-available small {
+  margin-top: 3px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}

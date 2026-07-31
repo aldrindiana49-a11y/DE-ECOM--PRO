@@ -1082,7 +1082,7 @@ function renderSuggestedProducts() {
     <div class="homepage-product-image">
      <img
   class="lazy-image"
-  data-src="${item.image || getProductImage(item)}"
+  data-src="${item.image || 'https://via.placeholder.com/500x400?text=No+Image'}"
   src=""
   alt="${item.name}">
     </div>

@@ -705,6 +705,7 @@ async function syncOrderToSupabase(order) {
         items: order.items,
         amount: order.total,
         order_status: order.status,
+        payment_method: order.payment?.method || "",
         courier: order.courier,
         address: order.address,
         customer_name: order.customer.name,
@@ -1768,6 +1769,125 @@ async function placeOrder() {
     return resetPlaceOrder();
   }
 
+  if (paymentMain === "SKYRO" && totalNumber < 3000) {
+    const remainingAmount = Math.max(3000 - totalNumber, 0);
+
+    showOrderModal(
+      "Skyro Minimum Order",
+      `
+      <div style="
+        padding:8px 2px;
+        text-align:center;
+      ">
+
+        <div style="
+          width:64px;
+          height:64px;
+          margin:0 auto 14px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          border-radius:50%;
+          background:#fff7ed;
+          font-size:32px;
+        ">
+          🛍️
+        </div>
+
+        <h3 style="
+          margin:0 0 10px;
+          color:#111827;
+        ">
+          Add More Items to Use Skyro
+        </h3>
+
+        <p style="
+          margin:0 0 12px;
+          line-height:1.6;
+          color:#4b5563;
+        ">
+          Skyro Installment requires a minimum order total of
+          <strong>₱3,000</strong>.
+        </p>
+
+        <div style="
+          margin:14px 0;
+          padding:14px;
+          border-radius:12px;
+          background:#f8fafc;
+          border:1px solid #e5e7eb;
+        ">
+          <div style="
+            font-size:13px;
+            color:#6b7280;
+          ">
+            Current Order Total
+          </div>
+
+          <strong style="
+            display:block;
+            margin-top:4px;
+            font-size:20px;
+            color:#111827;
+          ">
+            ${formatPrice(totalNumber)}
+          </strong>
+        </div>
+
+        <p style="
+          margin:0 0 16px;
+          color:#374151;
+        ">
+          Add at least
+          <strong style="color:#ea580c;">
+            ${formatPrice(remainingAmount)}
+          </strong>
+          more to qualify.
+        </p>
+
+        <button
+          type="button"
+          onclick="window.location.href='https://drinelectronicsph.com/'"
+          style="
+            width:100%;
+            padding:13px 16px;
+            border:none;
+            border-radius:10px;
+            background:#f97316;
+            color:#ffffff;
+            font-size:15px;
+            font-weight:700;
+            cursor:pointer;
+          "
+        >
+          Add More Items
+        </button>
+
+        <button
+          type="button"
+          onclick="closeOrderModal()"
+          style="
+            width:100%;
+            margin-top:10px;
+            padding:12px 16px;
+            border:1px solid #d1d5db;
+            border-radius:10px;
+            background:#ffffff;
+            color:#374151;
+            font-weight:700;
+            cursor:pointer;
+          "
+        >
+          Choose Another Payment Method
+        </button>
+
+      </div>
+    `
+    );
+
+    return resetPlaceOrder();
+  }
+
   if (paymentMain !== "COD" && totalNumber < 100) {
     showOrderModal(
       "Minimum Online Payment",
@@ -1856,36 +1976,30 @@ async function placeOrder() {
     parcelInfo: currentParcelInfo,
     shippingQuote: currentShippingQuote,
     total: totalNumber,
-    status: isManualLalamoveVerification
-      ? "Pending Address Verification"
-      : paymentMain === "COD"
-        ? "Pending COD"
-        : "Pending Payment",
+    status: paymentMain === "SKYRO"
+      ? "Pending Skyro Application"
+      : isManualLalamoveVerification
+        ? "Pending Address Verification"
+        : paymentMain === "COD"
+          ? "Pending COD"
+          : "Pending Payment",
     date: new Date().toLocaleString(),
   };
 
   if (paymentMain === "SKYRO") {
-    console.log("SKYRO TEMPORARILY UNAVAILABLE");
-
-    showOrderModal(
-      "Skyro Installment Temporarily Unavailable",
-      `
-      Skyro Installment is currently unavailable while we complete and improve the payment system.<br><br>
-      Please select Online Payment or Cash on Delivery to continue with your order.<br><br>
-      Thank you for your understanding.
-    `
-    );
-
-    return resetPlaceOrder();
+    console.log("SKYRO MANUAL APPLICATION:", order.id);
   }
 
   try {
 
-    if (paymentMain === "COD") {
+    if (
+      paymentMain === "COD" ||
+      paymentMain === "SKYRO"
+    ) {
       await deductOrderStock(order);
     }
 
-    if (!isGuestCheckout) {
+    if (!isGuestCheckout || paymentMain === "SKYRO") {
       const syncResult =
         await syncOrderToSupabase(order);
 
@@ -1896,7 +2010,11 @@ async function placeOrder() {
 
     saveOrder(order);
 
-    if (voucherCode && user) {
+    if (
+      voucherCode &&
+      user &&
+      paymentMain !== "SKYRO"
+    ) {
 
       await supabaseClient
         .from("voucher_usage")
@@ -1922,6 +2040,125 @@ async function placeOrder() {
     );
 
     return resetPlaceOrder();
+  }
+
+  if (paymentMain === "SKYRO") {
+    clearCheckedCartItems();
+    localStorage.removeItem("drinCheckoutItems");
+
+    showOrderModal(
+      "Skyro Order Successfully Submitted",
+      `
+      <div class="skyro-application-confirmation">
+
+        <div style="
+          width:70px;
+          height:70px;
+          margin:0 auto 14px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          border-radius:50%;
+          background:#dcfce7;
+          color:#16a34a;
+          font-size:38px;
+          font-weight:700;
+        ">
+          ✓
+        </div>
+
+        <h3 style="margin:0 0 10px;">
+          Order Submitted Successfully
+        </h3>
+
+        <p>
+          Your Skyro installment application has been received.
+        </p>
+
+        <p>
+          Application Reference Number:
+        </p>
+
+        <h2 style="
+          margin:10px 0;
+          color:#f97316;
+        ">
+          ${order.id}
+        </h2>
+
+        ${isGuestCheckout
+        ? `
+            <p>
+              Guest Tracking Code:
+            </p>
+
+            <h3 style="
+              margin:8px 0 14px;
+              color:#2563eb;
+            ">
+              ${order.guestTrackingCode}
+            </h3>
+          `
+        : `
+            <p>
+              You can view this application in your My Orders page.
+            </p>
+          `
+      }
+
+        <p>
+          Please take a screenshot of this confirmation and send it to our Skyro agent for assistance.
+        </p>
+
+        <button
+          type="button"
+          onclick="window.open('https://www.facebook.com/DrinElectronics', '_blank')"
+          style="
+            width:100%;
+            margin-top:12px;
+            padding:12px;
+            border:none;
+            border-radius:8px;
+            background:#1877f2;
+            color:#ffffff;
+            font-weight:700;
+            cursor:pointer;
+          "
+        >
+          Message Our Skyro Agent
+        </button>
+
+      </div>
+    `
+    );
+
+    if (checkoutBtn) {
+      checkoutBtn.disabled = true;
+      checkoutBtn.style.pointerEvents = "none";
+      checkoutBtn.style.opacity = "0.6";
+      checkoutBtn.textContent = "Skyro Application Submitted";
+    }
+
+    const okBtn =
+      document.getElementById("orderModalOk");
+
+    if (okBtn) {
+      okBtn.style.display = "inline-block";
+      okBtn.textContent = isGuestCheckout
+        ? "Track My Order"
+        : "Go to My Orders";
+
+      okBtn.onclick = function () {
+        if (isGuestCheckout) {
+          window.location.href =
+            `https://drinelectronicsph.com/guest-track/?track=${order.guestTrackingCode}`;
+        } else {
+          window.location.href = "/home-orders";
+        }
+      };
+    }
+
+    return;
   }
 
   if (paymentMain === "COD") {
@@ -2827,8 +3064,8 @@ function showNonCodPremiumPopup(items) {
       </div>
 
       <button onclick="switchToOnlinePayment()">
-         Switch to Online Payment
-       </button>
+         Choose Another Payment Method
+      </button>
 
     </div>
   `;
