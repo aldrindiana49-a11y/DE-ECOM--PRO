@@ -1,4 +1,3 @@
-const sharp = require("sharp");
 
 const SUPABASE_URL =
     "https://zdinvxowzpkolbfzpcac.supabase.co";
@@ -502,18 +501,14 @@ exports.handler = async event => {
         }
 
         if (imageMode) {
-            const image =
-                await generatePremiumCard(product);
-
             return {
-                statusCode: 200,
+                statusCode: 302,
                 headers: {
-                    "Content-Type": "image/png",
+                    Location: FALLBACK_IMAGE,
                     "Cache-Control":
                         "no-store, no-cache, must-revalidate"
                 },
-                body: image.toString("base64"),
-                isBase64Encoded: true
+                body: ""
             };
         }
 

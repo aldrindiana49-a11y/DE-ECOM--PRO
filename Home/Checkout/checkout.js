@@ -1865,11 +1865,15 @@ async function placeOrder() {
   };
 
   if (paymentMain === "SKYRO") {
-    console.log("SKYRO TEST MODE SELECTED");
+    console.log("SKYRO TEMPORARILY UNAVAILABLE");
 
     showOrderModal(
-      "Skyro Test Mode",
-      "Skyro test payment selected. No order was saved and no stock was deducted."
+      "Skyro Installment Temporarily Unavailable",
+      `
+      Skyro Installment is currently unavailable while we complete and improve the payment system.<br><br>
+      Please select Online Payment or Cash on Delivery to continue with your order.<br><br>
+      Thank you for your understanding.
+    `
     );
 
     return resetPlaceOrder();
