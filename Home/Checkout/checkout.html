@@ -38,7 +38,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Checkout - Drin Electronics</title>
-  <link rel="stylesheet" href="checkout.css?v=50021" />
+  <link rel="stylesheet" href="checkout.css?v=50022" />
 </head>
 
 <body>
@@ -332,6 +332,13 @@
         <strong id="checkoutTotal">₱0</strong>
       </div>
 
+      <div id="skyroPaymentNote" class="skyro-payment-note" style="display:none;">
+        <strong>Paalala:</strong>
+        Ang total na nakikita rito ay hindi pa ang final installment total.
+        Ang interest, monthly payment, at iba pang financing charges ay iko-compute
+        ng Skyro depende sa approved terms ng application.
+      </div>
+
       <button type="button" id="checkoutBtn" class="place-order-btn" onclick="placeOrder()">
         Place Order
       </button>
@@ -431,7 +438,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <script src="checkout.js?v=1000036" defer></script>
+  <script src="checkout.js?v=1000037" defer></script>
 </body>
 
 </html>

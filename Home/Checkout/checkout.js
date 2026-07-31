@@ -3147,3 +3147,22 @@ if (mapSearchInput) {
     }
   });
 }
+
+const skyroPaymentNote =
+  document.getElementById("skyroPaymentNote");
+
+document
+  .querySelectorAll('input[name="payment"]')
+  .forEach(paymentRadio => {
+
+    paymentRadio.addEventListener("change", function () {
+
+      if (!skyroPaymentNote) return;
+
+      skyroPaymentNote.style.display =
+        this.value === "SKYRO"
+          ? "block"
+          : "none";
+    });
+
+  });
