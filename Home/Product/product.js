@@ -2914,3 +2914,24 @@ document
     );
 
   });
+
+function openSkyroInfoModal() {
+  const modal = document.getElementById("skyroInfoModal");
+
+  if (modal) {
+    modal.classList.add("show");
+    document.body.style.overflow = "hidden";
+  }
+}
+
+function closeSkyroInfoModal() {
+  const modal = document.getElementById("skyroInfoModal");
+
+  if (modal) {
+    modal.classList.remove("show");
+    document.body.style.overflow = "";
+  }
+}
+
+window.openSkyroInfoModal = openSkyroInfoModal;
+window.closeSkyroInfoModal = closeSkyroInfoModal;

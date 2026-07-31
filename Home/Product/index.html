@@ -62,7 +62,7 @@
 
   <link rel="stylesheet" href="../style.css?v=10003" />
   <link rel="stylesheet" href="../chat/chat.css?v=20">
-  <link rel="stylesheet" href="product.css?v=10024" />
+  <link rel="stylesheet" href="product.css?v=10025" />
 </head>
 
 <body>
@@ -331,9 +331,15 @@
           <div class="skyro-available">
             <div class="skyro-available-icon">💳</div>
 
-            <div>
-              <strong>Installment via Skyro Available</strong>
-              <small>Minimum order total: ₱3,000</small>
+            <div class="skyro-minimum-note">
+              <div>
+                <strong>Skyro Installment:</strong>
+                Minimum purchase amount of ₱3,000 applies only when paying through Skyro.
+              </div>
+
+              <button type="button" class="skyro-how-btn" onclick="openSkyroInfoModal()">
+                Explore Skyro
+              </button>
             </div>
           </div>
 
@@ -671,6 +677,10 @@
 
         <p>✓ We verify your address after checkout</p>
 
+        <p>✓ Same Day Delivery booking hours: 11:00 AM to 4:00 PM</p>
+
+        <p>✓ Orders placed after 4:00 PM may be scheduled for the next available delivery day</p>
+
         <p>✓ Shipping fee depends on Lalamove rates</p>
 
         <p>✓ Once confirmed, we dispatch immediately</p>
@@ -678,6 +688,35 @@
         <p>⚡ Need urgent delivery? Contact us after checkout</p>
 
       </div>
+
+    </div>
+
+  </div>
+
+  <div id="skyroInfoModal" class="skyro-info-modal">
+
+    <div class="skyro-info-card">
+
+      <button type="button" class="skyro-modal-close" onclick="closeSkyroInfoModal()">
+        ✕
+      </button>
+
+      <h3>Explore Skyro Installment</h3>
+
+      <p>
+        Enjoy flexible installment options for purchases worth ₱3,000 or more.
+      </p>
+
+      <div class="skyro-info-list">
+        <p>✓ Available for Skyro payments only</p>
+        <p>✓ Subject to Skyro application approval</p>
+        <p>✓ Interest and monthly payments depend on approved terms</p>
+        <p>✓ COD and Online Payment are not affected by the ₱3,000 minimum</p>
+      </div>
+
+      <button type="button" class="skyro-modal-action" onclick="closeSkyroInfoModal()">
+        Got it
+      </button>
 
     </div>
 
