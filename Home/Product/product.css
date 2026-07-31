@@ -3508,3 +3508,16 @@ body {
     padding: 24px 20px;
   }
 }
+
+.skyro-minimum-note strong {
+  display: block;
+  margin-bottom: 3px;
+  font-weight: 700;
+}
+
+.skyro-minimum-note span {
+  display: block;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+}
