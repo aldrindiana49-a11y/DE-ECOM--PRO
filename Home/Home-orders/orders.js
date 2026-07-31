@@ -373,7 +373,8 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled")
         </span>
 
     </div>
-<div class="summary-row">
+
+    <div class="summary-row">
 
     <span>
         Payment Mode
@@ -382,7 +383,11 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled")
     <span>
         ${paymentMethod === "XENDIT"
                 ? "Online Payment"
-                : "COD"}
+                : paymentMethod === "SKYRO"
+                    ? "Skyro Installment"
+                    : paymentMethod === "COD"
+                        ? "Cash on Delivery"
+                        : paymentMethod || "Unknown"}
     </span>
 
 </div>
