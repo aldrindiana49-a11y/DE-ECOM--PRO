@@ -932,7 +932,14 @@ app.get("/api/orders", async (req, res) => {
 // ================= UPDATE ORDER =================
 app.post("/api/orders/update", async (req, res) => {
   try {
-    const { orderId, order_status, tracking_number, courier } = req.body;
+
+    const {
+      orderId,
+      order_status,
+      tracking_number,
+      courier,
+      skyro_application_link
+    } = req.body;
 
     let orders = await readOrders();
     const index = orders.findIndex(
@@ -970,6 +977,11 @@ app.post("/api/orders/update", async (req, res) => {
     }
     if (tracking_number !== undefined) orders[index].tracking_number = tracking_number;
     if (courier !== undefined) orders[index].courier = courier;
+
+    if (skyro_application_link !== undefined) {
+      orders[index].skyro_application_link =
+        String(skyro_application_link).trim();
+    }
 
     orders[index].updated_at = new Date().toISOString();
 

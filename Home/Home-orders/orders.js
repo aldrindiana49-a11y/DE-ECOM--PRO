@@ -416,7 +416,7 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled")
         type="button"
         class="track-btn skyro-application-btn"
         onclick="window.open('${skyroApplicationLink}', '_blank', 'noopener,noreferrer')">
-        Proceed with Application
+        Complete Skyro Application
     </button>
 ` : ""}
 

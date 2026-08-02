@@ -3076,15 +3076,27 @@ async function saveSkyroApplicationLink(orderId, btn) {
   try {
     setButtonLoading(btn, "Saving...");
 
-    const { error } = await supabaseClient
-      .from("orders")
-      .update({
-        skyro_application_link: link
-      })
-      .eq("id", order.id);
+    const res = await fetch(
+      "https://de-ecom-pro.onrender.com/api/orders/update",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          orderId,
+          skyro_application_link: link
+        })
+      }
+    );
 
-    if (error) {
-      throw error;
+    const result = await res.json();
+
+    if (!res.ok || !result.success) {
+      throw new Error(
+        result.message ||
+        "Failed to save Skyro application link"
+      );
     }
 
     showToast(
