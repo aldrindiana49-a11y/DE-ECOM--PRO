@@ -756,3 +756,16 @@ body {
     transform: translateY(-1px);
     filter: brightness(1.08);
 }
+
+.skyro-approved-btn {
+    background: #16a34a !important;
+    color: #ffffff !important;
+    cursor: default;
+    opacity: 1 !important;
+    box-shadow: 0 8px 20px rgba(22, 163, 74, 0.25);
+}
+
+.skyro-approved-btn:hover {
+    transform: none;
+    filter: none;
+}

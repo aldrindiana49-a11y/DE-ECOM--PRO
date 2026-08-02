@@ -262,6 +262,11 @@ async function loadOrders() {
         const isSkyro =
             paymentMethod === "SKYRO";
 
+        const isSkyroApproved =
+            String(order.order_status || "")
+                .trim()
+                .toLowerCase() === "skyro approved";
+
         const skyroApplicationLink =
             String(order.skyro_application_link || "").trim();
 
@@ -411,7 +416,14 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled")
                 : ""
             }
 
-            ${isSkyro && skyroApplicationLink ? `
+            ${isSkyroApproved ? `
+    <button
+        type="button"
+        class="track-btn skyro-approved-btn"
+        disabled>
+        Skyro Application Approved ✓
+    </button>
+` : isSkyro && skyroApplicationLink ? `
     <button
         type="button"
         class="track-btn skyro-application-btn"
