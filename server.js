@@ -976,6 +976,7 @@ app.post("/api/orders/update", async (req, res) => {
     const {
       orderId,
       order_status,
+      payment_status,
       tracking_number,
       courier,
       skyro_application_link
@@ -1015,6 +1016,12 @@ app.post("/api/orders/update", async (req, res) => {
         }
       }
     }
+
+    if (payment_status !== undefined) {
+      orders[index].payment_status =
+        String(payment_status).trim();
+    }
+
     if (tracking_number !== undefined) orders[index].tracking_number = tracking_number;
     if (courier !== undefined) orders[index].courier = courier;
 

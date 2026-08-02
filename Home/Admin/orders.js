@@ -1667,7 +1667,14 @@ function normalizeOrder(order) {
 
     payment_status:
       isSkyro
-        ? "Pending Skyro Approval"
+        ? (
+          String(paymentStatus).trim() ||
+          (
+            String(orderStatus).toLowerCase() === "skyro approved"
+              ? "Skyro Approved"
+              : "Pending Skyro Approval"
+          )
+        )
         : paymentStatus || (isCOD ? "COD" : "Pending Payment"),
 
     payment_method: paymentMethod,
@@ -2323,7 +2330,14 @@ async function bookLalamoveShipment(orderId, btn) {
     const isCOD = paymentStatus.includes("COD");
     const isPaid = paymentStatus === "PAID";
 
-    if (!isCOD && !isPaid) {
+    const isSkyroApproved =
+      String(order.payment_method || "")
+        .toUpperCase()
+        .includes("SKYRO") &&
+      String(order.payment_status || "")
+        .toUpperCase() === "SKYRO APPROVED";
+
+    if (!isCOD && !isPaid && !isSkyroApproved) {
       showToast(
         "Only COD or PAID orders can arrange shipment.",
         "error"
@@ -2962,7 +2976,14 @@ async function markOrderShipped(orderId, btn) {
     const isPaid =
       paymentStatus === "PAID";
 
-    if (!isCOD && !isPaid) {
+    const isSkyroApproved =
+      String(order.payment_method || "")
+        .toUpperCase()
+        .includes("SKYRO") &&
+      String(order.payment_status || "")
+        .toUpperCase() === "SKYRO APPROVED";
+
+    if (!isCOD && !isPaid && !isSkyroApproved) {
       showToast(
         "Only COD or PAID orders can be marked shipped.",
         "error"
@@ -3070,7 +3091,14 @@ async function forceUpdateOrderStatus(orderId, status, btn) {
     const isPaid =
       paymentStatus === "PAID";
 
-    if (!isCOD && !isPaid) {
+    const isSkyroApproved =
+      String(order.payment_method || "")
+        .toUpperCase()
+        .includes("SKYRO") &&
+      String(order.payment_status || "")
+        .toUpperCase() === "SKYRO APPROVED";
+
+    if (!isCOD && !isPaid && !isSkyroApproved) {
 
       showToast(
         "Only COD or PAID orders can update status.",
@@ -3161,7 +3189,8 @@ async function approveSkyroOrder(orderId, btn) {
         },
         body: JSON.stringify({
           orderId,
-          order_status: "Skyro Approved"
+          order_status: "Skyro Approved",
+          payment_status: "Skyro Approved"
         })
       }
     );
