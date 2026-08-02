@@ -1798,6 +1798,55 @@ function openOrderModal(orderId) {
 </p>
     <p><strong>Tracking:</strong> ${escapeHtml(order.tracking_number || "-")}</p>
 
+    ${String(order.payment_method || "")
+      .toUpperCase()
+      .includes("SKYRO")
+      ? `
+    <div style="
+      margin-top:14px;
+      padding:14px;
+      background:#f5f3ff;
+      border:1px solid #ddd6fe;
+      border-radius:12px;
+    ">
+      <label
+        for="skyroLink-${escapeAttribute(orderId)}"
+        style="
+          display:block;
+          margin-bottom:8px;
+          font-weight:700;
+          color:#4c1d95;
+        "
+      >
+        Skyro Application Link
+      </label>
+
+      <input
+        id="skyroLink-${escapeAttribute(orderId)}"
+        type="url"
+        value="${escapeAttribute(order.skyro_application_link || "")}"
+        placeholder="Paste Skyro application link here"
+        style="
+          width:100%;
+          padding:11px 12px;
+          border:1px solid #c4b5fd;
+          border-radius:10px;
+          margin-bottom:10px;
+        "
+      >
+
+      <button
+        type="button"
+        class="primary-btn"
+        onclick="saveSkyroApplicationLink('${escapeAttribute(orderId)}', this)"
+      >
+        Save Application Link
+      </button>
+    </div>
+  `
+      : ""
+    }
+
     <div class="order-modal-actions">
 
 ${String(order.payment_method || "")
@@ -2983,9 +3032,91 @@ async function bulkArrangeShipment() {
 
 }
 
+async function saveSkyroApplicationLink(orderId, btn) {
+  const order = adminOrders.find(o =>
+    String(o.external_id || o.id) === String(orderId)
+  );
+
+  if (!order) {
+    showToast("Order not found.", "error");
+    return;
+  }
+
+  const input = document.getElementById(
+    `skyroLink-${orderId}`
+  );
+
+  const link = String(input?.value || "").trim();
+
+  if (!link) {
+    showToast(
+      "Please paste the Skyro application link.",
+      "error"
+    );
+    return;
+  }
+
+  try {
+    const parsedUrl = new URL(link);
+
+    if (
+      parsedUrl.protocol !== "https:" &&
+      parsedUrl.protocol !== "http:"
+    ) {
+      throw new Error("Invalid URL");
+    }
+  } catch {
+    showToast(
+      "Please enter a valid Skyro link.",
+      "error"
+    );
+    return;
+  }
+
+  try {
+    setButtonLoading(btn, "Saving...");
+
+    const { error } = await supabaseClient
+      .from("orders")
+      .update({
+        skyro_application_link: link
+      })
+      .eq("id", order.id);
+
+    if (error) {
+      throw error;
+    }
+
+    showToast(
+      "Skyro application link saved.",
+      "success"
+    );
+
+    closeOrderModal();
+    await loadAdminOrders();
+
+  } catch (error) {
+    console.error(
+      "Save Skyro link error:",
+      error
+    );
+
+    showToast(
+      "Failed to save Skyro application link.",
+      "error"
+    );
+
+  } finally {
+    resetButtonLoading(btn);
+  }
+}
+
 /* ===============================
    GLOBALS
 ================================ */
+
+window.saveSkyroApplicationLink =
+  saveSkyroApplicationLink;
 
 window.markOrderPacked = markOrderPacked;
 window.handleOrderRequestAction = handleOrderRequestAction;

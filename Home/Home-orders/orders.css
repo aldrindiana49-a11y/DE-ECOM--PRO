@@ -745,3 +745,14 @@ body {
     }
 
 }
+
+.skyro-application-btn {
+    background: linear-gradient(135deg, #7c3aed, #4f46e5) !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 24px rgba(79, 70, 229, 0.28);
+}
+
+.skyro-application-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+}

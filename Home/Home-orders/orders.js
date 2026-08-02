@@ -259,6 +259,12 @@ async function loadOrders() {
         const isXendit =
             paymentMethod === "XENDIT";
 
+        const isSkyro =
+            paymentMethod === "SKYRO";
+
+        const skyroApplicationLink =
+            String(order.skyro_application_link || "").trim();
+
         const isPaidPayment =
             paymentStatus.includes("paid");
 
@@ -404,6 +410,15 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled")
         </button>`
                 : ""
             }
+
+            ${isSkyro && skyroApplicationLink ? `
+    <button
+        type="button"
+        class="track-btn skyro-application-btn"
+        onclick="window.open('${skyroApplicationLink}', '_blank', 'noopener,noreferrer')">
+        Proceed with Application
+    </button>
+` : ""}
 
   ${isPendingPayment && !isExpired
                 ? `
