@@ -122,7 +122,26 @@ async function savePendingOrder({
     guest_tracking_code: guestTrackingCode || "",
     address: address || {},
     parcel_info: parcelInfo || {},
-    items: Array.isArray(items) ? items : [],
+    items: (() => {
+      if (Array.isArray(items)) {
+        return items;
+      }
+
+      if (typeof items === "string") {
+        try {
+          const parsedItems = JSON.parse(items);
+
+          return Array.isArray(parsedItems)
+            ? parsedItems
+            : [];
+        } catch (error) {
+          console.error("INVALID ORDER ITEMS JSON:", error);
+          return [];
+        }
+      }
+
+      return [];
+    })(),
     payment_provider: paymentProvider,
     courier: courier || "",
     checkout_url: checkoutUrl || "",
@@ -137,19 +156,40 @@ async function savePendingOrder({
   const existingIndex = orders.findIndex(order => order.external_id === orderId);
 
   if (existingIndex !== -1) {
+    const existingOrder = orders[existingIndex];
+
+    const existingItems =
+      Array.isArray(existingOrder.items)
+        ? existingOrder.items
+        : [];
+
+    const incomingItems =
+      Array.isArray(orderData.items)
+        ? orderData.items
+        : [];
+
     orders[existingIndex] = {
-      ...orders[existingIndex],
-      ...orderData
+      ...existingOrder,
+      ...orderData,
+
+      items:
+        incomingItems.length >= existingItems.length
+          ? incomingItems
+          : existingItems
     };
   } else {
     orders.push(orderData);
   }
 
   await saveOrders(orders);
-  return orderData;
+
+  return existingIndex !== -1
+    ? orders[existingIndex]
+    : orderData;
 }
 
 async function reserveXenditStock(order) {
+
   if (!order || order.stock_reserved) return order;
 
   for (const item of order.items || []) {

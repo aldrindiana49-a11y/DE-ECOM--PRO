@@ -12,7 +12,7 @@ const dashboardShipped = document.getElementById("dashboardShipped");
 const dashboardDelivered = document.getElementById("dashboardDelivered");
 
 let adminOrders = [];
-let currentOrderFilter = "ALL";
+let currentOrderFilter = "Processing";
 let expandedOrderSummary = {};
 let expandedOrderItems = {};
 let currentOrdersPage = 1;
@@ -69,7 +69,29 @@ function printOrderInvoice(orderId) {
     ? order.items
     : [];
 
-  const subtotal = Number(order.subtotal || 0);
+  const calculatedSubtotal = items.reduce((sum, item) => {
+    const price = Number(
+      item.price ??
+      item.unit_price ??
+      item.unitPrice ??
+      item.selling_price ??
+      0
+    );
+
+    const quantity = Number(
+      item.quantity ??
+      item.qty ??
+      item.quantityOrdered ??
+      1
+    );
+
+    return sum + (price * quantity);
+  }, 0);
+
+  const subtotal =
+    calculatedSubtotal > 0
+      ? calculatedSubtotal
+      : Number(order.subtotal || 0);
 
   const voucher = Number(
     order.voucher_discount ||
@@ -91,11 +113,11 @@ function printOrderInvoice(orderId) {
     0
   );
 
-  const total = Number(
-    order.amount ||
-    order.total ||
-    0
-  );
+  const total =
+    subtotal -
+    voucher +
+    shipping +
+    serviceFee;
 
   const paymentStatus =
     order.payment_status ||
@@ -1166,9 +1188,29 @@ function renderAdminOrders() {
       order.order_request_status &&
       String(order.order_request_status).trim() !== "";
 
+    const calculatedSubtotal = items.reduce((sum, item) => {
+      const price = Number(
+        item.price ??
+        item.unit_price ??
+        item.unitPrice ??
+        item.selling_price ??
+        0
+      );
+
+      const quantity = Number(
+        item.quantity ??
+        item.qty ??
+        item.quantityOrdered ??
+        1
+      );
+
+      return sum + (price * quantity);
+    }, 0);
 
     const subtotal =
-      Number(order.subtotal || 0);
+      calculatedSubtotal > 0
+        ? calculatedSubtotal
+        : Number(order.subtotal || 0);
 
     const voucher =
       Number(order.voucher_discount || 0);
@@ -1186,11 +1228,10 @@ function renderAdminOrders() {
       );
 
     const total =
-      Number(
-        order.amount ||
-        order.total ||
-        0
-      );
+      subtotal -
+      voucher +
+      shipping +
+      serviceFee;
 
     return `
       <div class="warehouse-order-card">
@@ -1273,7 +1314,7 @@ ${hasOrderRequest ? `
         : `<div class="empty-box">No item details found.</div>`
       }
 
-            ${items.length > 3
+            ${items.length > 2
         ? `
                   <button
                     class="show-more-items-btn"
@@ -1707,6 +1748,38 @@ async function loadAdminOrders() {
 ================================ */
 
 function getShipmentButton(order, orderId) {
+  const orderStatus = String(
+    order.order_status || ""
+  ).trim().toLowerCase();
+
+  const shipmentAlreadyArranged =
+    Boolean(order.shipment_arranged_at) ||
+    Boolean(order.awb_link) ||
+    Boolean(order.tracking_number) ||
+    [
+      "processing",
+      "packed",
+      "shipped",
+      "in transit",
+      "delivered"
+    ].includes(orderStatus);
+
+  if (shipmentAlreadyArranged) {
+    return `
+      <button
+        class="primary-btn"
+        type="button"
+        disabled
+        style="
+          opacity:0.55;
+          cursor:not-allowed;
+        "
+      >
+        Shipment Arranged
+      </button>
+    `;
+  }
+
   return `
     <button
       class="primary-btn"
@@ -1755,7 +1828,62 @@ function openOrderModal(orderId) {
         address.country
       ].filter(Boolean).join(", ");
 
+  const modalItems = Array.isArray(order.items)
+    ? order.items
+    : [];
+
+  const modalCalculatedSubtotal = modalItems.reduce((sum, item) => {
+    const price = Number(
+      item.price ??
+      item.unit_price ??
+      item.unitPrice ??
+      item.selling_price ??
+      0
+    );
+
+    const quantity = Number(
+      item.quantity ??
+      item.qty ??
+      item.quantityOrdered ??
+      1
+    );
+
+    return sum + (price * quantity);
+  }, 0);
+
+  const modalSubtotal =
+    modalCalculatedSubtotal > 0
+      ? modalCalculatedSubtotal
+      : Number(order.subtotal || 0);
+
+  const modalVoucher = Number(
+    order.voucher_discount ??
+    order.voucherDiscount ??
+    0
+  );
+
+  const modalShipping = Number(
+    order.shipping_fee ??
+    order.shippingFee ??
+    0
+  );
+
+  const modalServiceFee = Number(
+    order.service_fee ??
+    order.serviceFee ??
+    order.handling_fee ??
+    order.handlingFee ??
+    0
+  );
+
+  const modalTotal =
+    modalSubtotal -
+    modalVoucher +
+    modalShipping +
+    modalServiceFee;
+
   content.innerHTML = `
+
     <h3>Order: ${escapeHtml(order.external_id || order.id || "-")}</h3>
 
     <p><strong>Customer:</strong> ${escapeHtml(order.customer_name || "-")}</p>
@@ -1782,7 +1910,7 @@ function openOrderModal(orderId) {
         `
       : ""}
 
-    <p><strong>Amount:</strong> ₱${Number(order.amount || 0).toLocaleString("en-PH")}</p>
+    <p><strong>Amount:</strong> ₱${modalTotal.toLocaleString("en-PH")}</p>
     <p><strong>Status:</strong> ${escapeHtml(order.order_status || "Pending")}</p>
     <p>
   <strong>Courier:</strong>
@@ -1826,22 +1954,60 @@ function openOrderModal(orderId) {
         type="url"
         value="${escapeAttribute(order.skyro_application_link || "")}"
         placeholder="Paste Skyro application link here"
+        ${order.skyro_application_link ? "readonly" : ""}
         style="
           width:100%;
           padding:11px 12px;
           border:1px solid #c4b5fd;
           border-radius:10px;
           margin-bottom:10px;
+          ${order.skyro_application_link
+        ? "background:#e5e7eb;cursor:not-allowed;"
+        : ""}
         "
       >
 
-      <button
-        type="button"
-        class="primary-btn"
-        onclick="saveSkyroApplicationLink('${escapeAttribute(orderId)}', this)"
-      >
-        Save Application Link
-      </button>
+      ${order.skyro_application_link
+        ? `
+    <div style="
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    ">
+
+    <button
+      type="button"
+      class="primary-btn"
+      disabled
+      style="
+        opacity:0.55;
+        cursor:not-allowed;
+      "
+    >
+      Link Saved
+       </button>
+
+        <button
+      type="button"
+      class="secondary-btn"
+      onclick="window.open('${escapeAttribute(order.skyro_application_link)}', '_blank')"
+  >
+    View Link
+  </button>
+
+</div>
+  `
+        : `
+    <button
+      type="button"
+      class="primary-btn"
+      onclick="saveSkyroApplicationLink('${escapeAttribute(orderId)}', this)"
+    >
+      Save Application Link
+    </button>
+  `
+      }
+
     </div>
   `
       : ""
@@ -2620,13 +2786,10 @@ function getSelectedOrderIds() {
 
 }
 
-async function bulkMarkPacked() {
-
-  const selectedOrders =
-    getSelectedOrderIds();
+async function bulkMarkPacked(btn) {
+  const selectedOrders = getSelectedOrderIds();
 
   if (!selectedOrders.length) {
-
     showToast(
       "Select orders first.",
       "error"
@@ -2635,40 +2798,70 @@ async function bulkMarkPacked() {
     return;
   }
 
-  for (const orderId of selectedOrders) {
+  try {
+    setButtonLoading(
+      btn,
+      `Packing ${selectedOrders.length} order(s)...`
+    );
 
-    try {
+    let successCount = 0;
+    let failedCount = 0;
 
-      await fetch(
-        "https://de-ecom-pro.onrender.com/api/orders/update",
-        {
-          method: "POST",
+    for (const orderId of selectedOrders) {
+      try {
+        const response = await fetch(
+          "https://de-ecom-pro.onrender.com/api/orders/update",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              orderId,
+              order_status: "Packed",
+              packed_at: new Date().toISOString()
+            })
+          }
+        );
 
-          headers: {
-            "Content-Type": "application/json"
-          },
+        const result = await response.json();
 
-          body: JSON.stringify({
-            orderId,
-            order_status: "Packed"
-          })
+        if (!response.ok || !result.success) {
+          failedCount++;
+          continue;
         }
-      );
 
-    } catch (err) {
+        successCount++;
 
-      console.error(err);
+      } catch (error) {
+        console.error(
+          `Failed to pack order ${orderId}:`,
+          error
+        );
 
+        failedCount++;
+      }
     }
 
+    if (successCount > 0) {
+      showToast(
+        `${successCount} order(s) marked as Packed.`,
+        "success"
+      );
+    }
+
+    if (failedCount > 0) {
+      showToast(
+        `${failedCount} order(s) failed to update.`,
+        "error"
+      );
+    }
+
+    await loadAdminOrders();
+
+  } finally {
+    resetButtonLoading(btn);
   }
-
-  showToast(
-    "Selected orders marked as Packed.",
-    "success"
-  );
-
-  await loadAdminOrders();
 }
 
 async function markOrderPacked(orderId, btn) {

@@ -26,7 +26,7 @@ async function checkAdminAccess() {
     }
 }
 
- checkAdminAccess();
+ // ckAdminAccess();
 
 async function adminLogout() {
     await supabaseClient.auth.signOut();

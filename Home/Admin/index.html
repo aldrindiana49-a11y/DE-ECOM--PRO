@@ -4,8 +4,9 @@
 <head>
 
   <link rel="icon" type="image/png" id="siteFavicon"
-    href="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/logo.png?v=10010" <meta
-    charset="UTF-8" />
+    href="https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/logo.png?v=10010" />
+
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Drin Electronics Admin Panel</title>
   <link rel="stylesheet" href="admin.css?v=10010" />
@@ -605,7 +606,7 @@
               </span>
             </button>
 
-            <button class="order-filter-btn" data-filter="Processing">
+            <button class="order-filter-btn active" data-filter="Processing">
               Processing
               <span class="order-filter-count" id="countProcessing">0</span>
             </button>
@@ -650,7 +651,7 @@
               <span class="order-filter-count" id="countExpired">0</span>
             </button>
 
-            <button class="order-filter-btn active" data-filter="ALL">
+            <button class="order-filter-btn" data-filter="ALL">
               All
               <span class="order-filter-count" id="countAll">0</span>
             </button>
@@ -659,20 +660,8 @@
 
           <div class="orders-toolbar-right">
 
-            <button class="secondary-btn" type="button">
-              Select Orders
-            </button>
-
-            <button class="small-btn" type="button" onclick="bulkMarkPacked()">
+            <button class="small-btn" type="button" onclick="bulkMarkPacked(this)">
               Mark Packed
-            </button>
-
-            <button class="primary-btn" type="button" onclick="bulkArrangeShipment()">
-              Arrange Shipment
-            </button>
-
-            <button class="primary-btn" type="button">
-              Print Waybill
             </button>
 
             <button class="secondary-btn" type="button" onclick="loadAdminOrders()">
@@ -1081,7 +1070,7 @@
   <script src="./inventory.js?v=10010"></script>
   <script src="./generator.js?v=10010"></script>
   <script src="./categories.js?v=10010"></script>
-  <script src="./orders.js?v=10012"></script>
+  <script src="./orders.js?v=10014"></script>
   <script src="./employee.js?v=10010"></script>
 
 </body>
