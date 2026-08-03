@@ -836,11 +836,17 @@ app.post("/api/orders/:orderId/skyro-create", async (req, res) => {
       order.order_status || ""
     ).trim();
 
-    if (currentStatus !== "Pending Stock Confirmation") {
+    const allowedStockConfirmationStatuses = [
+      "Pending Stock Confirmation",
+      "Pending",
+      "Pending Skyro Application"
+    ];
+
+    if (!allowedStockConfirmationStatuses.includes(currentStatus)) {
       return res.status(400).json({
         success: false,
         message:
-          "Skyro application can only be created after stock confirmation."
+          `Skyro application cannot be created from status: ${currentStatus || "empty"}.`
       });
     }
 
