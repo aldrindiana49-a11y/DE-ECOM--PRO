@@ -1988,6 +1988,12 @@ async function placeOrder() {
 
   if (paymentMain === "SKYRO") {
     console.log("SKYRO MANUAL APPLICATION:", order.id);
+
+    showOrderModal(
+      "Submitting Skyro Order",
+      "Please wait while we save and reserve your order...",
+      true
+    );
   }
 
   try {
@@ -2041,6 +2047,7 @@ async function placeOrder() {
 
     return resetPlaceOrder();
   }
+
 
   if (paymentMain === "SKYRO") {
 
@@ -2132,22 +2139,63 @@ async function placeOrder() {
 
         ${isGuestCheckout
         ? `
-            <p>
-              Guest Tracking Code:
-            </p>
+      <div style="text-align:center;">
 
-            <h3 style="
-              margin:8px 0 14px;
-              color:#2563eb;
-            ">
-              ${order.guestTrackingCode}
-            </h3>
-          `
+        <h3 style="margin:0 0 8px;">
+          Create an Account
+        </h3>
+
+        <p style="margin:0 0 12px; line-height:1.4;">
+          Sign up using the same email to manage and continue your Skyro order.
+        </p>
+
+        <button
+          type="button"
+          onclick="window.location.href='https://drinelectronicsph.com/signup/'"
+          style="
+            width:100%;
+            padding:12px;
+            border:none;
+            border-radius:8px;
+            background:#f97316;
+            color:white;
+            font-weight:700;
+          "
+        >
+          Create Account
+        </button>
+
+        <p style="margin:12px 0 4px; font-size:12px;">
+          Tracking Code
+        </p>
+
+        <strong style="color:#2563eb;">
+          ${order.guestTrackingCode}
+        </strong>
+
+        <button
+          type="button"
+          onclick="window.location.href='https://drinelectronicsph.com/guest-track/?track=${order.guestTrackingCode}'"
+          style="
+            width:100%;
+            margin-top:10px;
+            padding:10px;
+            border:1px solid #d1d5db;
+            border-radius:8px;
+            background:white;
+            font-weight:700;
+          "
+        >
+          Track as Guest
+        </button>
+
+      </div>
+    `
         : `
-            <p>
-              You can view this order request in your My Orders page.
-            </p>
-          `
+      <p>
+        You can view this order request in your My Orders page.
+      </p>
+    `
       }
 
         <p>
@@ -2204,14 +2252,14 @@ async function placeOrder() {
 
     if (!isGuestCheckout) {
       showOrderModal(
-        "Redirecting to My Orders",
-        "Please wait while we open your order details...",
+        "Skyro Order Submitted",
+        "Your order was saved successfully. Redirecting to My Orders...",
         true
       );
 
       setTimeout(() => {
         window.location.href = "/home-orders";
-      }, 1500);
+      }, 3000);
     }
 
     return;
