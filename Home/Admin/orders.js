@@ -846,6 +846,7 @@ function updateOrderFilterCounts() {
     all: adminOrders.length,
     pendingCod: 0,
     pendingSkyro: 0,
+    awaitingSkyroApplication: 0,
     approvedSkyro: 0,
     processing: 0,
     packed: 0,
@@ -903,9 +904,20 @@ function updateOrderFilterCounts() {
 
     if (
       isSkyro &&
-      orderStatus === "pending skyro application"
+      [
+        "pending stock confirmation",
+        "pending skyro approval",
+        "pending skyro application"
+      ].includes(orderStatus)
     ) {
       counts.pendingSkyro++;
+    }
+
+    if (
+      isSkyro &&
+      orderStatus === "skyro application allowed"
+    ) {
+      counts.awaitingSkyroApplication++;
     }
 
     if (
@@ -964,6 +976,8 @@ function updateOrderFilterCounts() {
     countAll: counts.all,
     countPendingCod: counts.pendingCod,
     countPendingSkyro: counts.pendingSkyro,
+    countAwaitingSkyroApplication:
+      counts.awaitingSkyroApplication,
     countApprovedSkyro: counts.approvedSkyro,
     countProcessing: counts.processing,
     countPacked: counts.packed,
@@ -1099,7 +1113,22 @@ function renderAdminOrders() {
       if (selectedFilter === "pending skyro") {
         return (
           paymentText.includes("skyro") &&
-          orderStatus === "pending skyro application"
+          [
+            "pending stock confirmation",
+            "pending skyro approval",
+            "pending skyro application"
+          ].includes(orderStatus)
+        );
+      }
+
+      if (
+        selectedFilter ===
+        "awaiting customer application"
+      ) {
+        return (
+          paymentText.includes("skyro") &&
+          orderStatus ===
+          "skyro application allowed"
         );
       }
 
@@ -1546,6 +1575,51 @@ function changeOrdersPage(direction) {
       ""
     ).trim().toLowerCase();
 
+    const paymentMethod = String(
+      order.payment_provider ||
+      order.paymentProvider ||
+      order.payment_method ||
+      order.paymentMethod ||
+      order.payment_type ||
+      order.payment_option ||
+      order.payment_channel ||
+      order.method ||
+      ""
+    ).trim().toLowerCase();
+
+    const paymentText =
+      `${paymentStatus} ${paymentMethod}`;
+
+    const isCOD =
+      paymentText.includes("cod") ||
+      paymentText.includes("cash on delivery");
+
+    if (selectedFilter === "pending skyro") {
+      return (
+        paymentText.includes("skyro") &&
+        [
+          "pending stock confirmation",
+          "skyro application allowed",
+          "pending skyro approval",
+          "pending skyro application"
+        ].includes(orderStatus)
+      );
+    }
+
+    if (selectedFilter === "skyro approved") {
+      return (
+        paymentText.includes("skyro") &&
+        orderStatus === "skyro approved"
+      );
+    }
+
+    if (
+      selectedFilter === "pending" ||
+      selectedFilter === "pending cod"
+    ) {
+      return isCOD && orderStatus === "pending";
+    }
+
     return (
       orderStatus === selectedFilter ||
       paymentStatus === selectedFilter
@@ -1587,6 +1661,8 @@ function normalizeOrder(order) {
     "";
 
   const paymentMethod =
+    order.payment_provider ||
+    order.paymentProvider ||
     order.payment_method ||
     order.paymentMethod ||
     order.payment_type ||
@@ -1627,9 +1703,10 @@ function normalizeOrder(order) {
     if (
       !orderStatus ||
       orderStatus === "Pending Payment" ||
-      orderStatus === "Pending"
+      orderStatus === "Pending" ||
+      orderStatus === "Pending Skyro Application"
     ) {
-      orderStatus = "Pending Skyro Application";
+      orderStatus = "Pending Stock Confirmation";
     }
 
   } else if (isCOD) {
@@ -1758,6 +1835,30 @@ function getShipmentButton(order, orderId) {
   const orderStatus = String(
     order.order_status || ""
   ).trim().toLowerCase();
+
+  const isSkyro =
+    String(order.payment_method || "")
+      .toLowerCase()
+      .includes("skyro");
+
+  const isSkyroApproved =
+    orderStatus === "skyro approved";
+
+  if (isSkyro && !isSkyroApproved) {
+    return `
+    <button
+      class="primary-btn"
+      type="button"
+      disabled
+      style="
+        opacity:0.55;
+        cursor:not-allowed;
+      "
+    >
+      Waiting for Skyro Approval
+    </button>
+  `;
+  }
 
   const shipmentAlreadyArranged =
     Boolean(order.shipment_arranged_at) ||
@@ -1944,100 +2045,93 @@ function openOrderModal(orderId) {
       border:1px solid #ddd6fe;
       border-radius:12px;
     ">
-      <label
-        for="skyroLink-${escapeAttribute(orderId)}"
-        style="
-          display:block;
-          margin-bottom:8px;
-          font-weight:700;
-          color:#4c1d95;
-        "
-      >
-        Skyro Application Link
-      </label>
+      <div style="
+        margin-bottom:10px;
+        font-weight:700;
+        color:#4c1d95;
+      ">
+        Skyro Application
+      </div>
 
-      <input
-        id="skyroLink-${escapeAttribute(orderId)}"
-        type="url"
-        value="${escapeAttribute(order.skyro_application_link || "")}"
-        placeholder="Paste Skyro application link here"
-        ${order.skyro_application_link ? "readonly" : ""}
-        style="
-          width:100%;
-          padding:11px 12px;
-          border:1px solid #c4b5fd;
-          border-radius:10px;
-          margin-bottom:10px;
-          ${order.skyro_application_link
-        ? "background:#e5e7eb;cursor:not-allowed;"
-        : ""}
-        "
-      >
+      <p style="
+        margin:0 0 12px;
+        color:#6b21a8;
+      ">
+        Status:
+        <strong>
+          ${escapeHtml(
+        order.skyro_status ||
+        order.order_status ||
+        "Pending Stock Confirmation"
+      )}
+        </strong>
+      </p>
 
       ${order.skyro_application_link
         ? `
-    <div style="
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    ">
+          <div style="
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+          ">
+            <button
+              type="button"
+              class="primary-btn"
+              disabled
+              style="
+                opacity:0.55;
+                cursor:not-allowed;
+              "
+            >
+              Application Link Created
+            </button>
 
-    <button
-      type="button"
-      class="primary-btn"
-      disabled
-      style="
-        opacity:0.55;
-        cursor:not-allowed;
-      "
-    >
-      Link Saved
-       </button>
-
-        <button
-      type="button"
-      class="secondary-btn"
-      onclick="window.open('${escapeAttribute(order.skyro_application_link)}', '_blank')"
-  >
-    View Link
-  </button>
-
-</div>
-  `
-        : `
-    <button
-      type="button"
-      class="primary-btn"
-      onclick="saveSkyroApplicationLink('${escapeAttribute(orderId)}', this)"
-    >
-      Save Application Link
-    </button>
-  `
+            <button
+              type="button"
+              class="secondary-btn"
+              onclick="window.open(
+                '${escapeAttribute(order.skyro_application_link)}',
+                '_blank'
+              )"
+            >
+              View Skyro Link
+            </button>
+          </div>
+        `
+        : String(order.order_status || "") ===
+          "Pending Stock Confirmation"
+          ? `
+            <button
+              type="button"
+              class="primary-btn"
+              onclick="confirmSkyroStock(
+                '${escapeAttribute(orderId)}',
+                this
+              )"
+            >
+              Confirm Stock & Create Skyro Link
+            </button>
+          `
+          : `
+            <button
+              type="button"
+              class="primary-btn"
+              disabled
+              style="
+                opacity:0.55;
+                cursor:not-allowed;
+              "
+            >
+              Waiting for Skyro Application
+            </button>
+          `
       }
-
     </div>
   `
       : ""
     }
 
     <div class="order-modal-actions">
-
-${String(order.payment_method || "")
-      .toUpperCase()
-      .includes("SKYRO") &&
-      String(order.order_status || "")
-        .toUpperCase() === "PENDING SKYRO APPLICATION"
-      ? `
-    <button
-      class="primary-btn"
-      type="button"
-      onclick="approveSkyroOrder('${escapeAttribute(orderId)}', this)"
-    >
-      Approve Skyro
-    </button>
-  `
-      : ""
-    }
 
       ${getShipmentButton(order, orderId)}
 
@@ -2105,6 +2199,62 @@ function closeOrderModal() {
 
   if (modal) {
     modal.style.display = "none";
+  }
+}
+
+async function confirmSkyroStock(orderId, btn) {
+  const ok = confirm(
+    "Confirm na available ang stock at gumawa ng Skyro application link?"
+  );
+
+  if (!ok) return;
+
+  try {
+    setButtonLoading(btn, "Creating Skyro Link...");
+
+    const response = await fetch(
+      `https://de-ecom-pro.onrender.com/api/orders/${orderId}/skyro-create`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.message ||
+        "Failed to create Skyro application."
+      );
+    }
+
+    showToast(
+      result.alreadyCreated
+        ? "Skyro application link already exists."
+        : "Stock confirmed and Skyro link created.",
+      "success"
+    );
+
+    closeOrderModal();
+    await loadAdminOrders();
+
+  } catch (error) {
+    console.error(
+      "Skyro create application error:",
+      error
+    );
+
+    showToast(
+      error.message ||
+      "Skyro application server error.",
+      "error"
+    );
+
+  } finally {
+    resetButtonLoading(btn);
   }
 }
 
@@ -2334,7 +2484,7 @@ async function bookLalamoveShipment(orderId, btn) {
       String(order.payment_method || "")
         .toUpperCase()
         .includes("SKYRO") &&
-      String(order.payment_status || "")
+      String(order.order_status || "")
         .toUpperCase() === "SKYRO APPROVED";
 
     if (!isCOD && !isPaid && !isSkyroApproved) {
@@ -2980,7 +3130,7 @@ async function markOrderShipped(orderId, btn) {
       String(order.payment_method || "")
         .toUpperCase()
         .includes("SKYRO") &&
-      String(order.payment_status || "")
+      String(order.order_status || "")
         .toUpperCase() === "SKYRO APPROVED";
 
     if (!isCOD && !isPaid && !isSkyroApproved) {
@@ -3095,7 +3245,7 @@ async function forceUpdateOrderStatus(orderId, status, btn) {
       String(order.payment_method || "")
         .toUpperCase()
         .includes("SKYRO") &&
-      String(order.payment_status || "")
+      String(order.order_status || "")
         .toUpperCase() === "SKYRO APPROVED";
 
     if (!isCOD && !isPaid && !isSkyroApproved) {
@@ -3136,97 +3286,6 @@ async function forceUpdateOrderStatus(orderId, status, btn) {
   }
 }
 
-async function approveSkyroOrder(orderId, btn) {
-  const order = adminOrders.find(o =>
-    String(o.external_id || o.id) === String(orderId)
-  );
-
-  if (!order) {
-    showToast("Order not found.", "error");
-    return;
-  }
-
-  const isSkyro =
-    String(order.payment_method || "")
-      .toUpperCase()
-      .includes("SKYRO");
-
-  if (!isSkyro) {
-    showToast(
-      "Skyro orders only.",
-      "error"
-    );
-    return;
-  }
-
-  const isPendingSkyro =
-    String(order.order_status || "")
-      .toUpperCase() === "PENDING SKYRO APPLICATION";
-
-  if (!isPendingSkyro) {
-    showToast(
-      "Pending Skyro applications only.",
-      "error"
-    );
-    return;
-  }
-
-  const ok = confirm(
-    "Approve this Skyro application?"
-  );
-
-  if (!ok) return;
-
-  try {
-    setButtonLoading(btn, "Approving...");
-
-    const res = await fetch(
-      "https://de-ecom-pro.onrender.com/api/orders/update",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          orderId,
-          order_status: "Skyro Approved",
-          payment_status: "Skyro Approved"
-        })
-      }
-    );
-
-    const result = await res.json();
-
-    if (!res.ok || !result.success) {
-      throw new Error(
-        result.message ||
-        "Failed to approve Skyro order"
-      );
-    }
-
-    showToast(
-      "Skyro application approved.",
-      "success"
-    );
-
-    closeOrderModal();
-    await loadAdminOrders();
-
-  } catch (error) {
-    console.error(error);
-
-    showToast(
-      error.message ||
-      "Skyro approval server error",
-      "error"
-    );
-
-  } finally {
-    resetButtonLoading(btn);
-  }
-
-}
-
 async function bulkArrangeShipment() {
 
   const selectedOrders =
@@ -3254,108 +3313,13 @@ async function bulkArrangeShipment() {
 
 }
 
-async function saveSkyroApplicationLink(orderId, btn) {
-  const order = adminOrders.find(o =>
-    String(o.external_id || o.id) === String(orderId)
-  );
-
-  if (!order) {
-    showToast("Order not found.", "error");
-    return;
-  }
-
-  const input = document.getElementById(
-    `skyroLink-${orderId}`
-  );
-
-  const link = String(input?.value || "").trim();
-
-  if (!link) {
-    showToast(
-      "Please paste the Skyro application link.",
-      "error"
-    );
-    return;
-  }
-
-  try {
-    const parsedUrl = new URL(link);
-
-    if (
-      parsedUrl.protocol !== "https:" &&
-      parsedUrl.protocol !== "http:"
-    ) {
-      throw new Error("Invalid URL");
-    }
-  } catch {
-    showToast(
-      "Please enter a valid Skyro link.",
-      "error"
-    );
-    return;
-  }
-
-  try {
-    setButtonLoading(btn, "Saving...");
-
-    const res = await fetch(
-      "https://de-ecom-pro.onrender.com/api/orders/update",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          orderId,
-          skyro_application_link: link
-        })
-      }
-    );
-
-    const result = await res.json();
-
-    if (!res.ok || !result.success) {
-      throw new Error(
-        result.message ||
-        "Failed to save Skyro application link"
-      );
-    }
-
-    showToast(
-      "Skyro application link saved.",
-      "success"
-    );
-
-    closeOrderModal();
-    await loadAdminOrders();
-
-  } catch (error) {
-    console.error(
-      "Save Skyro link error:",
-      error
-    );
-
-    showToast(
-      "Failed to save Skyro application link.",
-      "error"
-    );
-
-  } finally {
-    resetButtonLoading(btn);
-  }
-}
-
 /* ===============================
    GLOBALS
 ================================ */
-
-window.saveSkyroApplicationLink =
-  saveSkyroApplicationLink;
-
+window.confirmSkyroStock = confirmSkyroStock;
 window.markOrderPacked = markOrderPacked;
 window.handleOrderRequestAction = handleOrderRequestAction;
 window.approveOrderRequest = approveOrderRequest;
-window.approveSkyroOrder = approveSkyroOrder;
 window.rejectOrderRequest = rejectOrderRequest;
 window.updateOrderRequestStatus = updateOrderRequestStatus;
 window.bulkMarkPacked = bulkMarkPacked;

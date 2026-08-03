@@ -1977,7 +1977,7 @@ async function placeOrder() {
     shippingQuote: currentShippingQuote,
     total: totalNumber,
     status: paymentMain === "SKYRO"
-      ? "Pending Skyro Application"
+      ? "Pending Stock Confirmation"
       : isManualLalamoveVerification
         ? "Pending Address Verification"
         : paymentMain === "COD"
@@ -2043,11 +2043,51 @@ async function placeOrder() {
   }
 
   if (paymentMain === "SKYRO") {
+
+    const skyroRes = await fetch(
+      `${API_BASE_URL}/api/orders/skyro`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          orderId: order.id,
+          amount: totalNumber,
+          subtotal: subtotalNumber,
+          shippingFee: shippingFeeNumber,
+          serviceFee: handlingFee,
+          handlingFee: handlingFee,
+          customerName: name,
+          customerPhone: phone,
+          customerEmail: email,
+          guestOrder: order.guestOrder === true,
+          guestTrackingCode: order.guestTrackingCode,
+          courier: order.courier,
+          address,
+          parcelInfo: currentParcelInfo,
+          items: order.items
+        })
+      }
+    );
+
+    const skyroData = await skyroRes.json();
+
+    if (!skyroRes.ok || !skyroData.success) {
+      showOrderModal(
+        "Skyro Order Error",
+        skyroData.message || "Skyro order save failed."
+      );
+
+      return resetPlaceOrder();
+    }
+
     clearCheckedCartItems();
+
     localStorage.removeItem("drinCheckoutItems");
 
     showOrderModal(
-      "Skyro Order Successfully Submitted",
+      "Skyro Order Request Submitted",
       `
       <div class="skyro-application-confirmation">
 
@@ -2072,11 +2112,15 @@ async function placeOrder() {
         </h3>
 
         <p>
-          Your Skyro installment application has been received.
+          Your Skyro order request has been received.
         </p>
 
         <p>
-          Application Reference Number:
+          Our team will first confirm item availability before allowing you to proceed with the Skyro application.
+        </p>
+
+        <p>
+          Order Reference Number:
         </p>
 
         <h2 style="
@@ -2101,13 +2145,13 @@ async function placeOrder() {
           `
         : `
             <p>
-              You can view this application in your My Orders page.
+              You can view this order request in your My Orders page.
             </p>
           `
       }
 
         <p>
-          Please take a screenshot of this confirmation and send it to our Skyro agent for assistance.
+         Please wait for item availability confirmation. Once approved, the Complete Skyro Application button will appear in My Orders.
         </p>
 
         <button
@@ -2136,7 +2180,7 @@ async function placeOrder() {
       checkoutBtn.disabled = true;
       checkoutBtn.style.pointerEvents = "none";
       checkoutBtn.style.opacity = "0.6";
-      checkoutBtn.textContent = "Skyro Application Submitted";
+      checkoutBtn.textContent = "Skyro Order Submitted";
     }
 
     const okBtn =
@@ -2156,6 +2200,18 @@ async function placeOrder() {
           window.location.href = "/home-orders";
         }
       };
+    }
+
+    if (!isGuestCheckout) {
+      showOrderModal(
+        "Redirecting to My Orders",
+        "Please wait while we open your order details...",
+        true
+      );
+
+      setTimeout(() => {
+        window.location.href = "/home-orders";
+      }, 1500);
     }
 
     return;
