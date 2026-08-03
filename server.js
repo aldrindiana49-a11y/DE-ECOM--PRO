@@ -28,6 +28,62 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
+const SKYRO_API_BASE_URL = "https://online-api.skyro.ph";
+
+let cachedSkyroAccessToken = "";
+let cachedSkyroTokenExpiresAt = 0;
+
+async function getSkyroAccessToken() {
+  const now = Date.now();
+
+  // Reuse token habang valid pa, with 60-second safety allowance.
+  if (
+    cachedSkyroAccessToken &&
+    now < cachedSkyroTokenExpiresAt - 60000
+  ) {
+    return cachedSkyroAccessToken;
+  }
+
+  const clientId = process.env.SKYRO_CLIENT_ID;
+  const clientSecret = process.env.SKYRO_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new Error(
+      "Missing SKYRO_CLIENT_ID or SKYRO_CLIENT_SECRET environment variable."
+    );
+  }
+
+  const formData = new URLSearchParams();
+
+  formData.append("client_id", clientId);
+  formData.append("client_secret", clientSecret);
+  formData.append("grant_type", "client_credentials");
+
+  const response = await axios.post(
+    `${SKYRO_API_BASE_URL}/realms/merchants/protocol/openid-connect/token`,
+    formData.toString(),
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      timeout: 15000
+    }
+  );
+
+  const accessToken = response.data?.access_token;
+  const expiresIn = Number(response.data?.expires_in || 3600);
+
+  if (!accessToken) {
+    throw new Error("Skyro did not return an access token.");
+  }
+
+  cachedSkyroAccessToken = accessToken;
+  cachedSkyroTokenExpiresAt =
+    Date.now() + expiresIn * 1000;
+
+  return cachedSkyroAccessToken;
+}
+
 function generateLalamoveSignature(method, path, body = "") {
   const time = new Date().getTime().toString();
 
