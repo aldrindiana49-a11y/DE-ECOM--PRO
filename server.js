@@ -201,10 +201,21 @@ async function savePendingOrder({
     payment_provider: paymentProvider,
     courier: courier || "",
     checkout_url: checkoutUrl || "",
-    status: "Pending Payment",
-    order_status: paymentProvider === "COD"
-      ? "Pending"
-      : "Pending Payment",
+
+    status:
+      paymentProvider === "COD"
+        ? "COD"
+        : paymentProvider === "SKYRO"
+          ? "Pending Skyro Approval"
+          : "Pending Payment",
+
+    order_status:
+      paymentProvider === "COD"
+        ? "Pending"
+        : paymentProvider === "SKYRO"
+          ? "Pending Stock Confirmation"
+          : "Pending Payment",
+
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   };
@@ -647,6 +658,76 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
   }
 });
 
+// ================= SKYRO ORDER SAVE =================
+app.post("/api/orders/skyro", async (req, res) => {
+  try {
+    const {
+      orderId,
+      amount,
+      subtotal,
+      shippingFee,
+      serviceFee,
+      handlingFee,
+      customerName,
+      customerPhone,
+      customerEmail,
+      guestOrder,
+      guestTrackingCode,
+      items,
+      address,
+      parcelInfo,
+      courier
+    } = req.body;
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing order ID."
+      });
+    }
+
+    let order = await savePendingOrder({
+      orderId,
+      amount,
+      subtotal,
+      shippingFee,
+      serviceFee,
+      handlingFee,
+      customerName,
+      customerPhone,
+      customerEmail,
+      guestOrder,
+      guestTrackingCode,
+      items,
+      paymentProvider: "SKYRO",
+      checkoutUrl: "",
+      address,
+      parcelInfo,
+      courier
+    });
+
+    await saveOrders([order]);
+
+    return res.json({
+      success: true,
+      message: "Skyro order saved successfully.",
+      order
+    });
+
+  } catch (error) {
+    console.error(
+      "SKYRO ORDER SAVE ERROR:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: "Skyro order save failed.",
+      error: error.message
+    });
+  }
+});
+
 // ================= COD ORDER SAVE =================
 app.post("/api/orders/cod", async (req, res) => {
   try {
@@ -688,6 +769,7 @@ app.post("/api/orders/cod", async (req, res) => {
       courier
     });
 
+
     let orders = await readOrders();
     const index = orders.findIndex(item => item.external_id === orderId);
 
@@ -714,102 +796,453 @@ app.post("/api/orders/cod", async (req, res) => {
   }
 });
 
-// ================= SKYRO TEST MODE =================
-app.post("/api/skyro/test-create-order", async (req, res) => {
+// ================= SKYRO CREATE APPLICATION =================
+app.post("/api/orders/:orderId/skyro-create", async (req, res) => {
   try {
-    const {
-      orderId,
-      amount,
-      subtotal,
-      shippingFee,
-      serviceFee,
-      handlingFee,
-      customerName,
-      customerPhone,
-      customerEmail,
-      guestOrder,
-      guestTrackingCode,
-      items,
-      address,
-      parcelInfo,
-      courier
-    } = req.body;
+    const { orderId } = req.params;
 
-    if (!orderId) {
-      return res.status(400).json({
+    const orders = await readOrders();
+
+    const orderIndex = orders.findIndex(order =>
+      String(order.external_id || order.id) === String(orderId)
+    );
+
+    if (orderIndex === -1) {
+      return res.status(404).json({
         success: false,
-        message: "Missing order ID"
+        message: "Order not found."
       });
     }
 
-    if (!Number(amount) || Number(amount) <= 0) {
+    const order = orders[orderIndex];
+
+    const paymentMethod = String(
+      order.payment_method ||
+      order.payment_provider ||
+      order.paymentMethod ||
+      ""
+    )
+      .trim()
+      .toUpperCase();
+
+    if (!paymentMethod.includes("SKYRO")) {
       return res.status(400).json({
         success: false,
-        message: "Invalid order amount"
+        message: "This is not a Skyro order."
       });
     }
 
-    if (!Array.isArray(items) || !items.length) {
+    const currentStatus = String(
+      order.order_status || ""
+    ).trim();
+
+    if (currentStatus !== "Pending Stock Confirmation") {
       return res.status(400).json({
         success: false,
-        message: "No order items found"
+        message:
+          "Skyro application can only be created after stock confirmation."
       });
     }
+
+    // Prevent duplicate Skyro applications.
+    if (
+      order.skyro_order_id &&
+      order.skyro_application_link
+    ) {
+      return res.json({
+        success: true,
+        alreadyCreated: true,
+        message: "Skyro application already exists.",
+        skyroOrderId: order.skyro_order_id,
+        applicationUrl: order.skyro_application_link
+      });
+    }
+
+    const orderItems = Array.isArray(order.items)
+      ? order.items
+      : [];
+
+    if (!orderItems.length) {
+      return res.status(400).json({
+        success: false,
+        message: "No order items found."
+      });
+    }
+
+    const paymentAmount = Number(
+      order.amount ||
+      order.total ||
+      0
+    );
+
+    if (!paymentAmount || paymentAmount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Skyro payment amount."
+      });
+    }
+
+    const shopId = process.env.SKYRO_SHOP_ID;
+
+    if (!shopId) {
+      return res.status(500).json({
+        success: false,
+        message: "SKYRO_SHOP_ID is missing."
+      });
+    }
+
+    const accessToken = await getSkyroAccessToken();
+
+    const fullName = String(
+      order.customer_name || "Customer"
+    )
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+
+    const firstName =
+      fullName[0] || "Customer";
+
+    const surname =
+      fullName.length > 1
+        ? fullName[fullName.length - 1]
+        : "";
+
+    const middleName =
+      fullName.length > 2
+        ? fullName.slice(1, -1).join(" ")
+        : "";
+
+    const skyroItems = orderItems.map(item => ({
+      name:
+        item.name ||
+        item.product_name ||
+        item.title ||
+        "Electronics Product",
+
+      quantity: Number(
+        item.quantity ||
+        item.qty ||
+        1
+      ),
+
+      price: Number(
+        item.price ||
+        item.unit_price ||
+        item.unitPrice ||
+        item.selling_price ||
+        0
+      ),
+
+      category: "Electronics",
+
+      imageUrl:
+        item.variant_image ||
+        item.product_image ||
+        item.image ||
+        ""
+    }));
+
+    const skyroPayload = {
+      shopId,
+
+      paymentAmount,
+
+      items: skyroItems,
+
+      shopOrderId: String(
+        order.external_id || order.id
+      ),
+
+      webhookUrl:
+        "https://de-ecom-pro.onrender.com/api/skyro/webhook",
+
+      successUrl:
+        "https://drinelectronicsph.com/home-orders/?skyro=success",
+
+      failUrl:
+        "https://drinelectronicsph.com/home-orders/?skyro=failed",
+
+      cancelUrl:
+        "https://drinelectronicsph.com/home-orders/?skyro=cancelled",
+
+      customer: {
+        phone: String(order.customer_phone || ""),
+        email: String(order.customer_email || ""),
+        name: firstName,
+        surname,
+        middleName
+      }
+    };
+
+    const skyroResponse = await axios.post(
+      `${SKYRO_API_BASE_URL}/partners/api/v1/orders`,
+      skyroPayload,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+        },
+        timeout: 20000
+      }
+    );
 
     const skyroOrderId =
-      `TEST-SKYRO-${Date.now()}`;
+      skyroResponse.data?.orderId;
 
-    let order = await savePendingOrder({
-      orderId,
-      amount,
-      subtotal,
-      shippingFee,
-      serviceFee,
-      handlingFee,
+    const applicationUrl =
+      skyroResponse.data?.orderFormUrl;
 
-      customerName,
-      customerPhone,
-      customerEmail,
+    if (!skyroOrderId || !applicationUrl) {
+      console.error(
+        "Invalid Skyro response:",
+        skyroResponse.data
+      );
 
-      guestOrder,
-      guestTrackingCode,
+      return res.status(502).json({
+        success: false,
+        message:
+          "Skyro did not return an order ID or application URL."
+      });
+    }
 
-      items,
-      address,
-      parcelInfo,
-      courier,
+    orders[orderIndex] = {
+      ...order,
 
-      paymentProvider: "SKYRO",
+      skyro_order_id: skyroOrderId,
+      skyro_application_link: applicationUrl,
+      skyro_status: "NEW",
 
-      checkoutUrl:
-        "https://drinelectronicsph.com/home-orders/?skyro=test"
-    });
+      status: "Pending Skyro Approval",
+      payment_status: "Pending Skyro Approval",
+      order_status: "Skyro Application Allowed",
 
-    order.payment_provider = "SKYRO";
-    order.status = "Pending Payment";
-    order.order_status = "Installment Application";
-    order.updated_at = new Date().toISOString();
+      skyro_created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
 
-    await saveOrders([order]);
+    await saveOrders(orders);
 
     return res.json({
       success: true,
-      testMode: true,
+      message: "Skyro application created successfully.",
       skyroOrderId,
-
-      checkoutUrl:
-        "https://drinelectronicsph.com/home-orders/?skyro=test",
-
-      order
+      applicationUrl,
+      order: orders[orderIndex]
     });
 
   } catch (error) {
-    console.error("SKYRO TEST ERROR:", error);
+    console.error(
+      "SKYRO CREATE APPLICATION ERROR:",
+      error.response?.data || error.message
+    );
 
-    return res.status(500).json({
+    return res
+      .status(error.response?.status || 500)
+      .json({
+        success: false,
+        message:
+          error.response?.data?.message ||
+          "Failed to create Skyro application.",
+        error:
+          error.response?.data ||
+          error.message
+      });
+  }
+});
+
+// ================= SKYRO STATUS HELPER =================
+async function getVerifiedSkyroStatus(skyroOrderId) {
+  const accessToken = await getSkyroAccessToken();
+
+  const response = await axios.post(
+    `${SKYRO_API_BASE_URL}/partners/api/v1/order/status`,
+    null,
+    {
+      params: {
+        orderId: skyroOrderId
+      },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: "application/json"
+      },
+      timeout: 15000
+    }
+  );
+
+  const verifiedOrderId =
+    response.data?.orderId;
+
+  const verifiedStatus = String(
+    response.data?.status || ""
+  )
+    .trim()
+    .toUpperCase();
+
+  if (!verifiedOrderId || !verifiedStatus) {
+    throw new Error(
+      "Skyro status verification returned an invalid response."
+    );
+  }
+
+  return {
+    orderId: verifiedOrderId,
+    status: verifiedStatus,
+    raw: response.data
+  };
+}
+
+// ================= SKYRO WEBHOOK =================
+app.post("/api/skyro/webhook", async (req, res) => {
+  try {
+    const webhookData = req.body || {};
+
+    const skyroOrderId = String(
+      webhookData.orderId || ""
+    ).trim();
+
+    if (!skyroOrderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing Skyro orderId."
+      });
+    }
+
+    const verified =
+      await getVerifiedSkyroStatus(skyroOrderId);
+
+    const verifiedStatus =
+      verified.status;
+
+    const allowedStatuses = [
+      "NEW",
+      "IN_PROGRESS",
+      "APPROVED",
+      "REJECTED",
+      "CANCELLED",
+      "FINISHED"
+    ];
+
+    if (!allowedStatuses.includes(verifiedStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: "Unknown Skyro status.",
+        status: verifiedStatus
+      });
+    }
+
+    const orders = await readOrders();
+
+    const orderIndex = orders.findIndex(order =>
+      String(order.skyro_order_id || "") ===
+      String(skyroOrderId)
+    );
+
+    if (orderIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Local Skyro order not found."
+      });
+    }
+
+    const order = orders[orderIndex];
+    const now = new Date().toISOString();
+
+    order.skyro_status = verifiedStatus;
+    order.skyro_updated_at = now;
+    order.skyro_raw_webhook = webhookData;
+    order.updated_at = now;
+
+    if (verifiedStatus === "NEW") {
+      order.status = "Pending Skyro Approval";
+      order.payment_status = "Pending Skyro Approval";
+      order.order_status = "Skyro Application Allowed";
+    }
+
+    if (verifiedStatus === "IN_PROGRESS") {
+      order.status = "Pending Skyro Approval";
+      order.payment_status = "Pending Skyro Approval";
+      order.order_status = "Pending Skyro Approval";
+    }
+
+    if (verifiedStatus === "APPROVED") {
+      order.status = "Skyro Approved";
+      order.payment_status = "Skyro Approved";
+      order.order_status = "Skyro Approved";
+
+    }
+
+    if (verifiedStatus === "REJECTED") {
+      order.status = "Skyro Rejected";
+      order.payment_status = "Skyro Rejected";
+      order.order_status = "Skyro Rejected";
+
+      if (order.stock_restored !== true) {
+        await restoreXenditStock({
+          ...order,
+          stock_reserved: true
+        });
+
+        order.stock_reserved = false;
+        order.stock_restored = true;
+        order.stock_restored_at = now;
+      }
+    }
+
+    if (verifiedStatus === "CANCELLED") {
+      order.status = "Skyro Cancelled";
+      order.payment_status = "Skyro Cancelled";
+      order.order_status = "Cancelled";
+      order.skyro_cancelled_at = now;
+
+      if (order.stock_restored !== true) {
+        await restoreXenditStock({
+          ...order,
+          stock_reserved: true
+        });
+
+        order.stock_reserved = false;
+        order.stock_restored = true;
+        order.stock_restored_at = now;
+      }
+    }
+
+    if (verifiedStatus === "FINISHED") {
+      order.status = "Skyro Finished";
+      order.payment_status = "Skyro Finished";
+
+    }
+
+    orders[orderIndex] = order;
+
+    await saveOrders(orders);
+
+    return res.status(200).json({
+      success: true,
+      message: "Skyro webhook verified and processed.",
+      skyroOrderId,
+      skyroStatus: verifiedStatus,
+      localOrderId:
+        order.external_id || order.id,
+      orderStatus: order.order_status
+    });
+
+  } catch (error) {
+    console.error(
+      "SKYRO WEBHOOK ERROR:",
+      error.response?.data || error.message
+    );
+
+    return res.status(
+      error.response?.status || 500
+    ).json({
       success: false,
-      message: "Skyro test order failed",
-      error: error.message
+      message:
+        error.response?.data?.message ||
+        "Skyro webhook processing failed.",
+      error:
+        error.response?.data ||
+        error.message
     });
   }
 });
