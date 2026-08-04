@@ -157,7 +157,9 @@ async function savePendingOrder({
   checkoutUrl,
   address,
   parcelInfo,
-  courier
+  courier,
+  shippingPaymentMethod,
+  shippingCodAmount
 }) {
   let orders = await readOrders();
 
@@ -166,6 +168,11 @@ async function savePendingOrder({
     amount: Number(amount),
     subtotal: Number(subtotal || amount || 0),
     shipping_fee: Number(shippingFee || 0),
+    shipping_payment_method:
+      shippingPaymentMethod || "",
+
+    shipping_cod_amount:
+      Number(shippingCodAmount || 0),
     service_fee: Number(
       serviceFee ??
       handlingFee ??
@@ -562,11 +569,45 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
     const savedAddress = order.address || {};
     const savedParcel = order.parcel_info || {};
 
+    const isSkyroShippingCod =
+      String(order.payment_provider || "")
+        .trim()
+        .toUpperCase() === "SKYRO" &&
+      String(order.shipping_payment_method || "")
+        .trim()
+        .toUpperCase() === "COD";
+
+    const spxPaymentMethod =
+      order.payment_provider === "COD" ||
+        isSkyroShippingCod
+        ? "COD"
+        : "PAID";
+
+    const spxTotalAmount =
+      isSkyroShippingCod
+        ? Number(
+          order.shipping_cod_amount ||
+          order.shipping_fee ||
+          0
+        )
+        : Number(order.amount || 0);
+
     const spxPayload = {
+
       _id: order.external_id,
-      paymentMethod: order.payment_provider === "COD" ? "COD" : "PAID",
-      totalAmount: order.amount,
+
+      paymentMethod: spxPaymentMethod,
+
+      totalAmount: spxTotalAmount,
+
+      declaredValue: Number(
+        order.subtotal ||
+        order.amount ||
+        0
+      ),
+
       customerName: order.customer_name,
+
       phone: order.customer_phone || "639123456789",
       address: savedAddress,
 
@@ -676,7 +717,9 @@ app.post("/api/orders/skyro", async (req, res) => {
       items,
       address,
       parcelInfo,
-      courier
+      courier,
+      shippingPaymentMethod,
+      shippingCodAmount
     } = req.body;
 
     if (!orderId) {
@@ -703,7 +746,9 @@ app.post("/api/orders/skyro", async (req, res) => {
       checkoutUrl: "",
       address,
       parcelInfo,
-      courier
+      courier,
+      shippingPaymentMethod,
+      shippingCodAmount
     });
 
     await saveOrders([order]);
@@ -1330,7 +1375,11 @@ app.post("/api/create-payment", async (req, res) => {
       checkoutUrl: data.invoice_url
     });
 
-    order = await reserveXenditStock(order);
+    order.stock_reserved = true;
+    order.stock_restored = false;
+    order.stock_reserved_at = new Date().toISOString();
+    order.updated_at = new Date().toISOString();
+
     await saveOrders([order]);
 
 

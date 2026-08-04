@@ -139,12 +139,17 @@ async function checkShippingFee({ amount, paymentMethod, address, parcelInfo, vo
           sender_phone: "639123456789",
           sender_detail_address: "1"
         },
+
         fulfillment_info: {
           cod_collection: 0,
           cod_amount: 0,
-          collect_type: Number(process.env.SPX_COLLECT_TYPE || 2),
+
+          collect_type:
+            Number(process.env.SPX_COLLECT_TYPE || 2),
+
           ...(voucherCode ? { voucher_code: voucherCode } : {})
         },
+
         deliver_info: {
           ...delivery,
 
@@ -220,7 +225,14 @@ async function createOrder(order) {
           parcel_height: order.parcelHeight || 10,
           parcel_item_name: order.parcelItemName || "Electronics",
           parcel_item_quantity: order.parcelItemQuantity || order.items?.length || 1,
-          express_insured_value: Math.max(Number(order.totalAmount) || 0, 1),
+          express_insured_value: Math.max(
+            Number(
+              order.declaredValue ||
+              order.totalAmount ||
+              0
+            ),
+            1
+          ),
           parcel_item_type: order.parcelItemType || "Electronics"
         }
       }

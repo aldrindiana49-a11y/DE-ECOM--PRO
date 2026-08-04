@@ -38,7 +38,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Checkout - Drin Electronics</title>
-  <link rel="stylesheet" href="checkout.css?v=50022" />
+  <link rel="stylesheet" href="checkout.css?v=50023" />
 </head>
 
 <body>
@@ -218,11 +218,16 @@
       <h3>Payment Method</h3>
 
       <div class="payment-options">
+
         <label>
-          <input type="radio" name="payment" value="COD" checked />
-          <div>
-            <strong>Cash on Delivery</strong>
-          </div>
+          <input type="radio" name="payment" value="COD">
+
+          <span>
+            <strong>Cash on Delivery</strong><br>
+            <small>
+              Pay the delivery rider upon receiving your order.
+            </small>
+          </span>
         </label>
 
         <label>
@@ -235,10 +240,30 @@
 
         <label>
           <input type="radio" name="payment" value="SKYRO" />
+
           <div>
             <strong>Skyro Installment</strong>
-            <p class="payment-sub">Apply for flexible installment payment</p>
+
+            <p class="payment-sub">
+              Apply for flexible installment payment
+            </p>
+
+            <p class="payment-sub">
+              ⚠ Shipping fee is not included in Skyro financing.
+              It will be paid separately via Cash on Delivery upon delivery.
+            </p>
           </div>
+        </label>
+
+        <label id="overTheCounterOption">
+          <input type="radio" name="payment" value="OVER_THE_COUNTER">
+
+          <span>
+            <strong>Over The Counter</strong><br>
+            <small>
+              Pay at the store when your order is ready for pickup.
+            </small>
+          </span>
         </label>
 
       </div>
@@ -333,8 +358,15 @@
       </div>
 
       <div id="skyroPaymentNote" class="skyro-payment-note" style="display:none;">
-        <strong>Paalala:</strong>
-        Ang total na nakikita rito ay hindi pa ang final installment total.
+        <strong>Paalala:</strong><br><br>
+
+        Hindi maaaring gamitin ang voucher sa Skyro installment payment.<br><br>
+
+        Ang Skyro financing ay para sa product amount lamang.<br><br>
+
+        Hindi kasama sa financing ang shipping fee at handling fee.
+        Babayaran ang mga ito nang hiwalay via Cash on Delivery kapag natanggap ang parcel.<br><br>
+
         Ang interest, monthly payment, at iba pang financing charges ay iko-compute
         ng Skyro depende sa approved terms ng application.
       </div>
@@ -438,7 +470,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <script src="checkout.js?v=1000040" defer></script>
+  <script src="checkout.js?v=1000042" defer></script>
 </body>
 
 </html>

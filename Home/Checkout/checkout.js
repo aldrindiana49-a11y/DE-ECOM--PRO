@@ -522,7 +522,12 @@ function updateCourierOptions() {
 
   resetSelect(courierSelect);
 
-  ["SPX", "Same Day Delivery / Lalamove"].forEach((courier) => {
+  [
+    "SPX",
+    "Same Day Delivery / Lalamove",
+    "Manual Delivery via RORO",
+    "Store Pickup"
+  ].forEach((courier) => {
     const opt = document.createElement("option");
     opt.value = courier;
     opt.textContent = courier;
@@ -583,7 +588,159 @@ function closeOrderModal() {
   if (modal) modal.classList.remove("show");
 }
 
-function togglePayment() { }
+function togglePayment(enabled = false) {
+  const paymentOptions =
+    document.querySelectorAll(
+      'input[name="payment"]'
+    );
+
+  paymentOptions.forEach((input) => {
+    input.disabled = !enabled;
+
+    if (!enabled) {
+      input.checked = false;
+    }
+
+    const paymentBox =
+      input.closest("label") ||
+      input.parentElement;
+
+    if (!paymentBox) return;
+
+    paymentBox.style.opacity =
+      enabled ? "1" : "0.55";
+
+    paymentBox.style.cursor =
+      enabled ? "pointer" : "not-allowed";
+
+    if (!paymentBox.dataset.courierLockAdded) {
+      paymentBox.dataset.courierLockAdded = "true";
+
+      paymentBox.addEventListener(
+        "click",
+        function (event) {
+          if (courierSelect?.value) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          showOrderModal(
+            "Select Your Courier First",
+            `
+            <div style="
+              padding:10px 4px;
+              text-align:center;
+            ">
+
+              <div style="
+                width:72px;
+                height:72px;
+                margin:0 auto 16px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                border-radius:50%;
+                background:linear-gradient(
+                  135deg,
+                  #fff7ed,
+                  #ffedd5
+                );
+                font-size:36px;
+                box-shadow:0 8px 24px
+                  rgba(249,115,22,0.18);
+              ">
+                🚚
+              </div>
+
+              <h3 style="
+                margin:0 0 10px;
+                color:#111827;
+                font-size:21px;
+              ">
+                Choose Delivery Courier
+              </h3>
+
+              <p style="
+                margin:0;
+                color:#4b5563;
+                line-height:1.65;
+              ">
+                Please select your preferred courier
+                before choosing a payment method.
+              </p>
+
+              <div style="
+                margin:16px 0;
+                padding:13px;
+                border-radius:12px;
+                background:#f8fafc;
+                border:1px solid #e5e7eb;
+                color:#374151;
+                font-size:14px;
+                line-height:1.55;
+              ">
+                Your courier determines which payment
+                methods are available for your order.
+              </div>
+
+              <button
+                type="button"
+                id="selectCourierNowBtn"
+                style="
+                  width:100%;
+                  padding:13px 16px;
+                  border:none;
+                  border-radius:10px;
+                  background:#f97316;
+                  color:#ffffff;
+                  font-size:15px;
+                  font-weight:700;
+                  cursor:pointer;
+                "
+              >
+                Select Courier Now
+              </button>
+
+            </div>
+            `
+          );
+
+          setTimeout(() => {
+            const selectCourierBtn =
+              document.getElementById(
+                "selectCourierNowBtn"
+              );
+
+            if (selectCourierBtn) {
+              selectCourierBtn.onclick =
+                function () {
+                  closeOrderModal();
+
+                  courierSelect?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                  });
+
+                  setTimeout(() => {
+                    courierSelect?.focus();
+                  }, 400);
+                };
+            }
+          }, 50);
+        },
+        true
+      );
+    }
+  });
+
+  if (checkoutBtn) {
+    checkoutBtn.disabled = !enabled;
+    checkoutBtn.style.pointerEvents =
+      enabled ? "auto" : "none";
+    checkoutBtn.style.opacity =
+      enabled ? "1" : "0.6";
+  }
+}
 
 if (nameInput) {
   nameInput.addEventListener("input", () => {
@@ -714,6 +871,16 @@ async function syncOrderToSupabase(order) {
         subtotal: order.subtotal,
         shipping_fee: order.shippingFee,
 
+        shipping_payment_method:
+          order.payment?.method === "SKYRO"
+            ? "COD"
+            : "",
+
+        shipping_cod_amount:
+          order.payment?.method === "SKYRO"
+            ? Number(order.shippingCodAmount || 0)
+            : 0,
+
         service_fee: Number(
           order.serviceFee ||
           order.handlingFee ||
@@ -821,6 +988,59 @@ function scheduleShippingQuote() {
     return;
   }
 
+  if (selectedCourier === "Manual Delivery via RORO") {
+    currentShippingFee = 0;
+
+    currentShippingQuote = {
+      success: true,
+      manualDelivery: true,
+      courier: selectedCourier
+    };
+
+    setShippingUI(
+      "ready",
+      `
+    <div class="delivery-notice-box">
+      <strong>🚢 Manual Delivery via RORO</strong><br><br>
+
+      Shipping fee is not included in checkout.<br><br>
+
+      RORO freight, port charges, and delivery schedule
+      will be confirmed separately by our team.
+    </div>
+    `,
+      0
+    );
+
+    return;
+  }
+
+  if (selectedCourier === "Store Pickup") {
+    currentShippingFee = 0;
+
+    currentShippingQuote = {
+      success: true,
+      storePickup: true,
+      courier: selectedCourier
+    };
+
+    setShippingUI(
+      "ready",
+      `
+    <div class="delivery-notice-box">
+      <strong>🏪 Store Pickup</strong><br><br>
+
+      No shipping fee.<br><br>
+
+      Please wait for confirmation that your order
+      is ready before visiting the store.
+    </div>
+    `,
+      0
+    );
+
+    return;
+  }
 
   if (selectedCourier === "Same Day Delivery / Lalamove") {
 
@@ -1249,7 +1469,15 @@ async function calculateShippingFee() {
 
 
     const address = getSelectedAddress();
-    const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || "COD";
+
+    const selectedPaymentMethod =
+      document.querySelector('input[name="payment"]:checked')?.value || "";
+
+    const paymentMethod =
+      selectedPaymentMethod === "SKYRO"
+        ? "COD"
+        : selectedPaymentMethod || "COD";
+
     const subtotal = getCheckoutTotal();
 
     const normalizedItems = normalizeOrderItems(cartItems);
@@ -1378,11 +1606,11 @@ function getFallbackCourier() {
 }
 
 async function deductOrderStock(order) {
+  const deductedItems = [];
 
-  for (const item of order.items) {
-
-    const { error } =
-      await supabaseClient.rpc(
+  try {
+    for (const item of order.items) {
+      const { error } = await supabaseClient.rpc(
         "deduct_stock",
         {
           p_product_id:
@@ -1401,53 +1629,94 @@ async function deductOrderStock(order) {
         }
       );
 
+      if (error) {
+        throw error;
+      }
+
+      deductedItems.push(item);
+    }
+  } catch (error) {
+    console.error(
+      "STOCK DEDUCTION ERROR:",
+      error
+    );
+
+    for (const deductedItem of deductedItems) {
+
+      try {
+        const { error: restoreError } =
+          await supabaseClient.rpc(
+            "restore_stock",
+            {
+              p_product_id:
+                Number(
+                  deductedItem.productId ||
+                  deductedItem.id
+                ),
+
+              p_variant_label:
+                deductedItem.variantLabel ||
+                deductedItem.variant ||
+                "Default",
+
+              p_quantity:
+                Number(deductedItem.quantity) || 1,
+
+              p_order_id:
+                order.id
+            }
+          );
+
+        if (restoreError) {
+          throw restoreError;
+        }
+      } catch (restoreError) {
+
+        console.error(
+          "PARTIAL STOCK RESTORE ERROR:",
+          restoreError
+        );
+      }
+    }
+
+    showOrderModal(
+      "Variation Out of Stock",
+      "One or more selected variations are no longer available. Any stock already reserved has been returned."
+    );
+
+    throw error;
+  }
+}
+
+async function restoreOrderStock(order) {
+  for (const item of order.items) {
+    const { error } = await supabaseClient.rpc(
+      "restore_stock",
+      {
+        p_product_id:
+          Number(item.productId || item.id),
+
+        p_variant_label:
+          item.variantLabel ||
+          item.variant ||
+          "Default",
+
+        p_quantity:
+          Number(item.quantity) || 1,
+
+        p_order_id:
+          order.id
+      }
+    );
+
     if (error) {
-
-      console.error("RPC ERROR FULL:", JSON.stringify(error, null, 2));
-      alert(JSON.stringify(error, null, 2));
-
-      const itemName =
-        item.name || "Item";
-
-      const variantName =
-        item.variantLabel ||
-        item.variant ||
-        item.variation ||
-        "Default Variant";
-
-      showOrderModal(
-        "Variation Out of Stock",
-        `
-    <div class="premium-stock-alert">
-
-      <div class="premium-stock-icon">
-        ⚠️
-      </div>
-
-      <h4>
-        Selected Variation Unavailable
-      </h4>
-
-      <p>
-        <strong>${itemName}</strong>
-      </p>
-
-      <p>
-        Variation:
-        <strong>${variantName}</strong>
-      </p>
-
-      <small>
-        Another customer may have checked out this variation first.
-      </small>
-
-    </div>
-    `
+      console.error(
+        "CHECKOUT STOCK ROLLBACK ERROR:",
+        error
       );
 
       throw error;
     }
-
   }
 }
 
@@ -1546,16 +1815,137 @@ async function placeOrder() {
   const name = nameInput?.value.trim() || "";
   const phone = phoneInput?.value.trim() || "";
   const email = emailInput?.value.trim() || "";
-  const paymentMain =
-    document.querySelector('input[name="payment"]:checked')
-      ?.value
-      ?.trim()
-      ?.toUpperCase() || "ONLINE";
+  const selectedPayment =
+    document.querySelector(
+      'input[name="payment"]:checked'
+    );
 
-  const selectedCourierNow = courierSelect?.value || "";
+  const paymentMain =
+    selectedPayment?.value
+      ?.trim()
+      ?.toUpperCase() || "";
+
+  const selectedCourierNow =
+    courierSelect?.value || "";
 
   if (!selectedCourierNow) {
     showOrderModal("Courier Required", "Please select SPX or Same Day Delivery before placing your order.");
+    return resetPlaceOrder();
+  }
+
+  if (!paymentMain) {
+    showOrderModal(
+      "Select Payment Method",
+      `
+    <div style="
+      padding:10px 4px;
+      text-align:center;
+    ">
+
+      <div style="
+        width:72px;
+        height:72px;
+        margin:0 auto 16px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border-radius:50%;
+        background:linear-gradient(
+          135deg,
+          #eff6ff,
+          #dbeafe
+        );
+        font-size:36px;
+        box-shadow:0 8px 24px
+          rgba(37,99,235,0.18);
+      ">
+        💳
+      </div>
+
+      <h3 style="
+        margin:0 0 10px;
+        color:#111827;
+        font-size:21px;
+      ">
+        Choose Your Payment Method
+      </h3>
+
+      <p style="
+        margin:0;
+        color:#4b5563;
+        line-height:1.65;
+      ">
+        Please select how you would like to
+        pay before placing your order.
+      </p>
+
+      <div style="
+        margin:16px 0;
+        padding:13px;
+        border-radius:12px;
+        background:#f8fafc;
+        border:1px solid #e5e7eb;
+        color:#374151;
+        font-size:14px;
+      ">
+          Choose a payment method available for your selected courier.
+
+          COD is available for SPX only.
+
+          Over The Counter is available for Store Pickup only.
+      </div>
+
+      <button
+        type="button"
+        id="selectPaymentNowBtn"
+        style="
+          width:100%;
+          padding:13px 16px;
+          border:none;
+          border-radius:10px;
+          background:#2563eb;
+          color:#ffffff;
+          font-size:15px;
+          font-weight:700;
+          cursor:pointer;
+        "
+      >
+        Select Payment Method
+      </button>
+
+    </div>
+    `
+    );
+
+    setTimeout(() => {
+      const selectPaymentBtn =
+        document.getElementById(
+          "selectPaymentNowBtn"
+        );
+
+      selectPaymentBtn?.addEventListener(
+        "click",
+        function () {
+          closeOrderModal();
+
+          const paymentSection =
+            document.querySelector(
+              'input[name="payment"]'
+            )?.closest(
+              ".payment-section, .payment-methods, section"
+            ) ||
+            document.querySelector(
+              'input[name="payment"]'
+            );
+
+          paymentSection?.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
+        }
+      );
+    }, 50);
+
     return resetPlaceOrder();
   }
 
@@ -1739,6 +2129,13 @@ async function placeOrder() {
     shippingFeeNumber +
     handlingFee;
 
+  const skyroFinancedAmount =
+    subtotalNumber;
+
+  const skyroShippingCodAmount =
+    shippingFeeNumber +
+    handlingFee;
+
   if (
     paymentMain === "COD" &&
     selectedCourierNow === "Same Day Delivery / Lalamove"
@@ -1769,8 +2166,15 @@ async function placeOrder() {
     return resetPlaceOrder();
   }
 
-  if (paymentMain === "SKYRO" && totalNumber < 3000) {
-    const remainingAmount = Math.max(3000 - totalNumber, 0);
+  if (
+    paymentMain === "SKYRO" &&
+    skyroFinancedAmount < 3000
+  ) {
+    const remainingAmount =
+      Math.max(
+        3000 - skyroFinancedAmount,
+        0
+      );
 
     showOrderModal(
       "Skyro Minimum Order",
@@ -1830,7 +2234,7 @@ async function placeOrder() {
             font-size:20px;
             color:#111827;
           ">
-            ${formatPrice(totalNumber)}
+            ${formatPrice(skyroFinancedAmount)}
           </strong>
         </div>
 
@@ -1963,6 +2367,16 @@ async function placeOrder() {
     handlingFee: handlingFee,
     serviceFee: handlingFee,
 
+    skyroFinancedAmount:
+      paymentMain === "SKYRO"
+        ? skyroFinancedAmount
+        : 0,
+
+    shippingCodAmount:
+      paymentMain === "SKYRO"
+        ? skyroShippingCodAmount
+        : 0,
+
     estimatedLalamoveFee: estimatedLalamoveFee,
 
     shippingNote: isManualLalamoveVerification
@@ -1975,14 +2389,21 @@ async function placeOrder() {
     voucherDiscount: voucherDiscount || 0,
     parcelInfo: currentParcelInfo,
     shippingQuote: currentShippingQuote,
-    total: totalNumber,
-    status: paymentMain === "SKYRO"
-      ? "Pending Stock Confirmation"
-      : isManualLalamoveVerification
-        ? "Pending Address Verification"
-        : paymentMain === "COD"
-          ? "Pending COD"
-          : "Pending Payment",
+    total:
+      paymentMain === "SKYRO"
+        ? skyroFinancedAmount
+        : totalNumber,
+    status:
+      paymentMain === "OVER_THE_COUNTER" &&
+        selectedCourierNow === "Store Pickup"
+        ? "Pending Pickup Confirmation"
+        : paymentMain === "SKYRO"
+          ? "Pending Stock Confirmation"
+          : isManualLalamoveVerification
+            ? "Pending Address Verification"
+            : paymentMain === "COD"
+              ? "Pending COD"
+              : "Pending Payment",
     date: new Date().toLocaleString(),
   };
 
@@ -1996,16 +2417,18 @@ async function placeOrder() {
     );
   }
 
+  let stockDeducted = false;
+
   try {
 
-    if (
-      paymentMain === "COD" ||
-      paymentMain === "SKYRO"
-    ) {
-      await deductOrderStock(order);
-    }
+    await deductOrderStock(order);
+    stockDeducted = true;
 
-    if (!isGuestCheckout || paymentMain === "SKYRO") {
+    if (
+      !isGuestCheckout ||
+      paymentMain === "SKYRO" ||
+      paymentMain === "OVER_THE_COUNTER"
+    ) {
       const syncResult =
         await syncOrderToSupabase(order);
 
@@ -2045,57 +2468,101 @@ async function placeOrder() {
       error
     );
 
+    if (stockDeducted) {
+      try {
+        await restoreOrderStock(order);
+
+        console.log(
+          "Stock restored after checkout error:",
+          order.id
+        );
+      } catch (restoreError) {
+        console.error(
+          "FAILED TO RESTORE STOCK:",
+          restoreError
+        );
+      }
+    }
+
+    showOrderModal(
+      "Order Failed",
+      "The order was not completed. Reserved stock has been returned. Please try again."
+    );
+
     return resetPlaceOrder();
   }
 
-
   if (paymentMain === "SKYRO") {
 
-    const skyroRes = await fetch(
-      `${API_BASE_URL}/api/orders/skyro`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          orderId: order.id,
-          amount: totalNumber,
-          subtotal: subtotalNumber,
-          shippingFee: shippingFeeNumber,
-          serviceFee: handlingFee,
-          handlingFee: handlingFee,
-          customerName: name,
-          customerPhone: phone,
-          customerEmail: email,
-          guestOrder: order.guestOrder === true,
-          guestTrackingCode: order.guestTrackingCode,
-          courier: order.courier,
-          address,
-          parcelInfo: currentParcelInfo,
-          items: order.items
-        })
-      }
-    );
+    try {
 
-    const skyroData = await skyroRes.json();
+      const skyroRes = await fetch(
 
-    if (!skyroRes.ok || !skyroData.success) {
-      showOrderModal(
-        "Skyro Order Error",
-        skyroData.message || "Skyro order save failed."
+
+        `${API_BASE_URL}/api/orders/skyro`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            orderId: order.id,
+            amount: skyroFinancedAmount,
+            subtotal: subtotalNumber,
+            shippingFee: shippingFeeNumber,
+            shippingPaymentMethod: "COD",
+            shippingCodAmount: skyroShippingCodAmount,
+            serviceFee: 0,
+            handlingFee: handlingFee,
+            customerName: name,
+            customerPhone: phone,
+            customerEmail: email,
+            guestOrder: order.guestOrder === true,
+            guestTrackingCode: order.guestTrackingCode,
+            courier: order.courier,
+            address,
+            parcelInfo: currentParcelInfo,
+            items: order.items
+          })
+        }
       );
 
-      return resetPlaceOrder();
-    }
+      const skyroData = await skyroRes.json();
 
-    clearCheckedCartItems();
+      if (!skyroRes.ok || !skyroData.success) {
+        if (stockDeducted) {
+          try {
+            await restoreOrderStock(order);
+            stockDeducted = false;
 
-    localStorage.removeItem("drinCheckoutItems");
+            console.log(
+              "Stock restored after Skyro save error:",
+              order.id
+            );
+          } catch (restoreError) {
+            console.error(
+              "FAILED TO RESTORE SKYRO STOCK:",
+              restoreError
+            );
+          }
+        }
 
-    showOrderModal(
-      "Skyro Order Request Submitted",
-      `
+        showOrderModal(
+          "Skyro Order Error",
+          skyroData.message ||
+          "Skyro order was not completed. Please try again."
+        );
+
+        return resetPlaceOrder();
+      }
+
+      clearCheckedCartItems();
+
+      localStorage.removeItem("drinCheckoutItems");
+
+      showOrderModal(
+        "Skyro Order Request Submitted",
+        `
       <div class="skyro-application-confirmation">
 
         <div style="
@@ -2138,7 +2605,7 @@ async function placeOrder() {
         </h2>
 
         ${isGuestCheckout
-        ? `
+          ? `
       <div style="text-align:center;">
 
         <h3 style="margin:0 0 8px;">
@@ -2191,12 +2658,12 @@ async function placeOrder() {
 
       </div>
     `
-        : `
+          : `
       <p>
         You can view this order request in your My Orders page.
       </p>
     `
-      }
+        }
 
         <p>
          Please wait for item availability confirmation. Once approved, the Complete Skyro Application button will appear in My Orders.
@@ -2222,47 +2689,74 @@ async function placeOrder() {
 
       </div>
     `
-    );
-
-    if (checkoutBtn) {
-      checkoutBtn.disabled = true;
-      checkoutBtn.style.pointerEvents = "none";
-      checkoutBtn.style.opacity = "0.6";
-      checkoutBtn.textContent = "Skyro Order Submitted";
-    }
-
-    const okBtn =
-      document.getElementById("orderModalOk");
-
-    if (okBtn) {
-      okBtn.style.display = "inline-block";
-      okBtn.textContent = isGuestCheckout
-        ? "Track My Order"
-        : "Go to My Orders";
-
-      okBtn.onclick = function () {
-        if (isGuestCheckout) {
-          window.location.href =
-            `https://drinelectronicsph.com/guest-track/?track=${order.guestTrackingCode}`;
-        } else {
-          window.location.href = "/home-orders";
-        }
-      };
-    }
-
-    if (!isGuestCheckout) {
-      showOrderModal(
-        "Skyro Order Submitted",
-        "Your order was saved successfully. Redirecting to My Orders...",
-        true
       );
 
-      setTimeout(() => {
-        window.location.href = "/home-orders";
-      }, 3000);
+      if (checkoutBtn) {
+        checkoutBtn.disabled = true;
+        checkoutBtn.style.pointerEvents = "none";
+        checkoutBtn.style.opacity = "0.6";
+        checkoutBtn.textContent = "Skyro Order Submitted";
+      }
+
+      const okBtn =
+        document.getElementById("orderModalOk");
+
+      if (okBtn) {
+        okBtn.style.display = "inline-block";
+        okBtn.textContent = isGuestCheckout
+          ? "Track My Order"
+          : "Go to My Orders";
+
+        okBtn.onclick = function () {
+          if (isGuestCheckout) {
+            window.location.href =
+              `https://drinelectronicsph.com/guest-track/?track=${order.guestTrackingCode}`;
+          } else {
+            window.location.href = "/home-orders";
+          }
+        };
+      }
+
+      if (!isGuestCheckout) {
+        showOrderModal(
+          "Skyro Order Submitted",
+          "Your order was saved successfully. Redirecting to My Orders...",
+          true
+        );
+
+        setTimeout(() => {
+          window.location.href = "/home-orders";
+        }, 3000);
+      }
+
+      return;
+
+    } catch (error) {
+      console.error(
+        "SKYRO CONNECTION ERROR:",
+        error
+      );
+
+      if (stockDeducted) {
+        try {
+          await restoreOrderStock(order);
+          stockDeducted = false;
+        } catch (restoreError) {
+          console.error(
+            "FAILED TO RESTORE SKYRO STOCK:",
+            restoreError
+          );
+        }
+      }
+
+      showOrderModal(
+        "Skyro Connection Error",
+        "The Skyro order was not completed. Please try again."
+      );
+
+      return resetPlaceOrder();
     }
 
-    return;
   }
 
   if (paymentMain === "COD") {
@@ -2273,33 +2767,64 @@ async function placeOrder() {
     );
 
     try {
-      await fetch(`${API_BASE_URL}/api/orders/cod`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId: order.id,
-          amount: totalNumber,
-          subtotal: subtotalNumber,
-          shippingFee: shippingFeeNumber,
-          serviceFee: handlingFee,
-          handlingFee: handlingFee,
-          customerName: name,
-          customerPhone: phone,
-          customerEmail: email,
-          guestOrder: order.guestOrder === true,
-          guestTrackingCode: order.guestTrackingCode,
-          paymentMethod: "COD",
-          courier: order.courier,
-          address,
-          parcelInfo: currentParcelInfo,
-          items: order.items,
-        }),
-      });
+      const codRes = await fetch(
+        `${API_BASE_URL}/api/orders/cod`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            orderId: order.id,
+            amount: totalNumber,
+            subtotal: subtotalNumber,
+            shippingFee: shippingFeeNumber,
+            serviceFee: handlingFee,
+            handlingFee: handlingFee,
+            customerName: name,
+            customerPhone: phone,
+            customerEmail: email,
+            guestOrder: order.guestOrder === true,
+            guestTrackingCode: order.guestTrackingCode,
+            paymentMethod: "COD",
+            courier: order.courier,
+            address,
+            parcelInfo: currentParcelInfo,
+            items: order.items
+          })
+        }
+      );
+
+      if (!codRes.ok) {
+        throw new Error(
+          `COD save failed with status ${codRes.status}`
+        );
+      }
 
     } catch (error) {
+      console.error(
+        "COD BACKEND SAVE ERROR:",
+        error
+      );
 
-      console.warn("COD backend save failed:", error);
+      if (stockDeducted) {
+        try {
+          await restoreOrderStock(order);
+          stockDeducted = false;
+        } catch (restoreError) {
+          console.error(
+            "FAILED TO RESTORE COD STOCK:",
+            restoreError
+          );
+        }
+      }
 
+      showOrderModal(
+        "COD Order Failed",
+        "Your COD order was not completed. Please try again."
+      );
+
+      return resetPlaceOrder();
     }
 
     if (typeof fbq !== "undefined") {
@@ -2394,6 +2919,43 @@ async function placeOrder() {
 
   }
 
+  if (paymentMain === "OVER_THE_COUNTER") {
+
+    if (selectedCourierNow !== "Store Pickup") {
+      showOrderModal(
+        "Payment Not Available",
+        "Over The Counter is available for Store Pickup only."
+      );
+
+      return resetPlaceOrder();
+    }
+
+    clearCheckedCartItems();
+    localStorage.removeItem("drinCheckoutItems");
+
+    showOrderModal(
+      "Pickup Order Submitted",
+      `
+      Your order has been submitted successfully.<br><br>
+
+      Please wait for confirmation that your order
+      is ready before visiting the store.<br><br>
+
+      Payment will be collected at the store
+      when you pick up your order.
+    `
+    );
+
+    if (checkoutBtn) {
+      checkoutBtn.disabled = true;
+      checkoutBtn.style.pointerEvents = "none";
+      checkoutBtn.style.opacity = "0.6";
+      checkoutBtn.textContent = "Pickup Order Submitted";
+    }
+
+    return;
+  }
+
   try {
     const paymentUrl = `${API_BASE_URL}/api/create-payment`;
     showOrderModal(
@@ -2448,6 +3010,23 @@ async function placeOrder() {
     console.log("CREATE PAYMENT RESPONSE:", data);
 
     if (!res.ok) {
+      if (stockDeducted) {
+        try {
+          await restoreOrderStock(order);
+          stockDeducted = false;
+
+          console.log(
+            "Stock restored after payment creation error:",
+            order.id
+          );
+        } catch (restoreError) {
+          console.error(
+            "FAILED TO RESTORE STOCK:",
+            restoreError
+          );
+        }
+      }
+
       showOrderModal(
         "Payment Server Error",
         data.message || data.error || "Create payment failed."
@@ -2483,13 +3062,56 @@ async function placeOrder() {
     }
 
     else {
-      showOrderModal("Payment Error", data.message || "Checkout failed.");
+      if (stockDeducted) {
+        try {
+          await restoreOrderStock(order);
+          stockDeducted = false;
+
+          console.log(
+            "Stock restored because payment URL was missing:",
+            order.id
+          );
+        } catch (restoreError) {
+          console.error(
+            "FAILED TO RESTORE STOCK:",
+            restoreError
+          );
+        }
+      }
+
+      showOrderModal(
+        "Payment Error",
+        data.message || "Checkout failed. Reserved stock has been returned."
+      );
+
       return resetPlaceOrder();
     }
 
   } catch (error) {
     console.error("CHECKOUT ERROR:", error);
-    showOrderModal("Server Error", "Cannot connect to payment server.");
+
+    if (stockDeducted) {
+      try {
+        await restoreOrderStock(order);
+        stockDeducted = false;
+
+        console.log(
+          "Stock restored after payment connection error:",
+          order.id
+        );
+      } catch (restoreError) {
+        console.error(
+          "FAILED TO RESTORE STOCK:",
+          restoreError
+        );
+      }
+    }
+
+    showOrderModal(
+      "Server Error",
+      "Cannot connect to payment server. Reserved stock has been returned."
+    );
+
     return resetPlaceOrder();
   }
 }
@@ -2560,15 +3182,176 @@ courierSelect?.addEventListener("change", function () {
 
   selectedCourier = this.value;
 
+  const codOption =
+    document.querySelector(
+      'input[name="payment"][value="COD"]'
+    );
+
+  const overTheCounterOption =
+    document.querySelector(
+      'input[name="payment"][value="OVER_THE_COUNTER"]'
+    );
+
+  const isCodDisabledCourier =
+    selectedCourier ===
+    "Same Day Delivery / Lalamove" ||
+    selectedCourier ===
+    "Manual Delivery via RORO" ||
+    selectedCourier ===
+    "Store Pickup";
+
+  // Reset muna lahat ng payment
+  togglePayment(false);
+
+  // Enable kapag may courier na
+  if (selectedCourier) {
+    togglePayment(true);
+  }
+
+  // Final rule: disable COD kapag RORO
+  if (codOption) {
+    codOption.disabled =
+      isCodDisabledCourier;
+
+    if (
+      isCodDisabledCourier &&
+      codOption.checked
+    ) {
+      codOption.checked = false;
+    }
+
+    const codBox =
+      codOption.closest("label") ||
+      codOption.parentElement;
+
+    if (codBox) {
+      codBox.style.opacity =
+        isCodDisabledCourier
+          ? "0.45"
+          : "1";
+
+      codBox.style.cursor =
+        isCodDisabledCourier
+          ? "not-allowed"
+          : "pointer";
+    }
+
+    if (
+      codBox &&
+      !codBox.dataset.roroCodPopupAdded
+    ) {
+      codBox.dataset.roroCodPopupAdded =
+        "true";
+
+      codBox.addEventListener(
+        "click",
+        function (event) {
+          const isRoroSelected =
+            courierSelect?.value ===
+            "Manual Delivery via RORO";
+
+          if (!isRoroSelected) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          showOrderModal(
+            "COD Not Available",
+            `
+            <div style="
+              padding:10px 4px;
+              text-align:center;
+            ">
+
+              <div style="
+                width:72px;
+                height:72px;
+                margin:0 auto 16px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                border-radius:50%;
+                background:#fff7ed;
+                font-size:36px;
+              ">
+                🚢
+              </div>
+
+              <h3 style="
+                margin:0 0 10px;
+                color:#111827;
+              ">
+                COD is Not Available for RORO
+              </h3>
+
+              <p style="
+                margin:0;
+                color:#4b5563;
+                line-height:1.65;
+              ">
+                Manual Delivery via RORO requires
+                Online Payment or Skyro Installment.
+              </p>
+
+              <div style="
+                margin:16px 0 0;
+                padding:13px;
+                border-radius:12px;
+                background:#f8fafc;
+                border:1px solid #e5e7eb;
+                color:#374151;
+                line-height:1.55;
+              ">
+                RORO freight, port charges, and
+                local delivery fees will be
+                confirmed and paid separately.
+              </div>
+
+            </div>
+            `
+          );
+        },
+        true
+      );
+    }
+  }
+
+  if (overTheCounterOption) {
+    const isStorePickup =
+      selectedCourier === "Store Pickup";
+
+    overTheCounterOption.disabled =
+      !isStorePickup;
+
+    if (
+      !isStorePickup &&
+      overTheCounterOption.checked
+    ) {
+      overTheCounterOption.checked = false;
+    }
+
+    const overTheCounterBox =
+      overTheCounterOption.closest("label") ||
+      overTheCounterOption.parentElement;
+
+    if (overTheCounterBox) {
+      overTheCounterBox.style.opacity =
+        isStorePickup ? "1" : "0.45";
+
+      overTheCounterBox.style.cursor =
+        isStorePickup
+          ? "pointer"
+          : "not-allowed";
+    }
+  }
+
   updateDeliveryAddressUI();
 
   if (courierStatus) {
-
     courierStatus.textContent =
       selectedCourier
         ? `${selectedCourier} selected`
         : "Please select courier";
-
   }
 
   scheduleShippingQuote();
@@ -2682,6 +3465,36 @@ document.querySelectorAll('input[name="payment"]').forEach((input) => {
       checkoutBtn.style.opacity = "1";
     }
 
+    const selectedPayment =
+      document.querySelector(
+        'input[name="payment"]:checked'
+      )?.value || "";
+
+    if (selectedPayment === "SKYRO") {
+      claimedVoucher = null;
+      voucherDiscount = 0;
+
+      localStorage.removeItem(
+        "claimedVoucherCode"
+      );
+
+      const voucherRow =
+        document.getElementById(
+          "voucherSummaryRow"
+        );
+
+      if (voucherRow) {
+        voucherRow.style.display = "none";
+      }
+
+      updateTotalsDisplay();
+
+      showOrderModal(
+        "Voucher Removed",
+        "Vouchers are not available for Skyro installment payments."
+      );
+    }
+
     scheduleShippingQuote();
   });
 });
@@ -2726,8 +3539,9 @@ async function loadClaimedVoucher() {
   renderCheckout();
   loadAreaGroups();
 
-  loadCustomerCheckoutInfo();
+  togglePayment(false);
 
+  loadCustomerCheckoutInfo();
   updateParcelEstimate();
   updateTotalsDisplay();
   initDeliveryMap();

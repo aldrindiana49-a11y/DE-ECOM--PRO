@@ -9,7 +9,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Drin Electronics Admin Panel</title>
-  <link rel="stylesheet" href="admin.css?v=10010" />
+  <link rel="stylesheet" href="admin.css?v=10012" />
 
 </head>
 
@@ -25,6 +25,17 @@
 
       <nav class="sidebar-menu">
         <button class="menu-item active" data-section="ordersSection">Orders</button>
+
+        <button class="menu-item" data-section="storePickupSection">
+          Store Pickup Orders
+          <span class="order-filter-count" id="countStorePickup">0</span>
+        </button>
+
+        <button class="menu-item" data-section="roroOrdersSection">
+          RORO Orders
+          <span class="order-filter-count" id="countRoroOrders">0</span>
+        </button>
+
         <a href="../Admin-chat/" class="admin-chat-link">
 
           <span>💬 Support Inbox</span>
@@ -684,6 +695,22 @@
 
       </section>
 
+      <section class="content-section" id="storePickupSection">
+
+        <div class="section-header">
+          <h2>Store Pickup Orders</h2>
+          <p>Orders for customer pickup at the store.</p>
+        </div>
+
+        <div class="panel-card">
+          <div id="storePickupOrdersTableBody" class="admin-orders-list">
+            <div class="empty-box">
+              No store pickup orders yet.
+            </div>
+          </div>
+        </div>
+
+      </section>
       <!-- ===============================
             CANCELLED ORDERS
          ================================ -->
@@ -1078,7 +1105,7 @@
   <script src="./inventory.js?v=10010"></script>
   <script src="./generator.js?v=10010"></script>
   <script src="./categories.js?v=10010"></script>
-  <script src="./orders.js?v=10016"></script>
+  <script src="./orders.js?v=10017"></script>
   <script src="./employee.js?v=10010"></script>
 
 </body>

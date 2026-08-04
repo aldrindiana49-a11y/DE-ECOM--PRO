@@ -12,6 +12,9 @@ const dashboardShipped = document.getElementById("dashboardShipped");
 const dashboardDelivered = document.getElementById("dashboardDelivered");
 
 let adminOrders = [];
+let storePickupOrders = [];
+let roroOrders = [];
+
 let currentOrderFilter = "Processing";
 let expandedOrderSummary = {};
 let expandedOrderItems = {};
@@ -19,7 +22,11 @@ let currentOrdersPage = 1;
 const ordersPerPage = 10;
 const cancelledOrdersTableBody =
   document.getElementById("cancelledOrdersTableBody");
+const storePickupOrdersTableBody =
+  document.getElementById("storePickupOrdersTableBody");
 
+const roroOrdersTableBody =
+  document.getElementById("roroOrdersTableBody");
 const returnRefundRequestsBody =
   document.getElementById("returnRefundRequestsBody");
 
@@ -53,7 +60,13 @@ function getCustomerFullAddress(order) {
 }
 
 function printOrderInvoice(orderId) {
-  const order = adminOrders.find(o =>
+  const allActiveOrders = [
+    ...adminOrders,
+    ...storePickupOrders,
+    ...roroOrders
+  ];
+
+  const order = allActiveOrders.find(o =>
     String(o.external_id || o.id) === String(orderId)
   );
 
@@ -893,10 +906,45 @@ function updateOrderFilterCounts() {
     const isSkyro =
       paymentText.includes("skyro");
 
+    const createdTime =
+      new Date(order.created_at).getTime();
+
+    const explicitExpiryTime =
+      new Date(
+        order.expires_at ||
+        order.expiry_date ||
+        order.invoice_expiry_date ||
+        ""
+      ).getTime();
+
+    const fallbackExpiryTime =
+      Number.isFinite(createdTime)
+        ? createdTime + 60 * 60 * 1000
+        : NaN;
+
+    const expiryTime =
+      Number.isFinite(explicitExpiryTime)
+        ? explicitExpiryTime
+        : fallbackExpiryTime;
+
+    const isPendingOnlinePayment =
+      !isCOD &&
+      (
+        orderStatus === "pending payment" ||
+        paymentStatus === "pending" ||
+        paymentStatus === "pending payment"
+      );
+
+    const isTimedOut =
+      isPendingOnlinePayment &&
+      Number.isFinite(expiryTime) &&
+      Date.now() > expiryTime;
+
     const isExpired =
       orderStatus === "expired" ||
       orderStatus === "payment expired" ||
-      paymentStatus.includes("expired");
+      paymentStatus.includes("expired") ||
+      isTimedOut;
 
     if (isCOD && orderStatus === "pending") {
       counts.pendingCod++;
@@ -1538,6 +1586,119 @@ ${hasOrderRequest ? `
 `;
 
 }
+
+function renderStorePickupOrders() {
+  if (!storePickupOrdersTableBody) return;
+
+  if (!storePickupOrders.length) {
+    storePickupOrdersTableBody.innerHTML = `
+      <div class="empty-box">
+        No store pickup orders yet.
+      </div>
+    `;
+    return;
+  }
+
+  const sortedOrders = [...storePickupOrders].sort(
+    (a, b) =>
+      new Date(b.created_at) -
+      new Date(a.created_at)
+  );
+
+  storePickupOrdersTableBody.innerHTML =
+    sortedOrders.map(order => {
+      const orderId =
+        order.external_id ||
+        order.id ||
+        "";
+
+      const orderStatus =
+        order.order_status ||
+        "Pending";
+
+      const amount = Number(
+        order.amount ||
+        order.total ||
+        0
+      );
+
+      return `
+        <div class="warehouse-order-card">
+
+          <div class="warehouse-order-head">
+            <span>
+              <strong>
+                ${escapeHtml(orderId || "-")}
+              </strong>
+              <br>
+              ${escapeHtml(
+        order.customer_name ||
+        "Customer"
+      )}
+            </span>
+
+            <span class="status-badge ${getOrderStatusClass(orderStatus)}">
+              ${escapeHtml(orderStatus)}
+            </span>
+          </div>
+
+          <div class="warehouse-order-info summary-box">
+
+            <div>
+              <span>Phone</span>
+              <strong>
+                ${escapeHtml(
+        order.customer_phone || "-"
+      )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Amount</span>
+              <strong>
+                ₱${amount.toLocaleString("en-PH")}
+              </strong>
+            </div>
+
+            <div>
+              <span>Payment</span>
+              <strong>
+                ${escapeHtml(
+        order.payment_status ||
+        order.status ||
+        "-"
+      )}
+              </strong>
+            </div>
+
+            <div>
+  <span>Courier</span>
+  <strong>Store Pickup</strong>
+</div>
+
+</div>
+
+<div
+  style="
+    display:flex;
+    justify-content:flex-end;
+    margin-top:10px;
+  "
+>
+  <button
+    class="mini-manage-btn"
+    type="button"
+    onclick="openOrderModal('${escapeAttribute(orderId)}')"
+  >
+    Manage Order
+  </button>
+</div>
+
+</div>
+`;
+
+    }).join("");
+}
 /* ===============================
    SHOW ALL ITEMS TOGGLE
 ================================ */
@@ -1588,7 +1749,7 @@ function changeOrdersPage(direction) {
     ).trim().toLowerCase();
 
     const paymentText =
-      `${paymentStatus} ${paymentMethod}`;
+      `${paymentStatus} ${paymentMethod} `;
 
     const isCOD =
       paymentText.includes("cod") ||
@@ -1672,7 +1833,7 @@ function normalizeOrder(order) {
     "";
 
   const paymentText = String(
-    `${paymentStatus} ${paymentMethod}`
+    `${paymentStatus} ${paymentMethod} `
   )
     .trim()
     .toUpperCase();
@@ -1796,7 +1957,7 @@ async function loadAdminOrders() {
     if (adminOrdersTableBody) {
       adminOrdersTableBody.innerHTML = `
         <div class="empty-box">Loading orders...</div>
-      `;
+        `;
     }
 
     const response = await fetch("https://de-ecom-pro.onrender.com/api/orders");
@@ -1807,11 +1968,110 @@ async function loadAdminOrders() {
     }
 
     /* REMOVE CANCELLED ORDERS FROM MAIN DASHBOARD */
-    adminOrders = data.orders
+    const activeOrders = data.orders
       .map(normalizeOrder)
       .filter(order => order.order_status !== "Cancelled");
 
+    storePickupOrders = activeOrders.filter(order => {
+      const courier = String(
+        order.courier || ""
+      ).toLowerCase();
+
+      const orderStatus = String(
+        order.order_status || ""
+      ).toLowerCase();
+
+      const paymentStatus = String(
+        order.payment_status || ""
+      ).toLowerCase();
+
+      const isExpired =
+        orderStatus.includes("expired") ||
+        paymentStatus.includes("expired");
+
+      return (
+        courier.includes("store pickup") &&
+        !isExpired
+      );
+    });
+
+    roroOrders = activeOrders.filter(order => {
+      const courier = String(
+        order.courier || ""
+      ).toLowerCase();
+
+      const orderStatus = String(
+        order.order_status || ""
+      ).toLowerCase();
+
+      const paymentStatus = String(
+        order.payment_status || ""
+      ).toLowerCase();
+
+      const isExpired =
+        orderStatus.includes("expired") ||
+        paymentStatus.includes("expired");
+
+      return (
+        courier.includes("roro") &&
+        !isExpired
+      );
+    });
+
+    const storePickupCount =
+      document.getElementById("countStorePickup");
+
+    const roroCount =
+      document.getElementById("countRoroOrders");
+
+    if (storePickupCount) {
+      storePickupCount.textContent =
+        storePickupOrders.length;
+
+      storePickupCount.style.display =
+        storePickupOrders.length > 0
+          ? "inline-flex"
+          : "none";
+    }
+
+    if (roroCount) {
+      roroCount.textContent =
+        roroOrders.length;
+
+      roroCount.style.display =
+        roroOrders.length > 0
+          ? "inline-flex"
+          : "none";
+    }
+
+    adminOrders = activeOrders.filter(order => {
+      const courier = String(
+        order.courier || ""
+      ).toLowerCase();
+
+      const orderStatus = String(
+        order.order_status || ""
+      ).toLowerCase();
+
+      const paymentStatus = String(
+        order.payment_status || ""
+      ).toLowerCase();
+
+      const isExpired =
+        orderStatus.includes("expired") ||
+        paymentStatus.includes("expired");
+
+      return (
+        isExpired ||
+        (
+          !courier.includes("store pickup") &&
+          !courier.includes("roro")
+        )
+      );
+    });
+
     renderAdminOrders();
+    renderStorePickupOrders();
     updateOrdersSummary();
     updateDashboardOrders();
     updateOrderFilterCounts();
@@ -1821,8 +2081,8 @@ async function loadAdminOrders() {
 
     if (adminOrdersTableBody) {
       adminOrdersTableBody.innerHTML = `
-        <div class="empty-box">Cannot load orders.</div>
-      `;
+    <div class="empty-box">Cannot load orders.</div>
+    `;
     }
   }
 }
@@ -1836,6 +2096,13 @@ function getShipmentButton(order, orderId) {
     order.order_status || ""
   ).trim().toLowerCase();
 
+  const courier = String(
+    order.courier || ""
+  ).trim().toLowerCase();
+
+  const isStorePickup =
+    courier.includes("store pickup");
+
   const isSkyro =
     String(order.payment_method || "")
       .toLowerCase()
@@ -1844,20 +2111,66 @@ function getShipmentButton(order, orderId) {
   const isSkyroApproved =
     orderStatus === "skyro approved";
 
-  if (isSkyro && !isSkyroApproved) {
+  if (isStorePickup) {
+    if (orderStatus === "picked up") {
+      return `
+      <button
+        class="primary-btn"
+        type="button"
+        disabled
+        style="
+          opacity:0.55;
+          cursor:not-allowed;
+        "
+      >
+        Order Picked Up
+      </button>
+    `;
+    }
+
+    if (orderStatus === "ready for pickup") {
+      return `
+      <button
+        class="primary-btn"
+        type="button"
+        onclick="completeStorePickup(
+          '${escapeAttribute(orderId)}',
+          this
+        )"
+      >
+        Mark as Picked Up
+      </button>
+    `;
+    }
+
     return `
     <button
       class="primary-btn"
       type="button"
-      disabled
-      style="
-        opacity:0.55;
-        cursor:not-allowed;
-      "
+      onclick="confirmStorePickup(
+        '${escapeAttribute(orderId)}',
+        this
+      )"
     >
-      Waiting for Skyro Approval
+      Mark Ready for Pickup
     </button>
   `;
+  }
+
+  if (isSkyro && !isSkyroApproved) {
+    return `
+      <button
+        class="primary-btn"
+        type="button"
+        disabled
+        style="
+          opacity:0.55;
+          cursor:not-allowed;
+        "
+      >
+        Waiting for Skyro Approval
+      </button>
+    `;
   }
 
   const shipmentAlreadyArranged =
@@ -1892,15 +2205,130 @@ function getShipmentButton(order, orderId) {
     <button
       class="primary-btn"
       type="button"
-      onclick="arrangeShipment('${escapeAttribute(orderId)}', this)"
+      onclick="arrangeShipment(
+        '${escapeAttribute(orderId)}',
+        this
+      )"
     >
       Arrange Shipment
     </button>
   `;
 }
 
+async function confirmStorePickup(orderId, btn) {
+  try {
+    setButtonLoading(btn, "Confirming Pickup...");
+
+    const response = await fetch(
+      "https://de-ecom-pro.onrender.com/api/orders/update",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          orderId,
+          order_status: "Ready for Pickup",
+          payment_status: "Pay at Store"
+        })
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.message ||
+        "Failed to confirm pickup order."
+      );
+    }
+
+    showToast(
+      "Order is now ready for pickup.",
+      "success"
+    );
+
+    closeOrderModal();
+    await loadAdminOrders();
+
+  } catch (error) {
+    console.error(error);
+
+    showToast(
+      error.message ||
+      "Pickup confirmation failed.",
+      "error"
+    );
+
+  } finally {
+    resetButtonLoading(btn);
+  }
+}
+
+async function completeStorePickup(orderId, btn) {
+  const confirmed = confirm(
+    "Confirm that the customer has paid and picked up the order?"
+  );
+
+  if (!confirmed) return;
+
+  try {
+    setButtonLoading(btn, "Completing Order...");
+
+    const response = await fetch(
+      "https://de-ecom-pro.onrender.com/api/orders/update",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          orderId,
+          order_status: "Picked Up",
+          payment_status: "PAID"
+        })
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.message ||
+        "Failed to complete pickup order."
+      );
+    }
+
+    showToast(
+      "Payment received and order picked up.",
+      "success"
+    );
+
+    closeOrderModal();
+    await loadAdminOrders();
+
+  } catch (error) {
+    console.error(error);
+
+    showToast(
+      error.message ||
+      "Pickup completion failed.",
+      "error"
+    );
+
+  } finally {
+    resetButtonLoading(btn);
+  }
+}
+
 function openOrderModal(orderId) {
-  const order = adminOrders.find(o =>
+  const allActiveOrders = [
+    ...adminOrders,
+    ...storePickupOrders,
+    ...roroOrders
+  ];
+
+  const order = allActiveOrders.find(o =>
     String(o.external_id || o.id) === String(orderId)
   );
 
@@ -1989,6 +2417,10 @@ function openOrderModal(orderId) {
     modalVoucher +
     modalShipping +
     modalServiceFee;
+  const isStorePickup =
+    String(order.courier || "")
+      .toLowerCase()
+      .includes("store pickup");
 
   content.innerHTML = `
 
@@ -2016,22 +2448,61 @@ function openOrderModal(orderId) {
           </small>
         </div>
         `
-      : ""}
+      : ""
+    }
 
     <p><strong>Amount:</strong> ₱${modalTotal.toLocaleString("en-PH")}</p>
     <p><strong>Status:</strong> ${escapeHtml(order.order_status || "Pending")}</p>
     <p>
+  
+<p>
   <strong>Courier:</strong>
-  ${String(order.courier || "").toLowerCase().includes("lalamove") ||
-      String(order.courier || "").toLowerCase().includes("same day")
-      ? `<span style="background:#f97316;color:#fff;padding:4px 8px;border-radius:8px;font-weight:700;">
+
+  ${String(order.courier || "")
+      .toLowerCase()
+      .includes("store pickup")
+      ? `
+      <span style="
+        background:#16a34a;
+        color:#fff;
+        padding:4px 8px;
+        border-radius:8px;
+        font-weight:700;
+      ">
+        STORE PICKUP
+      </span>
+    `
+      : String(order.courier || "")
+        .toLowerCase()
+        .includes("lalamove") ||
+        String(order.courier || "")
+          .toLowerCase()
+          .includes("same day")
+        ? `
+        <span style="
+          background:#f97316;
+          color:#fff;
+          padding:4px 8px;
+          border-radius:8px;
+          font-weight:700;
+        ">
           LALAMOVE / SAME DAY - MANUAL BOOKING
-        </span>`
-      : `<span style="background:#2563eb;color:#fff;padding:4px 8px;border-radius:8px;font-weight:700;">
-          SPX
-        </span>`
+        </span>
+      `
+        : `
+        <span style="
+          background:#2563eb;
+          color:#fff;
+          padding:4px 8px;
+          border-radius:8px;
+          font-weight:700;
+        ">
+          ${escapeHtml(order.courier || "SPX")}
+        </span>
+      `
     }
 </p>
+
     <p><strong>Tracking:</strong> ${escapeHtml(order.tracking_number || "-")}</p>
 
     ${String(order.payment_method || "")
@@ -2136,26 +2607,74 @@ function openOrderModal(orderId) {
       ${getShipmentButton(order, orderId)}
 
 
-<button
-  class="small-btn"
-  type="button"
-  onclick="markOrderPacked('${escapeAttribute(orderId)}', this)"
->
-  Mark Packed
-</button>
+${!isStorePickup ? `
+  <button
+    class="small-btn"
+    type="button"
+    onclick="markOrderPacked(
+      '${escapeAttribute(orderId)}',
+      this
+    )"
+  >
+    Mark Packed
+  </button>
+` : ""}
 
-<button
-  class="small-btn"
-  type="button"
-  onclick="markOrderShipped('${escapeAttribute(orderId)}', this)"
->
-  Mark Shipped
-</button>
+${!isStorePickup ? `
+  <button
+    class="small-btn"
+    type="button"
+    onclick="markOrderShipped(
+      '${escapeAttribute(orderId)}',
+      this
+    )"
+  >
+    Mark Shipped
+  </button>
 
-      <button class="small-btn" type="button" onclick="markOrderInTransit('${escapeAttribute(orderId)}', this)">In Transit</button>
-      <button class="danger-btn" type="button" onclick="markOrderFailed('${escapeAttribute(orderId)}', this)">Failed Delivery</button>
-      <button class="small-btn" type="button" onclick="markOrderDelivered('${escapeAttribute(orderId)}', this)">Mark Delivered</button>
-      <button class="secondary-btn" type="button" onclick="openAWB('${escapeAttribute(orderId)}')">Print AWB</button>
+  <button
+    class="small-btn"
+    type="button"
+    onclick="markOrderInTransit(
+      '${escapeAttribute(orderId)}',
+      this
+    )"
+  >
+    In Transit
+  </button>
+
+  <button
+    class="danger-btn"
+    type="button"
+    onclick="markOrderFailed(
+      '${escapeAttribute(orderId)}',
+      this
+    )"
+  >
+    Failed Delivery
+  </button>
+
+  <button
+    class="small-btn"
+    type="button"
+    onclick="markOrderDelivered(
+      '${escapeAttribute(orderId)}',
+      this
+    )"
+  >
+    Mark Delivered
+  </button>
+
+  <button
+    class="secondary-btn"
+    type="button"
+    onclick="openAWB(
+      '${escapeAttribute(orderId)}'
+    )"
+  >
+    Print AWB
+  </button>
+` : ""}
 
 <button
   class="secondary-btn"
@@ -2165,7 +2684,17 @@ function openOrderModal(orderId) {
   Print Invoice
 </button>
 
-      <button class="secondary-btn" type="button" onclick="openTracking('${escapeAttribute(orderId)}')">Track Order</button>
+      ${!isStorePickup ? `
+  <button
+    class="secondary-btn"
+    type="button"
+    onclick="openTracking(
+      '${escapeAttribute(orderId)}'
+    )"
+  >
+    Track Order
+  </button>
+` : ""}
 
       ${order.order_request_status ? `
         <button class="small-btn" type="button" onclick="handleOrderRequestAction('${escapeAttribute(orderId)}')">
