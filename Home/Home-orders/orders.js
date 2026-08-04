@@ -486,11 +486,7 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled")
             type="button"
             class="track-btn skyro-application-btn"
             disabled
-            style="
-                opacity:0.55;
-                cursor:not-allowed;
-                width:100%;
-            ">
+            style="width:100%;">
             Complete Skyro Application
         </button>
 

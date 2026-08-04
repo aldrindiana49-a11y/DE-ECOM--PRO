@@ -769,3 +769,22 @@ body {
     transform: none;
     filter: none;
 }
+
+.skyro-application-btn:disabled {
+    background: #cbd5e1;
+    color: #64748b;
+    border: 1px solid #94a3b8;
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+.skyro-application-btn:not(:disabled) {
+    background: #2563eb;
+    color: #ffffff;
+    border: 1px solid #1d4ed8;
+    cursor: pointer;
+}
+
+.skyro-application-btn:not(:disabled):hover {
+    background: #1d4ed8;
+}
