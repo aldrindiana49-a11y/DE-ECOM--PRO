@@ -262,10 +262,17 @@ async function loadOrders() {
         const isSkyro =
             paymentMethod === "SKYRO";
 
-        const isSkyroApproved =
+        const skyroStatus =
             String(order.order_status || "")
                 .trim()
-                .toLowerCase() === "skyro approved";
+                .toLowerCase();
+
+        const isSkyroApproved =
+            skyroStatus === "skyro approved";
+
+        const canOpenSkyroApplication =
+            isSkyro &&
+            skyroStatus === "skyro application allowed";
 
         const skyroApplicationLink =
             String(order.skyro_application_link || "").trim();
@@ -278,10 +285,21 @@ async function loadOrders() {
                 .toLowerCase()
                 .includes("pending");
 
+        const courierText =
+            String(order.courier || "")
+                .trim()
+                .toLowerCase();
+
+        const isStorePickup =
+            courierText.includes("store pickup");
+
         const canRequestChange =
+            !isStorePickup &&
+            !isSkyro &&
             !statusText.includes("packed") &&
             !statusText.includes("shipped") &&
             !statusText.includes("delivered") &&
+            !statusText.includes("completed") &&
             !statusText.includes("cancelled") &&
             !hasPendingRequest &&
             !(isXendit && isPaidPayment) &&
@@ -424,7 +442,7 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled")
         Skyro Application Approved ✓
     </button>
 
-` : isSkyro && skyroApplicationLink ? `
+` : canOpenSkyroApplication && skyroApplicationLink ? `
     <button
         type="button"
         class="track-btn skyro-application-btn"

@@ -1989,9 +1989,14 @@ async function loadAdminOrders() {
         orderStatus.includes("expired") ||
         paymentStatus.includes("expired");
 
+      const isPickupFinished =
+        orderStatus === "completed" ||
+        orderStatus === "picked up";
+
       return (
         courier.includes("store pickup") &&
-        !isExpired
+        !isExpired &&
+        !isPickupFinished
       );
     });
 
@@ -2061,8 +2066,17 @@ async function loadAdminOrders() {
         orderStatus.includes("expired") ||
         paymentStatus.includes("expired");
 
+      const isCompletedPickup =
+        courier.includes("store pickup") &&
+        (
+          orderStatus === "completed" ||
+          orderStatus === "picked up"
+        ) &&
+        paymentStatus === "paid";
+
       return (
         isExpired ||
+        isCompletedPickup ||
         (
           !courier.includes("store pickup") &&
           !courier.includes("roro")
@@ -2112,7 +2126,10 @@ function getShipmentButton(order, orderId) {
     orderStatus === "skyro approved";
 
   if (isStorePickup) {
-    if (orderStatus === "picked up") {
+    if (
+      orderStatus === "completed" ||
+      orderStatus === "picked up"
+    ) {
       return `
       <button
         class="primary-btn"
@@ -2123,7 +2140,7 @@ function getShipmentButton(order, orderId) {
           cursor:not-allowed;
         "
       >
-        Order Picked Up
+        Pickup Completed
       </button>
     `;
     }
@@ -2284,8 +2301,9 @@ async function completeStorePickup(orderId, btn) {
         },
         body: JSON.stringify({
           orderId,
-          order_status: "Picked Up",
-          payment_status: "PAID"
+          order_status: "Completed",
+          payment_status: "PAID",
+          picked_up_at: new Date().toISOString()
         })
       }
     );
@@ -2300,7 +2318,7 @@ async function completeStorePickup(orderId, btn) {
     }
 
     showToast(
-      "Payment received and order picked up.",
+      "Pickup completed. Order moved to Paid.",
       "success"
     );
 

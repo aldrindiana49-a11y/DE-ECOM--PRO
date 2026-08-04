@@ -607,11 +607,8 @@ function togglePayment(enabled = false) {
 
     if (!paymentBox) return;
 
-    paymentBox.style.opacity =
-      enabled ? "1" : "0.55";
-
-    paymentBox.style.cursor =
-      enabled ? "pointer" : "not-allowed";
+    paymentBox.style.display =
+      enabled ? "" : "none";
 
     if (!paymentBox.dataset.courierLockAdded) {
       paymentBox.dataset.courierLockAdded = "true";
@@ -732,6 +729,47 @@ function togglePayment(enabled = false) {
       );
     }
   });
+
+  let paymentLockNotice =
+    document.getElementById("paymentLockNotice");
+
+  const firstPaymentInput =
+    document.querySelector('input[name="payment"]');
+
+  const paymentContainer =
+    firstPaymentInput?.closest(
+      ".payment-section, .payment-methods, section"
+    ) || firstPaymentInput?.parentElement;
+
+  if (!paymentLockNotice && paymentContainer) {
+    paymentLockNotice =
+      document.createElement("div");
+
+    paymentLockNotice.id = "paymentLockNotice";
+
+    paymentLockNotice.innerHTML = `
+    <div style="
+      padding:16px;
+      border:1px solid #fed7aa;
+      border-radius:12px;
+      background:#fff7ed;
+      color:#9a3412;
+      text-align:center;
+      line-height:1.6;
+    ">
+      <strong>🚚 Select Courier First</strong><br>
+      Available payment methods will appear after
+      choosing your delivery courier.
+    </div>
+  `;
+
+    paymentContainer.prepend(paymentLockNotice);
+  }
+
+  if (paymentLockNotice) {
+    paymentLockNotice.style.display =
+      enabled ? "none" : "block";
+  }
 
   if (checkoutBtn) {
     checkoutBtn.disabled = !enabled;
@@ -3225,15 +3263,10 @@ courierSelect?.addEventListener("change", function () {
       codOption.parentElement;
 
     if (codBox) {
-      codBox.style.opacity =
+      codBox.style.display =
         isCodDisabledCourier
-          ? "0.45"
-          : "1";
-
-      codBox.style.cursor =
-        isCodDisabledCourier
-          ? "not-allowed"
-          : "pointer";
+          ? "none"
+          : "";
     }
 
     if (
@@ -3335,13 +3368,10 @@ courierSelect?.addEventListener("change", function () {
       overTheCounterOption.parentElement;
 
     if (overTheCounterBox) {
-      overTheCounterBox.style.opacity =
-        isStorePickup ? "1" : "0.45";
-
-      overTheCounterBox.style.cursor =
+      overTheCounterBox.style.display =
         isStorePickup
-          ? "pointer"
-          : "not-allowed";
+          ? ""
+          : "none";
     }
   }
 
