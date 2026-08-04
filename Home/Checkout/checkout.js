@@ -522,12 +522,36 @@ function updateCourierOptions() {
 
   resetSelect(courierSelect);
 
-  [
+  const selectedArea =
+    String(areaGroupSelect?.value || "")
+      .trim()
+      .toLowerCase();
+
+  const selectedProvince =
+    String(provinceSelect?.value || "")
+      .trim()
+      .toLowerCase();
+
+  const lalamovePickupAllowedArea =
+    selectedArea === "metro manila" ||
+    selectedProvince.includes("rizal") ||
+    selectedProvince.includes("cavite") ||
+    selectedProvince.includes("laguna") ||
+    selectedProvince.includes("bulacan");
+
+  const availableCouriers = [
     "SPX",
-    "Same Day Delivery / Lalamove",
-    "Manual Delivery via RORO",
-    "Store Pickup"
-  ].forEach((courier) => {
+    "Manual Freight Delivery"
+  ];
+
+  if (lalamovePickupAllowedArea) {
+    availableCouriers.push(
+      "Same Day Delivery / Lalamove",
+      "Store Pickup"
+    );
+  }
+
+  availableCouriers.forEach((courier) => {
     const opt = document.createElement("option");
     opt.value = courier;
     opt.textContent = courier;
@@ -1026,7 +1050,7 @@ function scheduleShippingQuote() {
     return;
   }
 
-  if (selectedCourier === "Manual Delivery via RORO") {
+  if (selectedCourier === "Manual Freight Delivery") {
     currentShippingFee = 0;
 
     currentShippingQuote = {
@@ -1038,15 +1062,25 @@ function scheduleShippingQuote() {
     setShippingUI(
       "ready",
       `
-    <div class="delivery-notice-box">
-      <strong>🚢 Manual Delivery via RORO</strong><br><br>
+  <div class="delivery-notice-box">
+    <strong>🚚 Manual Freight Delivery</strong><br><br>
 
-      Shipping fee is not included in checkout.<br><br>
+    This delivery option may use:<br>
+    • RORO<br>
+    • Bus cargo<br>
+    • Trucking<br>
+    • Cargo forwarding<br>
+    • Other manual shipping arrangements<br><br>
 
-      RORO freight, port charges, and delivery schedule
-      will be confirmed separately by our team.
-    </div>
-    `,
+    Shipping fee and delivery schedule are not included
+    in checkout and will be confirmed separately by our team.<br><br>
+
+    <span class="delivery-payment-warning">
+      Please wait for our confirmation before making
+      any separate freight payment.
+    </span>
+  </div>
+  `,
       0
     );
 
@@ -3234,7 +3268,7 @@ courierSelect?.addEventListener("change", function () {
     selectedCourier ===
     "Same Day Delivery / Lalamove" ||
     selectedCourier ===
-    "Manual Delivery via RORO" ||
+    "Manual Freight Delivery" ||
     selectedCourier ===
     "Store Pickup";
 
