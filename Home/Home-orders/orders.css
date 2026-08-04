@@ -771,20 +771,21 @@ body {
 }
 
 .skyro-application-btn:disabled {
-    background: #cbd5e1;
-    color: #64748b;
-    border: 1px solid #94a3b8;
+    background: #cbd5e1 !important;
+    color: #64748b !important;
+    border: 1px solid #94a3b8 !important;
     cursor: not-allowed;
     opacity: 0.75;
+    box-shadow: none !important;
 }
 
 .skyro-application-btn:not(:disabled) {
-    background: #2563eb;
-    color: #ffffff;
-    border: 1px solid #1d4ed8;
+    background: #2563eb !important;
+    color: #ffffff !important;
+    border: 1px solid #1d4ed8 !important;
     cursor: pointer;
 }
 
 .skyro-application-btn:not(:disabled):hover {
-    background: #1d4ed8;
+    background: #1d4ed8 !important;
 }
