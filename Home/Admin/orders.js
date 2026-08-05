@@ -1622,6 +1622,68 @@ function renderStorePickupOrders() {
         0
       );
 
+      const items = getOrderItems(order);
+
+      const itemsHtml = items.length
+        ? items.map(item => {
+          const itemName =
+            item.name ||
+            item.product_name ||
+            item.title ||
+            "Product";
+
+          const itemQty =
+            item.quantity ||
+            item.qty ||
+            1;
+
+          const itemImage =
+            item.variant_image ||
+            item.variantImage ||
+            item.product_image ||
+            item.productImage ||
+            item.image ||
+            item.img ||
+            item.photo ||
+            "https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/favicon.png";
+
+          const itemVariant =
+            getItemVariant(item);
+
+          return `
+        <div class="warehouse-item">
+          <img
+            src="${escapeAttribute(itemImage)}"
+            onerror="this.onerror=null; this.src='https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/favicon.png'"
+          >
+
+          <div class="warehouse-item-info">
+            <div class="warehouse-item-title">
+              ${escapeHtml(itemName)}
+            </div>
+
+            ${itemVariant
+              ? `
+                <div class="warehouse-item-variant">
+                  Variation: ${escapeHtml(itemVariant)}
+                </div>
+              `
+              : ""
+            }
+
+            <div class="warehouse-item-qty">
+              Qty: ${escapeHtml(itemQty)}
+            </div>
+          </div>
+        </div>
+      `;
+        }).join("")
+        : `
+    <div class="empty-box">
+      No item details found.
+    </div>
+  `;
+
       return `
         <div class="warehouse-order-card">
 
@@ -1640,6 +1702,10 @@ function renderStorePickupOrders() {
             <span class="status-badge ${getOrderStatusClass(orderStatus)}">
               ${escapeHtml(orderStatus)}
             </span>
+          </div>
+
+          <div class="warehouse-items-list">
+            ${itemsHtml}
           </div>
 
           <div class="warehouse-order-info summary-box">
@@ -1697,6 +1763,187 @@ function renderStorePickupOrders() {
 </div>
 `;
 
+    }).join("");
+}
+
+function renderRoroOrders() {
+  if (!roroOrdersTableBody) return;
+
+  if (!roroOrders.length) {
+    roroOrdersTableBody.innerHTML = `
+      <div class="empty-box">
+        No Manual Freight orders yet.
+      </div>
+    `;
+    return;
+  }
+
+  const sortedOrders = [...roroOrders].sort(
+    (a, b) =>
+      new Date(b.created_at) -
+      new Date(a.created_at)
+  );
+
+  roroOrdersTableBody.innerHTML =
+    sortedOrders.map(order => {
+      const orderId =
+        order.external_id ||
+        order.id ||
+        "";
+
+      const orderStatus =
+        order.order_status ||
+        "Pending";
+
+      const amount = Number(
+        order.amount ||
+        order.total ||
+        0
+      );
+
+      const items = getOrderItems(order);
+
+      const itemsHtml = items.length
+        ? items.map(item => {
+          const itemName =
+            item.name ||
+            item.product_name ||
+            item.title ||
+            "Product";
+
+          const itemQty =
+            item.quantity ||
+            item.qty ||
+            1;
+
+          const itemImage =
+            item.variant_image ||
+            item.variantImage ||
+            item.product_image ||
+            item.productImage ||
+            item.image ||
+            item.img ||
+            item.photo ||
+            "https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/favicon.png";
+
+          const itemVariant =
+            getItemVariant(item);
+
+          return `
+              <div class="warehouse-item">
+                <img
+                  src="${escapeAttribute(itemImage)}"
+                  onerror="this.onerror=null; this.src='https://zdinvxowzpkolbfzpcac.supabase.co/storage/v1/object/public/product-images/favicon.png'"
+                >
+
+                <div class="warehouse-item-info">
+                  <div class="warehouse-item-title">
+                    ${escapeHtml(itemName)}
+                  </div>
+
+                  ${itemVariant
+              ? `
+                      <div class="warehouse-item-variant">
+                        Variation: ${escapeHtml(itemVariant)}
+                      </div>
+                    `
+              : ""
+            }
+
+                  <div class="warehouse-item-qty">
+                    Qty: ${escapeHtml(itemQty)}
+                  </div>
+                </div>
+              </div>
+            `;
+        }).join("")
+        : `
+          <div class="empty-box">
+            No item details found.
+          </div>
+        `;
+
+      return `
+        <div class="warehouse-order-card">
+
+          <div class="warehouse-order-head">
+            <span>
+              <strong>
+                ${escapeHtml(orderId || "-")}
+              </strong>
+              <br>
+              ${escapeHtml(
+        order.customer_name ||
+        "Customer"
+      )}
+            </span>
+
+            <span class="status-badge ${getOrderStatusClass(orderStatus)}">
+              ${escapeHtml(orderStatus)}
+            </span>
+          </div>
+
+          <div class="warehouse-items-list">
+            ${itemsHtml}
+          </div>
+
+          <div class="warehouse-order-info summary-box">
+
+            <div>
+              <span>Phone</span>
+              <strong>
+                ${escapeHtml(
+        order.customer_phone || "-"
+      )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Amount</span>
+              <strong>
+                ₱${amount.toLocaleString("en-PH")}
+              </strong>
+            </div>
+
+            <div>
+              <span>Payment</span>
+              <strong>
+                ${escapeHtml(
+        order.payment_status ||
+        order.status ||
+        "-"
+      )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Courier</span>
+              <strong>
+                ${escapeHtml(
+        order.courier ||
+        "Manual Freight Delivery"
+      )}
+              </strong>
+            </div>
+
+          </div>
+
+          <div style="
+            display:flex;
+            justify-content:flex-end;
+            margin-top:10px;
+          ">
+            <button
+              class="mini-manage-btn"
+              type="button"
+              onclick="openOrderModal('${escapeAttribute(orderId)}')"
+            >
+              Manage Order
+            </button>
+          </div>
+
+        </div>
+      `;
     }).join("");
 }
 /* ===============================
@@ -1946,9 +2193,38 @@ function normalizeOrder(order) {
       0
     ),
 
-    items: Array.isArray(order.items)
-      ? order.items
-      : []
+    items: (() => {
+      if (Array.isArray(order.items)) {
+        return order.items;
+      }
+
+      if (typeof order.items === "string") {
+        try {
+          const parsedItems = JSON.parse(order.items);
+
+          return Array.isArray(parsedItems)
+            ? parsedItems
+            : [];
+        } catch (error) {
+          console.warn(
+            "Unable to parse order items:",
+            order.external_id || order.id,
+            error
+          );
+
+          return [];
+        }
+      }
+
+      if (
+        order.items &&
+        typeof order.items === "object"
+      ) {
+        return Object.values(order.items);
+      }
+
+      return [];
+    })()
   };
 }
 
@@ -2017,9 +2293,20 @@ async function loadAdminOrders() {
         orderStatus.includes("expired") ||
         paymentStatus.includes("expired");
 
+      const isAlreadyProcessing =
+        orderStatus === "processing" ||
+        orderStatus === "packed" ||
+        orderStatus === "shipped" ||
+        orderStatus === "in transit" ||
+        orderStatus === "delivered";
+
       return (
-        courier.includes("roro") &&
-        !isExpired
+        (
+          courier.includes("manual freight") ||
+          courier.includes("roro")
+        ) &&
+        !isExpired &&
+        !isAlreadyProcessing
       );
     });
 
@@ -2066,6 +2353,17 @@ async function loadAdminOrders() {
         orderStatus.includes("expired") ||
         paymentStatus.includes("expired");
 
+      const isManualFreight =
+        courier.includes("roro") ||
+        courier.includes("manual freight");
+
+      const isAlreadyProcessing =
+        orderStatus === "processing" ||
+        orderStatus === "packed" ||
+        orderStatus === "shipped" ||
+        orderStatus === "in transit" ||
+        orderStatus === "delivered";
+
       const isCompletedPickup =
         courier.includes("store pickup") &&
         (
@@ -2079,13 +2377,18 @@ async function loadAdminOrders() {
         isCompletedPickup ||
         (
           !courier.includes("store pickup") &&
-          !courier.includes("roro")
+          !isManualFreight
+        ) ||
+        (
+          isManualFreight &&
+          isAlreadyProcessing
         )
       );
     });
 
     renderAdminOrders();
     renderStorePickupOrders();
+    renderRoroOrders();
     updateOrdersSummary();
     updateDashboardOrders();
     updateOrderFilterCounts();
@@ -2523,7 +2826,13 @@ function openOrderModal(orderId) {
 
     <p><strong>Tracking:</strong> ${escapeHtml(order.tracking_number || "-")}</p>
 
-    ${String(order.payment_method || "")
+    ${String(
+      order.payment_method ||
+      order.payment_provider ||
+      order.paymentProvider ||
+      order.payment_status ||
+      ""
+    )
       .toUpperCase()
       .includes("SKYRO")
       ? `
@@ -3124,15 +3433,96 @@ async function bookLalamoveShipment(orderId, btn) {
   }
 }
 
+
+async function arrangeManualFreight(orderId, btn) {
+  try {
+    setButtonLoading(
+      btn,
+      "Arranging Manual Freight..."
+    );
+
+    const response = await fetch(
+      "https://de-ecom-pro.onrender.com/api/orders/update",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          orderId,
+          order_status: "Processing",
+          shipment_arranged_at:
+            new Date().toISOString()
+        })
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.message ||
+        "Failed to arrange Manual Freight."
+      );
+    }
+
+    showToast(
+      "Manual Freight arranged. Order moved to Processing.",
+      "success"
+    );
+
+    closeOrderModal();
+    await loadAdminOrders();
+
+  } catch (error) {
+    console.error(
+      "Manual Freight error:",
+      error
+    );
+
+    showToast(
+      error.message ||
+      "Manual Freight arrangement failed.",
+      "error"
+    );
+
+  } finally {
+    resetButtonLoading(btn);
+  }
+}
+
 async function arrangeShipment(orderId, btn) {
-  const order = adminOrders.find(o =>
+  const allOrders = [
+    ...adminOrders,
+    ...storePickupOrders,
+    ...roroOrders
+  ];
+
+  const order = allOrders.find(o =>
     String(o.external_id || o.id) === String(orderId)
   );
 
-  const courier = String(order?.courier || "").toLowerCase();
+  if (!order) {
+    showToast("Order not found.", "error");
+    return;
+  }
 
-  if (courier.includes("lalamove") || courier.includes("same day")) {
+  const courier = String(
+    order.courier || ""
+  ).toLowerCase();
+
+  if (
+    courier.includes("lalamove") ||
+    courier.includes("same day")
+  ) {
     return bookLalamoveShipment(orderId, btn);
+  }
+
+  if (
+    courier.includes("manual freight") ||
+    courier.includes("roro")
+  ) {
+    return arrangeManualFreight(orderId, btn);
   }
 
   return createSPXShipment(orderId, btn);
@@ -3767,7 +4157,13 @@ async function markOrderDelivered(orderId, btn) {
 async function forceUpdateOrderStatus(orderId, status, btn) {
   try {
 
-    const order = adminOrders.find(o =>
+    const allOrders = [
+      ...adminOrders,
+      ...storePickupOrders,
+      ...roroOrders
+    ];
+
+    const order = allOrders.find(o =>
       String(o.external_id || o.id) === String(orderId)
     );
 

@@ -367,11 +367,19 @@ function updateTotalsDisplay() {
   const isLalamove =
     selectedCourier === "Same Day Delivery / Lalamove";
 
+  const selectedPaymentMethod =
+    document.querySelector(
+      'input[name="payment"]:checked'
+    )?.value?.trim()?.toUpperCase() || "";
+
+  const isOverTheCounter =
+    selectedPaymentMethod === "OVER_THE_COUNTER";
+
   const grandTotal =
     subtotal -
     voucherDiscount +
     (isLalamove ? 0 : (Number(currentShippingFee) || 0)) +
-    HANDLING_FEE;
+    (isOverTheCounter ? 0 : HANDLING_FEE);
 
   if (checkoutSubtotal) {
 
@@ -1836,6 +1844,127 @@ function markRequiredFields(fields) {
   return true;
 }
 
+function handleSuccessfulOrder(order, isGuestCheckout) {
+  clearCheckedCartItems();
+  localStorage.removeItem("drinCheckoutItems");
+
+  if (!isGuestCheckout) {
+    window.location.href = "/home-orders";
+    return;
+  }
+
+  showOrderModal(
+    "Order Successfully Placed",
+    `
+      <div style="text-align:center;">
+
+        <div style="
+          width:70px;
+          height:70px;
+          margin:0 auto 14px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          border-radius:50%;
+          background:#dcfce7;
+          color:#16a34a;
+          font-size:38px;
+          font-weight:700;
+        ">
+          ✓
+        </div>
+
+        <h3 style="margin:0 0 10px;">
+          Order Successfully Placed
+        </h3>
+
+        <p>Your Order Number:</p>
+
+        <h2 style="color:#f97316;">
+          ${order.id}
+        </h2>
+
+        <p>Your Tracking Code:</p>
+
+        <h2 style="color:#2563eb;">
+          ${order.guestTrackingCode}
+        </h2>
+
+        <small>
+          Save or screenshot your tracking code.
+        </small>
+
+        <button
+          type="button"
+          onclick="window.location.href='https://drinelectronicsph.com/guest-track/?track=${order.guestTrackingCode}'"
+          style="
+            width:100%;
+            margin-top:16px;
+            padding:12px;
+            border:none;
+            border-radius:8px;
+            background:#2563eb;
+            color:#ffffff;
+            font-weight:700;
+            cursor:pointer;
+          "
+        >
+          Track My Order
+        </button>
+
+        <button
+          type="button"
+          onclick="window.location.href='https://drinelectronicsph.com/signup/'"
+          style="
+            width:100%;
+            margin-top:10px;
+            padding:12px;
+            border:none;
+            border-radius:8px;
+            background:#f97316;
+            color:#ffffff;
+            font-weight:700;
+            cursor:pointer;
+          "
+        >
+          Sign Up
+        </button>
+
+        <button
+          type="button"
+          onclick="window.location.href='https://drinelectronicsph.com/login/'"
+          style="
+            width:100%;
+            margin-top:10px;
+            padding:12px;
+            border:1px solid #d1d5db;
+            border-radius:8px;
+            background:#ffffff;
+            color:#374151;
+            font-weight:700;
+            cursor:pointer;
+          "
+        >
+          Log In
+        </button>
+
+      </div>
+    `
+  );
+
+  const okBtn =
+    document.getElementById("orderModalOk");
+
+  if (okBtn) {
+    okBtn.textContent = "Track My Order";
+
+    okBtn.onclick = function () {
+      window.location.href =
+        `https://drinelectronicsph.com/guest-track/?track=${order.guestTrackingCode}`;
+    };
+  }
+}
+
 async function placeOrder() {
 
   if (isPlacingOrder) return;
@@ -2184,7 +2313,11 @@ async function placeOrder() {
   updateTotalsDisplay();
 
   const subtotalNumber = getCheckoutTotal();
-  const handlingFee = 25;
+
+  const handlingFee =
+    paymentMain === "OVER_THE_COUNTER"
+      ? 0
+      : 25;
 
   const isLalamoveOrder =
     selectedCourierNow === "Same Day Delivery / Lalamove";
@@ -2364,7 +2497,11 @@ async function placeOrder() {
     return resetPlaceOrder();
   }
 
-  if (paymentMain !== "COD" && totalNumber < 100) {
+  if (
+    paymentMain !== "COD" &&
+    paymentMain !== "OVER_THE_COUNTER" &&
+    totalNumber < 100
+  ) {
     showOrderModal(
       "Minimum Online Payment",
       "Your order is below the ₱100 minimum. Add more products to continue with Online Payment."
@@ -2909,86 +3046,8 @@ async function placeOrder() {
       });
     }
 
-    clearCheckedCartItems();
-
-    localStorage.removeItem("drinCheckoutItems");
-
-    closeOrderModal();
-
-    if (isGuestCheckout) {
-
-      showOrderModal(
-        "Order Successfully Placed",
-        `
-  <div class="elite-order-box">
-   <div class="elite-checkmark">✓</div>
-
-   <h3>Order Successfully Secured</h3>
-
-   <div class="elite-badge">
-      PREMIUM ORDER ACCESS AVAILABLE
-   </div>
-
-   <p class="elite-desc">
-      Your order is already confirmed and reserved.
-   </p>
-
-   <p class="elite-warning">
-      Create your account now to unlock full control of this order.
-   </p>
-
-   <div class="premium-login-actions">
-
-  <p>Your Tracking Code:</p>
-  <h2>${order.guestTrackingCode}</h2>
-  <small>Save this code or screenshot this page.</small>
-
-  <button onclick="window.location.href='https://drinelectronicsph.com/signup/'">
-    Unlock My Account
-  </button>
-
-  <button class="secondary-btn"
-    onclick="window.location.href='https://drinelectronicsph.com/guest-track/?track=${order.guestTrackingCode}'">
-    Track My Order
-  </button>
-
-  <button class="secondary-btn"
-    onclick="window.location.href='https://drinelectronicsph.com/login/'">
-     Access Existing Account
-  </button>
-
-  <button class="guest-btn"
-    onclick="window.location.href='https://drinelectronicsph.com/'">
-    Continue Shopping
-  </button>
-
-</div>
-
-</div>
-`
-      );
-
-      const okBtn =
-        document.getElementById("orderModalOk");
-
-      if (okBtn) {
-        okBtn.style.display = "none";
-      }
-
-      return;
-    }
-
-    showOrderModal(
-      "Thank You!",
-      `Your order has been placed successfully.`
-    );
-
-    setTimeout(() => {
-      window.location.href = "/home-orders";
-    }, 1200);
-
+    handleSuccessfulOrder(order, isGuestCheckout);
     return;
-
   }
 
   if (paymentMain === "OVER_THE_COUNTER") {
@@ -3002,29 +3061,7 @@ async function placeOrder() {
       return resetPlaceOrder();
     }
 
-    clearCheckedCartItems();
-    localStorage.removeItem("drinCheckoutItems");
-
-    showOrderModal(
-      "Pickup Order Submitted",
-      `
-      Your order has been submitted successfully.<br><br>
-
-      Please wait for confirmation that your order
-      is ready before visiting the store.<br><br>
-
-      Payment will be collected at the store
-      when you pick up your order.
-    `
-    );
-
-    if (checkoutBtn) {
-      checkoutBtn.disabled = true;
-      checkoutBtn.style.pointerEvents = "none";
-      checkoutBtn.style.opacity = "0.6";
-      checkoutBtn.textContent = "Pickup Order Submitted";
-    }
-
+    handleSuccessfulOrder(order, isGuestCheckout);
     return;
   }
 
