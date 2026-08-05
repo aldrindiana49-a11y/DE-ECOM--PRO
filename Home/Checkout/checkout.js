@@ -375,6 +375,22 @@ function updateTotalsDisplay() {
   const isOverTheCounter =
     selectedPaymentMethod === "OVER_THE_COUNTER";
 
+  const handlingFeeRow =
+    document.getElementById("handlingFeeRow");
+
+  const handlingFeeNote =
+    document.getElementById("handlingFeeNote");
+
+  if (handlingFeeRow) {
+    handlingFeeRow.style.display =
+      isOverTheCounter ? "none" : "flex";
+  }
+
+  if (handlingFeeNote) {
+    handlingFeeNote.style.display =
+      isOverTheCounter ? "none" : "block";
+  }
+
   const grandTotal =
     subtotal -
     voucherDiscount +

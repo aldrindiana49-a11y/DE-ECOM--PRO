@@ -95,9 +95,9 @@ async function loadOrders() {
 
         const serviceFee =
             Number(
-                order.service_fee ||
-                order.handling_fee ||
-                order.packaging_fee ||
+                order.service_fee ??
+                order.handling_fee ??
+                order.packaging_fee ??
                 25
             );
 
@@ -410,14 +410,17 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled")
     </span>
 
     <span>
-        ${paymentMethod === "XENDIT"
+    ${paymentMethod === "XENDIT"
                 ? "Online Payment"
                 : paymentMethod === "SKYRO"
                     ? "Skyro Installment"
                     : paymentMethod === "COD"
                         ? "Cash on Delivery"
-                        : paymentMethod || "Unknown"}
-    </span>
+                        : paymentMethod === "OVER_THE_COUNTER"
+                            ? "Over The Counter"
+                            : paymentMethod || "Unknown"
+            }
+</span>
 
 </div>
 
