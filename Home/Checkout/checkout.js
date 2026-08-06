@@ -563,10 +563,12 @@ function updateCourierOptions() {
     selectedProvince.includes("laguna") ||
     selectedProvince.includes("bulacan");
 
-  const availableCouriers = [
-    "SPX",
-    "Manual Freight Delivery"
-  ];
+  const parcelInfo = calculateParcelInfo();
+  const availableCouriers = ["SPX"];
+
+  if (Number(parcelInfo.parcelWeight || 0) >= 10) {
+    availableCouriers.push("Manual Freight Delivery");
+  }
 
   if (lalamovePickupAllowedArea) {
     availableCouriers.push(
