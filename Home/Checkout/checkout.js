@@ -577,8 +577,14 @@ function updateCourierOptions() {
 
   availableCouriers.forEach((courier) => {
     const opt = document.createElement("option");
+
     opt.value = courier;
-    opt.textContent = courier;
+
+    opt.textContent =
+      courier === "Manual Freight Delivery"
+        ? "Overland Cargo"
+        : courier;
+
     courierSelect.appendChild(opt);
   });
 
@@ -1087,7 +1093,7 @@ function scheduleShippingQuote() {
       "ready",
       `
   <div class="delivery-notice-box">
-    <strong>🚚 Manual Freight Delivery</strong><br><br>
+    <strong>🚚 Overland Cargo</strong><br><br>
 
     This delivery option may use:<br>
     • RORO<br>

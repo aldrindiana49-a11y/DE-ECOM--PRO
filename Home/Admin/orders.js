@@ -2498,7 +2498,6 @@ function getShipmentButton(order, orderId) {
     Boolean(order.awb_link) ||
     Boolean(order.tracking_number) ||
     [
-      "processing",
       "packed",
       "shipped",
       "in transit",
