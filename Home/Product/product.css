@@ -1272,47 +1272,33 @@
   pointer-events: none;
 }
 
-/* =========================
-   MOBILE VARIANT SWIPE
-========================= */
+/* MOBILE VARIANTS - WRAP, NO SWIPE */
 
 @media (max-width: 768px) {
 
   .variant-container {
     width: 100%;
-    overflow: hidden;
+    overflow: visible !important;
   }
 
   .variant-options {
     display: flex !important;
-    flex-wrap: nowrap !important;
-    gap: 10px;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
 
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-
-    padding-bottom: 8px;
-
-    scroll-snap-type: x mandatory;
-
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .variant-options::-webkit-scrollbar {
-    display: none;
+    overflow: visible !important;
+    padding-bottom: 0 !important;
   }
 
   .variant-btn {
-    flex: 0 0 auto;
+    flex: 0 0 auto !important;
 
-    min-width: 120px;
-    max-width: 150px;
+    min-width: unset !important;
+    max-width: 100% !important;
 
-    white-space: nowrap;
+    white-space: normal !important;
 
     text-align: center;
-
-    scroll-snap-align: start;
   }
 
 }
@@ -3520,4 +3506,194 @@ body {
   font-size: 13px;
   font-weight: 400;
   line-height: 1.5;
+}
+
+/* MOBILE VARIANTS - OUT OF STOCK AT BOTTOM */
+@media (max-width: 768px) {
+
+  .variant-popup-instock,
+  .variant-popup-outstock {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .variant-popup-outstock {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .variant-outstock-label {
+    width: 100%;
+    font-size: 12px;
+    font-weight: 700;
+    color: #94a3b8;
+    margin-bottom: 2px;
+  }
+
+  .variant-popup-outstock .variant-popup-option {
+    opacity: 0.5;
+  }
+}
+
+/* VOUCHER PREV / NEXT - LEFT & RIGHT SIDE */
+
+.product-info .voucher-section {
+  position: relative;
+}
+
+.voucher-nav {
+  position: static !important;
+}
+
+/* parehong arrow */
+.voucher-nav button {
+  position: absolute !important;
+  top: 58% !important;
+  transform: translateY(-50%) !important;
+
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+
+  z-index: 20 !important;
+
+  background: linear-gradient(135deg, #00bcd4, #0097a7) !important;
+  color: #fff !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* PREV */
+.voucher-nav button:first-child {
+  left: 4px !important;
+}
+
+/* NEXT */
+.voucher-nav button:last-child {
+  right: 4px !important;
+}
+
+/* para hindi matakpan ang voucher cards */
+.product-info .voucher-list {
+  padding-left: 30px !important;
+  padding-right: 30px !important;
+}
+
+.reviews-load-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.reviews-load-more-btn {
+  padding: 10px 22px;
+  border: 1px solid #00a8c6;
+  border-radius: 8px;
+  background: #fff;
+  color: #0097a7;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.reviews-load-more-btn:hover {
+  background: #0097a7;
+  color: #fff;
+}
+
+.no-reviews-message {
+  text-align: center;
+  padding: 28px 16px;
+  color: #64748b;
+}
+
+.no-reviews-star {
+  font-size: 34px;
+  color: #f59e0b;
+  margin-bottom: 8px;
+}
+
+.no-reviews-message strong {
+  display: block;
+  font-size: 16px;
+  color: #334155;
+  margin-bottom: 4px;
+}
+
+.no-reviews-message p {
+  margin: 0;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+/* VARIANT LOAD MORE + OUT OF STOCK GROUP */
+
+.variant-outstock-group {
+  width: 100%;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.variant-outstock-title {
+  margin-bottom: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.variant-outstock {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.variant-outstock .variant-btn {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.variant-load-more-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.variant-load-more-btn {
+  border: 1px solid #06b6d4;
+  background: #fff;
+  color: #0891b2;
+
+  padding: 8px 18px;
+
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.variant-load-more-btn:hover {
+  background: #06b6d4;
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+
+  .variant-load-more-btn {
+    width: 100%;
+  }
+
 }

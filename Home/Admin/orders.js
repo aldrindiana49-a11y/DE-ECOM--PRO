@@ -2428,6 +2428,15 @@ function getShipmentButton(order, orderId) {
   const isSkyroApproved =
     orderStatus === "skyro approved";
 
+  const paymentStatus = String(
+    order.payment_status ||
+    order.status ||
+    ""
+  ).trim().toUpperCase();
+
+  const isPaid =
+    paymentStatus === "PAID";
+
   if (isStorePickup) {
     if (
       orderStatus === "completed" ||
@@ -2477,7 +2486,7 @@ function getShipmentButton(order, orderId) {
   `;
   }
 
-  if (isSkyro && !isSkyroApproved) {
+  if (isSkyro && !isSkyroApproved && !isPaid) {
     return `
       <button
         class="primary-btn"

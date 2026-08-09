@@ -64,9 +64,15 @@ function renderVariantSelector() {
     return;
   }
 
-  const realVariants = variants.filter(
-    v => v.label && v.label !== "Default"
-  );
+  const realVariants = variants
+    .map((variant, originalIndex) => ({
+      variant,
+      originalIndex
+    }))
+    .filter(item =>
+      item.variant.label &&
+      item.variant.label !== "Default"
+    );
 
   if (!realVariants.length) {
     variantContainer.innerHTML = "";
@@ -74,50 +80,151 @@ function renderVariantSelector() {
     return;
   }
 
-  variantContainer.innerHTML = `
-    <h4 class="variant-title">${product.variantTitle || "Variation"}</h4>
-    <div class="variant-options">
-      ${variants.map((variant, index) => `
-        <button
-          type="button"
-          class="variant-btn ${safeNumber(variant.stock) <= 0 ? "out-of-stock" : ""}"
-          data-index="${index}"
-        >
-          ${variant.label}
-        </button>
-      `).join("")}
-    </div>
-  `;
+  const inStockVariants = realVariants.filter(
+    item => safeNumber(item.variant.stock) > 0
+  );
 
-  const buttons = variantContainer.querySelectorAll(".variant-btn");
+  const outOfStockVariants = realVariants.filter(
+    item => safeNumber(item.variant.stock) <= 0
+  );
 
-  buttons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const variant = variants[Number(this.dataset.index)];
+  let visibleVariants = 6;
+  let visibleOutOfStock = 6;
 
-      if (!variant) return;
+  function renderVariants() {
 
-      if (safeNumber(variant.stock) <= 0) {
-        showOutOfStockAlert();
-        return;
-      }
+    const visibleInStock =
+      inStockVariants.slice(0, visibleVariants);
 
-      if (window.innerWidth > 768) {
-        buttons.forEach(btn => btn.classList.remove("active"));
-        this.classList.add("active");
-      }
-      selectedVariant = variant;
+    const visibleOutStock =
+      outOfStockVariants.slice(0, visibleOutOfStock);
 
-      if (window.innerWidth <= 768) {
-        openVariantPopup();
-        return;
-      }
+    variantContainer.innerHTML = `
+      <h4 class="variant-title">
+        ${product.variantTitle || "Variation"}
+      </h4>
 
-      updateVariantUI(variant);
-    });
-  });
+      <div class="variant-options variant-instock">
+
+        ${visibleInStock.map(({ variant, originalIndex }) => `
+          <button
+            type="button"
+            class="variant-btn ${selectedVariant?.label === variant.label
+        ? "active"
+        : ""
+      }"
+            data-index="${originalIndex}"
+          >
+            ${variant.label}
+          </button>
+        `).join("")}
+
+      </div>
+
+      ${visibleVariants < inStockVariants.length ? `
+        <div class="variant-load-more-wrap">
+          <button
+            type="button"
+            id="loadMoreVariantsBtn"
+            class="variant-load-more-btn"
+          >
+            Load More Variants
+          </button>
+        </div>
+      ` : ""}
+
+      ${outOfStockVariants.length ? `
+        <div class="variant-outstock-group">
+
+          <div class="variant-outstock-title">
+            Out of Stock
+          </div>
+
+          <div class="variant-options variant-outstock">
+
+            ${visibleOutStock.map(({ variant, originalIndex }) => `
+              <button
+                type="button"
+                class="variant-btn out-of-stock"
+                data-index="${originalIndex}"
+              >
+                ${variant.label}
+              </button>
+            `).join("")}
+
+          </div>
+
+          ${visibleOutOfStock < outOfStockVariants.length ? `
+            <div class="variant-load-more-wrap">
+              <button
+                type="button"
+                id="loadMoreOutOfStockBtn"
+                class="variant-load-more-btn variant-load-more-outstock"
+              >
+                Load More Out of Stock
+              </button>
+            </div>
+          ` : ""}
+
+        </div>
+      ` : ""}
+    `;
+
+    variantContainer
+      .querySelectorAll(".variant-btn")
+      .forEach(button => {
+
+        button.addEventListener("click", function () {
+
+          const variant =
+            variants[Number(this.dataset.index)];
+
+          if (!variant) return;
+
+          if (safeNumber(variant.stock) <= 0) {
+            showOutOfStockAlert();
+            return;
+          }
+
+          selectedVariant = variant;
+
+          if (window.innerWidth <= 768) {
+            openVariantPopup();
+            return;
+          }
+
+          variantContainer
+            .querySelectorAll(".variant-btn")
+            .forEach(btn =>
+              btn.classList.remove("active")
+            );
+
+          this.classList.add("active");
+
+          updateVariantUI(variant);
+        });
+      });
+
+    document
+      .getElementById("loadMoreVariantsBtn")
+      ?.addEventListener("click", () => {
+
+        visibleVariants += 6;
+        renderVariants();
+      });
+
+    document
+      .getElementById("loadMoreOutOfStockBtn")
+      ?.addEventListener("click", () => {
+
+        visibleOutOfStock += 6;
+        renderVariants();
+      });
+  }
 
   selectedVariant = null;
+
+  renderVariants();
 }
 
 function updateVariantUI(variant) {
@@ -480,6 +587,8 @@ function renderProduct() {
   document.getElementById("productName").textContent =
     product.name || "Unnamed Product";
 
+  setTimeout(updateTitleToggle, 0);
+
   const variant = getBestVariant(product);
 
   let price = variant ? variant.price : product.price;
@@ -745,7 +854,14 @@ addToCartBtn.addEventListener("click", () => {
 
   const qty = validateQuantity();
 
-  const variants = getVariants(product);
+  const variants = getVariants(product)
+    .slice()
+    .sort((a, b) => {
+      const aOutOfStock = safeNumber(a.stock) <= 0 ? 1 : 0;
+      const bOutOfStock = safeNumber(b.stock) <= 0 ? 1 : 0;
+
+      return aOutOfStock - bOutOfStock;
+    });
 
   if (variants.length > 1 && window.innerWidth <= 768) {
     openVariantPopup();
@@ -1206,18 +1322,48 @@ if (overlay) {
   overlay.addEventListener("click", closeSidebar);
 }
 
-// TITLE TOGGLE
+// TITLE TOGGLE - SHOW ONLY IF MORE THAN 2 LINES
 const title = document.getElementById("productName");
 const titleToggle = document.getElementById("titleToggle");
 
-if (title && titleToggle) {
-  titleToggle.addEventListener("click", () => {
-    title.classList.toggle("expanded");
-    title.style.webkitLineClamp = title.classList.contains("expanded") ? "unset" : "2";
-    titleToggle.textContent = title.classList.contains("expanded")
-      ? "Show less"
-      : "Read more";
+function updateTitleToggle() {
+  if (!title || !titleToggle) return;
+
+  title.classList.remove("expanded");
+  title.style.webkitLineClamp = "2";
+
+  requestAnimationFrame(() => {
+    const isOverflowing =
+      title.scrollHeight > title.clientHeight + 2;
+
+    titleToggle.style.display =
+      isOverflowing ? "block" : "none";
+
+    titleToggle.textContent = "Read more";
   });
+}
+
+
+if (title && titleToggle) {
+
+  titleToggle.addEventListener("click", () => {
+
+    const expanded =
+      title.classList.toggle("expanded");
+
+    title.style.webkitLineClamp =
+      expanded ? "unset" : "2";
+
+    titleToggle.textContent =
+      expanded ? "Show less" : "Read more";
+  });
+
+  updateTitleToggle();
+
+  window.addEventListener(
+    "resize",
+    updateTitleToggle
+  );
 }
 
 // DESCRIPTION TOGGLE
@@ -1436,87 +1582,112 @@ function openVariantPopup() {
   document.getElementById("variantPopupStock").textContent =
     `Stock: ${getProductStock(product)}`;
 
-  variantPopupOptions.innerHTML = variants.map((variant, index) => `
-    <button
-      type="button"
-      class="variant-popup-option ${safeNumber(variant.stock) <= 0 ? "out-of-stock" : ""}"
-      data-index="${index}"
-    >
-      ${variant.label}
-    </button>
-  `).join("");
+  const inStockVariants = variants
+    .map((variant, originalIndex) => ({
+      variant,
+      originalIndex
+    }))
+    .filter(item => safeNumber(item.variant.stock) > 0);
 
+  let visiblePopupVariants = 6;
 
-  if (selectedVariant) {
-    const selectedIndex = variants.findIndex(
-      item => item.label === selectedVariant.label
-    );
+  function renderPopupVariants() {
 
-    if (selectedIndex >= 0) {
-      const activeBtn = variantPopupOptions.querySelector(
-        `[data-index="${selectedIndex}"]`
+    const visibleInStock =
+      inStockVariants.slice(0, visiblePopupVariants);
+
+    variantPopupOptions.innerHTML = `
+    <div class="variant-popup-instock">
+
+      ${visibleInStock.map(({ variant, originalIndex }) => `
+        <button
+          type="button"
+          class="variant-popup-option"
+          data-index="${originalIndex}"
+        >
+          ${variant.label}
+        </button>
+      `).join("")}
+
+    </div>
+
+    ${visiblePopupVariants < inStockVariants.length ? `
+      <div class="variant-popup-loadmore-wrap">
+        <button
+          type="button"
+          id="loadMorePopupVariantsBtn"
+          class="variant-load-more-btn"
+        >
+          Load More Variants
+        </button>
+      </div>
+    ` : ""}
+  `;
+
+    if (selectedVariant) {
+
+      const selectedIndex = variants.findIndex(
+        item => item.label === selectedVariant.label
       );
 
-      activeBtn?.classList.add("active");
-
-      document.getElementById("variantPopupImage").src =
-        selectedVariant.image || getProductImage(product);
-
-      document.getElementById("variantPopupPrice").textContent =
-        formatPrice(
-          safeNumber(selectedVariant.discountPrice) > 0
-            ? selectedVariant.discountPrice
-            : selectedVariant.price
+      const activeBtn =
+        variantPopupOptions.querySelector(
+          `[data-index="${selectedIndex}"]`
         );
 
-      document.getElementById("variantPopupStock").textContent =
-        `Stock: ${selectedVariant.stock}`;
+      activeBtn?.classList.add("active");
     }
+
+    variantPopupOptions
+      .querySelectorAll(".variant-popup-option")
+      .forEach((btn) => {
+
+        btn.addEventListener("click", function () {
+
+          const variant =
+            variants[Number(this.dataset.index)];
+
+          if (!variant) return;
+
+          variantPopupOptions
+            .querySelectorAll(".variant-popup-option")
+            .forEach(item =>
+              item.classList.remove("active")
+            );
+
+          this.classList.add("active");
+
+          selectedVariant = variant;
+
+          document.getElementById("variantPopupImage").src =
+            variant.image || getProductImage(product);
+
+          document.getElementById("variantPopupPrice").textContent =
+            formatPrice(
+              safeNumber(variant.discountPrice) > 0
+                ? variant.discountPrice
+                : variant.price
+            );
+
+          document.getElementById("variantPopupStock").textContent =
+            `Stock: ${variant.stock}`;
+        });
+      });
+
+    document
+      .getElementById("loadMorePopupVariantsBtn")
+      ?.addEventListener("click", () => {
+
+        visiblePopupVariants += 6;
+
+        renderPopupVariants();
+      });
   }
+
+  renderPopupVariants();
 
   variantPopup.classList.add("show");
 
-  variantPopupOptions
-    .querySelectorAll(".variant-popup-option")
-    .forEach((btn) => {
-
-      btn.addEventListener("click", function () {
-
-        const variant =
-          variants[Number(this.dataset.index)];
-
-        if (!variant) return;
-
-        if (safeNumber(variant.stock) <= 0) {
-          showOutOfStockAlert();
-          return;
-        }
-
-        variantPopupOptions
-          .querySelectorAll(".variant-popup-option")
-          .forEach(item =>
-            item.classList.remove("active")
-          );
-
-        this.classList.add("active");
-
-        selectedVariant = variant;
-
-        document.getElementById("variantPopupImage").src =
-          variant.image || getProductImage(product);
-
-        document.getElementById("variantPopupPrice").textContent =
-          formatPrice(
-            safeNumber(variant.discountPrice) > 0
-              ? variant.discountPrice
-              : variant.price
-          );
-
-        document.getElementById("variantPopupStock").textContent =
-          `Stock: ${variant.stock}`;
-      });
-
-    });
 }
 
 function closeVariantPopup() {
@@ -1893,7 +2064,7 @@ function renderSearchResults(list) {
 
       <div class="homepage-product-image">
         <img
-          src="${getProductImage(item)}"
+          src="${item.image || 'https://via.placeholder.com/500x400?text=No+Image'}"
           alt="${item.name}"
         >
       </div>
@@ -2353,6 +2524,19 @@ async function loadProductReviews() {
   }
 
   if (!data || !data.length) {
+    const reviewsList =
+      document.getElementById("productReviewsList");
+
+    if (reviewsList) {
+      reviewsList.innerHTML = `
+      <div class="no-reviews-message">
+        <div class="no-reviews-star">☆</div>
+        <strong>No reviews yet</strong>
+        <p>Be the first to review this product.</p>
+      </div>
+    `;
+    }
+
     return;
   }
 
@@ -2375,31 +2559,63 @@ async function loadProductReviews() {
     document.getElementById("productReviewsList");
 
   if (reviewsList) {
-    reviewsList.innerHTML = data.map(review => `
-  <div class="review-card">
 
-    <div class="review-stars">
-      ${"★".repeat(Number(review.rating))}
-    </div>
+    let visibleReviews = 3;
 
-    ${review.comment ? `
-      <p>${review.comment}</p>
-    ` : ""}
+    function renderReviews() {
 
-    ${review.review_image ? `
-      <img 
-        src="${review.review_image}"
-        class="review-image"
-        onclick="openReviewImage('${review.review_image}')"
-      >
-    ` : ""}
+      const reviewsToShow =
+        data.slice(0, visibleReviews);
 
-    <small>
-      ${maskName(review.customer_name)} • Verified Buyer
-    </small>
+      reviewsList.innerHTML = `
+      ${reviewsToShow.map(review => `
+        <div class="review-card">
 
-  </div>
-`).join("");
+          <div class="review-stars">
+            ${"★".repeat(Number(review.rating))}
+          </div>
+
+          ${review.comment ? `
+            <p>${review.comment}</p>
+          ` : ""}
+
+          ${review.review_image ? `
+            <img 
+              src="${review.review_image}"
+              class="review-image"
+              onclick="openReviewImage('${review.review_image}')"
+            >
+          ` : ""}
+
+          <small>
+            ${maskName(review.customer_name)} • Verified Buyer
+          </small>
+
+        </div>
+      `).join("")}
+
+      ${visibleReviews < data.length ? `
+        <div class="reviews-load-more-wrap">
+          <button
+            type="button"
+            id="loadMoreReviewsBtn"
+            class="reviews-load-more-btn"
+          >
+            Load More Reviews
+          </button>
+        </div>
+      ` : ""}
+    `;
+
+      document
+        .getElementById("loadMoreReviewsBtn")
+        ?.addEventListener("click", () => {
+          visibleReviews += 3;
+          renderReviews();
+        });
+    }
+
+    renderReviews();
   }
 }
 
