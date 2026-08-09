@@ -564,9 +564,15 @@ function updateCourierOptions() {
     selectedProvince.includes("bulacan");
 
   const parcelInfo = calculateParcelInfo();
-  const availableCouriers = ["SPX"];
+  const parcelWeight = Number(parcelInfo.parcelWeight || 0);
 
-  if (Number(parcelInfo.parcelWeight || 0) >= 10) {
+  const availableCouriers = [];
+
+  if (parcelWeight <= 50) {
+    availableCouriers.push("SPX");
+  }
+
+  if (parcelWeight >= 10 || parcelWeight > 50) {
     availableCouriers.push("Manual Freight Delivery");
   }
 
@@ -594,9 +600,27 @@ function updateCourierOptions() {
   selectedCourier = "";
 
   if (courierStatus) {
-    courierStatus.textContent = selectedCourier
-      ? `${selectedCourier} selected`
-      : "Please select courier";
+    if (parcelWeight > 50) {
+
+      courierStatus.classList.add("courier-weight-warning");
+
+      courierStatus.innerHTML = `
+      ⚠️ <strong>Estimated chargeable weight: ${parcelWeight}kg</strong><br>
+      This may be based on actual weight or parcel dimensions.<br>
+      SPX supports up to 50kg only. Please select <strong>Overland Cargo</strong> or another available courier.
+    `;
+
+    } else {
+
+      courierStatus.classList.remove("courier-weight-warning");
+
+      courierStatus.textContent = selectedCourier
+        ? `${selectedCourier === "Manual Freight Delivery"
+          ? "Overland Cargo"
+          : selectedCourier
+        } selected`
+        : "Please select courier";
+    }
   }
 
   if (selectedCourier) {
@@ -619,7 +643,7 @@ function showOrderModal(title, message, showLoader = false) {
   modalTitle.textContent = title;
   modalMessage.innerHTML = showLoader
     ? `<div class="payment-loader"></div><p>${message}</p>`
-    : `<p>${message}</p>`;
+    : message;
 
   // DISABLE CLOSE
   modal.onclick = null;
@@ -1370,23 +1394,6 @@ async function calculateLalamoveFee() {
 
     currentParcelInfo = calculateParcelInfo();
 
-    if (currentParcelInfo.parcelWeight > 20) {
-      currentShippingFee = null;
-
-      currentShippingQuote = {
-        success: false,
-        unsupportedArea: true,
-        overweight: true
-      };
-
-      setShippingUI(
-        "failed",
-        "Same Day Delivery is only available up to 20kg. Please use SPX.",
-        null
-      );
-      closeOrderModal();
-      return;
-    }
 
     const pinnedLat = deliveryLatInput?.value;
     const pinnedLng = deliveryLngInput?.value;
@@ -2052,6 +2059,62 @@ async function placeOrder() {
 
   const selectedCourierNow =
     courierSelect?.value || "";
+
+  const earlySubtotal = getCheckoutTotal();
+
+  if (
+    paymentMain === "ONLINE" &&
+    selectedCourierNow === "SPX" &&
+    earlySubtotal > 30000
+  ) {
+
+    showOrderModal(
+      "SPX Order Value Limit",
+      `
+    <div class="checkout-limit-premium">
+
+      <div class="checkout-limit-icon">
+        📦
+      </div>
+
+      <h3 class="checkout-limit-title">
+        SPX Order Value Limit
+      </h3>
+
+      <p class="checkout-limit-subtitle">
+        SPX delivery supports orders up to
+        ₱30,000 for Online Payment.
+      </p>
+
+      <div class="checkout-limit-amount">
+        <span class="checkout-limit-amount-label">
+          Maximum SPX Order Value
+        </span>
+
+        <div class="checkout-limit-amount-value">
+          ₱30,000
+        </div>
+      </div>
+
+      <div class="checkout-limit-note">
+        For orders above ₱30,000, please select
+        Overland Cargo or another available delivery option.
+      </div>
+
+      <button
+        type="button"
+        class="checkout-limit-btn"
+        onclick="closeOrderModal()"
+      >
+        Change Delivery Option
+      </button>
+
+    </div>
+  `
+    );
+
+    return resetPlaceOrder();
+  }
 
   if (!selectedCourierNow) {
     showOrderModal("Courier Required", "Please select SPX or Same Day Delivery before placing your order.");
@@ -3475,7 +3538,10 @@ courierSelect?.addEventListener("change", function () {
   if (courierStatus) {
     courierStatus.textContent =
       selectedCourier
-        ? `${selectedCourier} selected`
+        ? `${selectedCourier === "Manual Freight Delivery"
+          ? "Overland Cargo"
+          : selectedCourier
+        } selected`
         : "Please select courier";
   }
 

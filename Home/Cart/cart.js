@@ -489,7 +489,6 @@ function goToCheckout() {
   const selectedItems = getSelectedCart();
 
   const MAX_CHECKOUT_ROWS = 50;
-  const MAX_ORDER_VALUE = 30000;
 
 
   const totalValue = selectedItems.reduce((sum, item) => {
@@ -505,10 +504,6 @@ function goToCheckout() {
     return;
   }
 
-  if (totalValue > MAX_ORDER_VALUE) {
-    alert("Maximum ₱30,000 per checkout only. Please create another order.");
-    return;
-  }
 
   const checkoutItems = selectedItems.map(item => {
     const safeImage =
@@ -568,7 +563,7 @@ function goToCheckout() {
       currency: "PHP"
     });
   }
-  
+
   window.location.href = "../Checkout/checkout.html";
 }
 /* ===============================
