@@ -15,6 +15,47 @@
 
 let singleVariantImageData = "";
 let products = [];
+let inventoryCurrentPage = 1;
+const inventoryItemsPerPage = 10;
+let productGalleryData = [];
+let selectedCoverIndex = 0;
+let productGalleryFiles = [];
+
+const inventoryPrevBtn =
+  document.getElementById("inventoryPrevBtn");
+
+const inventoryNextBtn =
+  document.getElementById("inventoryNextBtn");
+
+const inventoryPageInfo =
+  document.getElementById("inventoryPageInfo");
+
+if (inventoryPrevBtn) {
+  inventoryPrevBtn.addEventListener("click", () => {
+
+    if (inventoryCurrentPage > 1) {
+      inventoryCurrentPage--;
+
+      renderInventory(searchInput?.value || "");
+    }
+
+  });
+}
+
+if (inventoryNextBtn) {
+  inventoryNextBtn.addEventListener("click", () => {
+
+    const totalPages = Math.ceil(
+      products.length / inventoryItemsPerPage
+    );
+
+    if (inventoryCurrentPage < totalPages) {
+      inventoryCurrentPage++;
+      renderInventory(searchInput?.value || "");
+    }
+
+  });
+}
 
 async function uploadImageToSupabase(file, folder = "products") {
 
@@ -48,10 +89,6 @@ async function uploadImageToSupabase(file, folder = "products") {
       .getPublicUrl(filePath);
 
   return data.publicUrl;
-}
-
-function saveProducts() {
-  // Supabase only - localStorage disabled
 }
 
 function generateVariantId() {
@@ -166,6 +203,115 @@ function updateDashboard() {
   }
 }
 
+function renderProductGallery() {
+  const galleryContainer =
+    document.getElementById("productGalleryPreview");
+
+  if (!galleryContainer) return;
+
+  galleryContainer.innerHTML = "";
+
+  for (let index = 0; index < 5; index++) {
+    const image = productGalleryData[index] || "";
+
+    const card = document.createElement("div");
+
+    card.className = image
+      ? "product-photo-card"
+      : "product-photo-slot";
+
+    if (image) {
+      card.innerHTML = `
+        <div class="photo-card-image-wrap">
+
+          <span class="slot-number">
+            ${index + 1}
+          </span>
+
+          <img
+            src="${escapeAttribute(image)}"
+            alt="Product photo ${index + 1}"
+          />
+
+          ${index === selectedCoverIndex
+          ? `<span class="cover-badge">Cover</span>`
+          : ""
+        }
+
+        </div>
+
+        <div class="photo-card-actions">
+
+          ${index !== selectedCoverIndex
+          ? `
+                <button
+                  type="button"
+                  class="set-cover-btn"
+                  onclick="setProductCover(${index})"
+                >
+                  Set as Cover
+                </button>
+              `
+          : `
+                <span class="current-cover-text">
+                  Main Photo
+                </span>
+              `
+        }
+
+          <button
+            type="button"
+            class="remove-photo-btn"
+            onclick="removeProductPhoto(${index})"
+          >
+            Remove
+          </button>
+
+        </div>
+      `;
+    } else {
+      card.innerHTML = `
+        <span class="slot-number">
+          ${index + 1}
+        </span>
+
+        <span class="slot-empty-text">
+          No Photo
+        </span>
+      `;
+    }
+
+    galleryContainer.appendChild(card);
+  }
+}
+
+function setProductCover(index) {
+  if (!productGalleryData[index]) return;
+
+  selectedCoverIndex = index;
+
+  setImagePreview(productGalleryData[index]);
+
+  renderProductGallery();
+}
+
+function removeProductPhoto(index) {
+  productGalleryData.splice(index, 1);
+
+  if (productGalleryData.length === 0) {
+    selectedCoverIndex = 0;
+    setImagePreview("");
+  } else {
+    if (selectedCoverIndex >= productGalleryData.length) {
+      selectedCoverIndex = 0;
+    }
+
+    setImagePreview(productGalleryData[selectedCoverIndex]);
+  }
+
+  renderProductGallery();
+}
+
 function setImagePreview(src, gallery = []) {
 
   const preview =
@@ -251,13 +397,35 @@ if (productImageFile) {
       files.map(file => fileToBase64(file))
     ).then((images) => {
 
-      setImagePreview(images[0], images);
+      const remainingSlots = 5 - productGalleryData.length;
+
+      if (remainingSlots <= 0) {
+        showToast("Maximum 5 product photos only.", "error");
+        this.value = "";
+        return;
+      }
+
+      const newImages = images.slice(0, remainingSlots);
+
+      const newFiles = files.slice(0, remainingSlots);
+
+      productGalleryData.push(...newImages);
+      productGalleryFiles.push(...newFiles);
+
+      if (productGalleryData.length === newImages.length) {
+        selectedCoverIndex = 0;
+      }
+
+      setImagePreview(productGalleryData[selectedCoverIndex]);
+      renderProductGallery();
 
       showToast(
-        `${images.length} product photos selected.`,
+        `${productGalleryData.length} product photos selected.`,
         "success"
       );
 
+      // para puwedeng pumili ulit ng another image
+      this.value = "";
     });
 
   });
@@ -386,10 +554,10 @@ function renderVariantTable(variants = []) {
     row.dataset.variantId = item.id;
 
     row.innerHTML = `
-      <td>
-        <input
-          type="text"
-          data-field="label"
+        <td>
+          <input
+            type="text"
+            data-field="label"
           maxlength="30"
           value="${escapeAttribute(item.label)}"
           placeholder="M1 - 2pcs / Yellow - 4pcs"
@@ -419,6 +587,60 @@ function addVariantRow() {
   const variants = getVariantRows();
   variants.push(createEmptyVariant());
   renderVariantTable(variants);
+}
+
+const applyToAllVariantsBtn =
+  document.getElementById("applyToAllVariantsBtn");
+
+if (applyToAllVariantsBtn) {
+  applyToAllVariantsBtn.addEventListener("click", () => {
+
+    const stock = document.getElementById("applyAllStock")?.value;
+    const weight = document.getElementById("applyAllWeight")?.value;
+    const length = document.getElementById("applyAllLength")?.value;
+    const width = document.getElementById("applyAllWidth")?.value;
+    const height = document.getElementById("applyAllHeight")?.value;
+
+    const rows =
+      document.querySelectorAll(
+        '#variantTableBody tr[data-variant-id]'
+      );
+
+    if (!rows.length) {
+      showToast("No variants available.", "warning");
+      return;
+    }
+
+    rows.forEach((row) => {
+
+      if (stock !== "") {
+        row.querySelector('[data-field="stock"]').value = stock;
+      }
+
+      if (weight !== "") {
+        row.querySelector('[data-field="weight"]').value = weight;
+      }
+
+      if (length !== "") {
+        row.querySelector('[data-field="length"]').value = length;
+      }
+
+      if (width !== "") {
+        row.querySelector('[data-field="width"]').value = width;
+      }
+
+      if (height !== "") {
+        row.querySelector('[data-field="height"]').value = height;
+      }
+
+    });
+
+    showToast(
+      "Values applied to all variants.",
+      "success"
+    );
+
+  });
 }
 
 window.addVariantRow = addVariantRow;
@@ -512,13 +734,13 @@ function validateDescription(value) {
     return false;
   }
 
-  if (description.length < 20) {
-    showToast("Description must be at least 20 characters.", "error");
+  if (description.length < 100) {
+    showToast("Description must be at least 100 characters.", "error");
     return false;
   }
 
-  if (description.length > 500) {
-    showToast("Description must not exceed 500 characters.", "error");
+  if (description.length > 3000) {
+    showToast("Description must not exceed 3000 characters.", "error");
     return false;
   }
 
@@ -740,27 +962,39 @@ function renderInventory(filter = "") {
     return;
   }
 
-  filteredProducts
-    .slice()
-    .reverse()
-    .forEach((product) => {
-      const variants = Array.isArray(product.variants) ? product.variants : [];
-      const totalStock = variants.reduce(
-        (sum, item) => sum + safeNumber(item.stock, 0),
-        0
-      );
-      const variantTitleText = safeText(
-        product.variantTitle,
-        product.productType === "single" ? "Single SKU" : "Variant"
-      );
+  const orderedProducts = filteredProducts.slice();
 
-      const row = document.createElement("tr");
-      row.innerHTML = `
+  const startIndex =
+    (inventoryCurrentPage - 1) * inventoryItemsPerPage;
+
+  const endIndex =
+    startIndex + inventoryItemsPerPage;
+
+  const paginatedProducts =
+    orderedProducts.slice(startIndex, endIndex);
+
+  paginatedProducts.forEach((product) => {
+
+    const variants = Array.isArray(product.variants) ? product.variants : [];
+    const totalStock = variants.reduce(
+      (sum, item) => sum + safeNumber(item.stock, 0),
+      0
+    );
+    const variantTitleText = safeText(
+      product.variantTitle,
+      product.productType === "single" ? "Single SKU" : "Variant"
+    );
+
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+    
+
         <td>
-          <img
+        <img
             src="${escapeAttribute(
-        safeText(product.image, "https://via.placeholder.com/100x100?text=No+Image")
-      )}"
+      safeText(product.image, "https://via.placeholder.com/100x100?text=No+Image")
+    )}"
             alt="${escapeHtml(safeText(product.name))}"
             class="table-image"
             onerror="this.src='https://via.placeholder.com/100x100?text=No+Image'"
@@ -773,33 +1007,43 @@ function renderInventory(filter = "") {
         <td>
           <div class="variant-preview-list">
             ${variants
-          .map(
-            (variant) =>
-              `<span class="variant-chip" title="${escapeAttribute(
-                safeText(variant.label, "Option")
-              )}">${escapeHtml(safeText(variant.label, "Option"))}</span>`
-          )
-          .join("")}
+        .map(
+          (variant) =>
+            `<span class="variant-chip" title="${escapeAttribute(
+              safeText(variant.label, "Option")
+            )}">${escapeHtml(safeText(variant.label, "Option"))}</span>`
+        )
+        .join("")}
           </div>
-        </td>
-        <td>${totalStock}</td>
-        <td>${escapeHtml(safeText(product.description, "No description"))}</td>
-        <td>
+            </td>
+            <td>${totalStock}</td>
+            <td>
+
           <div class="action-buttons">
             <button
-  type="button"
-  class="small-btn"
-  onclick="editProduct('${product.id}')"
->
-  Edit
-</button>
+            type="button"
+            class="small-btn"
+            onclick="editProduct('${product.id}')"
+          >
+            Edit
+
+        <button
+          type="button"
+          class="small-btn view-live-btn"
+          onclick="viewLiveProduct('${product.id}')"
+        >
+          View Live
+        </button>
+
             <button class="danger-btn" onclick="deleteProduct('${product.id}')">Delete</button>
           </div>
         </td>
       `;
-      inventoryTableBody.appendChild(row);
-    });
+
+    inventoryTableBody.appendChild(row);
+  });
 }
+
 
 if (productForm) {
   productForm.addEventListener("submit", async function (e) {
@@ -821,7 +1065,7 @@ if (productForm) {
         galleryImages = editingProduct.gallery;
       }
 
-      const uploadedFiles = Array.from(productImageFile?.files || []);
+      const uploadedFiles = productGalleryFiles;
 
       if (uploadedFiles.length > 5) {
         showToast("Maximum 5 product photos only.", "error");
@@ -835,7 +1079,7 @@ if (productForm) {
           )
         );
 
-        finalImage = galleryImages[0];
+        finalImage = galleryImages[selectedCoverIndex] || galleryImages[0] || "";
       }
 
       const currentMode = safeText(productTypeInput?.value, "single");
@@ -1015,7 +1259,26 @@ function editProduct(id) {
   }
 
   if (submitBtn) submitBtn.textContent = "Update Product";
-  setImagePreview(safeText(product.image));
+  productGalleryData =
+    Array.isArray(product.gallery) && product.gallery.length
+      ? [...product.gallery]
+      : (product.image ? [product.image] : []);
+
+  productGalleryFiles = [];
+
+  selectedCoverIndex = productGalleryData.findIndex(
+    (img) => img === product.image
+  );
+
+  if (selectedCoverIndex < 0) {
+    selectedCoverIndex = 0;
+  }
+
+  setImagePreview(
+    productGalleryData[selectedCoverIndex] || product.image || ""
+  );
+
+  renderProductGallery();
   showSection("addListingSection");
 
   productForm?.scrollIntoView({
@@ -1025,6 +1288,15 @@ function editProduct(id) {
   // window.scrollTo({ top: 0, behavior: "smooth" });
   showToast("Loaded product for editing.", "success");
 }
+
+function viewLiveProduct(id) {
+  window.open(
+    `../Product/index.html?id=${encodeURIComponent(id)}`,
+    "_blank"
+  );
+}
+
+
 
 async function deleteProduct(id) {
   const selected = products.find(
@@ -1062,12 +1334,25 @@ if (searchInput) {
   });
 }
 
+if (searchInput) {
+  searchInput.addEventListener("keydown", function (e) {
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+
+      const keyword = safeText(this.value).toLowerCase().trim();
+
+      renderInventory(keyword);
+    }
+
+  });
+}
+
 
 async function loadAdminProductsFromSupabase() {
   const { data, error } = await supabaseClient
     .from("products")
     .select("*")
-    .order("created_at", { ascending: false });
 
   if (error) {
     console.error(error);
@@ -1105,8 +1390,21 @@ setModeUI();
 
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
+window.viewLiveProduct = viewLiveProduct;
 window.removeVariantRow = removeVariantRow;
 window.handleVariantFileChange = handleVariantFileChange;
+
+window.setProductCover = setProductCover;
+window.removeProductPhoto = removeProductPhoto;
+
+document.addEventListener("wheel", function (e) {
+  const active = document.activeElement;
+
+  if (active && active.type === "number") {
+    active.blur();
+  }
+}, { passive: true });
+
 
 /* ===============================
    END INVENTORY MODULE
