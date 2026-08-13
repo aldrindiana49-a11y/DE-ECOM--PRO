@@ -26,7 +26,7 @@
 .product-image img {
   width: 100%;
   aspect-ratio: 1 / 1;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 
@@ -637,7 +637,7 @@
 
 @media (max-width: 768px) {
   .back-btn {
-    display: inline-flex;
+    display: none !important;
   }
 }
 
@@ -680,8 +680,7 @@
   position: relative;
 }
 
-.back-btn,
-.share-top-btn {
+.back-btn {
   position: absolute;
   top: 14px;
 
@@ -691,9 +690,11 @@
   border: none;
   border-radius: 50%;
 
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
   display: inline-flex;
   align-items: center;
@@ -708,10 +709,11 @@
 
 .back-btn {
   left: 14px;
+  top: -18px;
 }
 
-.share-top-btn {
-  right: 14px;
+.back-btn:active {
+  background: rgba(255, 255, 255, 0.55);
 }
 
 /* FINAL DESKTOP VOUCHER NAV FIX */
@@ -928,7 +930,7 @@
 .product-thumb img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 
@@ -1037,7 +1039,7 @@
 .product-thumb img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 
@@ -1131,7 +1133,7 @@
 .variant-popup-top img {
   width: 92px;
   height: 92px;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 14px;
   background: #f3f4f6;
 }
@@ -3111,8 +3113,7 @@ body {
 .share-top-btn {
   z-index: 9999 !important;
   pointer-events: auto !important;
-
-  background: rgba(255, 255, 255, 0.96) !important;
+  background: rgba(255, 255, 255, 0.55) !important;
   color: #111827 !important;
 
   border: 1px solid #e5e7eb !important;
@@ -3123,15 +3124,23 @@ body {
   backdrop-filter: blur(8px);
 }
 
+.back-btn {
+  width: auto !important;
+  height: 34px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  white-space: nowrap !important;
+}
+
 /* Desktop positioning */
 @media (min-width: 1025px) {
 
   .back-btn {
     display: inline-flex !important;
-
-    /* Ilayo sa vertical thumbnails */
-    left: 112px !important;
-    top: 36px !important;
+    position: fixed !important;
+    left: 20px !important;
+    top: 120px !important;
+    z-index: 999999 !important;
   }
 
   .share-top-btn {

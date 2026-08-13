@@ -1,3 +1,7 @@
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+
 const menuBtn = document.getElementById("menuBtn");
 const sidebar = document.getElementById("sidebar");
 const overlay = document.getElementById("overlay");
@@ -1985,3 +1989,12 @@ function scrollShortcutRight() {
   });
 }
 
+window.addEventListener("pageshow", () => {
+  if (sessionStorage.getItem("scrollTopOnBack") === "1") {
+    sessionStorage.removeItem("scrollTopOnBack");
+
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 0);
+  }
+});

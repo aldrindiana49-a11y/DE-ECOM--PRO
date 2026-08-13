@@ -622,7 +622,7 @@ body {
 .homepage-product-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
   align-items: start;
 }
 
@@ -653,7 +653,7 @@ body {
 .homepage-product-image {
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: #f7f7f7;
+  background: #ffffff;
   overflow: hidden;
   border-bottom: 1px solid var(--line);
   position: relative;
@@ -662,7 +662,7 @@ body {
 .homepage-product-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 
@@ -1361,7 +1361,7 @@ body {
 
 /* IMAGE ZOOM */
 .homepage-product-card:hover .homepage-product-image img {
-  transform: scale(1.1);
+  transform: scale(1.03);
 }
 
 /* CARD LIFT */
@@ -1386,7 +1386,7 @@ body {
 .product-image-track img {
   min-width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   scroll-snap-align: start;
 }
 

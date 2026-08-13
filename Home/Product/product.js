@@ -1,3 +1,11 @@
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+
+window.addEventListener("pageshow", () => {
+  window.scrollTo(0, 0);
+});
+
 let products = [];
 let cart = JSON.parse(localStorage.getItem("drinCart")) || [];
 
@@ -1923,22 +1931,14 @@ renderStoreBranding();
 
 renderDynamicSidebarCategories();
 
-
 function smartBack(fallback = "../index.html") {
+  sessionStorage.setItem("scrollTopOnBack", "1");
 
-  if (
-    document.referrer &&
-    document.referrer !== window.location.href
-  ) {
-
+  if (window.history.length > 1) {
     window.history.back();
-
   } else {
-
     window.location.href = fallback;
-
   }
-
 }
 
 function goHome() {

@@ -4184,23 +4184,16 @@ function showNonCodPremiumPopup(items) {
 
 function switchToOnlinePayment() {
 
-  const onlineOption =
-    document.querySelector(
-      'input[name="payment"][value="ONLINE"]'
-    );
-
-  if (onlineOption) {
-
-    onlineOption.checked = true;
-
-    onlineOption.dispatchEvent(
-      new Event("change")
-    );
-  }
-
   document
     .querySelector(".premium-noncod-popup")
     ?.remove();
+
+  document
+    .querySelector(".payment-section, .payment-methods")
+    ?.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
 }
 
 const mapSearchBtn = document.getElementById("mapSearchBtn");
