@@ -4188,8 +4188,15 @@ function switchToOnlinePayment() {
     .querySelector(".premium-noncod-popup")
     ?.remove();
 
-  document
-    .querySelector(".payment-section, .payment-methods")
+  const paymentOption =
+    document.querySelector(
+      'input[name="payment"]'
+    );
+
+  paymentOption
+    ?.closest(
+      ".payment-section, .payment-methods, section"
+    )
     ?.scrollIntoView({
       behavior: "smooth",
       block: "center"
