@@ -1210,6 +1210,8 @@ function renderSuggestedProducts() {
   src=""
   alt="${item.name}">
     </div>
+    
+<div class="homepage-product-info">
 
     <h3>${item.name}</h3>
 
