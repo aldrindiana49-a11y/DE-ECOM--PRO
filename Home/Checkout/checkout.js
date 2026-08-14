@@ -3647,7 +3647,10 @@ barangaySelect?.addEventListener("change", () => {
 });
 
 document.querySelectorAll('input[name="payment"]').forEach((input) => {
-  input.addEventListener("change", () => {
+
+  input.addEventListener("change", async () => {
+
+    // RESET PLACE ORDER STATE
     isPlacingOrder = false;
 
     if (checkoutBtn) {
@@ -3656,12 +3659,102 @@ document.querySelectorAll('input[name="payment"]').forEach((input) => {
       checkoutBtn.style.opacity = "1";
     }
 
+    // GET SELECTED PAYMENT
     const selectedPayment =
       document.querySelector(
         'input[name="payment"]:checked'
       )?.value || "";
 
+
+    // =========================================
+    // SKYRO ACCOUNT REQUIRED
+    // =========================================
     if (selectedPayment === "SKYRO") {
+
+      const {
+        data: { user }
+      } = await supabaseClient.auth.getUser();
+
+
+      // GUEST CUSTOMER
+      if (!user) {
+
+        // Do not allow Skyro to remain selected
+        input.checked = false;
+
+        updateTotalsDisplay();
+
+        showOrderModal(
+          "Account Required for Skyro",
+          `
+          <div class="premium-login-alert">
+
+            <div class="premium-login-icon">
+              👤
+            </div>
+
+            <h4>
+              Sign In Required
+            </h4>
+
+            <p>
+              To apply for Skyro Installment,
+              please sign in or create a
+              Drin Electronics account first.
+              <br><br>
+
+              Your account allows you to track your order
+              and continue your Skyro application from
+              <strong>My Orders</strong>.
+            </p>
+
+            <div class="premium-login-actions">
+
+              <button
+                type="button"
+                onclick="window.location.href='https://drinelectronicsph.com/login/'"
+              >
+                Log In
+              </button>
+
+              <button
+                type="button"
+                class="secondary-btn"
+                onclick="window.location.href='https://drinelectronicsph.com/signup/'"
+              >
+                Create Account
+              </button>
+
+              <button
+                type="button"
+                class="secondary-btn"
+                onclick="closeOrderModal()"
+              >
+                Choose Another Payment
+              </button>
+
+            </div>
+
+          </div>
+          `
+        );
+
+        // Hide normal modal OK button
+        const okBtn =
+          document.getElementById("orderModalOk");
+
+        if (okBtn) {
+          okBtn.style.display = "none";
+        }
+
+        return;
+      }
+
+
+      // =========================================
+      // LOGGED-IN SKYRO CUSTOMER
+      // Remove voucher silently
+      // =========================================
       claimedVoucher = null;
       voucherDiscount = 0;
 
@@ -3679,15 +3772,14 @@ document.querySelectorAll('input[name="payment"]').forEach((input) => {
       }
 
       updateTotalsDisplay();
-
-      showOrderModal(
-        "Voucher Removed",
-        "Vouchers are not available for Skyro installment payments."
-      );
     }
 
+
+    // Recalculate shipping/payment totals
     scheduleShippingQuote();
+
   });
+
 });
 
 async function loadClaimedVoucher() {
