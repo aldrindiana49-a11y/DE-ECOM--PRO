@@ -1548,3 +1548,10 @@ body {
   }
 }
 
+.order-review-note {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #6b7280;
+  text-align: center;
+  line-height: 1.5;
+}
