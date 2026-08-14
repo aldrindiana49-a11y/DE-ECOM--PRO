@@ -2117,7 +2117,11 @@ async function placeOrder() {
   }
 
   if (!selectedCourierNow) {
-    showOrderModal("Courier Required", "Please select SPX or Same Day Delivery before placing your order.");
+    showOrderModal(
+      "Courier Required",
+      "Please select your preferred courier before placing your order."
+    );
+
     return resetPlaceOrder();
   }
 
@@ -2176,11 +2180,7 @@ async function placeOrder() {
         color:#374151;
         font-size:14px;
       ">
-          Choose a payment method available for your selected courier.
-
-          COD is available for SPX only.
-
-          Over The Counter is available for Store Pickup only.
+          Please choose an available payment method based on your selected courier.
       </div>
 
       <button
