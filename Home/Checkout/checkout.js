@@ -2117,10 +2117,54 @@ async function placeOrder() {
   }
 
   if (!selectedCourierNow) {
+
     showOrderModal(
       "Courier Required",
-      "Please select your preferred courier before placing your order."
+      `
+    <div style="text-align:center;">
+
+      <p style="
+        color:#4b5563;
+        line-height:1.6;
+      ">
+        Please select your preferred courier
+        before placing your order.
+      </p>
+
+    </div>
+    `
     );
+
+
+    setTimeout(() => {
+
+      const okBtn =
+        document.getElementById("orderModalOk");
+
+      function goToCourier() {
+
+        closeOrderModal();
+
+        setTimeout(() => {
+
+          courierSelect?.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
+
+          courierSelect?.focus();
+
+        }, 150);
+      }
+
+
+      if (okBtn) {
+        okBtn.textContent = "Choose Courier";
+        okBtn.onclick = goToCourier;
+      }
+
+    }, 50);
+
 
     return resetPlaceOrder();
   }
@@ -2204,6 +2248,13 @@ async function placeOrder() {
     </div>
     `
     );
+
+    const okBtn =
+      document.getElementById("orderModalOk");
+
+    if (okBtn) {
+      okBtn.style.display = "none";
+    }
 
     setTimeout(() => {
       const selectPaymentBtn =
