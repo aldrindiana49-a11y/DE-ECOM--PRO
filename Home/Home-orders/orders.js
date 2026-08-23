@@ -505,6 +505,40 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled")
         width:100%;
     ">
 
+        <div style="
+            padding:12px;
+            border-radius:10px;
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+            text-align:center;
+        ">
+            <strong style="
+                display:block;
+                margin-bottom:6px;
+                color:#0f172a;
+            ">
+                Preparing Your Skyro Application
+            </strong>
+
+            <div style="
+                font-size:13px;
+                color:#475569;
+                line-height:1.5;
+            ">
+                While waiting, please download and install the Skyro app.
+                Prepare your active mobile number so you can continue quickly
+                once your application button is activated.
+
+                <div style="
+                    margin-top:8px;
+                    font-weight:600;
+                    color:#0f172a;
+                ">
+                    Estimated waiting time: usually within 1–3 hours during store hours.
+                </div>
+            </div>
+        </div>
+
         <button
             type="button"
             class="track-btn skyro-application-btn"
