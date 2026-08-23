@@ -473,7 +473,7 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled")
         </button>
 
         <a
-            href="https://play.google.com/store/apps/details?id=ph.skyro.customer"
+            href="https://play.google.com/store/apps/details?id=io.breezeventures.mb"
             target="_blank"
             rel="noopener noreferrer"
             class="track-btn">
@@ -481,7 +481,7 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled")
         </a>
 
         <a
-            href="https://apps.apple.com/ph/app/skyro/id6444296559"
+            href="https://apps.apple.com/ph/app/skyro/id1635398736"
             target="_blank"
             rel="noopener noreferrer"
             class="track-btn">
@@ -513,7 +513,7 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled")
         </button>
 
         <a
-            href="https://play.google.com/store/apps/details?id=ph.skyro.customer"
+            href="https://play.google.com/store/apps/details?id=io.breezeventures.mb"
             target="_blank"
             rel="noopener noreferrer"
             class="track-btn">
@@ -521,7 +521,7 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled")
         </a>
 
         <a
-            href="https://apps.apple.com/ph/app/skyro/id6444296559"
+            href="https://apps.apple.com/ph/app/skyro/id1635398736"
             target="_blank"
             rel="noopener noreferrer"
             class="track-btn">
