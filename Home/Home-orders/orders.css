@@ -789,3 +789,17 @@ body {
 .skyro-application-btn:not(:disabled):hover {
     background: #1d4ed8 !important;
 }
+
+.skyro-rejected-btn {
+    background: #dc2626 !important;
+    color: #ffffff !important;
+    cursor: not-allowed !important;
+    opacity: 1 !important;
+    border: 1px solid #b91c1c !important;
+    box-shadow: none !important;
+}
+
+.skyro-rejected-btn:hover {
+    transform: none !important;
+    filter: none !important;
+}

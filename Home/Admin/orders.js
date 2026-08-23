@@ -2873,40 +2873,110 @@ function openOrderModal(orderId) {
         </strong>
       </p>
 
-      ${order.skyro_application_link
+      ${String(order.order_status || "")
+        .trim()
+        .toLowerCase() === "skyro application rejected"
         ? `
-          <div style="
-            display:flex;
-            gap:8px;
-            flex-wrap:wrap;
-          ">
-            <button
-              type="button"
-              class="primary-btn"
-              disabled
-              style="
-                opacity:0.55;
-                cursor:not-allowed;
-              "
-            >
-              Application Link Created
-            </button>
+      <button
+        type="button"
+        class="danger-btn"
+        disabled
+        style="
+          opacity:1;
+          cursor:not-allowed;
+        "
+      >
+        Skyro Application Rejected
+      </button>
+    `
 
-            <button
-              type="button"
-              class="secondary-btn"
-              onclick="window.open(
-                '${escapeAttribute(order.skyro_application_link)}',
-                '_blank'
-              )"
-            >
-              View Skyro Link
-            </button>
-          </div>
-        `
-        : String(order.order_status || "") ===
-          "Pending Stock Confirmation"
+        : String(order.order_status || "")
+          .trim()
+          .toLowerCase() === "skyro approved"
           ? `
+      <button
+        type="button"
+        class="primary-btn"
+        disabled
+        style="
+          opacity:1;
+          cursor:not-allowed;
+          background:#16a34a;
+          color:#ffffff;
+        "
+      >
+        Skyro Approved ✓
+      </button>
+    `
+
+          : order.skyro_application_link
+            ? `
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+      <button
+        type="button"
+        class="primary-btn"
+        disabled
+        style="
+          opacity:0.55;
+          cursor:not-allowed;
+        "
+      >
+        Application Link Created
+      </button>
+
+      <button
+          type="button"
+          class="secondary-btn"
+          onclick="window.open(
+            '${escapeAttribute(order.skyro_application_link)}',
+            '_blank'
+          )"
+        >
+          View Skyro Link
+     </button>
+
+     <button
+          type="button"
+          class="secondary-btn"
+          onclick="refreshSkyroStatus(
+            '${escapeAttribute(orderId)}',
+            this
+          )"
+        >
+          Refresh Skyro Status
+     </button>
+
+      ${[
+              "skyro application allowed",
+              "pending skyro approval"
+            ].includes(
+              String(order.order_status || "")
+                .trim()
+                .toLowerCase()
+            )
+              ? `
+    <button
+      type="button"
+      class="danger-btn"
+      onclick="rejectSkyroApplication(
+        '${escapeAttribute(orderId)}',
+        this
+      )"
+    >
+      Reject Skyro Application
+    </button>
+  `
+              : ""
+            }
+
+    </div>
+  `
+
+            : String(order.order_status || "") ===
+              "Pending Stock Confirmation"
+              ? `
             <button
               type="button"
               class="primary-btn"
@@ -2918,7 +2988,7 @@ function openOrderModal(orderId) {
               Confirm Stock & Create Skyro Link
             </button>
           `
-          : `
+              : `
             <button
               type="button"
               class="primary-btn"
@@ -3119,6 +3189,118 @@ async function confirmSkyroStock(orderId, btn) {
 
   } finally {
     resetButtonLoading(btn);
+  }
+}
+
+async function refreshSkyroStatus(orderId, btn) {
+  try {
+    setButtonLoading(btn, "Checking Skyro...");
+
+    const response = await fetch(
+      `https://de-ecom-pro.onrender.com/api/orders/${orderId}/skyro-status`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.message ||
+        "Unable to check Skyro status."
+      );
+    }
+
+    showToast(
+      `Skyro status: ${result.skyroStatus}`,
+      "success"
+    );
+
+    closeOrderModal();
+    await loadAdminOrders();
+
+  } catch (error) {
+    console.error(
+      "Refresh Skyro status error:",
+      error
+    );
+
+    showToast(
+      error.message ||
+      "Unable to check Skyro status.",
+      "error"
+    );
+
+  } finally {
+    resetButtonLoading(btn);
+  }
+}
+
+async function rejectSkyroApplication(orderId, btn) {
+
+  const ok = confirm(
+    "Reject this Skyro application? The customer will no longer be able to open the Skyro application link."
+  );
+
+  if (!ok) return;
+
+  try {
+
+    setButtonLoading(btn, "Rejecting...");
+
+    const response = await fetch(
+      "https://de-ecom-pro.onrender.com/api/orders/update",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          orderId,
+          order_status: "Skyro Application Rejected",
+          payment_status: "Skyro Application Rejected"
+        })
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.message ||
+        "Failed to reject Skyro application."
+      );
+    }
+
+    showToast(
+      "Skyro application rejected.",
+      "success"
+    );
+
+    closeOrderModal();
+    await loadAdminOrders();
+
+  } catch (error) {
+
+    console.error(
+      "Reject Skyro application error:",
+      error
+    );
+
+    showToast(
+      error.message ||
+      "Unable to reject Skyro application.",
+      "error"
+    );
+
+  } finally {
+
+    resetButtonLoading(btn);
+
   }
 }
 
@@ -4286,6 +4468,7 @@ window.cancelOrder = cancelOrder;
 window.createSPXShipment = createSPXShipment;
 window.bookLalamoveShipment = bookLalamoveShipment;
 window.arrangeShipment = arrangeShipment;
+window.refreshSkyroStatus = refreshSkyroStatus;
 window.openAWB = openAWB;
 window.printOrderInvoice = printOrderInvoice;
 window.openTracking = openTracking;

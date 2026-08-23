@@ -1143,6 +1143,138 @@ async function getVerifiedSkyroStatus(skyroOrderId) {
   };
 }
 
+// ================= MANUAL SKYRO STATUS CHECK =================
+app.post("/api/orders/:orderId/skyro-status", async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const orders = await readOrders();
+
+    const orderIndex = orders.findIndex(order =>
+      String(order.external_id || order.id) === String(orderId)
+    );
+
+    if (orderIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found."
+      });
+    }
+
+    const order = orders[orderIndex];
+
+    const skyroOrderId = String(
+      order.skyro_order_id || ""
+    ).trim();
+
+    if (!skyroOrderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Skyro order ID not found."
+      });
+    }
+
+    const verified =
+      await getVerifiedSkyroStatus(skyroOrderId);
+
+    const verifiedStatus =
+      String(verified.status || "")
+        .trim()
+        .toUpperCase();
+
+    const now = new Date().toISOString();
+
+    order.skyro_status = verifiedStatus;
+    order.skyro_updated_at = now;
+    order.updated_at = now;
+
+    if (verifiedStatus === "NEW") {
+      order.status = "Pending Skyro Approval";
+      order.payment_status = "Pending Skyro Approval";
+      order.order_status = "Skyro Application Allowed";
+    }
+
+    if (verifiedStatus === "IN_PROGRESS") {
+      order.status = "Pending Skyro Approval";
+      order.payment_status = "Pending Skyro Approval";
+      order.order_status = "Pending Skyro Approval";
+    }
+
+    if (verifiedStatus === "APPROVED") {
+      order.status = "Skyro Approved";
+      order.payment_status = "Skyro Approved";
+      order.order_status = "Skyro Approved";
+    }
+
+    if (verifiedStatus === "REJECTED") {
+      order.status = "Skyro Application Rejected";
+      order.payment_status = "Skyro Application Rejected";
+      order.order_status = "Skyro Application Rejected";
+
+      if (order.stock_restored !== true) {
+        await restoreXenditStock({
+          ...order,
+          stock_reserved: true
+        });
+
+        order.stock_reserved = false;
+        order.stock_restored = true;
+        order.stock_restored_at = now;
+      }
+    }
+
+    if (verifiedStatus === "CANCELLED") {
+      order.status = "Skyro Cancelled";
+      order.payment_status = "Skyro Cancelled";
+      order.order_status = "Cancelled";
+
+      if (order.stock_restored !== true) {
+        await restoreXenditStock({
+          ...order,
+          stock_reserved: true
+        });
+
+        order.stock_reserved = false;
+        order.stock_restored = true;
+        order.stock_restored_at = now;
+      }
+    }
+
+    if (verifiedStatus === "FINISHED") {
+      order.status = "Skyro Finished";
+      order.payment_status = "Skyro Finished";
+    }
+
+    orders[orderIndex] = order;
+
+    await saveOrders(orders);
+
+    return res.json({
+      success: true,
+      skyroStatus: verifiedStatus,
+      order
+    });
+
+  } catch (error) {
+    console.error(
+      "MANUAL SKYRO STATUS CHECK ERROR:",
+      error.response?.data || error.message
+    );
+
+    return res.status(
+      error.response?.status || 500
+    ).json({
+      success: false,
+      message:
+        error.response?.data?.message ||
+        "Unable to check Skyro status.",
+      error:
+        error.response?.data ||
+        error.message
+    });
+  }
+});
+
 // ================= SKYRO WEBHOOK =================
 app.post("/api/skyro/webhook", async (req, res) => {
   try {
@@ -1224,9 +1356,9 @@ app.post("/api/skyro/webhook", async (req, res) => {
     }
 
     if (verifiedStatus === "REJECTED") {
-      order.status = "Skyro Rejected";
-      order.payment_status = "Skyro Rejected";
-      order.order_status = "Skyro Rejected";
+      order.status = "Skyro Application Rejected";
+      order.payment_status = "Skyro Application Rejected";
+      order.order_status = "Skyro Application Rejected";
 
       if (order.stock_restored !== true) {
         await restoreXenditStock({

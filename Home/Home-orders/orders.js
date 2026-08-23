@@ -270,9 +270,13 @@ async function loadOrders() {
         const isSkyroApproved =
             skyroStatus === "skyro approved";
 
+        const isSkyroRejected =
+            skyroStatus === "skyro application rejected";
+
         const canOpenSkyroApplication =
             isSkyro &&
-            skyroStatus === "skyro application allowed";
+            skyroStatus === "skyro application allowed" &&
+            !isSkyroRejected;
 
         const skyroApplicationLink =
             String(order.skyro_application_link || "").trim();
@@ -437,7 +441,15 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled")
                 : ""
             }
 
-            ${isSkyroApproved ? `
+ ${isSkyroRejected ? `
+    <button
+        type="button"
+        class="track-btn skyro-rejected-btn"
+        disabled>
+        Skyro Application Rejected
+    </button>
+
+` : isSkyroApproved ? `
     <button
         type="button"
         class="track-btn skyro-approved-btn"
@@ -446,86 +458,83 @@ ${String(order.order_status || "").toLowerCase().includes("cancelled")
     </button>
 
 ` : canOpenSkyroApplication && skyroApplicationLink ? `
-    <button
-        type="button"
-        class="track-btn skyro-application-btn"
-        onclick="window.open('${skyroApplicationLink}', '_blank', 'noopener,noreferrer')">
-        Complete Skyro Application
-    </button>
-
-` : isSkyro ? `
     <div style="
+        display:flex;
+        flex-direction:column;
+        gap:8px;
         width:100%;
-        padding:14px;
-        border-radius:10px;
-        background:#f8fafc;
-        border:1px solid #e2e8f0;
-        text-align:center;
-        line-height:1.5;
     ">
-        <strong style="
-            display:block;
-            color:#0f172a;
-            margin-bottom:6px;
-        ">
-            Preparing Your Skyro Application
-        </strong>
-
-        <div style="
-            color:#475569;
-            font-size:13px;
-            margin-bottom:12px;
-        ">
-            While waiting, please download and install the Skyro app.
-            Prepare your active mobile number so you can continue quickly
-            once your application button is activated.
-        </div>
-
-        <div style="
-            display:flex;
-            gap:8px;
-            justify-content:center;
-            flex-wrap:wrap;
-            margin-bottom:12px;
-        ">
-            <button
-                type="button"
-                class="track-btn"
-                onclick="window.open('https://play.google.com/store/apps/details?id=io.breezeventures.mb', '_blank', 'noopener,noreferrer')">
-                Download for Android
-            </button>
-
-            <button
-                type="button"
-                class="track-btn"
-                onclick="window.open('https://apps.apple.com/ph/app/skyro/id1635398736', '_blank', 'noopener,noreferrer')">
-                Download for iPhone
-            </button>
-        </div>
 
         <button
             type="button"
             class="track-btn skyro-application-btn"
-            disabled
-            style="width:100%;">
+            onclick="window.open('${skyroApplicationLink}', '_blank', 'noopener,noreferrer')">
             Complete Skyro Application
         </button>
 
-        <div style="
-            color:#64748b;
-            font-size:12px;
-            margin-top:9px;
-        ">
-            This button will be activated within 1–3 hours during store hours.
-        </div>
+        <a
+            href="https://play.google.com/store/apps/details?id=ph.skyro.customer"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="track-btn">
+            Download Skyro App - Android
+        </a>
+
+        <a
+            href="https://apps.apple.com/ph/app/skyro/id6444296559"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="track-btn">
+            Download Skyro App - iPhone
+        </a>
 
         <button
             type="button"
             class="track-btn"
-            onclick="window.location.reload()"
-            style="margin-top:10px;">
+            onclick="window.location.reload()">
             Refresh Application Status
         </button>
+
+    </div>
+
+` : isSkyro ? `
+    <div style="
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+        width:100%;
+    ">
+
+        <button
+            type="button"
+            class="track-btn skyro-application-btn"
+            disabled>
+            Complete Skyro Application
+        </button>
+
+        <a
+            href="https://play.google.com/store/apps/details?id=ph.skyro.customer"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="track-btn">
+            Download Skyro App - Android
+        </a>
+
+        <a
+            href="https://apps.apple.com/ph/app/skyro/id6444296559"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="track-btn">
+            Download Skyro App - iPhone
+        </a>
+
+        <button
+            type="button"
+            class="track-btn"
+            onclick="window.location.reload()">
+            Refresh Application Status
+        </button>
+
     </div>
 ` : ""}
 
