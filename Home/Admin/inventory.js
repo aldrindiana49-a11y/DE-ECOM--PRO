@@ -14,12 +14,19 @@
 ================================ */
 
 let singleVariantImageData = "";
+let singleVariantImageChanged = false;
 let products = [];
 let inventoryCurrentPage = 1;
 const inventoryItemsPerPage = 10;
 let productGalleryData = [];
 let selectedCoverIndex = 0;
 let productGalleryFiles = [];
+
+let productGalleryFileKeys = new Set();
+
+function getFileKey(file) {
+  return `${file.name}-${file.size}-${file.lastModified}`;
+}
 
 const inventoryPrevBtn =
   document.getElementById("inventoryPrevBtn");
@@ -296,17 +303,69 @@ function setProductCover(index) {
 }
 
 function removeProductPhoto(index) {
+
+  const removedImage =
+    productGalleryData[index];
+
+  if (!removedImage) return;
+
+  if (
+    typeof removedImage === "string" &&
+    !removedImage.startsWith("http")
+  ) {
+
+    const localImagesBefore =
+      productGalleryData
+        .slice(0, index)
+        .filter(image =>
+          typeof image === "string" &&
+          !image.startsWith("http")
+        );
+
+    const fileIndex =
+      localImagesBefore.length;
+
+    const removedFile =
+      productGalleryFiles[fileIndex];
+
+    if (removedFile) {
+
+      if (typeof getFileKey === "function") {
+        productGalleryFileKeys.delete(
+          getFileKey(removedFile)
+        );
+      }
+
+      productGalleryFiles.splice(
+        fileIndex,
+        1
+      );
+    }
+  }
+
   productGalleryData.splice(index, 1);
 
   if (productGalleryData.length === 0) {
+
     selectedCoverIndex = 0;
     setImagePreview("");
+
   } else {
-    if (selectedCoverIndex >= productGalleryData.length) {
+
+    if (index < selectedCoverIndex) {
+      selectedCoverIndex--;
+    }
+
+    if (
+      selectedCoverIndex >=
+      productGalleryData.length
+    ) {
       selectedCoverIndex = 0;
     }
 
-    setImagePreview(productGalleryData[selectedCoverIndex]);
+    setImagePreview(
+      productGalleryData[selectedCoverIndex]
+    );
   }
 
   renderProductGallery();
@@ -366,7 +425,6 @@ if (productTypeInput) {
   productTypeInput.addEventListener("change", setModeUI);
 }
 
-
 if (productImageFile) {
   productImageFile.addEventListener("change", function () {
 
@@ -377,8 +435,13 @@ if (productImageFile) {
       return;
     }
 
+    const MAX_IMAGE_SIZE = 500 * 1024; // 500 KB
+
     if (files.length > 5) {
-      showToast("Maximum 5 product photos only.", "error");
+      showToast(
+        "Photo Limit Reached — Maximum of 5 product photos only.",
+        "warning"
+      );
       this.value = "";
       return;
     }
@@ -388,7 +451,25 @@ if (productImageFile) {
     );
 
     if (invalidFile) {
-      showToast("Please select valid image files only.", "error");
+      showToast(
+        "Invalid Image — Please upload a valid image file.",
+        "error"
+      );
+
+      this.value = "";
+      return;
+    }
+
+    const oversizedFile = files.find(
+      file => file.size > MAX_IMAGE_SIZE
+    );
+
+    if (oversizedFile) {
+      showToast(
+        `Image Too Large — "${oversizedFile.name}" must be smaller than 500 KB.`,
+        "error"
+      );
+
       this.value = "";
       return;
     }
@@ -397,26 +478,78 @@ if (productImageFile) {
       files.map(file => fileToBase64(file))
     ).then((images) => {
 
-      const remainingSlots = 5 - productGalleryData.length;
+      const uniqueImages = [];
+      const uniqueFiles = [];
 
-      if (remainingSlots <= 0) {
-        showToast("Maximum 5 product photos only.", "error");
+      images.forEach((image, index) => {
+
+        const file = files[index];
+        const fileKey = getFileKey(file);
+
+        const alreadyExists =
+          productGalleryFileKeys.has(fileKey);
+
+        const alreadyAdded =
+          uniqueFiles.some(
+            item => getFileKey(item) === fileKey
+          );
+
+        if (!alreadyExists && !alreadyAdded) {
+          uniqueImages.push(image);
+          uniqueFiles.push(files[index]);
+        }
+
+      });
+
+      if (!uniqueImages.length) {
+        showToast(
+          "Photo Already Added — This image is already in your product gallery.",
+          "warning"
+        );
+
         this.value = "";
         return;
       }
 
-      const newImages = images.slice(0, remainingSlots);
+      const remainingSlots =
+        5 - productGalleryData.length;
 
-      const newFiles = files.slice(0, remainingSlots);
+      if (remainingSlots <= 0) {
+        showToast(
+          "Photo Limit Reached — Maximum of 5 product photos only.",
+          "warning"
+        );
+
+        this.value = "";
+        return;
+      }
+
+      const newImages =
+        uniqueImages.slice(0, remainingSlots);
+
+      const newFiles =
+        uniqueFiles.slice(0, remainingSlots);
 
       productGalleryData.push(...newImages);
       productGalleryFiles.push(...newFiles);
 
-      if (productGalleryData.length === newImages.length) {
+      newFiles.forEach(file => {
+        productGalleryFileKeys.add(
+          getFileKey(file)
+        );
+      });
+
+      if (
+        productGalleryData.length ===
+        newImages.length
+      ) {
         selectedCoverIndex = 0;
       }
 
-      setImagePreview(productGalleryData[selectedCoverIndex]);
+      setImagePreview(
+        productGalleryData[selectedCoverIndex]
+      );
+
       renderProductGallery();
 
       showToast(
@@ -424,12 +557,12 @@ if (productImageFile) {
         "success"
       );
 
-      // para puwedeng pumili ulit ng another image
       this.value = "";
     });
 
   });
 }
+
 
 if (singleVariantImageFile) {
   singleVariantImageFile.addEventListener("change", function () {
@@ -439,7 +572,21 @@ if (singleVariantImageFile) {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      showToast("Please select a valid single SKU image file.", "error");
+      showToast(
+        "Invalid Image — Please upload a valid image file.",
+        "error"
+      );
+      this.value = "";
+      return;
+    }
+
+   const MAX_IMAGE_SIZE = 500 * 1024;
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      showToast(
+        `Image Too Large — "${file.name}" must be smaller than 500 KB.`,
+        "error"
+      );
       this.value = "";
       return;
     }
@@ -455,6 +602,7 @@ if (singleVariantImageFile) {
         }
 
         singleVariantImageData = String(imageUrl).trim();
+        singleVariantImageChanged = true;
 
         showToast("Single SKU image uploaded.", "success");
       });
@@ -502,15 +650,42 @@ function handleVariantFileChange(variantId, input) {
   }
 
   if (!file.type.startsWith("image/")) {
-    showToast("Please select a valid variant image file.", "error");
+    showToast(
+      "Invalid Image — Please upload a valid image file.",
+      "error"
+    );
+
     input.value = "";
+
     if (fileNameText) {
-      fileNameText.textContent = currentImage ? "Saved image" : "No file chosen";
+      fileNameText.textContent =
+        currentImage ? "Saved image" : "No file chosen";
     }
+
     return;
   }
 
-  if (fileNameText) fileNameText.textContent = "Uploading...";
+ const MAX_IMAGE_SIZE = 500 * 1024;
+
+  if (file.size > MAX_IMAGE_SIZE) {
+    showToast(
+      `Image Too Large — "${file.name}" must be smaller than 500 KB.`,
+      "error"
+    );
+
+    input.value = "";
+
+    if (fileNameText) {
+      fileNameText.textContent =
+        currentImage ? "Saved image" : "No file chosen";
+    }
+
+    return;
+  }
+
+  if (fileNameText) {
+    fileNameText.textContent = "Uploading...";
+  }
 
   uploadImageToSupabase(file, "variants")
     .then((imageUrl) => {
@@ -652,11 +827,37 @@ function removeVariantRow(variantId) {
   renderVariantTable(variants);
 }
 
-function buildSingleSkuVariant() {
-  const fallbackImage =
-    safeText(singleVariantImageData) ||
-    safeText(existingImageData?.value) ||
-    safeText(productImagePreview?.src);
+function buildSingleSkuVariant(mainImage = "") {
+
+  const existingMainImage =
+    safeText(existingImageData?.value);
+
+  const existingSkuImage =
+    safeText(singleVariantImageData);
+
+  let fallbackImage = "";
+
+  if (singleVariantImageChanged) {
+
+    // User explicitly uploaded a new Single SKU image
+    fallbackImage = existingSkuImage;
+
+  } else if (
+    existingSkuImage &&
+    existingSkuImage !== existingMainImage
+  ) {
+
+    // Preserve an existing separate SKU image
+    fallbackImage = existingSkuImage;
+
+  } else {
+
+    // SKU was using the main image, so follow the new cover/main image
+    fallbackImage =
+      safeText(mainImage) ||
+      existingSkuImage ||
+      existingMainImage;
+  }
 
   return normalizeVariant({
     id: generateVariantId(),
@@ -882,6 +1083,7 @@ function resetSingleSkuFields() {
   if (singleHeightInput) singleHeightInput.value = "";
   if (singleVariantImageFile) singleVariantImageFile.value = "";
   singleVariantImageData = "";
+  singleVariantImageChanged = false;
 }
 
 function resetProductForm() {
@@ -890,6 +1092,14 @@ function resetProductForm() {
   productForm.reset();
   if (productId) productId.value = "";
   if (existingImageData) existingImageData.value = "";
+
+  productGalleryData = [];
+  productGalleryFiles = [];
+  productGalleryFileKeys.clear();
+  selectedCoverIndex = 0;
+
+  renderProductGallery();
+
   if (submitBtn) submitBtn.textContent = "Save Product";
   setImagePreview("");
   renderVariantTable([]);
@@ -1051,41 +1261,60 @@ if (productForm) {
 
     try {
 
-      let finalImage = safeText(existingImageData?.value);
-
       let galleryImages = [];
-
-      const editingProduct = products.find(
-        (item) =>
-          String(item.id).trim() ===
-          String(productId?.value || "").trim()
-      );
-
-      if (editingProduct && Array.isArray(editingProduct.gallery)) {
-        galleryImages = editingProduct.gallery;
-      }
 
       const uploadedFiles = productGalleryFiles;
 
-      if (uploadedFiles.length > 5) {
+      if (productGalleryData.length > 5) {
         showToast("Maximum 5 product photos only.", "error");
         return;
       }
 
-      if (uploadedFiles.length > 0) {
-        galleryImages = await Promise.all(
-          uploadedFiles.map((file) =>
-            uploadImageToSupabase(file, "products")
-          )
-        );
+      let uploadIndex = 0;
 
-        finalImage = galleryImages[selectedCoverIndex] || galleryImages[0] || "";
+      for (const image of productGalleryData) {
+
+        // Existing uploaded image
+        if (
+          typeof image === "string" &&
+          image.startsWith("http")
+        ) {
+          galleryImages.push(image);
+          continue;
+        }
+
+        // Newly selected local/base64 image
+        const file = uploadedFiles[uploadIndex];
+
+        if (file) {
+          const uploadedUrl =
+            await uploadImageToSupabase(
+              file,
+              "products"
+            );
+
+          if (!uploadedUrl) {
+            showToast(
+              "One of the product images failed to upload.",
+              "error"
+            );
+            return;
+          }
+
+          galleryImages.push(uploadedUrl);
+          uploadIndex++;
+        }
       }
+
+      const finalImage =
+        galleryImages[selectedCoverIndex] ||
+        galleryImages[0] ||
+        "";
 
       const currentMode = safeText(productTypeInput?.value, "single");
 
       const variants = currentMode === "single"
-        ? [buildSingleSkuVariant()]
+        ? [buildSingleSkuVariant(finalImage)]
         : getVariantRows().map((variant, index) =>
           normalizeVariant(variant, index)
         );
@@ -1250,6 +1479,7 @@ function editProduct(id) {
     if (singleWidthInput) singleWidthInput.value = single.width || "";
     if (singleHeightInput) singleHeightInput.value = single.height || "";
     singleVariantImageData = safeText(single.image);
+    singleVariantImageChanged = false;
     renderVariantTable([]);
     if (variantTitleInput) variantTitleInput.value = "";
   } else {
@@ -1265,6 +1495,7 @@ function editProduct(id) {
       : (product.image ? [product.image] : []);
 
   productGalleryFiles = [];
+  productGalleryFileKeys.clear();
 
   selectedCoverIndex = productGalleryData.findIndex(
     (img) => img === product.image
