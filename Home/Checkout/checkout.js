@@ -4305,11 +4305,12 @@ function showNonCodPremiumPopup(items) {
 
       <div class="premium-noncod-icon">🔒</div>
 
-      <h2>Online Payment Required</h2>
+      <h2>Cash on Delivery Not Available</h2>
 
       <p>
-        The following item(s) require Online Payment for secure shipping.
-     </p>
+        Cash on Delivery (COD) is not available for the following item(s).
+        Please select another payment option to continue.
+      </p>
 
       <div class="premium-noncod-list">
         ${itemList}
