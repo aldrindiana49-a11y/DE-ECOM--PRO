@@ -1180,6 +1180,123 @@
     </div>
   </div>
 
+  <dialog id="inventoryRestockDialog" style="
+    margin:auto;
+    width:min(95vw, 480px);
+    max-height:90vh;
+    overflow:auto;
+    padding:24px;
+    border:0;
+    border-radius:14px;
+  ">
+    <h2>Restock Product</h2>
+    <p id="restockProductName"></p>
+
+    <div class="form-group">
+      <label for="restockVariant">Select SKU / Variant</label>
+      <select id="restockVariant"></select>
+    </div>
+
+    <div class="form-group">
+      <label for="restockCurrentStock">
+        Current Stock
+      </label>
+
+      <input id="restockCurrentStock" type="number" min="0" step="1" inputmode="numeric" placeholder="0" />
+
+      <small>
+        Use the arrows or type the actual stock manually.
+      </small>
+    </div>
+
+    <div id="manualStockAdjustmentSection">
+
+      <div class="form-group">
+        <label for="manualStockReason">
+          Reason for Stock Update
+        </label>
+
+        <select id="manualStockReason">
+          <option value="">Select reason</option>
+          <option value="damaged">Damaged Item</option>
+          <option value="lost">Lost Item</option>
+          <option value="customer_return">Customer Return</option>
+          <option value="physical_count">Physical Count Correction</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="manualStockNotes">
+          Notes
+        </label>
+
+        <textarea id="manualStockNotes" rows="3" maxlength="300"
+          placeholder="Explain why the stock was changed"></textarea>
+      </div>
+
+      <p id="manualStockPreview" aria-live="polite"></p>
+
+      <button id="saveManualStockBtn" type="button" class="secondary-btn" disabled>
+        Save Stock Update
+      </button>
+
+    </div>
+
+    <hr style="margin:20px 0;" />
+
+    <div class="form-group">
+      <label for="restockCurrentCost">
+        Current Average Cost / Item (₱)
+      </label>
+      <input id="restockCurrentCost" type="text" readonly />
+    </div>
+
+    <div id="restockInitialCostSection" hidden>
+      <div class="form-group">
+        <label for="restockInitialCost">
+          Initial Average Cost of Existing Stock / Item (₱)
+        </label>
+
+        <input id="restockInitialCost" type="number" min="0" step="0.000001"
+          placeholder="Puhunan bawat item ng natitirang stock" />
+      </div>
+
+      <button id="saveInitialCostBtn" type="button" class="secondary-btn" disabled>
+        Save Initial Cost
+      </button>
+    </div>
+
+    <hr style="margin:20px 0;" />
+
+    <div class="form-group">
+      <label for="restockQuantity">Quantity Received</label>
+      <input id="restockQuantity" type="number" min="1" step="1" placeholder="Dami ng bagong dating" />
+    </div>
+
+    <div class="form-group">
+      <label for="restockNewCost">
+        New Supplier Cost / Item (₱)
+      </label>
+      <input id="restockNewCost" type="number" min="0" step="0.000001"
+        placeholder="Puhunan bawat item sa bagong delivery" />
+    </div>
+
+    <p id="restockPreview" aria-live="polite"></p>
+    <p id="restockMessage" role="status"></p>
+
+    <div class="form-actions">
+      <button id="saveRestockBtn" type="button" class="primary-btn" disabled>
+        Save Restock
+      </button>
+
+      <button id="closeRestockBtn" type="button" class="secondary-btn"
+        onclick="document.getElementById('inventoryRestockDialog').close()">
+        Close
+      </button>
+    </div>
+  </dialog>
+
   <div id="toastContainer" class="toast-container"></div>
 
 
@@ -1210,7 +1327,7 @@
   <script src="./supabase.js?v=10010"></script>
   <script src="./utils.js?v=10010"></script>
   <script src="./admin.js?v=10011"></script>
-  <script src="./inventory.js?v=10011"></script>
+  <script src="./inventory.js?v=10012"></script>
   <script src="./generator.js?v=10010"></script>
   <script src="./categories.js?v=10010"></script>
   <script src="./orders.js?v=10022"></script>

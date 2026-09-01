@@ -2555,6 +2555,294 @@ document.getElementById("restockVariant")?.addEventListener(
   loadSelectedRestockVariant
 );
 
+let inventoryAdjustmentSaving = false;
+
+function getManualStockAdjustmentData() {
+  const dialog =
+    document.getElementById("inventoryRestockDialog");
+
+  const variantSelect =
+    document.getElementById("restockVariant");
+
+  const stockInput =
+    document.getElementById("restockCurrentStock");
+
+  const reasonInput =
+    document.getElementById("manualStockReason");
+
+  const notesInput =
+    document.getElementById("manualStockNotes");
+
+  if (
+    !dialog ||
+    !variantSelect ||
+    !stockInput ||
+    !reasonInput ||
+    !notesInput
+  ) {
+    return null;
+  }
+
+  const previousStock =
+    Number(dialog.dataset.currentStock);
+
+  const newStock =
+    Number(stockInput.value);
+
+  const reason =
+    reasonInput.value.trim();
+
+  const notes =
+    notesInput.value.trim();
+
+  const validReasons = [
+    "damaged",
+    "lost",
+    "customer_return",
+    "physical_count",
+    "other"
+  ];
+
+  if (
+    !dialog.dataset.productId ||
+    !variantSelect.value ||
+    dialog.dataset.currentStock === undefined ||
+    stockInput.value.trim() === "" ||
+    !stockInput.validity.valid ||
+    !Number.isSafeInteger(previousStock) ||
+    previousStock < 0 ||
+    !Number.isSafeInteger(newStock) ||
+    newStock < 0 ||
+    newStock === previousStock ||
+    !validReasons.includes(reason) ||
+    !notes ||
+    notes.length > 300
+  ) {
+    return null;
+  }
+
+  return {
+    previousStock,
+    newStock,
+    difference: newStock - previousStock,
+
+    payload: {
+      p_product_id: dialog.dataset.productId,
+      p_variant_id: variantSelect.value,
+      p_expected_stock: previousStock,
+      p_new_stock: newStock,
+      p_reason: reason,
+      p_notes: notes
+    }
+  };
+}
+
+function updateManualStockPreview() {
+  const preview =
+    document.getElementById("manualStockPreview");
+
+  const button =
+    document.getElementById("saveManualStockBtn");
+
+  if (!preview || !button) return;
+
+  const data =
+    getManualStockAdjustmentData();
+
+  button.disabled =
+    inventoryAdjustmentSaving ||
+    inventoryProductSaving ||
+    inventoryRestockSaving ||
+    initialCostSaving ||
+    !data;
+
+  if (!data) {
+    preview.textContent =
+      "Change the current stock, select a reason, and enter notes.";
+    return;
+  }
+
+  const action =
+    data.difference > 0
+      ? `Dagdag: ${data.difference}`
+      : `Bawas: ${Math.abs(data.difference)}`;
+
+  preview.textContent =
+    `${data.previousStock} → ${data.newStock} | ${action}`;
+}
+
+[
+  "restockCurrentStock",
+  "manualStockReason",
+  "manualStockNotes"
+].forEach((id) => {
+  document.getElementById(id)?.addEventListener(
+    "input",
+    updateManualStockPreview
+  );
+
+  document.getElementById(id)?.addEventListener(
+    "change",
+    updateManualStockPreview
+  );
+});
+
+document.getElementById("saveManualStockBtn")?.addEventListener(
+  "click",
+  async function () {
+    updateManualStockPreview();
+
+    if (this.disabled || inventoryAdjustmentSaving) {
+      return;
+    }
+
+    const data =
+      getManualStockAdjustmentData();
+
+    if (!data) return;
+
+    const message =
+      document.getElementById("restockMessage");
+
+    const pendingKey =
+      "drinPendingStockAdjustment";
+
+    const controls = [
+      "restockVariant",
+      "restockCurrentStock",
+      "manualStockReason",
+      "manualStockNotes",
+      "restockQuantity",
+      "restockNewCost",
+      "saveRestockBtn",
+      "saveInitialCostBtn",
+      "closeRestockBtn"
+    ]
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+
+    const previousStates =
+      controls.map((control) => control.disabled);
+
+    let saved = false;
+
+    inventoryAdjustmentSaving = true;
+    this.disabled = true;
+    this.textContent = "Saving...";
+
+    controls.forEach((control) => {
+      control.disabled = true;
+    });
+
+    try {
+      const signature =
+        JSON.stringify(data.payload);
+
+      const stored =
+        sessionStorage.getItem(pendingKey);
+
+      let pending =
+        stored ? JSON.parse(stored) : null;
+
+      if (
+        pending &&
+        pending.signature !== signature
+      ) {
+        throw new Error(
+          "Retry the previous unconfirmed stock update using its original values."
+        );
+      }
+
+      if (!pending) {
+        pending = {
+          signature,
+          requestId: crypto.randomUUID()
+        };
+
+        sessionStorage.setItem(
+          pendingKey,
+          JSON.stringify(pending)
+        );
+      }
+
+      message.textContent =
+        "Saving stock adjustment...";
+
+      const { data: result, error } =
+        await supabaseClient.rpc(
+          "inventory_adjust_stock",
+          {
+            ...data.payload,
+            p_request_id: pending.requestId
+          }
+        );
+
+      if (error) throw error;
+
+      if (
+        !result ||
+        result.request_id !== pending.requestId
+      ) {
+        throw new Error(
+          "Stock update was not confirmed. Retry using the same values."
+        );
+      }
+
+      saved = true;
+
+      sessionStorage.removeItem(pendingKey);
+
+      document.getElementById(
+        "manualStockReason"
+      ).value = "";
+
+      document.getElementById(
+        "manualStockNotes"
+      ).value = "";
+
+      const refreshed =
+        await loadSelectedRestockVariant();
+
+      await loadAdminProductsFromSupabase();
+
+      if (!refreshed) {
+        throw new Error(
+          "Stock was saved, but the Edit form did not refresh safely."
+        );
+      }
+
+      message.textContent =
+        data.difference > 0
+          ? `Stock updated successfully. Added ${data.difference}.`
+          : `Stock updated successfully. Removed ${Math.abs(data.difference)}.`;
+
+      showToast(
+        "Manual stock update saved.",
+        "success"
+      );
+
+    } catch (error) {
+      message.textContent = saved
+        ? "Stock was saved, but refresh did not finish. Do not repeat the update. Reopen Edit to check."
+        : error.message ||
+        "Stock update was not confirmed.";
+
+    } finally {
+      inventoryAdjustmentSaving = false;
+      this.textContent = "Save Stock Update";
+
+      controls.forEach((control, index) => {
+        control.disabled =
+          previousStates[index];
+      });
+
+      updateManualStockPreview();
+      updateInitialCostButton();
+      updateRestockPreview();
+    }
+  }
+);
+
 let initialCostSaving = false;
 
 function updateInitialCostButton() {
@@ -2892,6 +3180,8 @@ document.getElementById("inventoryRestockDialog")?.addEventListener(
     if (inventoryRestockSaving) event.preventDefault();
   }
 );
+
+
 /* ===============================
    END INVENTORY MODULE
 ================================ */
