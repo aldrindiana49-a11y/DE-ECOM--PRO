@@ -42,6 +42,12 @@ const sendReplyBtn =
 const unreadBadge =
     document.getElementById("unreadBadge");
 
+const chatHeaderTitle =
+    document.getElementById("chatHeaderTitle");
+
+const closeAdminChatBtn =
+    document.getElementById("closeAdminChatBtn");
+
 const chatHeader =
     document.getElementById("chatHeader");
 
@@ -219,8 +225,10 @@ async function openConversation(conversationId) {
 
     activeItem?.classList.add("active");
 
-    chatHeader.textContent =
-        "Customer Support Chat";
+    if (chatHeaderTitle) {
+        chatHeaderTitle.textContent =
+            "Customer Support Chat";
+    }
 
     if (window.innerWidth <= 768) {
         document
@@ -250,10 +258,11 @@ function renderMessages(messages) {
             if (msg.image_url) {
 
                 content = `
-                <img
-    src="${msg.image_url}"
-    class="chat-image"
-    onclick="openChatImagePreview('${msg.image_url}')">
+                
+        <img
+            src="${msg.image_url}"
+            class="chat-image">
+
             `;
 
             }
@@ -290,7 +299,10 @@ function renderMessages(messages) {
             }
 
             return `
-            <div class="chat-message ${msg.sender_type}">
+            <div
+                class="chat-message ${msg.sender_type}"
+                data-chat-id="${msg.id}"
+            >
                 ${content}
             </div>
         `;
@@ -415,6 +427,13 @@ function subscribeRealtime() {
 
 function appendMessage(msg) {
 
+    const existingMessage =
+        document.querySelector(
+            `[data-chat-id="${msg.id}"]`
+        );
+
+    if (existingMessage) return;
+
     const div =
         document.createElement("div");
 
@@ -426,11 +445,10 @@ function appendMessage(msg) {
     if (msg.image_url) {
 
         div.innerHTML = `
-        <img
-            src="${msg.image_url}"
-            class="chat-image"
-            onclick="openChatImagePreview('${msg.image_url}')">
-    `;
+    <img
+        src="${msg.image_url}"
+        class="chat-image">
+`;
 
     }
     else if (msg.video_url) {
@@ -739,3 +757,76 @@ async function togglePinConversation(
 
     loadConversations();
 }
+
+closeAdminChatBtn?.addEventListener(
+    "click",
+    async function () {
+
+        await setAdminTypingStatus(false);
+
+        selectedConversationId = null;
+
+        document
+            .querySelector(".chat-main")
+            ?.classList.remove("show");
+
+        const emojiPanel =
+            document.getElementById("adminEmojiPanel");
+
+        if (emojiPanel) {
+            emojiPanel.style.display = "none";
+        }
+    }
+);
+
+closeAdminChatBtn?.addEventListener(
+    "click",
+    async function () {
+
+        await setAdminTypingStatus(false);
+
+        selectedConversationId = null;
+
+        document
+            .querySelectorAll(".conversation-item")
+            .forEach((item) => {
+                item.classList.remove("active");
+            });
+
+        showCustomerTyping(false);
+
+        const chatMain =
+            document.querySelector(".chat-main");
+
+        if (window.innerWidth <= 768) {
+            chatMain?.classList.remove("show");
+        } else {
+            if (chatHeaderTitle) {
+                chatHeaderTitle.textContent =
+                    "Select a conversation";
+            }
+
+            const status =
+                document.getElementById("chatHeaderStatus");
+
+            if (status) {
+                status.textContent = "Customer Support";
+            }
+
+            if (adminChatMessages) {
+                adminChatMessages.innerHTML = `
+                    <div style="padding:20px; color:#64748b;">
+                        Select a conversation from the inbox.
+                    </div>
+                `;
+            }
+        }
+
+        const emojiPanel =
+            document.getElementById("adminEmojiPanel");
+
+        if (emojiPanel) {
+            emojiPanel.style.display = "none";
+        }
+    }
+);

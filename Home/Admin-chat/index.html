@@ -35,7 +35,23 @@
     <main class="chat-main">
 
       <div id="chatHeader" class="chat-header">
-        Select a conversation
+
+        <div class="chat-header-details">
+          <strong id="chatHeaderTitle">
+            Support Inbox
+          </strong>
+
+          <small id="chatHeaderStatus">
+            Customer Support
+          </small>
+        </div>
+
+        <a href="/Home/Admin/index.html" id="closeAdminChatBtn" class="premium-back-btn"
+          aria-label="Back to Admin Panel" title="Back to Admin Panel">
+          <span class="premium-back-icon">←</span>
+          <span class="premium-back-text">Admin</span>
+        </a>
+
       </div>
 
       <div id="adminChatMessages" class="admin-chat-messages"></div>
@@ -81,11 +97,6 @@
 
     </main>
 
-  </div>
-
-  <div id="chatImagePreview" class="chat-image-preview">
-    <button class="chat-image-preview-close" onclick="closeChatImagePreview()">✕</button>
-    <img id="chatPreviewImage" src="" alt="Preview">
   </div>
 
   <script src="admin-chat.js"></script>

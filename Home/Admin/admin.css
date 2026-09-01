@@ -1812,3 +1812,45 @@ body {
 .view-live-btn:hover {
   background: #0b5ed7;
 }
+
+#inventoryPageInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.inventory-page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #263238;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.inventory-page-btn:hover {
+  border-color: #ff6b00;
+  color: #ff6b00;
+}
+
+.inventory-page-btn.active {
+  border-color: #ff6b00;
+  background: #ff6b00;
+  color: #ffffff;
+}
+
+.inventory-page-btn:focus-visible {
+  outline: 3px solid rgba(255, 107, 0, 0.25);
+  outline-offset: 2px;
+}
+
+#inventoryPrevBtn:disabled,
+#inventoryNextBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

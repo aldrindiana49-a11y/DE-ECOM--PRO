@@ -16,6 +16,7 @@
 let singleVariantImageData = "";
 let singleVariantImageChanged = false;
 let products = [];
+let inventoryProductSaving = false;
 let inventoryCurrentPage = 1;
 const inventoryItemsPerPage = 10;
 let productGalleryData = [];
@@ -36,6 +37,66 @@ const inventoryNextBtn =
 
 const inventoryPageInfo =
   document.getElementById("inventoryPageInfo");
+
+function renderInventoryPageNumbers(totalItems, filter = "") {
+  if (!inventoryPageInfo) return;
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(totalItems / inventoryItemsPerPage)
+  );
+
+  if (inventoryCurrentPage > totalPages) {
+    inventoryCurrentPage = totalPages;
+  }
+
+  let startPage = Math.max(
+    1,
+    inventoryCurrentPage - 2
+  );
+
+  let endPage = Math.min(
+    totalPages,
+    startPage + 4
+  );
+
+  startPage = Math.max(
+    1,
+    endPage - 4
+  );
+
+  inventoryPageInfo.innerHTML = "";
+
+  for (let page = startPage; page <= endPage; page++) {
+    const button = document.createElement("button");
+
+    button.type = "button";
+    button.className = "inventory-page-btn";
+    button.textContent = String(page);
+
+    if (page === inventoryCurrentPage) {
+      button.classList.add("active");
+      button.setAttribute("aria-current", "page");
+    }
+
+    button.addEventListener("click", () => {
+      inventoryCurrentPage = page;
+      renderInventory(filter);
+    });
+
+    inventoryPageInfo.appendChild(button);
+  }
+
+  if (inventoryPrevBtn) {
+    inventoryPrevBtn.disabled =
+      inventoryCurrentPage <= 1;
+  }
+
+  if (inventoryNextBtn) {
+    inventoryNextBtn.disabled =
+      inventoryCurrentPage >= totalPages;
+  }
+}
 
 if (inventoryPrevBtn) {
   inventoryPrevBtn.addEventListener("click", () => {
@@ -102,12 +163,65 @@ function generateVariantId() {
   return `var-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 }
 
+function inventorySupplierPrice(value) {
+  if (value == null || String(value).trim() === "") return null;
+
+  const amount = Number(value);
+
+  return Number.isFinite(amount) && amount >= 0
+    ? amount
+    : null;
+}
+
+function inventoryPeso(value) {
+  return new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP"
+  }).format(value);
+}
+
+function inventoryGrossProfit(variant) {
+  const cost = inventorySupplierPrice(variant.supplierPrice);
+  const price = Number(variant.price);
+  const discount = Number(variant.discountPrice || 0);
+
+  if (
+    cost === null ||
+    !Number.isFinite(price) ||
+    price <= 0 ||
+    !Number.isFinite(discount) ||
+    discount < 0 ||
+    (discount > 0 && discount >= price)
+  ) {
+    return null;
+  }
+
+  const sellingPrice = discount > 0 ? discount : price;
+  const unit = Math.round((sellingPrice - cost) * 100) / 100;
+  const stock = Math.max(0, safeNumber(variant.stock, 0));
+
+  return {
+    unit,
+    total: Math.round(unit * stock * 100) / 100
+  };
+}
+
+function inventoryProfitPreview(variant) {
+  const profit = inventoryGrossProfit(variant);
+
+  if (!profit) return "Set supplier price and valid selling price.";
+
+  return `Gross profit/item: ${inventoryPeso(profit.unit)}
+    | Potential stock profit: ${inventoryPeso(profit.total)}`;
+}
+
 function createEmptyVariant() {
   return {
     id: generateVariantId(),
     label: "",
     price: 0,
     discountPrice: 0,
+    supplierPrice: null,
     stock: 0,
     sku: "",
     weight: 0,
@@ -124,6 +238,7 @@ function normalizeVariant(variant, index = 0) {
     label: safeText(variant?.label, ""),
     price: safeNumber(variant?.price, 0),
     discountPrice: safeNumber(variant?.discountPrice, 0),
+    supplierPrice: inventorySupplierPrice(variant?.supplierPrice),
     stock: safeNumber(variant?.stock, 0),
     sku: safeText(variant?.sku, ""),
     weight: safeNumber(variant?.weight, 0),
@@ -409,6 +524,85 @@ function setImagePreview(src, gallery = []) {
   placeholder.style.display = "none";
 }
 
+function refreshSupplierProfitPreview() {
+  const singlePreview =
+    document.getElementById("singleSupplierProfitPreview");
+
+  if (singlePreview) {
+    singlePreview.textContent = inventoryProfitPreview({
+      supplierPrice:
+        document.getElementById("singleSupplierPrice")?.value,
+      price: singlePriceInput?.value,
+      discountPrice: singleDiscountPriceInput?.value,
+      stock: singleStockInput?.value
+    });
+  }
+
+  if (!variantTableBody) return;
+
+  variantTableBody
+    .querySelectorAll("tr[data-variant-id]")
+    .forEach((row) => {
+      const preview =
+        row.querySelector('[data-role="supplierProfitPreview"]');
+
+      if (!preview) return;
+
+      preview.textContent = inventoryProfitPreview({
+        supplierPrice:
+          row.querySelector('[data-field="supplierPrice"]')?.value,
+        price:
+          row.querySelector('[data-field="price"]')?.value,
+        discountPrice:
+          row.querySelector('[data-field="discountPrice"]')?.value,
+        stock:
+          row.querySelector('[data-field="stock"]')?.value
+      });
+    });
+}
+
+function setupSupplierPriceFields() {
+  if (
+    singleSkuSection &&
+    !document.getElementById("singleSupplierPrice")
+  ) {
+    const field = document.createElement("div");
+
+    field.className = "form-group";
+    field.innerHTML = `
+      <label for="singleSupplierPrice">
+        Supplier Price / Item (₱)
+      </label>
+
+      <input
+        id="singleSupplierPrice"
+        type="number"
+        min="0"
+        step="0.01"
+        placeholder="Not set"
+      />
+
+      <p
+        id="singleSupplierProfitPreview"
+        aria-live="polite"
+      ></p>
+
+      <small>
+        Gross profit only. Excludes fees and other expenses.
+      </small>
+    `;
+
+    singleSkuSection.appendChild(field);
+  }
+
+  productForm?.addEventListener(
+    "input",
+    refreshSupplierProfitPreview
+  );
+
+  refreshSupplierProfitPreview();
+}
+
 function setModeUI() {
   const mode = safeText(productTypeInput?.value, "single");
 
@@ -580,7 +774,7 @@ if (singleVariantImageFile) {
       return;
     }
 
-   const MAX_IMAGE_SIZE = 500 * 1024;
+    const MAX_IMAGE_SIZE = 500 * 1024;
 
     if (file.size > MAX_IMAGE_SIZE) {
       showToast(
@@ -618,6 +812,9 @@ function getVariantRows() {
       id: safeText(row.dataset.variantId, generateVariantId()),
       label: safeText(row.querySelector('[data-field="label"]')?.value),
       price: safeNumber(row.querySelector('[data-field="price"]')?.value, 0),
+      supplierPrice: inventorySupplierPrice(
+        row.querySelector('[data-field="supplierPrice"]')?.value
+      ),
       discountPrice: safeNumber(
         row.querySelector('[data-field="discountPrice"]')?.value,
         0
@@ -665,7 +862,7 @@ function handleVariantFileChange(variantId, input) {
     return;
   }
 
- const MAX_IMAGE_SIZE = 500 * 1024;
+  const MAX_IMAGE_SIZE = 500 * 1024;
 
   if (file.size > MAX_IMAGE_SIZE) {
     showToast(
@@ -738,9 +935,54 @@ function renderVariantTable(variants = []) {
           placeholder="M1 - 2pcs / Yellow - 4pcs"
         />
       </td>
-      <td><input type="number" data-field="price" min="0" step="0.01" value="${item.price}" /></td>
+     
+        <td>
+          <input
+            type="number"
+            data-field="price"
+            min="0"
+            step="0.01"
+            value="${item.price}"
+          />
+
+          <label style="display:block; margin-top:8px;">
+            Supplier Price / Item (₱)
+
+            <input
+              type="number"
+              data-field="supplierPrice"
+              min="0"
+              step="0.000001"
+              value="${item.supplierPrice ?? ""}"
+              placeholder="Not set"
+              ${safeText(productId?.value) && item.supplierPrice !== null
+        ? "readonly"
+        : ""
+      }
+            
+      />
+      </label>
+
+      <small
+        data-role="supplierProfitPreview"
+
+            aria-live="polite"
+            style="display:block; margin-top:6px;"
+          >
+            ${inventoryProfitPreview(item)}
+          </small>
+        </td>
+
       <td><input type="number" data-field="discountPrice" min="0" step="0.01" value="${item.discountPrice || ""}" /></td>
-      <td><input type="number" data-field="stock" min="0" value="${item.stock}" /></td>
+      <td>
+      <input
+        type="number"
+        data-field="stock"
+        min="0"
+        value="${item.stock}"
+        ${safeText(productId?.value) ? "readonly" : ""}
+        />
+      </td>
       <td><input type="text" data-field="sku" maxlength="40" value="${escapeAttribute(item.sku)}" placeholder="SKU" /></td>
       <td><input type="number" data-field="weight" min="0" step="0.01" value="${item.weight || ""}" /></td>
       <td><input type="number" data-field="length" min="0" step="0.01" value="${item.length || ""}" /></td>
@@ -788,8 +1030,16 @@ if (applyToAllVariantsBtn) {
 
     rows.forEach((row) => {
 
-      if (stock !== "") {
-        row.querySelector('[data-field="stock"]').value = stock;
+      const stockField =
+        row.querySelector('[data-field="stock"]');
+
+      if (
+        stock != null &&
+        stock !== "" &&
+        stockField &&
+        !stockField.readOnly
+      ) {
+        stockField.value = stock;
       }
 
       if (weight !== "") {
@@ -859,10 +1109,23 @@ function buildSingleSkuVariant(mainImage = "") {
       existingMainImage;
   }
 
+  const existingProduct = products.find(
+    (item) => String(item.id) === String(productId?.value)
+  );
+
+  const existingVariant =
+    existingProduct?.productType === "single"
+      ? existingProduct.variants?.[0]
+      : null;
+
   return normalizeVariant({
-    id: generateVariantId(),
+    id: existingVariant?.id || generateVariantId(),
+
     label: "Default",
     price: safeNumber(singlePriceInput?.value, 0),
+    supplierPrice: inventorySupplierPrice(
+      document.getElementById("singleSupplierPrice")?.value
+    ),
     discountPrice: safeNumber(singleDiscountPriceInput?.value, 0),
     stock: safeNumber(singleStockInput?.value, 0),
     sku: safeText(singleSkuInput?.value),
@@ -1075,22 +1338,54 @@ function validateVariants(variants) {
 function resetSingleSkuFields() {
   if (singlePriceInput) singlePriceInput.value = "";
   if (singleDiscountPriceInput) singleDiscountPriceInput.value = "";
-  if (singleStockInput) singleStockInput.value = "";
+
+  if (singleStockInput) {
+    singleStockInput.value = "";
+    singleStockInput.readOnly = false;
+  }
+
+  const supplierInput =
+    document.getElementById("singleSupplierPrice");
+
+  if (supplierInput) {
+    supplierInput.value = "";
+    supplierInput.readOnly = false;
+  }
+
   if (singleSkuInput) singleSkuInput.value = "";
   if (singleWeightInput) singleWeightInput.value = "";
   if (singleLengthInput) singleLengthInput.value = "";
   if (singleWidthInput) singleWidthInput.value = "";
   if (singleHeightInput) singleHeightInput.value = "";
   if (singleVariantImageFile) singleVariantImageFile.value = "";
+
   singleVariantImageData = "";
   singleVariantImageChanged = false;
+
+  refreshSupplierProfitPreview();
 }
 
 function resetProductForm() {
   if (!productForm) return;
 
+  const restockPanel =
+    document.getElementById("inventoryRestockDialog");
+
+  if (restockPanel) {
+    restockPanel.hidden = true;
+    delete restockPanel.dataset.productId;
+  }
+
   productForm.reset();
-  if (productId) productId.value = "";
+
+  restockLoadVersion++;
+
+  if (productId) {
+    productId.value = "";
+    delete productId.dataset.editRevision;
+    delete productId.dataset.detailsFingerprint;
+  }
+
   if (existingImageData) existingImageData.value = "";
 
   productGalleryData = [];
@@ -1161,6 +1456,11 @@ function renderInventory(filter = "") {
     );
   });
 
+  renderInventoryPageNumbers(
+    filteredProducts.length,
+    searchValue
+  );
+
   if (!filteredProducts.length) {
     inventoryTableBody.innerHTML = `
       <tr>
@@ -1230,20 +1530,22 @@ function renderInventory(filter = "") {
             <td>
 
           <div class="action-buttons">
-            <button
-            type="button"
-            class="small-btn"
-            onclick="editProduct('${product.id}')"
-          >
-            Edit
 
-        <button
-          type="button"
-          class="small-btn view-live-btn"
-          onclick="viewLiveProduct('${product.id}')"
-        >
-          View Live
-        </button>
+            <button
+              type="button"
+              class="small-btn"
+              onclick="openProductEditor('${product.id}')"
+              >
+              Edit
+            </button>
+
+          <button
+            type="button"
+            class="small-btn view-live-btn"
+            onclick="viewLiveProduct('${product.id}')"
+          >
+            View Live
+          </button>
 
             <button class="danger-btn" onclick="deleteProduct('${product.id}')">Delete</button>
           </div>
@@ -1258,6 +1560,21 @@ function renderInventory(filter = "") {
 if (productForm) {
   productForm.addEventListener("submit", async function (e) {
     e.preventDefault();
+
+    if (
+      inventoryProductSaving ||
+      inventoryRestockSaving ||
+      initialCostSaving
+    ) {
+      showToast(
+        "Please wait for the current save to finish.",
+        "warning"
+      );
+      return;
+    }
+
+    inventoryProductSaving = true;
+    if (submitBtn) submitBtn.disabled = true;
 
     try {
 
@@ -1339,7 +1656,13 @@ if (productForm) {
         variant_title: currentMode === "variant"
           ? safeText(variantTitleInput?.value, "Variation")
           : "Single SKU",
-        variations: variants,
+        variations: variants.map((variant) => {
+          const publicVariant = { ...variant };
+
+          delete publicVariant.supplierPrice;
+
+          return publicVariant;
+        }),
         weight: safeNumber(firstVariant.weight, 0),
         length: safeNumber(firstVariant.length, 0),
         width: safeNumber(firstVariant.width, 0),
@@ -1372,22 +1695,34 @@ if (productForm) {
       let savedRows = [];
 
       if (editingId) {
-        const result = await supabaseClient
-          .from("products")
-          .update(productData)
-          .eq("id", editingId)
-          .select("id, stock, variations");
+        const expectedRevision =
+          productId?.dataset.editRevision || "";
 
-        error = result.error;
-        savedRows = result.data || [];
-
-        if (!error && savedRows.length === 0) {
+        if (!/^\d+$/.test(expectedRevision)) {
           showToast(
-            "No product was updated. Check Supabase UPDATE policy.",
+            "Product revision is missing. Reopen Edit before saving.",
             "error"
           );
           return;
         }
+
+        const result = await supabaseClient.rpc(
+          "inventory_save_product_details",
+          {
+            p_product_id: editingId,
+            p_expected_revision: expectedRevision,
+            p_details: productData
+          }
+        );
+
+        error = result.error;
+        savedRows = result.data ? [result.data] : [];
+
+        if (!error && savedRows.length === 0) {
+          showToast("Product save was not confirmed.", "error");
+          return;
+        }
+
       } else {
         const result = await supabaseClient
           .from("products")
@@ -1404,12 +1739,46 @@ if (productForm) {
         return;
       }
 
-      showToast(
-        editingId
-          ? "Product updated online successfully."
-          : "Product saved online successfully.",
-        "success"
-      );
+      let costSaveError = "";
+      let existingCostDifferent = false;
+
+      try {
+        const savedProductId = savedRows[0]?.id;
+
+        if (savedProductId == null) {
+          throw new Error("Saved product ID was not returned.");
+        }
+
+        existingCostDifferent = await saveProductInitialCosts(
+          savedProductId,
+          variants
+        );
+
+      } catch (error) {
+        costSaveError =
+          error.message || "Supplier cost could not be saved.";
+      }
+
+      if (costSaveError) {
+        showToast(
+          "Product saved, but supplier cost saving did not finish: " +
+          costSaveError +
+          " Reopen Edit to retry the missing costs.",
+          "error"
+        );
+
+      } else if (existingCostDifferent) {
+        showToast(
+          "Product saved. Existing average cost was kept; use Restock to record new delivery costs.",
+          "warning"
+        );
+
+      } else {
+        showToast(
+          "Product and supplier cost saved successfully.",
+          "success"
+        );
+      }
 
       resetProductForm();
       await loadAdminProductsFromSupabase();
@@ -1418,17 +1787,244 @@ if (productForm) {
     } catch (error) {
       console.error(error);
       showToast("Failed to save product online.", "error");
+    } finally {
+      inventoryProductSaving = false;
+      if (submitBtn) submitBtn.disabled = false;
+
+      updateInitialCostButton();
+      updateRestockPreview();
     }
   });
 }
 
-function editProduct(id) {
+async function saveProductInitialCosts(savedProductId, variants) {
+  let existingCostDifferent = false;
+
+  for (const variant of variants) {
+    const cost = inventorySupplierPrice(variant.supplierPrice);
+
+    if (cost === null) continue;
+
+    const { data, error } = await supabaseClient
+      .from("inventory_costs")
+      .select("average_cost")
+      .eq("product_id", savedProductId)
+      .eq("variant_id", variant.id)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    // Existing average cost must not be overwritten by Edit.
+    if (data?.average_cost != null) {
+      if (Number(data.average_cost) !== cost) {
+        existingCostDifferent = true;
+      }
+
+      continue;
+    }
+
+    const result = await supabaseClient.rpc(
+      "inventory_set_initial_cost",
+      {
+        p_product_id: savedProductId,
+        p_variant_id: variant.id,
+        p_unit_cost: cost,
+        p_expected_stock: variant.stock
+      }
+    );
+
+    if (result.error) {
+      throw new Error(
+        `${variant.label || variant.id}: ${result.error.message}`
+      );
+    }
+  }
+
+  return existingCostDifferent;
+}
+
+function inventoryDetailsFingerprint(product) {
+  const details = {};
+
+  [
+    "title",
+    "brand",
+    "price",
+    "discount_price",
+    "category",
+    "description",
+    "image",
+    "gallery",
+    "variant_title",
+    "weight",
+    "length",
+    "width",
+    "height"
+  ].forEach((key) => {
+    details[key] = product[key] ?? null;
+  });
+
+  details.variations = (
+    Array.isArray(product.variations)
+      ? product.variations
+      : []
+  ).map((variant) => {
+    const item = { ...variant };
+
+    delete item.stock;
+    delete item.supplierPrice;
+
+    return item;
+  });
+
+  function sortKeys(value) {
+    if (Array.isArray(value)) {
+      return value.map(sortKeys);
+    }
+
+    if (value !== null && typeof value === "object") {
+      return Object.fromEntries(
+        Object.keys(value)
+          .sort()
+          .map((key) => [key, sortKeys(value[key])])
+      );
+    }
+
+    return value;
+  }
+
+  return JSON.stringify(sortKeys(details));
+}
+
+function updateEditorInventoryFields(
+  savedProductId,
+  variantId,
+  stock,
+  averageCost
+) {
+  if (
+    !productId ||
+    String(productId.value) !== String(savedProductId)
+  ) {
+    return;
+  }
+
+  function updateFields(stockField, costField) {
+    if (stockField) {
+      stockField.value = String(stock);
+      stockField.readOnly = true;
+    }
+
+    // Preserve a typed initial cost if no saved cost exists yet.
+    if (costField && averageCost !== null) {
+      costField.value = String(averageCost);
+      costField.step = "0.000001";
+      costField.readOnly = true;
+    }
+  }
+
+  if (productTypeInput?.value === "single") {
+    const baseline = JSON.parse(
+      productId.dataset.detailsFingerprint || "{}"
+    );
+
+    if (
+      String(baseline.variations?.[0]?.id) !== String(variantId)
+    ) {
+      return;
+    }
+
+    updateFields(
+      singleStockInput,
+      document.getElementById("singleSupplierPrice")
+    );
+  } else {
+    const rows = variantTableBody?.querySelectorAll(
+      "tr[data-variant-id]"
+    ) || [];
+
+    for (const row of rows) {
+      if (String(row.dataset.variantId) !== String(variantId)) {
+        continue;
+      }
+
+      updateFields(
+        row.querySelector('[data-field="stock"]'),
+        row.querySelector('[data-field="supplierPrice"]')
+      );
+    }
+  }
+
+  refreshSupplierProfitPreview();
+}
+
+function openProductEditor(id) {
+  const url = new URL(window.location.href);
+
+  url.searchParams.set("editProduct", String(id));
+  url.hash = "";
+
+  window.open(url.toString(), "_blank", "noopener,noreferrer");
+}
+
+window.openProductEditor = openProductEditor;
+
+async function editProduct(id) {
   const product = products.find(
     (item) => String(item.id).trim() === String(id).trim()
   );
+
   if (!product) return;
 
-  if (productId) productId.value = safeText(product.id);
+  try {
+    const costRows = [];
+    const pageSize = 500;
+
+    for (let offset = 0; ; offset += pageSize) {
+      const { data, error } = await supabaseClient
+        .from("inventory_costs")
+        .select("variant_id, average_cost")
+        .eq("product_id", product.id)
+        .order("variant_id")
+        .range(offset, offset + pageSize - 1);
+
+      if (error) throw error;
+
+      costRows.push(...(data || []));
+
+      if (!data || data.length < pageSize) break;
+    }
+
+    const costsByVariant = new Map(
+      costRows.map((row) => [
+        String(row.variant_id),
+        inventorySupplierPrice(row.average_cost)
+      ])
+    );
+
+    product.variants = (
+      Array.isArray(product.variants) ? product.variants : []
+    ).map((variant) => ({
+      ...variant,
+      supplierPrice:
+        costsByVariant.get(String(variant.id)) ?? null
+    }));
+
+  } catch (error) {
+    showToast(
+      "Cannot load supplier costs: " +
+      (error.message || "Please retry."),
+      "error"
+    );
+    return;
+  }
+
+  if (productId) {
+    productId.value = safeText(product.id);
+    productId.dataset.editRevision = safeText(product.editRevision);
+    productId.dataset.detailsFingerprint =
+      safeText(product.detailsFingerprint);
+  }
   if (existingImageData) existingImageData.value = safeText(product.image);
   if (nameInput) nameInput.value = safeText(product.name);
   if (categoryInput) categoryInput.value = safeText(product.category);
@@ -1463,6 +2059,15 @@ function editProduct(id) {
         : createEmptyVariant();
 
     if (singlePriceInput) singlePriceInput.value = single.price || "";
+    const supplierPriceInput =
+      document.getElementById("singleSupplierPrice");
+
+    if (supplierPriceInput) {
+      supplierPriceInput.value = single.supplierPrice ?? "";
+      supplierPriceInput.step = "0.000001";
+      supplierPriceInput.readOnly = single.supplierPrice !== null;
+    }
+
     if (singleDiscountPriceInput) {
       singleDiscountPriceInput.value = single.discountPrice || "";
     }
@@ -1471,6 +2076,7 @@ function editProduct(id) {
       singleStockInput.value = String(
         safeNumber(single.stock, 0)
       );
+      singleStockInput.readOnly = true;
     }
 
     if (singleSkuInput) singleSkuInput.value = safeText(single.sku);
@@ -1510,7 +2116,10 @@ function editProduct(id) {
   );
 
   renderProductGallery();
+  refreshSupplierProfitPreview();
   showSection("addListingSection");
+
+  await openInlineRestock(product);
 
   productForm?.scrollIntoView({
     behavior: "smooth",
@@ -1560,7 +2169,9 @@ if (searchInput) {
 
     const keyword = safeText(this.value).toLowerCase().trim();
 
+    inventoryCurrentPage = 1;
     renderInventory(keyword);
+
 
   });
 }
@@ -1573,6 +2184,7 @@ if (searchInput) {
 
       const keyword = safeText(this.value).toLowerCase().trim();
 
+      inventoryCurrentPage = 1;
       renderInventory(keyword);
     }
 
@@ -1593,6 +2205,8 @@ async function loadAdminProductsFromSupabase() {
 
   products = (data || []).map((item) => ({
     id: item.id,
+    editRevision: String(item.edit_revision ?? ""),
+    detailsFingerprint: inventoryDetailsFingerprint(item),
     name: item.title,
     brand: item.brand || "",
     category: item.category,
@@ -1614,10 +2228,45 @@ async function loadAdminProductsFromSupabase() {
   updateDashboard();
 }
 
-loadAdminProductsFromSupabase();
+setupSupplierPriceFields();
 setImagePreview("");
 renderVariantTable([]);
 setModeUI();
+
+loadAdminProductsFromSupabase()
+  .then(async () => {
+    const url = new URL(window.location.href);
+    const editId = url.searchParams.get("editProduct");
+
+    if (!editId) {
+      showSection("ordersSection");
+      return;
+    }
+
+    // Remove the Edit instruction from the URL after reading it.
+    url.searchParams.delete("editProduct");
+    window.history.replaceState(
+      window.history.state,
+      "",
+      url.toString()
+    );
+
+    const exists = products.some(
+      (item) => String(item.id) === editId
+    );
+
+    if (!exists) {
+      showSection("ordersSection");
+      showToast("Product not found.", "error");
+      return;
+    }
+
+    await editProduct(editId);
+  })
+  .catch((error) => {
+    console.error(error);
+    showToast("Failed to load the admin page.", "error");
+  });
 
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
@@ -1636,7 +2285,613 @@ document.addEventListener("wheel", function (e) {
   }
 }, { passive: true });
 
+async function openInlineRestock(product) {
+  let panel =
+    document.getElementById("inventoryRestockDialog");
 
+  if (!panel || !productForm) {
+    showToast("Restock section is missing from the HTML.", "error");
+    return;
+  }
+
+  // Convert the existing dialog into a normal page section.
+  // Moving its children preserves their existing event listeners.
+  if (panel.tagName === "DIALOG") {
+    const section = document.createElement("section");
+
+    section.id = "inventoryRestockDialog";
+    section.className = "panel-card";
+    section.style.marginTop = "24px";
+
+    while (panel.firstChild) {
+      section.appendChild(panel.firstChild);
+    }
+
+    panel.replaceWith(section);
+    panel = section;
+  }
+
+  // Place Restock outside the product form, on the same page.
+  productForm.insertAdjacentElement("afterend", panel);
+
+  panel.hidden = false;
+  panel.dataset.productId = String(product.id);
+
+  const heading = panel.querySelector("h2");
+  if (heading) heading.textContent = "Restock / Add Stock";
+
+  const closeButton = document.getElementById("closeRestockBtn");
+  if (closeButton) {
+    closeButton.hidden = true;
+    closeButton.onclick = null;
+  }
+
+  document.getElementById("restockProductName").textContent =
+    safeText(product.name, "Unnamed Product");
+
+  const variantSelect =
+    document.getElementById("restockVariant");
+
+  variantSelect.replaceChildren();
+
+  const variants = Array.isArray(product.variants)
+    ? product.variants
+    : [];
+
+  variants.forEach((variant) => {
+    const option = document.createElement("option");
+
+    option.value = safeText(variant.id);
+    option.textContent = safeText(variant.label, "Default");
+
+    variantSelect.appendChild(option);
+  });
+
+  await loadSelectedRestockVariant();
+}
+
+let restockLoadVersion = 0;
+
+async function loadSelectedRestockVariant() {
+  const dialog =
+    document.getElementById("inventoryRestockDialog");
+
+  const variantSelect =
+    document.getElementById("restockVariant");
+
+  if (!dialog || !variantSelect) return;
+
+  const loadVersion = ++restockLoadVersion;
+  const selectedProductId = dialog.dataset.productId;
+  const selectedVariantId = variantSelect.value;
+
+  const editorRevision =
+    productId?.dataset.editRevision || "";
+
+  const editorFingerprint =
+    productId?.dataset.detailsFingerprint || "";
+
+  function editorStillMatches() {
+    return (
+      loadVersion === restockLoadVersion &&
+      String(productId?.value) === String(selectedProductId) &&
+      dialog.dataset.productId === selectedProductId &&
+      variantSelect.value === selectedVariantId &&
+      productId?.dataset.editRevision === editorRevision &&
+      productId?.dataset.detailsFingerprint === editorFingerprint
+    );
+  }
+
+  const stockInput =
+    document.getElementById("restockCurrentStock");
+
+  const costInput =
+    document.getElementById("restockCurrentCost");
+
+  const message =
+    document.getElementById("restockMessage");
+
+  stockInput.value = "";
+  costInput.value = "";
+
+  delete dialog.dataset.currentStock;
+  delete dialog.dataset.averageCost;
+
+  document.getElementById("restockInitialCost").value = "";
+  document.getElementById("restockQuantity").value = "";
+  document.getElementById("restockNewCost").value = "";
+  document.getElementById("restockPreview").textContent = "";
+
+  document.getElementById("restockInitialCostSection").hidden = true;
+  document.getElementById("saveInitialCostBtn").disabled = true;
+  document.getElementById("saveRestockBtn").disabled = true;
+
+  if (!selectedProductId || !selectedVariantId) {
+    message.textContent = "No valid variant selected.";
+    return;
+  }
+
+  message.textContent = "Loading current stock and cost...";
+
+  try {
+    const [productResult, costResult] = await Promise.all([
+
+      supabaseClient
+        .from("products")
+        .select("*")
+        .eq("id", selectedProductId)
+        .single(),
+
+      supabaseClient
+        .from("inventory_costs")
+        .select("average_cost")
+        .eq("product_id", selectedProductId)
+        .eq("variant_id", selectedVariantId)
+        .maybeSingle()
+    ]);
+
+    // Ignore an old response if another variant was selected.
+    if (loadVersion !== restockLoadVersion) return;
+
+    if (productResult.error) throw productResult.error;
+    if (costResult.error) throw costResult.error;
+
+    if (!editorStillMatches()) return;
+
+    if (
+      !editorFingerprint ||
+      inventoryDetailsFingerprint(productResult.data) !== editorFingerprint
+    ) {
+      throw new Error(
+        "Product details changed in another session. Copy your unsaved edits, then reopen Edit. Your edits were not replaced."
+      );
+    }
+
+    const freshRevision = String(
+      productResult.data.edit_revision ?? ""
+    );
+
+    if (
+      !/^\d+$/.test(editorRevision) ||
+      !/^\d+$/.test(freshRevision) ||
+      BigInt(freshRevision) < BigInt(editorRevision)
+    ) {
+      throw new Error(
+        "Cannot verify product revision. Copy your unsaved edits, then reopen Edit."
+      );
+    }
+
+    const variants = productResult.data?.variations;
+
+    const matches = Array.isArray(variants)
+      ? variants.filter(
+        (item) => String(item.id) === selectedVariantId
+      )
+      : [];
+
+    if (matches.length !== 1) {
+      throw new Error("Variant is missing or its ID is duplicated.");
+    }
+
+    const rawStock = matches[0].stock;
+    const stock = Number(rawStock);
+
+    if (
+      rawStock == null ||
+      String(rawStock).trim() === "" ||
+      !Number.isSafeInteger(stock) ||
+      stock < 0
+    ) {
+      throw new Error("Variant stock is invalid.");
+    }
+
+    const rawCost = costResult.data?.average_cost;
+    const hasCost = rawCost !== null && rawCost !== undefined;
+    const averageCost = hasCost ? Number(rawCost) : null;
+
+    if (
+      hasCost &&
+      (!Number.isFinite(averageCost) || averageCost < 0)
+    ) {
+      throw new Error("Saved average cost is invalid.");
+    }
+
+    if (!editorStillMatches()) return;
+
+    productId.dataset.editRevision = freshRevision;
+
+    stockInput.value = String(stock);
+    dialog.dataset.currentStock = String(stock);
+
+    if (hasCost) {
+      costInput.value = inventoryPeso(averageCost);
+      dialog.dataset.averageCost = String(averageCost);
+    } else {
+      costInput.value = "Not set";
+
+      document.getElementById(
+        "restockInitialCostSection"
+      ).hidden = stock === 0;
+    }
+
+    updateEditorInventoryFields(
+      selectedProductId,
+      selectedVariantId,
+      stock,
+      averageCost
+    );
+
+    message.textContent = !hasCost && stock > 0
+      ? "Set the initial cost of existing stock before restocking."
+      : "Stock and cost loaded. Enter the delivery quantity and supplier cost.";
+
+    return true;
+
+  } catch (error) {
+    if (
+      loadVersion !== restockLoadVersion ||
+      String(productId?.value) !== String(selectedProductId) ||
+      dialog.dataset.productId !== selectedProductId ||
+      variantSelect.value !== selectedVariantId
+    ) {
+      return false;
+    }
+
+    delete dialog.dataset.currentStock;
+    delete dialog.dataset.averageCost;
+
+    document.getElementById("saveInitialCostBtn").disabled = true;
+    document.getElementById("saveRestockBtn").disabled = true;
+
+    message.textContent =
+      error.message || "Failed to load stock and cost.";
+
+    return false;
+  }
+}
+
+document.getElementById("restockVariant")?.addEventListener(
+  "change",
+  loadSelectedRestockVariant
+);
+
+let initialCostSaving = false;
+
+function updateInitialCostButton() {
+  const dialog =
+    document.getElementById("inventoryRestockDialog");
+
+  const input =
+    document.getElementById("restockInitialCost");
+
+  const button =
+    document.getElementById("saveInitialCostBtn");
+
+  const section =
+    document.getElementById("restockInitialCostSection");
+
+  if (!dialog || !input || !button || !section) return;
+
+  const cost = Number(input.value);
+
+  const valid =
+    !section.hidden &&
+    dialog.dataset.currentStock !== undefined &&
+    dialog.dataset.averageCost === undefined &&
+    input.value.trim() !== "" &&
+    input.validity.valid &&
+    Number.isFinite(cost) &&
+    cost >= 0 &&
+    cost < 100000000000000;
+
+  button.disabled =
+    inventoryProductSaving ||
+    inventoryRestockSaving ||
+    initialCostSaving ||
+    !valid;
+}
+
+document.getElementById("restockInitialCost")?.addEventListener(
+  "input",
+  updateInitialCostButton
+);
+
+document.getElementById("saveInitialCostBtn")?.addEventListener(
+  "click",
+  async function () {
+    updateInitialCostButton();
+
+    if (this.disabled || initialCostSaving) return;
+
+    const dialog =
+      document.getElementById("inventoryRestockDialog");
+
+    const input =
+      document.getElementById("restockInitialCost");
+
+    const variantSelect =
+      document.getElementById("restockVariant");
+
+    const closeButton =
+      document.getElementById("closeRestockBtn");
+
+    const message =
+      document.getElementById("restockMessage");
+
+    const payload = {
+      p_product_id: dialog.dataset.productId,
+      p_variant_id: variantSelect.value,
+      p_unit_cost: input.value.trim(),
+      p_expected_stock: dialog.dataset.currentStock
+    };
+
+    initialCostSaving = true;
+    this.disabled = true;
+    this.textContent = "Saving...";
+    input.disabled = true;
+    variantSelect.disabled = true;
+    closeButton.disabled = true;
+
+    message.textContent = "Saving initial cost...";
+
+    try {
+      const { error } = await supabaseClient.rpc(
+        "inventory_set_initial_cost",
+        payload
+      );
+
+      if (error) throw error;
+
+      showToast(
+        "Initial cost saved. Stock quantity was not changed.",
+        "success"
+      );
+
+      await loadSelectedRestockVariant();
+
+    } catch (error) {
+      message.textContent =
+        error.message || "Failed to save initial cost.";
+
+    } finally {
+      initialCostSaving = false;
+      this.textContent = "Save Initial Cost";
+      input.disabled = false;
+      variantSelect.disabled = false;
+      closeButton.disabled = false;
+
+      updateInitialCostButton();
+    }
+  }
+);
+
+document.getElementById("inventoryRestockDialog")?.addEventListener(
+  "cancel",
+  function (event) {
+    if (initialCostSaving) event.preventDefault();
+  }
+);
+
+let inventoryRestockSaving = false;
+
+function getRestockInputData() {
+  const dialog = document.getElementById("inventoryRestockDialog");
+  const variant = document.getElementById("restockVariant");
+  const qtyInput = document.getElementById("restockQuantity");
+  const costInput = document.getElementById("restockNewCost");
+
+  if (!dialog || !variant || !qtyInput || !costInput) return null;
+
+  if (
+    !dialog.dataset.productId ||
+    !variant.value ||
+    dialog.dataset.currentStock === undefined ||
+    qtyInput.value.trim() === "" ||
+    costInput.value.trim() === "" ||
+    !qtyInput.validity.valid ||
+    !costInput.validity.valid
+  ) {
+    return null;
+  }
+
+  const stock = Number(dialog.dataset.currentStock);
+  const quantity = Number(qtyInput.value);
+  const cost = Number(costInput.value);
+
+  const hasCost = dialog.dataset.averageCost !== undefined;
+  const averageCost = hasCost
+    ? Number(dialog.dataset.averageCost)
+    : 0;
+
+  if (
+    !Number.isSafeInteger(stock) ||
+    stock < 0 ||
+    !Number.isSafeInteger(quantity) ||
+    quantity <= 0 ||
+    !Number.isSafeInteger(stock + quantity) ||
+    !Number.isFinite(cost) ||
+    cost < 0 ||
+    cost >= 100000000000000 ||
+    !Number.isFinite(averageCost) ||
+    averageCost < 0 ||
+    (stock > 0 && !hasCost)
+  ) {
+    return null;
+  }
+
+  return {
+    stock,
+    quantity,
+    cost,
+    averageCost,
+    payload: {
+      p_product_id: dialog.dataset.productId,
+      p_variant_id: variant.value,
+      p_quantity: quantity,
+      p_unit_cost: costInput.value.trim()
+    }
+  };
+}
+
+function updateRestockPreview() {
+  const button = document.getElementById("saveRestockBtn");
+  const preview = document.getElementById("restockPreview");
+
+  if (!button || !preview) return;
+
+  const data = getRestockInputData();
+
+  button.disabled =
+    inventoryProductSaving ||
+    inventoryRestockSaving ||
+    initialCostSaving ||
+    !data;
+
+  if (!data) {
+    preview.textContent =
+      "Enter quantity and new supplier cost. Existing stock needs an initial cost.";
+    return;
+  }
+
+  const newStock = data.stock + data.quantity;
+  const newCost = (
+    data.stock * data.averageCost +
+    data.quantity * data.cost
+  ) / newStock;
+
+  preview.textContent =
+    `Updated stock: ${newStock} | ` +
+    `Estimated average cost: ${inventoryPeso(newCost)} / item`;
+}
+
+["restockQuantity", "restockNewCost"].forEach((id) => {
+  document.getElementById(id)?.addEventListener(
+    "input",
+    updateRestockPreview
+  );
+});
+
+document.getElementById("saveRestockBtn")?.addEventListener(
+  "click",
+  async function () {
+    updateRestockPreview();
+
+    if (this.disabled || inventoryRestockSaving) return;
+
+    const data = getRestockInputData();
+    if (!data) return;
+
+    const message = document.getElementById("restockMessage");
+    const pendingKey = "drinPendingInventoryRestock";
+
+    const controls = [
+      "restockVariant",
+      "restockQuantity",
+      "restockNewCost",
+      "restockInitialCost",
+      "saveInitialCostBtn",
+      "closeRestockBtn"
+    ]
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+
+    const previousStates = controls.map((input) => input.disabled);
+    let saved = false;
+
+    inventoryRestockSaving = true;
+    this.disabled = true;
+    this.textContent = "Saving...";
+
+    controls.forEach((input) => {
+      input.disabled = true;
+    });
+
+    try {
+      const signature = JSON.stringify(data.payload);
+      const stored = sessionStorage.getItem(pendingKey);
+      let pending = stored ? JSON.parse(stored) : null;
+
+      if (pending && pending.signature !== signature) {
+        throw new Error(
+          "Retry the previous unconfirmed restock using its original product, variant, quantity and cost."
+        );
+      }
+
+      if (!pending) {
+        pending = {
+          signature,
+          requestId: crypto.randomUUID()
+        };
+
+        // Remember the ID before sending, to prevent duplicate retries.
+        sessionStorage.setItem(pendingKey, JSON.stringify(pending));
+      }
+
+      message.textContent = "Saving restock...";
+
+      const { data: result, error } = await supabaseClient.rpc(
+        "inventory_restock",
+        {
+          ...data.payload,
+          p_request_id: pending.requestId
+        }
+      );
+
+      if (error) throw error;
+
+      if (!result || result.request_id !== pending.requestId) {
+        throw new Error(
+          "Save not confirmed. Retry using the same values."
+        );
+      }
+
+      saved = true;
+      sessionStorage.removeItem(pendingKey);
+
+      const refreshed = await loadSelectedRestockVariant();
+
+      await loadAdminProductsFromSupabase();
+
+      if (refreshed) {
+        message.textContent =
+          "Restock saved. Stock, average cost and history updated.";
+
+        showToast("Restock saved successfully.", "success");
+      } else {
+        showToast(
+          "Restock was saved, but the Edit form could not refresh safely. Copy your unsaved edits, then reopen Edit. Do not repeat the saved restock.",
+          "warning"
+        );
+      }
+
+    } catch (error) {
+      message.textContent = saved
+        ? "Restock saved, but refresh did not finish. Reopen the window to check."
+        : error.message || "Save not confirmed. Retry the same values.";
+
+    } finally {
+      inventoryRestockSaving = false;
+      this.textContent = "Save Restock";
+
+      controls.forEach((input, index) => {
+        input.disabled = previousStates[index];
+      });
+
+      if (typeof updateInitialCostButton === "function") {
+        updateInitialCostButton();
+      }
+
+      updateRestockPreview();
+    }
+  }
+);
+
+document.getElementById("inventoryRestockDialog")?.addEventListener(
+  "cancel",
+  function (event) {
+    if (inventoryRestockSaving) event.preventDefault();
+  }
+);
 /* ===============================
    END INVENTORY MODULE
 ================================ */
