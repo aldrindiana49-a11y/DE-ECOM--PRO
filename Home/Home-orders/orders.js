@@ -1003,8 +1003,55 @@ async function submitCancelRequest() {
     loadOrders();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    loadOrders();
+let customerOrdersRealtimeChannel = null;
+
+async function subscribeToCustomerOrderUpdates() {
+    const {
+        data: { user }
+    } = await supabaseClient.auth.getUser();
+
+    if (!user) {
+        return;
+    }
+
+    if (customerOrdersRealtimeChannel) {
+        supabaseClient.removeChannel(
+            customerOrdersRealtimeChannel
+        );
+    }
+
+    customerOrdersRealtimeChannel =
+        supabaseClient
+            .channel("customer-orders-realtime")
+            .on(
+                "postgres_changes",
+                {
+                    event: "*",
+                    schema: "public",
+                    table: "orders",
+                    filter: `user_id=eq.${user.id}`
+                },
+                async payload => {
+                    console.log(
+                        "CUSTOMER ORDER REALTIME UPDATE:",
+                        payload
+                    );
+
+                    await loadOrders();
+                }
+            )
+            .subscribe(status => {
+                console.log(
+                    "CUSTOMER ORDERS REALTIME STATUS:",
+                    status
+                );
+            });
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadOrders();
+    await subscribeToCustomerOrderUpdates();
+
     updatePaymentCountdowns();
     setInterval(updatePaymentCountdowns, 1000);
 });
