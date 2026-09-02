@@ -4507,8 +4507,70 @@ document
 
   });
 
+let ordersRealtimeChannel = null;
+
+function subscribeToOrderUpdates() {
+  if (
+    typeof supabaseClient === "undefined" ||
+    !supabaseClient
+  ) {
+    console.error(
+      "Supabase client not available for realtime orders."
+    );
+    return;
+  }
+
+  if (ordersRealtimeChannel) {
+    supabaseClient.removeChannel(
+      ordersRealtimeChannel
+    );
+  }
+
+  ordersRealtimeChannel =
+    supabaseClient
+      .channel("admin-orders-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "orders"
+        },
+        async payload => {
+          console.log(
+            "ORDER REALTIME UPDATE:",
+            payload
+          );
+
+          await loadAdminOrders();
+
+          const newStatus =
+            String(
+              payload.new?.order_status || ""
+            )
+              .trim()
+              .toLowerCase();
+
+          if (
+            payload.eventType === "DELETE" ||
+            newStatus === "cancelled"
+          ) {
+            await loadCancelledOrders();
+          }
+        }
+      )
+      .subscribe(status => {
+        console.log(
+          "ORDERS REALTIME STATUS:",
+          status
+        );
+      });
+}
+
 loadAdminOrders();
+subscribeToOrderUpdates();
 
 setTimeout(() => {
   loadCancelledOrders();
 }, 1000);
+

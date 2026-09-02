@@ -256,11 +256,59 @@ async function getAWB(batchNo) {
   });
 }
 
+
+function verifyWebhookSignature({
+  timestamp,
+  randomNum,
+  payloadString,
+  checkSign
+}) {
+  const appId = process.env.SPX_APP_ID;
+  const appSecret = process.env.SPX_APP_SECRET;
+
+  if (
+    !appId ||
+    !appSecret ||
+    !timestamp ||
+    !randomNum ||
+    !checkSign
+  ) {
+    return false;
+  }
+
+  const expected = generateCheckSign(
+    appId,
+    appSecret,
+    timestamp,
+    randomNum,
+    payloadString || ""
+  );
+
+  const expectedBuffer =
+    Buffer.from(expected, "utf8");
+
+  const receivedBuffer =
+    Buffer.from(String(checkSign), "utf8");
+
+  if (
+    expectedBuffer.length !==
+    receivedBuffer.length
+  ) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(
+    expectedBuffer,
+    receivedBuffer
+  );
+}
+
 module.exports = {
   spxPost,
   verifyAccount,
   checkShippingFee,
   createOrder,
   getCreateResult,
-  getAWB
+  getAWB,
+  verifyWebhookSignature
 };

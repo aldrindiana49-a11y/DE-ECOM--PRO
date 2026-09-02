@@ -6,7 +6,8 @@ const {
   checkShippingFee,
   createOrder,
   getCreateResult,
-  getAWB
+  getAWB,
+  verifyWebhookSignature
 } = require("./services/spxService");
 
 const express = require("express");
@@ -24,7 +25,12 @@ const supabase = createClient(
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+
+app.use(express.json({
+  verify: (req, res, buffer) => {
+    req.rawBody = buffer.toString("utf8");
+  }
+}));
 
 const PORT = process.env.PORT || 3000;
 
@@ -376,6 +382,499 @@ async function restoreXenditStock(order) {
 app.get("/", (req, res) => {
   res.send("🔥 Server Running");
 });
+
+// ================= SPX WEBHOOK HELPERS =================
+
+function mapSpxStatus(statusCode, statusText = "") {
+  const code = String(statusCode || "").trim();
+  const text = String(statusText || "")
+    .trim()
+    .toLowerCase();
+
+  if (code === "1001") {
+    return {
+      shipping_status: "PENDING_PICKUP",
+      order_status: "Ready to Ship"
+    };
+  }
+
+  if (code === "2001") {
+    return {
+      shipping_status: "IN_TRANSIT",
+      order_status: "In Transit"
+    };
+  }
+
+  if (code === "5001") {
+    return {
+      shipping_status: "PICKUP_FAILED",
+      order_status: "Ready to Ship"
+    };
+  }
+
+  if (text.includes("delivered")) {
+    return {
+      shipping_status: "DELIVERED",
+      order_status: "Delivered"
+    };
+  }
+
+  if (
+    text.includes("delivery failed") ||
+    text.includes("failed delivery")
+  ) {
+    return {
+      shipping_status: "DELIVERY_FAILED",
+      order_status: "Failed Delivery"
+    };
+  }
+
+  if (text.includes("in transit")) {
+    return {
+      shipping_status: "IN_TRANSIT",
+      order_status: "In Transit"
+    };
+  }
+
+  if (text.includes("cancel")) {
+    return {
+      shipping_status: "CANCELLED",
+      order_status: "Cancelled"
+    };
+  }
+
+  if (
+    text.includes("return") ||
+    text.includes("rts")
+  ) {
+    return {
+      shipping_status: "RETURNING",
+      order_status: "Returning"
+    };
+  }
+
+  return {
+    shipping_status:
+      String(statusText || statusCode || "UNKNOWN")
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, "_"),
+
+    order_status:
+      statusText || "Processing"
+  };
+}
+
+
+async function processSpxTrackingWebhook(data) {
+  try {
+    console.log(
+      "SPX TRACKING WEBHOOK PROCESSING:",
+      data
+    );
+
+    const orderId =
+      data.order_id ||
+      data.customer_order_id;
+
+    const trackingNo =
+      data.tracking_no || "";
+
+    let orders = await readOrders();
+
+    let index = -1;
+
+    if (orderId) {
+      index = orders.findIndex(order =>
+        String(order.external_id || order.id) ===
+        String(orderId)
+      );
+    }
+
+    if (
+      index === -1 &&
+      trackingNo
+    ) {
+      index = orders.findIndex(order =>
+        String(order.tracking_number || "") ===
+        String(trackingNo)
+      );
+    }
+
+    if (index === -1) {
+      console.error(
+        "SPX WEBHOOK ORDER NOT FOUND:",
+        {
+          orderId,
+          trackingNo
+        }
+      );
+
+      return;
+    }
+
+    const mapped = mapSpxStatus(
+      data.status_code,
+      data.status
+    );
+
+    const now =
+      new Date().toISOString();
+
+    orders[index].courier = "SPX";
+
+    if (trackingNo) {
+      orders[index].tracking_number =
+        trackingNo;
+    }
+
+    if (data.tracking_link) {
+      orders[index].tracking_link =
+        data.tracking_link;
+    }
+
+    orders[index].shipping_status =
+      mapped.shipping_status;
+
+    orders[index].order_status =
+      mapped.order_status;
+
+    if (
+      data.actual_shipping_fee !== undefined &&
+      data.actual_shipping_fee !== null
+    ) {
+      orders[index].shipping_fee =
+        Number(data.actual_shipping_fee);
+    }
+
+    if (
+      mapped.order_status === "Delivered"
+    ) {
+      orders[index].delivered_at =
+        orders[index].delivered_at || now;
+    }
+
+    orders[index].updated_at = now;
+
+    await saveOrders(orders);
+
+    console.log(
+      "SPX ORDER UPDATED:",
+      {
+        orderId:
+          orders[index].external_id ||
+          orders[index].id,
+
+        shippingStatus:
+          orders[index].shipping_status,
+
+        orderStatus:
+          orders[index].order_status
+      }
+    );
+
+  } catch (error) {
+    console.error(
+      "SPX TRACKING WEBHOOK PROCESS ERROR:",
+      error
+    );
+  }
+}
+
+
+// ================= SPX TRACKING WEBHOOK =================
+
+app.post(
+  "/api/spx/webhook",
+  (req, res) => {
+
+    try {
+      const checkSign =
+        req.headers["check-sign"];
+
+      const timestamp =
+        req.headers["timestamp"];
+
+      const randomNum =
+        req.headers["random-num"];
+
+      const payloadString =
+        req.rawBody ||
+        JSON.stringify(req.body || {});
+
+      const validSignature =
+        verifyWebhookSignature({
+          timestamp,
+          randomNum,
+          payloadString,
+          checkSign
+        });
+
+      if (!validSignature) {
+        console.error(
+          "SPX WEBHOOK INVALID SIGNATURE",
+          {
+            timestamp,
+            randomNum
+          }
+        );
+
+        return res
+          .status(401)
+          .json({
+            success: false,
+            message:
+              "Invalid SPX webhook signature"
+          });
+      }
+
+      const data = req.body || {};
+
+      console.log(
+        "SPX WEBHOOK RECEIVED:",
+        data
+      );
+
+      /*
+        Important:
+        SPX requires HTTP 200 quickly.
+        Respond first, process after.
+      */
+      res.status(200).json({
+        success: true,
+        message: "SPX webhook received"
+      });
+
+      setImmediate(() => {
+        processSpxTrackingWebhook(data);
+      });
+
+    } catch (error) {
+      console.error(
+        "SPX WEBHOOK ERROR:",
+        error
+      );
+
+      if (!res.headersSent) {
+        return res
+          .status(500)
+          .json({
+            success: false,
+            message:
+              "SPX webhook error"
+          });
+      }
+    }
+  }
+);
+
+// ================= SPX EP WEBHOOK PROCESSOR =================
+
+async function processSpxEPWebhook(data) {
+  try {
+    console.log(
+      "SPX EP WEBHOOK PROCESSING:",
+      data
+    );
+
+    const orderId =
+      data.customer_order_id ||
+      data.order_id;
+
+    const trackingNo =
+      data.tracking_no || "";
+
+    let orders = await readOrders();
+
+    let index = -1;
+
+    if (orderId) {
+      index = orders.findIndex(order =>
+        String(order.external_id || order.id) ===
+        String(orderId)
+      );
+    }
+
+    if (
+      index === -1 &&
+      trackingNo
+    ) {
+      index = orders.findIndex(order =>
+        String(order.tracking_number || "") ===
+        String(trackingNo)
+      );
+    }
+
+    if (index === -1) {
+      console.error(
+        "SPX EP ORDER NOT FOUND:",
+        {
+          orderId,
+          trackingNo
+        }
+      );
+
+      return;
+    }
+
+    const now =
+      new Date().toISOString();
+
+    orders[index].courier = "SPX";
+
+    if (trackingNo) {
+      orders[index].tracking_number =
+        trackingNo;
+    }
+
+    orders[index].spx_epod_list =
+      Array.isArray(data.epod_list)
+        ? data.epod_list
+        : [];
+
+    orders[index].spx_epop_list =
+      Array.isArray(data.epop_list)
+        ? data.epop_list
+        : [];
+
+    orders[index].spx_epor_list =
+      Array.isArray(data.epor_list)
+        ? data.epor_list
+        : [];
+
+    orders[index].spx_epooh_list =
+      Array.isArray(data.epooh_list)
+        ? data.epooh_list
+        : [];
+
+    orders[index].spx_ep_last_id =
+      data.id || "";
+
+    orders[index].spx_ep_tracking_code_name =
+      data.tracking_code_name || "";
+
+    orders[index].spx_ep_status_code_name =
+      data.status_code_name || "";
+
+    orders[index].spx_ep_updated_at =
+      now;
+
+    orders[index].updated_at =
+      now;
+
+    await saveOrders(orders);
+
+    console.log(
+      "SPX EP UPDATED:",
+      {
+        orderId:
+          orders[index].external_id ||
+          orders[index].id,
+
+        epodCount:
+          orders[index].spx_epod_list.length,
+
+        epopCount:
+          orders[index].spx_epop_list.length,
+
+        eporCount:
+          orders[index].spx_epor_list.length,
+
+        epoohCount:
+          orders[index].spx_epooh_list.length
+      }
+    );
+
+  } catch (error) {
+    console.error(
+      "SPX EP WEBHOOK PROCESS ERROR:",
+      error
+    );
+  }
+}
+
+
+// ================= SPX EP WEBHOOK =================
+
+app.post(
+  "/api/spx/ep-webhook",
+  (req, res) => {
+
+    try {
+      const checkSign =
+        req.headers["check-sign"];
+
+      const timestamp =
+        req.headers["timestamp"];
+
+      const randomNum =
+        req.headers["random-num"];
+
+      const payloadString =
+        req.rawBody ||
+        JSON.stringify(req.body || {});
+
+      const validSignature =
+        verifyWebhookSignature({
+          timestamp,
+          randomNum,
+          payloadString,
+          checkSign
+        });
+
+      if (!validSignature) {
+        console.error(
+          "SPX EP WEBHOOK INVALID SIGNATURE"
+        );
+
+        return res
+          .status(401)
+          .json({
+            success: false,
+            message:
+              "Invalid SPX EP webhook signature"
+          });
+      }
+
+      const data =
+        req.body || {};
+
+      console.log(
+        "SPX EP WEBHOOK RECEIVED:",
+        data
+      );
+
+      /*
+        SPX requires fast HTTP 200.
+      */
+      res.status(200).json({
+        success: true,
+        message:
+          "SPX EP webhook received"
+      });
+
+      setImmediate(() => {
+        processSpxEPWebhook(data);
+      });
+
+    } catch (error) {
+      console.error(
+        "SPX EP WEBHOOK ERROR:",
+        error
+      );
+
+      if (!res.headersSent) {
+        return res
+          .status(500)
+          .json({
+            success: false,
+            message:
+              "SPX EP webhook error"
+          });
+      }
+    }
+  }
+);
 
 // ================= SPX CREATE ACCOUNT =================
 app.post("/api/spx/create-account", async (req, res) => {
