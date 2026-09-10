@@ -987,7 +987,23 @@ function updateOrderFilterCounts() {
       counts.shipped++;
     }
 
-    if (orderStatus === "in transit") {
+    const activeTransitStatuses = [
+      "in transit",
+      "parcel on hold",
+      "on hold",
+      "shipment on hold",
+      "delivery on hold",
+      "delayed",
+      "delivery delayed",
+      "arrived at delivery hub",
+      "at delivery hub"
+    ];
+
+    if (
+      activeTransitStatuses.some(status =>
+        orderStatus.includes(status)
+      )
+    ) {
       counts.inTransit++;
     }
 
@@ -1203,6 +1219,24 @@ function renderAdminOrders() {
           orderStatus === "pending payment" ||
           paymentStatus === "pending" ||
           paymentStatus === "pending payment"
+        );
+      }
+
+      if (selectedFilter === "in transit") {
+        const activeTransitStatuses = [
+          "in transit",
+          "parcel on hold",
+          "on hold",
+          "shipment on hold",
+          "delivery on hold",
+          "delayed",
+          "delivery delayed",
+          "arrived at delivery hub",
+          "at delivery hub"
+        ];
+
+        return activeTransitStatuses.some(status =>
+          orderStatus.includes(status)
         );
       }
 
