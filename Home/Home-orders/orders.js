@@ -242,7 +242,9 @@ async function loadOrders() {
         const isExpired = isPendingPayment && remainingMs <= 0;
 
         const isPaid =
-            statusText.includes("processing");
+            String(order.payment_status || "")
+                .trim()
+                .toLowerCase() === "paid";
 
         const paymentMethod =
             String(

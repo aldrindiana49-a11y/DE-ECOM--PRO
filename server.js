@@ -1358,6 +1358,7 @@ app.post("/api/orders/cod", async (req, res) => {
 
     if (index !== -1) {
       orders[index].status = "COD";
+      orders[index].payment_status = "COD";
       orders[index].order_status = "Pending";
       orders[index].updated_at = new Date().toISOString();
 
