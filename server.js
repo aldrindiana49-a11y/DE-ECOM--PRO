@@ -387,6 +387,7 @@ app.get("/", (req, res) => {
 
 function mapSpxStatus(statusCode, statusText = "") {
   const code = String(statusCode || "").trim();
+
   const text = String(statusText || "")
     .trim()
     .toLowerCase();
@@ -394,7 +395,7 @@ function mapSpxStatus(statusCode, statusText = "") {
   if (code === "1001") {
     return {
       shipping_status: "PENDING_PICKUP",
-      order_status: "Ready to Ship"
+      order_status: "Processing"
     };
   }
 
@@ -408,11 +409,15 @@ function mapSpxStatus(statusCode, statusText = "") {
   if (code === "5001") {
     return {
       shipping_status: "PICKUP_FAILED",
-      order_status: "Ready to Ship"
+      order_status: "Processing"
     };
   }
 
-  if (text.includes("delivered")) {
+  if (
+    text === "delivered" ||
+    text.includes("successfully delivered") ||
+    text.includes("parcel delivered")
+  ) {
     return {
       shipping_status: "DELIVERED",
       order_status: "Delivered"
@@ -421,7 +426,8 @@ function mapSpxStatus(statusCode, statusText = "") {
 
   if (
     text.includes("delivery failed") ||
-    text.includes("failed delivery")
+    text.includes("failed delivery") ||
+    text.includes("unsuccessful delivery")
   ) {
     return {
       shipping_status: "DELIVERY_FAILED",
@@ -429,7 +435,15 @@ function mapSpxStatus(statusCode, statusText = "") {
     };
   }
 
-  if (text.includes("in transit")) {
+  if (
+    text.includes("in transit") ||
+    text.includes("delivering") ||
+    text.includes("out for delivery") ||
+    text.includes("on hold") ||
+    text.includes("delayed") ||
+    text.includes("delivery hub") ||
+    text.includes("sorting hub")
+  ) {
     return {
       shipping_status: "IN_TRANSIT",
       order_status: "In Transit"
@@ -460,8 +474,7 @@ function mapSpxStatus(statusCode, statusText = "") {
         .toUpperCase()
         .replace(/\s+/g, "_"),
 
-    order_status:
-      statusText || "Processing"
+    order_status: "In Transit"
   };
 }
 
@@ -533,11 +546,21 @@ async function processSpxTrackingWebhook(data) {
         data.tracking_link;
     }
 
-    orders[index].shipping_status =
-      mapped.shipping_status;
+    const currentOrderStatus =
+      String(orders[index].order_status || "")
+        .trim()
+        .toLowerCase();
 
-    orders[index].order_status =
-      mapped.order_status;
+    const alreadyDelivered =
+      currentOrderStatus === "delivered";
+
+    if (!alreadyDelivered || mapped.order_status === "Delivered") {
+      orders[index].shipping_status =
+        mapped.shipping_status;
+
+      orders[index].order_status =
+        mapped.order_status;
+    }
 
     if (
       data.actual_shipping_fee !== undefined &&
@@ -1176,7 +1199,7 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
     orders[index].awb_link = awb.data?.awb_link || "";
     orders[index].shipping_fee = spxOrder.estimated_shipping_fee || 0;
     orders[index].shipping_status = "PENDING_PICKUP";
-    orders[index].order_status = "Ready to Ship";
+    orders[index].order_status = "Processing";
     orders[index].updated_at = new Date().toISOString();
 
     await saveOrders(orders);
