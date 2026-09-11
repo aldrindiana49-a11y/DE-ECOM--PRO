@@ -167,55 +167,93 @@ async function savePendingOrder({
   shippingPaymentMethod,
   shippingCodAmount
 }) {
-  let orders = await readOrders();
+  const now = new Date().toISOString();
+
+  let normalizedItems = [];
+
+  if (Array.isArray(items)) {
+    normalizedItems = items;
+  } else if (typeof items === "string") {
+    try {
+      const parsedItems = JSON.parse(items);
+      normalizedItems = Array.isArray(parsedItems)
+        ? parsedItems
+        : [];
+    } catch (error) {
+      console.error(
+        "INVALID ORDER ITEMS JSON:",
+        error
+      );
+    }
+  }
 
   const orderData = {
     external_id: orderId,
+
     amount: Number(amount),
-    subtotal: Number(subtotal || amount || 0),
-    shipping_fee: Number(shippingFee || 0),
+
+    subtotal: Number(
+      subtotal || amount || 0
+    ),
+
+    shipping_fee: Number(
+      shippingFee || 0
+    ),
+
     shipping_payment_method:
       shippingPaymentMethod || "",
 
-    shipping_cod_amount:
-      Number(shippingCodAmount || 0),
+    shipping_cod_amount: Number(
+      shippingCodAmount || 0
+    ),
+
     service_fee: Number(
       serviceFee ??
       handlingFee ??
       0
     ),
-    customer_name: customerName || "Customer",
-    customer_phone: customerPhone || "",
-    customer_email: customerEmail || "",
-    guest_order: guestOrder === true,
-    guest_tracking_code: guestTrackingCode || "",
-    address: address || {},
-    parcel_info: parcelInfo || {},
-    items: (() => {
-      if (Array.isArray(items)) {
-        return items;
-      }
 
-      if (typeof items === "string") {
-        try {
-          const parsedItems = JSON.parse(items);
+    customer_name:
+      customerName || "Customer",
 
-          return Array.isArray(parsedItems)
-            ? parsedItems
-            : [];
-        } catch (error) {
-          console.error("INVALID ORDER ITEMS JSON:", error);
-          return [];
-        }
-      }
+    customer_phone:
+      customerPhone || "",
 
-      return [];
-    })(),
-    payment_provider: paymentProvider,
-    courier: courier || "",
-    checkout_url: checkoutUrl || "",
+    customer_email:
+      customerEmail || "",
+
+    guest_order:
+      guestOrder === true,
+
+    guest_tracking_code:
+      guestTrackingCode || "",
+
+    address:
+      address || {},
+
+    parcel_info:
+      parcelInfo || {},
+
+    items:
+      normalizedItems,
+
+    payment_provider:
+      paymentProvider,
+
+    courier:
+      courier || "",
+
+    checkout_url:
+      checkoutUrl || "",
 
     status:
+      paymentProvider === "COD"
+        ? "COD"
+        : paymentProvider === "SKYRO"
+          ? "Pending Skyro Approval"
+          : "Pending Payment",
+
+    payment_status:
       paymentProvider === "COD"
         ? "COD"
         : paymentProvider === "SKYRO"
@@ -229,43 +267,33 @@ async function savePendingOrder({
           ? "Pending Stock Confirmation"
           : "Pending Payment",
 
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: now
   };
 
-  const existingIndex = orders.findIndex(order => order.external_id === orderId);
+  const {
+    data: savedOrder,
+    error
+  } = await supabase
+    .from("orders")
+    .upsert(
+      orderData,
+      {
+        onConflict: "external_id"
+      }
+    )
+    .select()
+    .single();
 
-  if (existingIndex !== -1) {
-    const existingOrder = orders[existingIndex];
+  if (error) {
+    console.error(
+      "SAVE PENDING ORDER ERROR:",
+      error
+    );
 
-    const existingItems =
-      Array.isArray(existingOrder.items)
-        ? existingOrder.items
-        : [];
-
-    const incomingItems =
-      Array.isArray(orderData.items)
-        ? orderData.items
-        : [];
-
-    orders[existingIndex] = {
-      ...existingOrder,
-      ...orderData,
-
-      items:
-        incomingItems.length >= existingItems.length
-          ? incomingItems
-          : existingItems
-    };
-  } else {
-    orders.push(orderData);
+    throw error;
   }
 
-  await saveOrders(orders);
-
-  return existingIndex !== -1
-    ? orders[existingIndex]
-    : orderData;
+  return savedOrder;
 }
 
 async function reserveXenditStock(order) {
@@ -1332,7 +1360,7 @@ app.post("/api/orders/cod", async (req, res) => {
       courier
     } = req.body;
 
-    let order = await savePendingOrder({
+    const order = await savePendingOrder({
       orderId,
       amount,
       subtotal,
@@ -1352,28 +1380,18 @@ app.post("/api/orders/cod", async (req, res) => {
       courier
     });
 
-
-    let orders = await readOrders();
-    const index = orders.findIndex(item => item.external_id === orderId);
-
-    if (index !== -1) {
-      orders[index].status = "COD";
-      orders[index].payment_status = "COD";
-      orders[index].order_status = "Pending";
-      orders[index].updated_at = new Date().toISOString();
-
-      await saveOrders(orders);
-    }
-
-    res.json({
+    return res.json({
       success: true,
-      order: index !== -1 ? orders[index] : order
+      order
     });
 
   } catch (err) {
-    console.error("COD ORDER SAVE ERROR:", err);
+    console.error(
+      "COD ORDER SAVE ERROR:",
+      err
+    );
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "COD order save failed"
     });
@@ -1995,26 +2013,60 @@ app.post("/api/create-payment", async (req, res) => {
         ? "https://drinelectronicsph.com/guest-track/?payment=success"
         : "https://drinelectronicsph.com/home-orders/";
 
-    const response = await fetch("https://api.xendit.co/v2/invoices", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization:
-          "Basic " + Buffer.from(`${process.env.XENDIT_SECRET_KEY}:`).toString("base64")
-      },
-      body: JSON.stringify({
-        external_id: orderId,
-        amount: Number(amount),
-        currency: "PHP",
-        description: `Order ${orderId}`,
-        customer: {
-          given_names: customerName || "Customer",
-          mobile_number: customerPhone || ""
-        },
-        success_redirect_url: successRedirectUrl,
-        failure_redirect_url: "https://drinelectronicsph.com/Checkout/checkout.html"
-      })
-    });
+    const controller = new AbortController();
+
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, 15000);
+
+    let response;
+
+    try {
+      response = await fetch(
+        "https://api.xendit.co/v2/invoices",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+
+            Authorization:
+              "Basic " +
+              Buffer.from(
+                `${process.env.XENDIT_SECRET_KEY}:`
+              ).toString("base64")
+          },
+
+          body: JSON.stringify({
+            external_id: orderId,
+            amount: Number(amount),
+            currency: "PHP",
+
+            description:
+              `Order ${orderId}`,
+
+            customer: {
+              given_names:
+                customerName || "Customer",
+
+              mobile_number:
+                customerPhone || ""
+            },
+
+            success_redirect_url:
+              successRedirectUrl,
+
+            failure_redirect_url:
+              "https://drinelectronicsph.com/Checkout/checkout.html"
+          }),
+
+          signal: controller.signal
+        }
+      );
+
+    } finally {
+      clearTimeout(timeout);
+    }
 
     const data = await response.json();
 
@@ -2026,55 +2078,62 @@ app.post("/api/create-payment", async (req, res) => {
       });
     }
 
-    let order = await savePendingOrder({
+    const order = await savePendingOrder({
       orderId,
       amount,
+      subtotal,
+      shippingFee,
+      serviceFee,
+      handlingFee,
       customerName,
       customerPhone,
       customerEmail,
       guestOrder,
       guestTrackingCode,
       items,
+
       paymentProvider: "XENDIT",
+
+      checkoutUrl: data.invoice_url,
+
       address,
       parcelInfo,
-      subtotal,
-      shippingFee,
-      serviceFee,
-      handlingFee,
-      courier,
-      checkoutUrl: data.invoice_url
+      courier
     });
 
-    order.stock_reserved = true;
-    order.stock_restored = false;
-    order.stock_reserved_at = new Date().toISOString();
-    order.updated_at = new Date().toISOString();
-
-    await saveOrders([order]);
-
-
-    res.json({
+    return res.json({
       success: true,
       checkoutUrl: data.invoice_url,
       order
     });
 
   } catch (err) {
-    console.error("XENDIT FULL ERROR:", {
-      message: err.message,
-      response: err.response?.data,
-      status: err.response?.status,
-      stack: err.stack
-    });
+    console.error(
+      "XENDIT FULL ERROR:",
+      {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        stack: err.stack
+      }
+    );
 
-    res.status(500).json({
+    if (err.name === "AbortError") {
+      return res.status(504).json({
+        success: false,
+        message:
+          "Xendit request timed out. Please try again."
+      });
+    }
+
+    return res.status(500).json({
       success: false,
       message: "Xendit failed",
-      error: err.response?.data || err.message
+      error:
+        err.response?.data ||
+        err.message
     });
   }
-
 });
 
 // ================= MAYA =================

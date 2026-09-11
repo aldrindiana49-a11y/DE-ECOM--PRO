@@ -1717,86 +1717,67 @@ function getFallbackCourier() {
 }
 
 async function deductOrderStock(order) {
-  const deductedItems = [];
+  if (!order?.items?.length) {
+    return true;
+  }
 
-  try {
-    for (const item of order.items) {
-      const { error } = await supabaseClient.rpc(
-        "deduct_stock",
+  const stockRequests = order.items.map(async (item) => {
+    const productId =
+      item.productId ||
+      item.product_id ||
+      item.productID ||
+      item.id;
+
+    const variantLabel =
+      item.variantLabel ||
+      item.variant ||
+      item.variation ||
+      item.variant_name ||
+      item.variantName ||
+      item.option ||
+      item.label ||
+      "Default";
+
+    const quantity = Number(
+      item.quantity ||
+      item.qty ||
+      item.quantityOrdered ||
+      1
+    );
+
+    const { error } = await supabaseClient.rpc(
+      "deduct_stock",
+      {
+        p_product_id: productId,
+        p_variant_label: variantLabel,
+        p_quantity: quantity,
+        p_order_id: String(
+          order.external_id ||
+          order.id
+        )
+      }
+    );
+
+    if (error) {
+      console.error(
+        "STOCK DEDUCTION ERROR:",
         {
-          p_product_id:
-            Number(item.productId || item.id),
-
-          p_variant_label:
-            item.variantLabel ||
-            item.variant ||
-            "Default",
-
-          p_quantity:
-            Number(item.quantity) || 1,
-
-          p_order_id:
-            order.id
+          productId,
+          variantLabel,
+          quantity,
+          error
         }
       );
 
-      if (error) {
-        throw error;
-      }
-
-      deductedItems.push(item);
-    }
-  } catch (error) {
-    console.error(
-      "STOCK DEDUCTION ERROR:",
-      error
-    );
-
-    for (const deductedItem of deductedItems) {
-
-      try {
-        const { error: restoreError } =
-          await supabaseClient.rpc(
-            "restore_stock",
-            {
-              p_product_id:
-                Number(
-                  deductedItem.productId ||
-                  deductedItem.id
-                ),
-
-              p_variant_label:
-                deductedItem.variantLabel ||
-                deductedItem.variant ||
-                "Default",
-
-              p_quantity:
-                Number(deductedItem.quantity) || 1,
-
-              p_order_id:
-                order.id
-            }
-          );
-
-        if (restoreError) {
-          throw restoreError;
-        }
-      } catch (restoreError) {
-
-        console.error(
-          "PARTIAL STOCK RESTORE ERROR:",
-          restoreError
-        );
-      }
+      throw error;
     }
 
-    showOrderModal(
-      "Variation Out of Stock",
-      "One or more selected variations are no longer available. Any stock already reserved has been returned."
-    );
+    return true;
+  });
 
-    throw error;
-  }
+  await Promise.all(stockRequests);
+
+  return true;
 }
 
 async function restoreOrderStock(order) {
@@ -2772,7 +2753,6 @@ async function placeOrder() {
     stockDeducted = true;
 
     if (
-      !isGuestCheckout ||
       paymentMain === "SKYRO" ||
       paymentMain === "OVER_THE_COUNTER"
     ) {
