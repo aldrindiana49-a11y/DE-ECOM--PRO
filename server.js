@@ -1100,7 +1100,7 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
 
     // Gumawa ng hiwalay at unique na ID para sa SPX.
     const spxOrderId =
-      `${order.external_id}-SPX-${Date.now()}`;
+      `SPX-${String(order.external_id).replace(/^ORD-/, "")}`;
 
     const savedAddress = order.address || {};
 
