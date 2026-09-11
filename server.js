@@ -499,8 +499,8 @@ async function processSpxTrackingWebhook(data) {
 
     if (orderId) {
       index = orders.findIndex(order =>
-        String(order.external_id || order.id) ===
-        String(orderId)
+        String(order.spx_order_id || "") === String(orderId) ||
+        String(order.external_id || order.id) === String(orderId)
       );
     }
 
@@ -713,8 +713,8 @@ async function processSpxEPWebhook(data) {
 
     if (orderId) {
       index = orders.findIndex(order =>
-        String(order.external_id || order.id) ===
-        String(orderId)
+        String(order.spx_order_id || "") === String(orderId) ||
+        String(order.external_id || order.id) === String(orderId)
       );
     }
 
@@ -1088,7 +1088,22 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
 
     const order = orders[index];
 
+    // Prevent duplicate SPX shipment kapag may tracking na.
+    if (order.tracking_number) {
+      return res.json({
+        success: true,
+        alreadyCreated: true,
+        message: "SPX shipment already exists",
+        order
+      });
+    }
+
+    // Gumawa ng hiwalay at unique na ID para sa SPX.
+    const spxOrderId =
+      `${order.external_id}-SPX-${Date.now()}`;
+
     const savedAddress = order.address || {};
+
     const savedParcel = order.parcel_info || {};
 
     const isSkyroShippingCod =
@@ -1116,7 +1131,7 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
 
     const spxPayload = {
 
-      _id: order.external_id,
+      _id: spxOrderId,
 
       paymentMethod: spxPaymentMethod,
 
@@ -1178,7 +1193,7 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
       orders[index].spx_error = result.data?.fail_list?.[0]?.message || "SPX failed";
       orders[index].updated_at = new Date().toISOString();
 
-      await saveOrders(orders);
+      await saveOrders([orders[index]]);
 
       return res.status(400).json({
         success: false,
@@ -1193,6 +1208,7 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
     const awb = await getAWB(batchNo);
 
     orders[index].courier = "SPX";
+    orders[index].spx_order_id = spxOrderId;
     orders[index].spx_batch_no = batchNo;
     orders[index].tracking_number = spxOrder.tracking_no;
     orders[index].tracking_link = spxOrder.tracking_link || spxOrder.tracking_no_link;
@@ -1202,7 +1218,7 @@ app.post("/api/orders/:orderId/spx-create", async (req, res) => {
     orders[index].order_status = "Processing";
     orders[index].updated_at = new Date().toISOString();
 
-    await saveOrders(orders);
+    await saveOrders([orders[index]]);
 
     res.json({
       success: true,
