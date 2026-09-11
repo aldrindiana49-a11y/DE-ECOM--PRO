@@ -3484,42 +3484,13 @@ async function createSPXShipment(orderId, btn) {
       );
     }
 
-    /*
-      STEP 2:
-      Pag successful ang Arrange Shipment,
-      Processing muna—not Shipped.
-    */
-    const updateResponse = await fetch(
-      "https://de-ecom-pro.onrender.com/api/orders/update",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-          orderId,
-          order_status: "Processing",
-          shipment_arranged_at:
-            new Date().toISOString()
-        })
-      }
-    );
-
-    const updateResult =
-      await updateResponse.json();
-
-    if (!updateResponse.ok || !updateResult.success) {
-      throw new Error(
-        updateResult.message ||
-        "Shipment created but status update failed"
-      );
-    }
 
     showToast(
       "Shipment arranged. Order moved to Processing.",
       "success"
     );
+
+    resetButtonLoading(btn);
 
     closeOrderModal();
     await loadAdminOrders();
