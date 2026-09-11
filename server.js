@@ -2246,80 +2246,133 @@ app.get("/api/orders", async (req, res) => {
 // ================= UPDATE ORDER =================
 app.post("/api/orders/update", async (req, res) => {
   try {
-
     const {
       orderId,
       order_status,
       payment_status,
       tracking_number,
       courier,
-      skyro_application_link
+      skyro_application_link,
+      delivered_at,
+      picked_up_at,
+      packed_at,
+      shipment_arranged_at
     } = req.body;
 
-    let orders = await readOrders();
-    const index = orders.findIndex(
-      order => String(order.external_id) === String(orderId)
-    );
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing order ID"
+      });
+    }
 
-    if (index === -1) {
-      return res.json({
+    const { data: existingOrder, error: findError } =
+      await supabase
+        .from("orders")
+        .select("*")
+        .eq("external_id", orderId)
+        .single();
+
+    if (findError || !existingOrder) {
+      return res.status(404).json({
         success: false,
         message: "Order not found"
       });
     }
 
-    if (order_status) {
-      orders[index].order_status = order_status;
+    const updates = {
+      updated_at: new Date().toISOString()
+    };
+
+    if (order_status !== undefined) {
+      updates.order_status = String(order_status).trim();
 
       if (
         String(order_status).toLowerCase() === "cancelled" &&
-        orders[index].stock_restored !== true
+        existingOrder.stock_restored !== true
       ) {
         try {
           await restoreXenditStock({
-            ...orders[index],
+            ...existingOrder,
             stock_reserved: true
           });
 
-          orders[index].stock_reserved = false;
-          orders[index].stock_restored = true;
-          orders[index].stock_restored_at = new Date().toISOString();
+          updates.stock_reserved = false;
+          updates.stock_restored = true;
+          updates.stock_restored_at =
+            new Date().toISOString();
 
         } catch (stockErr) {
-          console.error("UPDATE CANCEL RESTORE STOCK ERROR:", stockErr);
+          console.error(
+            "UPDATE CANCEL RESTORE STOCK ERROR:",
+            stockErr
+          );
         }
       }
     }
 
     if (payment_status !== undefined) {
-      orders[index].payment_status =
+      updates.payment_status =
         String(payment_status).trim();
     }
 
-    if (tracking_number !== undefined) orders[index].tracking_number = tracking_number;
-    if (courier !== undefined) orders[index].courier = courier;
+    if (tracking_number !== undefined) {
+      updates.tracking_number = tracking_number;
+    }
+
+    if (courier !== undefined) {
+      updates.courier = courier;
+    }
 
     if (skyro_application_link !== undefined) {
-      orders[index].skyro_application_link =
+      updates.skyro_application_link =
         String(skyro_application_link).trim();
     }
 
-    orders[index].updated_at = new Date().toISOString();
+    if (delivered_at !== undefined) {
+      updates.delivered_at = delivered_at;
+    }
 
-    await saveOrders(orders);
+    if (picked_up_at !== undefined) {
+      updates.picked_up_at = picked_up_at;
+    }
 
-    res.json({
+    if (packed_at !== undefined) {
+      updates.packed_at = packed_at;
+    }
+
+    if (shipment_arranged_at !== undefined) {
+      updates.shipment_arranged_at =
+        shipment_arranged_at;
+    }
+
+    const { data: updatedOrder, error: updateError } =
+      await supabase
+        .from("orders")
+        .update(updates)
+        .eq("external_id", orderId)
+        .select()
+        .single();
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    return res.json({
       success: true,
-      order: orders[index]
+      order: updatedOrder
     });
+
   } catch (err) {
     console.error("UPDATE ORDER ERROR:", err);
-    res.status(500).json({
+
+    return res.status(500).json({
       success: false,
       message: "Update failed"
     });
   }
 });
+
 
 // ================= CANCEL ORDER =================
 app.post("/api/orders/:orderId/cancel", async (req, res) => {
