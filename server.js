@@ -2218,9 +2218,86 @@ app.post("/api/create-maya-payment", async (req, res) => {
   }
 });
 
+async function autoCompleteDeliveredOrders() {
+  try {
+    const sevenDaysAgo =
+      new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        .toISOString();
+
+    const { data: orders, error } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("order_status", "Delivered")
+      .lte("delivered_at", sevenDaysAgo);
+
+    if (error) {
+      console.error(
+        "AUTO COMPLETE READ ERROR:",
+        error
+      );
+      return;
+    }
+
+    if (!orders?.length) return;
+
+    for (const order of orders) {
+
+      const shippingStatus = String(
+        order.shipping_status || ""
+      ).toLowerCase();
+
+      const orderStatus = String(
+        order.order_status || ""
+      ).toLowerCase();
+
+      const hasReturn =
+        shippingStatus.includes("return") ||
+        shippingStatus.includes("rts") ||
+        orderStatus.includes("return") ||
+        orderStatus.includes("rts");
+
+      if (hasReturn) {
+        continue;
+      }
+
+      const { error: updateError } =
+        await supabase
+          .from("orders")
+          .update({
+            order_status: "Completed",
+            completed_at:
+              new Date().toISOString(),
+            updated_at:
+              new Date().toISOString()
+          })
+          .eq(
+            "external_id",
+            order.external_id
+          );
+
+      if (updateError) {
+        console.error(
+          "AUTO COMPLETE UPDATE ERROR:",
+          order.external_id,
+          updateError
+        );
+      }
+    }
+
+  } catch (error) {
+    console.error(
+      "AUTO COMPLETE ERROR:",
+      error
+    );
+  }
+}
+
 // ================= VIEW ACTIVE ORDERS =================
 app.get("/api/orders", async (req, res) => {
   try {
+
+    await autoCompleteDeliveredOrders();
+
     const orders = await readOrders();
 
     // Hide cancelled orders from main dashboard
@@ -2433,7 +2510,7 @@ app.post("/api/orders/:orderId/cancel", async (req, res) => {
       }
     }
 
-    await saveOrders(orders);
+    await saveOrders([orders[index]]);
 
     res.json({
       success: true,
@@ -2456,19 +2533,28 @@ app.post("/api/orders/:orderId/expire-payment", async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    let orders = await readOrders();
+    const {
+      data: order,
+      error: orderError
+    } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("external_id", orderId)
+      .maybeSingle();
 
-    const index = orders.findIndex(
-      order => String(order.external_id) === String(orderId) ||
-        String(order.id) === String(orderId)
-    );
+    if (orderError) {
+      throw orderError;
+    }
 
-    if (index === -1) {
+    if (!order) {
       return res.status(404).json({
         success: false,
         message: "Order not found"
       });
     }
+
+    let orders = [order];
+    const index = 0;
 
     if (orders[index].stock_restored !== true) {
       try {
