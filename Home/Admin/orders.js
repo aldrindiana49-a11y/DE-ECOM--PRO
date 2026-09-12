@@ -711,6 +711,142 @@ function escapeAttribute(text) {
   return String(text ?? "").replaceAll('"', "&quot;");
 }
 
+function showSuccessModal(title, message) {
+  return new Promise(resolve => {
+    let modal = document.getElementById("premiumSuccessModal");
+
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "premiumSuccessModal";
+
+      modal.innerHTML = `
+        <div class="premium-success-backdrop">
+          <div class="premium-success-card">
+            <div class="premium-success-icon">✓</div>
+
+            <h2 id="premiumSuccessTitle"></h2>
+            <p id="premiumSuccessMessage"></p>
+
+            <button
+              type="button"
+              id="premiumSuccessOk"
+              class="premium-success-btn"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const style = document.createElement("style");
+      style.textContent = `
+        #premiumSuccessModal {
+          position: fixed;
+          inset: 0;
+          z-index: 99999;
+        }
+
+        .premium-success-backdrop {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          background: rgba(15, 23, 42, 0.65);
+          backdrop-filter: blur(8px);
+        }
+
+        .premium-success-card {
+          width: 100%;
+          max-width: 420px;
+          padding: 34px 28px 28px;
+          border-radius: 24px;
+          background: #ffffff;
+          text-align: center;
+          box-shadow: 0 25px 70px rgba(0,0,0,0.25);
+          animation: premiumSuccessPop 0.22s ease-out;
+        }
+
+        .premium-success-icon {
+          width: 76px;
+          height: 76px;
+          margin: 0 auto 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          background: #dcfce7;
+          color: #16a34a;
+          font-size: 40px;
+          font-weight: 800;
+        }
+
+        .premium-success-card h2 {
+          margin: 0 0 10px;
+          color: #111827;
+          font-size: 24px;
+        }
+
+        .premium-success-card p {
+          margin: 0 0 24px;
+          color: #6b7280;
+          font-size: 15px;
+          line-height: 1.6;
+        }
+
+        .premium-success-btn {
+          width: 100%;
+          padding: 13px 20px;
+          border: none;
+          border-radius: 12px;
+          background: #16a34a;
+          color: #ffffff;
+          font-weight: 700;
+          font-size: 15px;
+          cursor: pointer;
+        }
+
+        .premium-success-btn:hover {
+          filter: brightness(0.95);
+        }
+
+        @keyframes premiumSuccessPop {
+          from {
+            opacity: 0;
+            transform: scale(0.92) translateY(12px);
+          }
+
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+      `;
+
+      document.head.appendChild(style);
+    }
+
+    document.getElementById("premiumSuccessTitle").textContent =
+      title;
+
+    document.getElementById("premiumSuccessMessage").textContent =
+      message;
+
+    modal.style.display = "block";
+
+    const okButton =
+      document.getElementById("premiumSuccessOk");
+
+    okButton.onclick = () => {
+      modal.style.display = "none";
+      resolve(true);
+    };
+  });
+}
+
 function setButtonLoading(button, loadingText = "Updating...") {
   if (!button) return;
 
@@ -866,6 +1002,7 @@ function updateOrderFilterCounts() {
     shipped: 0,
     inTransit: 0,
     delivered: 0,
+    completed: 0,
     paid: 0,
     pendingPayment: 0,
     failedDelivery: 0,
@@ -1011,6 +1148,13 @@ function updateOrderFilterCounts() {
       counts.delivered++;
     }
 
+    if (
+      orderStatus === "completed" ||
+      orderStatus === "picked up"
+    ) {
+      counts.completed++;
+    }
+
     if (paymentStatus === "paid") {
       counts.paid++;
     }
@@ -1048,6 +1192,7 @@ function updateOrderFilterCounts() {
     countShipped: counts.shipped,
     countInTransit: counts.inTransit,
     countDelivered: counts.delivered,
+    countCompleted: counts.completed,
     countPaid: counts.paid,
     countPendingPayment: counts.pendingPayment,
     countFailedDelivery: counts.failedDelivery,
@@ -2095,6 +2240,119 @@ function changeOrdersPage(direction) {
    LOAD ORDERS
 ================================ */
 
+
+function applyUpdatedOrderLocal(updatedOrder) {
+  if (!updatedOrder) return;
+
+  const normalized = normalizeOrder(updatedOrder);
+
+  const id = String(
+    normalized.external_id ||
+    normalized.id ||
+    ""
+  );
+
+  adminOrders = adminOrders.filter(order =>
+    String(order.external_id || order.id) !== id
+  );
+
+  storePickupOrders = storePickupOrders.filter(order =>
+    String(order.external_id || order.id) !== id
+  );
+
+  roroOrders = roroOrders.filter(order =>
+    String(order.external_id || order.id) !== id
+  );
+
+  const status = String(
+    normalized.order_status || ""
+  ).toLowerCase();
+
+  const courier = String(
+    normalized.courier || ""
+  ).toLowerCase();
+
+  const paymentStatus = String(
+    normalized.payment_status || ""
+  ).toLowerCase();
+
+  const isCancelled =
+    status === "cancelled";
+
+  const isExpired =
+    status.includes("expired") ||
+    paymentStatus.includes("expired");
+
+  const isStorePickup =
+    courier.includes("store pickup");
+
+  const isManualFreight =
+    courier.includes("manual freight") ||
+    courier.includes("roro");
+
+  const isPickupFinished =
+    status === "completed" ||
+    status === "picked up";
+
+  const isAlreadyProcessing =
+    status === "processing" ||
+    status === "packed" ||
+    status === "shipped" ||
+    status === "in transit" ||
+    status === "delivered" ||
+    status === "completed";
+
+  if (!isCancelled) {
+    if (
+      isStorePickup &&
+      !isExpired &&
+      !isPickupFinished
+    ) {
+      storePickupOrders.unshift(normalized);
+
+    } else if (
+      isManualFreight &&
+      !isExpired &&
+      !isAlreadyProcessing
+    ) {
+      roroOrders.unshift(normalized);
+
+    } else {
+      adminOrders.unshift(normalized);
+    }
+  }
+
+  renderAdminOrders();
+  renderStorePickupOrders();
+  renderRoroOrders();
+
+  const storePickupCount =
+    document.getElementById("countStorePickup");
+
+  const roroCount =
+    document.getElementById("countRoroOrders");
+
+  if (storePickupCount) {
+    storePickupCount.textContent = storePickupOrders.length;
+    storePickupCount.style.display =
+      storePickupOrders.length > 0
+        ? "inline-flex"
+        : "none";
+  }
+
+  if (roroCount) {
+    roroCount.textContent = roroOrders.length;
+    roroCount.style.display =
+      roroOrders.length > 0
+        ? "inline-flex"
+        : "none";
+  }
+
+  updateOrdersSummary();
+  updateDashboardOrders();
+  updateOrderFilterCounts();
+}
+
 function normalizeOrder(order) {
   const paymentStatus =
     order.payment_status ||
@@ -2605,13 +2863,13 @@ async function confirmStorePickup(orderId, btn) {
       );
     }
 
-    showToast(
-      "Order is now ready for pickup.",
-      "success"
+    await showSuccessModal(
+      "Ready for Pickup",
+      "The order is now ready for customer pickup."
     );
 
     closeOrderModal();
-    await loadAdminOrders();
+    applyUpdatedOrderLocal(result.order);
 
   } catch (error) {
     console.error(error);
@@ -2628,8 +2886,10 @@ async function confirmStorePickup(orderId, btn) {
 }
 
 async function completeStorePickup(orderId, btn) {
-  const confirmed = confirm(
-    "Confirm that the customer has paid and picked up the order?"
+
+  const confirmed = await showConfirmModal(
+    "Complete Store Pickup",
+    "Confirm that the customer has fully paid and already picked up the order?"
   );
 
   if (!confirmed) return;
@@ -2662,13 +2922,13 @@ async function completeStorePickup(orderId, btn) {
       );
     }
 
-    showToast(
-      "Pickup completed. Order moved to Paid.",
-      "success"
-    );
-
     closeOrderModal();
-    await loadAdminOrders();
+    applyUpdatedOrderLocal(result.order);
+
+    await showSuccessModal(
+      "Pickup Completed",
+      "The order was successfully paid and picked up by the customer."
+    );
 
   } catch (error) {
     console.error(error);
@@ -3171,8 +3431,10 @@ function closeOrderModal() {
 }
 
 async function confirmSkyroStock(orderId, btn) {
-  const ok = confirm(
-    "Confirm na available ang stock at gumawa ng Skyro application link?"
+
+  const ok = await showConfirmModal(
+    "Confirm Skyro Stock",
+    "Confirm that the stock is available and create the Skyro application link?"
   );
 
   if (!ok) return;
@@ -3199,15 +3461,22 @@ async function confirmSkyroStock(orderId, btn) {
       );
     }
 
-    showToast(
-      result.alreadyCreated
-        ? "Skyro application link already exists."
-        : "Stock confirmed and Skyro link created.",
-      "success"
-    );
-
     closeOrderModal();
-    await loadAdminOrders();
+
+    if (result.order) {
+      applyUpdatedOrderLocal(result.order);
+    } else {
+      await loadAdminOrders();
+    }
+
+    await showSuccessModal(
+      result.alreadyCreated
+        ? "Skyro Link Ready"
+        : "Skyro Stock Confirmed",
+      result.alreadyCreated
+        ? "The Skyro application link already exists and is ready for the customer."
+        : "Stock was confirmed and the Skyro application link was created successfully."
+    );
 
   } catch (error) {
     console.error(
@@ -3249,13 +3518,13 @@ async function refreshSkyroStatus(orderId, btn) {
       );
     }
 
-    showToast(
-      `Skyro status: ${result.skyroStatus}`,
-      "success"
-    );
-
     closeOrderModal();
-    await loadAdminOrders();
+    applyUpdatedOrderLocal(result.order);
+
+    await showSuccessModal(
+      "Skyro Status Updated",
+      `Skyro status is now: ${result.skyroStatus}`
+    );
 
   } catch (error) {
     console.error(
@@ -3276,8 +3545,9 @@ async function refreshSkyroStatus(orderId, btn) {
 
 async function rejectSkyroApplication(orderId, btn) {
 
-  const ok = confirm(
-    "Reject this Skyro application? The customer will no longer be able to open the Skyro application link."
+  const ok = await showConfirmModal(
+    "Reject Skyro Application",
+    "Are you sure you want to reject this Skyro application? The customer will no longer be able to open the application link."
   );
 
   if (!ok) return;
@@ -3310,13 +3580,13 @@ async function rejectSkyroApplication(orderId, btn) {
       );
     }
 
-    showToast(
-      "Skyro application rejected.",
-      "success"
-    );
-
     closeOrderModal();
-    await loadAdminOrders();
+    applyUpdatedOrderLocal(result.order);
+
+    await showSuccessModal(
+      "Skyro Application Rejected",
+      "The Skyro application was successfully rejected."
+    );
 
   } catch (error) {
 
@@ -3353,14 +3623,22 @@ async function cancelOrder(orderId, btn) {
 
   if (!cancelReason) {
 
-    showToast(
-      "Please select cancellation reason.",
-      "error"
+    await showSuccessModal(
+      "Cancellation Reason Required",
+      "Please select a cancellation reason before cancelling the order."
     );
 
     return;
   }
-  const confirmCancel = confirm("Cancel this order?");
+
+  const confirmCancel = await showConfirmModal(
+    "Cancel Order",
+    `Are you sure you want to cancel this order?
+
+Reason: ${cancelReason}
+
+This action will move the order to Cancelled.`
+  );
 
   if (!confirmCancel) return;
 
@@ -3396,11 +3674,15 @@ async function cancelOrder(orderId, btn) {
       return;
     }
 
-    showToast("Order cancelled", "success");
     closeOrderModal();
 
-    await loadAdminOrders();
+    applyUpdatedOrderLocal(result.order);
     await loadCancelledOrders();
+
+    await showSuccessModal(
+      "Order Cancelled",
+      "The order was successfully cancelled."
+    );
 
   } catch (error) {
     console.error(error);
@@ -3484,16 +3766,16 @@ async function createSPXShipment(orderId, btn) {
       );
     }
 
-
-    showToast(
-      "Shipment arranged. Order moved to Processing.",
-      "success"
-    );
-
     resetButtonLoading(btn);
 
     closeOrderModal();
-    await loadAdminOrders();
+    applyUpdatedOrderLocal(shipmentResult.order);
+
+    await showSuccessModal(
+      "SPX Shipment Arranged",
+      "The shipment was successfully arranged and the order moved to Processing."
+    );
+
 
   } catch (error) {
     console.error(
@@ -3604,13 +3886,13 @@ async function bookLalamoveShipment(orderId, btn) {
       );
     }
 
-    showToast(
-      "Rider booked. Order moved to Processing.",
-      "success"
-    );
-
     closeOrderModal();
-    await loadAdminOrders();
+    applyUpdatedOrderLocal(updateResult.order);
+
+    await showSuccessModal(
+      "Lalamove Rider Booked",
+      "The rider was successfully booked and the order moved to Processing."
+    );
 
   } catch (error) {
     console.error(
@@ -3661,13 +3943,13 @@ async function arrangeManualFreight(orderId, btn) {
       );
     }
 
-    showToast(
-      "Manual Freight arranged. Order moved to Processing.",
-      "success"
-    );
-
     closeOrderModal();
-    await loadAdminOrders();
+    applyUpdatedOrderLocal(result.order);
+
+    await showSuccessModal(
+      "Manual Freight Arranged",
+      "Manual Freight was successfully arranged and the order moved to Processing."
+    );
 
   } catch (error) {
     console.error(
@@ -3737,7 +4019,11 @@ function openAWB(orderId) {
 }
 
 async function approveOrderRequest(orderId) {
-  const ok = confirm("Approve customer cancellation request and cancel this order?");
+
+  const ok = await showConfirmModal(
+    "Approve Cancellation Request",
+    "Approve the customer's cancellation request and cancel this order?"
+  );
 
   if (!ok) return;
 
@@ -3777,11 +4063,15 @@ async function approveOrderRequest(orderId) {
       return;
     }
 
-    showToast("Cancellation request approved. Order cancelled.", "success");
-
     closeOrderModal();
-    await loadAdminOrders();
+
+    applyUpdatedOrderLocal(result.order);
     await loadCancelledOrders();
+
+    await showSuccessModal(
+      "Cancellation Approved",
+      "The customer's cancellation request was approved and the order was cancelled."
+    );
 
   } catch (error) {
     console.error(error);
@@ -3789,32 +4079,47 @@ async function approveOrderRequest(orderId) {
   }
 }
 
-
 async function rejectOrderRequest(orderId) {
-  const ok = confirm("Reject this customer request?");
+  const ok = await showConfirmModal(
+    "Reject Request",
+    "Are you sure you want to reject this customer request?"
+  );
 
   if (!ok) return;
 
-  await updateOrderRequestStatus(orderId, "Rejected");
+  const updated = await updateOrderRequestStatus(
+    orderId,
+    "Rejected"
+  );
 
-  showToast("Request rejected.", "success");
+  if (!updated) return;
+
+  await showSuccessModal(
+    "Request Rejected",
+    "The customer request was successfully rejected."
+  );
 }
 
+
 async function updateOrderRequestStatus(orderId, status) {
-  const { error } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from("orders")
     .update({
       order_request_status: status
     })
-    .or(`external_id.eq.${orderId},id.eq.${orderId}`);
+    .or(`external_id.eq.${orderId},id.eq.${orderId}`)
+    .select()
+    .single();
 
   if (error) {
     console.error(error);
     showToast("Failed to update request status.", "error");
-    return;
+    return false;
   }
 
-  await loadAdminOrders();
+  applyUpdatedOrderLocal(data);
+
+  return true;
 }
 
 async function handleOrderRequestAction(orderId) {
@@ -4007,10 +4312,13 @@ async function undoCancelledOrder(orderId) {
       return;
     }
 
-    showToast("Order restored", "success");
-
     await loadCancelledOrders();
-    await loadAdminOrders();
+    applyUpdatedOrderLocal(result.order);
+
+    await showSuccessModal(
+      "Order Restored",
+      "The order was successfully restored to Processing."
+    );
 
   } catch (error) {
 
@@ -4053,12 +4361,12 @@ async function permanentDeleteOrder(orderId) {
       return;
     }
 
-    showToast(
-      "Order permanently deleted",
-      "success"
-    );
-
     await loadCancelledOrders();
+
+    await showSuccessModal(
+      "Order Deleted",
+      "The order was permanently deleted successfully."
+    );
 
   } catch (error) {
 
@@ -4103,8 +4411,8 @@ async function bulkMarkPacked(btn) {
     let successCount = 0;
     let failedCount = 0;
 
-    for (const orderId of selectedOrders) {
-      try {
+    const results = await Promise.allSettled(
+      selectedOrders.map(async orderId => {
         const response = await fetch(
           "https://de-ecom-pro.onrender.com/api/orders/update",
           {
@@ -4123,26 +4431,37 @@ async function bulkMarkPacked(btn) {
         const result = await response.json();
 
         if (!response.ok || !result.success) {
-          failedCount++;
-          continue;
+          throw new Error(
+            result.message || `Failed to pack ${orderId}`
+          );
         }
 
+        return result.order;
+      })
+    );
+
+    results.forEach(result => {
+      if (result.status === "fulfilled") {
         successCount++;
 
-      } catch (error) {
-        console.error(
-          `Failed to pack order ${orderId}:`,
-          error
+        applyUpdatedOrderLocal(
+          result.value
         );
 
+      } else {
         failedCount++;
+
+        console.error(
+          "Bulk pack failed:",
+          result.reason
+        );
       }
-    }
+    });
 
     if (successCount > 0) {
-      showToast(
-        `${successCount} order(s) marked as Packed.`,
-        "success"
+      await showSuccessModal(
+        "Bulk Pack Complete",
+        `${successCount} order(s) were successfully marked as Packed.`
       );
     }
 
@@ -4153,7 +4472,6 @@ async function bulkMarkPacked(btn) {
       );
     }
 
-    await loadAdminOrders();
 
   } finally {
     resetButtonLoading(btn);
@@ -4209,13 +4527,13 @@ async function markOrderPacked(orderId, btn) {
       );
     }
 
-    showToast(
-      "Order marked as Packed.",
-      "success"
+    await showSuccessModal(
+      "Order Packed",
+      "The order was successfully marked as Packed."
     );
 
     closeOrderModal();
-    await loadAdminOrders();
+    applyUpdatedOrderLocal(result.order);
 
   } catch (error) {
     console.error(
@@ -4294,9 +4612,13 @@ async function markOrderShipped(orderId, btn) {
       return;
     }
 
-    showToast("Order marked as Shipped.", "success");
+    await showSuccessModal(
+      "Order Shipped",
+      "The order was successfully marked as Shipped."
+    );
+
     closeOrderModal();
-    await loadAdminOrders();
+    applyUpdatedOrderLocal(result.order);
 
   } catch (err) {
     console.error(err);
@@ -4337,9 +4659,13 @@ async function markOrderDelivered(orderId, btn) {
       return;
     }
 
-    showToast("Order marked as Delivered.", "success");
     closeOrderModal();
-    await loadAdminOrders();
+    applyUpdatedOrderLocal(result.order);
+
+    await showSuccessModal(
+      "Order Delivered",
+      "The order was successfully marked as Delivered."
+    );
 
   } catch (err) {
     console.error(err);
@@ -4411,9 +4737,13 @@ async function forceUpdateOrderStatus(orderId, status, btn) {
       return;
     }
 
-    showToast(`Order marked as ${status}.`, "success");
     closeOrderModal();
-    await loadAdminOrders();
+    applyUpdatedOrderLocal(result.order);
+
+    await showSuccessModal(
+      "Order Status Updated",
+      `The order was successfully marked as ${status}.`
+    );
 
   } catch (err) {
     console.error(err);
@@ -4444,9 +4774,9 @@ async function bulkArrangeShipment() {
     await arrangeShipment(orderId);
   }
 
-  showToast(
-    "Bulk shipment arrangement complete.",
-    "success"
+  await showSuccessModal(
+    "Bulk Shipment Complete",
+    "The selected orders were successfully processed for shipment."
   );
 
 }
@@ -4534,6 +4864,7 @@ function subscribeToOrderUpdates() {
   ordersRealtimeChannel =
     supabaseClient
       .channel("admin-orders-realtime")
+
       .on(
         "postgres_changes",
         {
@@ -4547,7 +4878,12 @@ function subscribeToOrderUpdates() {
             payload
           );
 
-          await loadAdminOrders();
+          if (
+            payload.eventType === "INSERT" ||
+            payload.eventType === "UPDATE"
+          ) {
+            applyUpdatedOrderLocal(payload.new);
+          }
 
           const newStatus =
             String(
@@ -4564,6 +4900,7 @@ function subscribeToOrderUpdates() {
           }
         }
       )
+
       .subscribe(status => {
         console.log(
           "ORDERS REALTIME STATUS:",
