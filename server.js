@@ -2312,7 +2312,27 @@ app.get("/api/orders", async (req, res) => {
 
     // Hide cancelled orders from main dashboard
     const activeOrders = orders.filter(order => {
-      return order.order_status !== "Cancelled";
+      const orderStatus = String(order.order_status || "")
+        .trim()
+        .toLowerCase();
+
+      const courier = String(order.courier || "")
+        .trim()
+        .toLowerCase();
+
+      const tracking = String(order.tracking_number || "").trim();
+      const spxOrderId = String(order.spx_order_id || "").trim();
+
+      const isCancelled =
+        orderStatus === "cancelled";
+
+      const isInvalidOldSpxToShip =
+        courier === "spx" &&
+        orderStatus === "to ship" &&
+        !tracking &&
+        !spxOrderId;
+
+      return !isCancelled && !isInvalidOldSpxToShip;
     });
 
     res.json({

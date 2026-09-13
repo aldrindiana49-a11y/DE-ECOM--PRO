@@ -956,12 +956,46 @@ function updateOrdersSummary() {
 
   if (ordersToShipCount) {
     ordersToShipCount.textContent =
-      adminOrders.filter(order =>
-        order.order_status === "Processing" ||
-        order.order_status === "Packed" ||
-        order.order_status === "To Ship"
-      ).length;
+      adminOrders.filter(order => {
+        const status = String(order.order_status || "")
+          .trim()
+          .toLowerCase();
+
+        const payment = String(order.payment_status || "")
+          .trim()
+          .toLowerCase();
+
+        const method = String(
+          order.payment_method ||
+          order.payment_provider ||
+          ""
+        ).trim().toLowerCase();
+
+        const courier = String(order.courier || "")
+          .trim()
+          .toLowerCase();
+
+        const isStorePickup =
+          courier.includes("store pickup");
+
+        const isCOD =
+          method.includes("cod") ||
+          payment === "cod";
+
+        const isReadyStatus =
+          ["processing", "packed", "to ship"].includes(status);
+
+        const isPaymentOkay =
+          isCOD || payment === "paid";
+
+        return (
+          !isStorePickup &&
+          isReadyStatus &&
+          isPaymentOkay
+        );
+      }).length;
   }
+
 }
 
 function updateDashboardOrders() {
@@ -2870,7 +2904,8 @@ function getShipmentButton(order, orderId) {
     `;
     }
 
-    return `
+    if (!isOnlinePayment && isPaid) {
+      return `
     <button
       class="primary-btn"
       type="button"
@@ -2882,6 +2917,20 @@ function getShipmentButton(order, orderId) {
       Mark Ready for Pickup
     </button>
   `;
+    }
+
+    return `
+  <button
+    class="primary-btn"
+    type="button"
+    onclick="markStorePickupPaid(
+      '${escapeAttribute(orderId)}',
+      this
+    )"
+  >
+    Confirm Payment / Mark Paid
+  </button>
+`;
   }
 
   if (isSkyro && !isSkyroApproved && !isPaid) {
@@ -3027,6 +3076,14 @@ async function confirmStorePickup(orderId, btn) {
 }
 
 async function markStorePickupPaid(orderId, btn) {
+
+  const confirmed = await showConfirmModal(
+    "Confirm OTC Payment",
+    "Confirm that payment has already been received from the customer?"
+  );
+
+  if (!confirmed) return;
+
   try {
     setButtonLoading(btn, "Marking Paid...");
 
@@ -3229,10 +3286,26 @@ function openOrderModal(orderId) {
     modalVoucher +
     modalShipping +
     modalServiceFee;
+
   const isStorePickup =
     String(order.courier || "")
       .toLowerCase()
       .includes("store pickup");
+
+  const paymentProvider = String(
+    order.payment_provider ||
+    order.paymentProvider ||
+    order.payment_method ||
+    ""
+  ).trim().toUpperCase();
+
+  const isOnlinePayment =
+    paymentProvider.includes("XENDIT") ||
+    paymentProvider.includes("MAYA") ||
+    paymentProvider.includes("SKYRO");
+
+  const isStorePickupOTC =
+    isStorePickup && !isOnlinePayment;
 
   content.innerHTML = `
 
@@ -3591,11 +3664,14 @@ ${!isStorePickup ? `
       ` : ""}
     </div>
 
-   ${(
-      ["pending", "pending payment"].includes(
-        String(order.order_status || "")
-          .trim()
-          .toLowerCase()
+${(
+      (
+        ["pending", "pending payment"].includes(
+          String(order.order_status || "")
+            .trim()
+            .toLowerCase()
+        ) ||
+        isStorePickupOTC
       ) &&
       String(order.payment_status || "")
         .trim()
