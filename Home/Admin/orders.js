@@ -1066,6 +1066,9 @@ function updateOrderFilterCounts() {
 
     const isPendingOnlinePayment =
       !isCOD &&
+      !String(order.courier || "")
+        .toLowerCase()
+        .includes("store pickup") &&
       (
         orderStatus === "pending payment" ||
         paymentStatus === "pending" ||
@@ -1305,6 +1308,9 @@ function renderAdminOrders() {
 
       const pendingOnlinePayment =
         !isCOD &&
+        !String(order.courier || "")
+          .toLowerCase()
+          .includes("store pickup") &&
         (
           paymentStatus === "pending" ||
           paymentStatus === "pending payment" ||
@@ -1360,7 +1366,12 @@ function renderAdminOrders() {
       }
 
       if (selectedFilter === "pending payment") {
-        return !isCOD && !isExpired && (
+        const isStorePickup =
+          String(order.courier || "")
+            .toLowerCase()
+            .includes("store pickup");
+
+        return (!isCOD || isStorePickup) && !isExpired && (
           orderStatus === "pending payment" ||
           paymentStatus === "pending" ||
           paymentStatus === "pending payment"
@@ -2303,12 +2314,20 @@ function applyUpdatedOrderLocal(updatedOrder) {
     status === "completed";
 
   if (!isCancelled) {
+
     if (
       isStorePickup &&
       !isExpired &&
       !isPickupFinished
     ) {
       storePickupOrders.unshift(normalized);
+
+      if (
+        status === "pending payment" ||
+        paymentStatus === "pending payment"
+      ) {
+        adminOrders.unshift(normalized);
+      }
 
     } else if (
       isManualFreight &&
@@ -2377,6 +2396,12 @@ function normalizeOrder(order) {
     .trim()
     .toUpperCase();
 
+  const isStorePickup =
+    String(order.courier || "")
+      .trim()
+      .toLowerCase()
+      .includes("store pickup");
+
   const isCOD =
     paymentText.includes("COD") ||
     paymentText.includes("CASH ON DELIVERY");
@@ -2399,7 +2424,19 @@ function normalizeOrder(order) {
     order.order_status || ""
   ).trim();
 
-  if (isSkyro) {
+
+  if (
+    isStorePickup &&
+    (
+      !orderStatus ||
+      orderStatus === "Pending" ||
+      orderStatus === "Pending Payment"
+    )
+  ) {
+    orderStatus = "Pending Payment";
+
+  } else if (isSkyro) {
+
     if (
       !orderStatus ||
       orderStatus === "Pending Payment" ||
@@ -2664,9 +2701,17 @@ async function loadAdminOrders() {
         ) &&
         paymentStatus === "paid";
 
+      const isPendingStorePickup =
+        courier.includes("store pickup") &&
+        (
+          orderStatus === "pending payment" ||
+          paymentStatus === "pending payment"
+        );
+
       return (
         isExpired ||
         isCompletedPickup ||
+        isPendingStorePickup ||
         (
           !courier.includes("store pickup") &&
           !isManualFreight
@@ -2849,7 +2894,7 @@ async function confirmStorePickup(orderId, btn) {
         body: JSON.stringify({
           orderId,
           order_status: "Ready for Pickup",
-          payment_status: "Pay at Store"
+          payment_status: "PAID"
         })
       }
     );
@@ -2862,11 +2907,6 @@ async function confirmStorePickup(orderId, btn) {
         "Failed to confirm pickup order."
       );
     }
-
-    await showSuccessModal(
-      "Ready for Pickup",
-      "The order is now ready for customer pickup."
-    );
 
     closeOrderModal();
     applyUpdatedOrderLocal(result.order);
@@ -3402,6 +3442,7 @@ ${!isStorePickup ? `
       ` : ""}
     </div>
 
+    ${!isStorePickup ? `
     <div class="order-cancel-actions">
       <select id="cancelReason-${escapeAttribute(orderId)}" class="cancel-reason-dropdown">
         <option value="">Select reason</option>
@@ -3413,10 +3454,15 @@ ${!isStorePickup ? `
         <option>Other reason</option>
       </select>
 
-      <button class="danger-btn" type="button" onclick="cancelOrder('${escapeAttribute(orderId)}', this)">
+      <button
+        class="danger-btn"
+        type="button"
+        onclick="cancelOrder('${escapeAttribute(orderId)}', this)"
+      >
         Cancel Order
       </button>
     </div>
+    ` : ""}
   `;
 
   modal.style.display = "flex";

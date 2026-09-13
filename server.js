@@ -187,6 +187,12 @@ async function savePendingOrder({
     }
   }
 
+  const isStorePickup =
+    String(courier || "")
+      .trim()
+      .toLowerCase()
+      .includes("store pickup");
+
   const orderData = {
     external_id: orderId,
 
@@ -254,18 +260,22 @@ async function savePendingOrder({
           : "Pending Payment",
 
     payment_status:
-      paymentProvider === "COD"
-        ? "COD"
-        : paymentProvider === "SKYRO"
-          ? "Pending Skyro Approval"
-          : "Pending Payment",
+      isStorePickup
+        ? "Pending Payment"
+        : paymentProvider === "COD"
+          ? "COD"
+          : paymentProvider === "SKYRO"
+            ? "Pending Skyro Approval"
+            : "Pending Payment",
 
     order_status:
-      paymentProvider === "COD"
-        ? "Pending"
-        : paymentProvider === "SKYRO"
-          ? "Pending Stock Confirmation"
-          : "Pending Payment",
+      isStorePickup
+        ? "Pending Payment"
+        : paymentProvider === "COD"
+          ? "Pending"
+          : paymentProvider === "SKYRO"
+            ? "Pending Stock Confirmation"
+            : "Pending Payment",
 
     updated_at: now
   };

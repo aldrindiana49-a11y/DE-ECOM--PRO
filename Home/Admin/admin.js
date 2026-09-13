@@ -301,7 +301,7 @@ loadVouchers();
    CUSTOM CONFIRM MODAL
 ================================ */
 
-function showConfirmModal(title, message) {
+function showConfirmModal(title, message, confirmLabel = "Confirm") {
 
     return new Promise((resolve) => {
 
@@ -323,7 +323,7 @@ function showConfirmModal(title, message) {
             </button>
 
             <button class="confirm-ok-btn">
-              Delete
+              ${confirmLabel}
             </button>
 
           </div>
