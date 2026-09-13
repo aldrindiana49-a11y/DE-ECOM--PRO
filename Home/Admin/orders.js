@@ -2774,7 +2774,20 @@ function getShipmentButton(order, orderId) {
   const isPaid =
     paymentStatus === "PAID";
 
+  const paymentProvider = String(
+    order.payment_provider ||
+    order.paymentProvider ||
+    order.payment_method ||
+    ""
+  ).trim().toUpperCase();
+
+  const isOnlinePayment =
+    paymentProvider.includes("XENDIT") ||
+    paymentProvider.includes("MAYA") ||
+    paymentProvider.includes("SKYRO");
+
   if (isStorePickup) {
+
     if (
       orderStatus === "completed" ||
       orderStatus === "picked up"
@@ -2805,6 +2818,38 @@ function getShipmentButton(order, orderId) {
         )"
       >
         Mark as Picked Up
+      </button>
+    `;
+    }
+
+    if (isOnlinePayment && !isPaid) {
+      return `
+      <button
+        class="primary-btn"
+        type="button"
+        disabled
+        style="
+          opacity:0.55;
+          cursor:not-allowed;
+        "
+      >
+        Waiting for Online Payment
+      </button>
+    `;
+    }
+
+    if (isOnlinePayment && isPaid) {
+      return `
+      <button
+        class="primary-btn"
+        type="button"
+        disabled
+        style="
+          opacity:0.55;
+          cursor:not-allowed;
+        "
+      >
+        Payment Received
       </button>
     `;
     }
@@ -2882,6 +2927,42 @@ function getShipmentButton(order, orderId) {
 
 async function confirmStorePickup(orderId, btn) {
   try {
+
+    const allActiveOrders = [
+      ...adminOrders,
+      ...storePickupOrders,
+      ...roroOrders
+    ];
+
+    const order = allActiveOrders.find(o =>
+      String(o.external_id || o.id) === String(orderId)
+    );
+
+    if (!order) {
+      showToast("Order not found.", "error");
+      return;
+    }
+
+    const paymentProvider = String(
+      order.payment_provider ||
+      order.paymentProvider ||
+      order.payment_method ||
+      ""
+    ).trim().toUpperCase();
+
+    const isOnlinePayment =
+      paymentProvider.includes("XENDIT") ||
+      paymentProvider.includes("MAYA") ||
+      paymentProvider.includes("SKYRO");
+
+    if (isOnlinePayment) {
+      showToast(
+        "Online payment orders must wait for payment confirmation.",
+        "error"
+      );
+      return;
+    }
+
     setButtonLoading(btn, "Confirming Pickup...");
 
     const response = await fetch(
@@ -2907,6 +2988,11 @@ async function confirmStorePickup(orderId, btn) {
         "Failed to confirm pickup order."
       );
     }
+
+    await showSuccessModal(
+      "Ready for Pickup",
+      "The order is now ready for customer pickup."
+    );
 
     closeOrderModal();
     applyUpdatedOrderLocal(result.order);
@@ -3442,7 +3528,12 @@ ${!isStorePickup ? `
       ` : ""}
     </div>
 
-    ${!isStorePickup ? `
+   ${(
+      !isStorePickup ||
+      String(order.order_status || "")
+        .trim()
+        .toLowerCase() === "pending payment"
+    ) ? `
     <div class="order-cancel-actions">
       <select id="cancelReason-${escapeAttribute(orderId)}" class="cancel-reason-dropdown">
         <option value="">Select reason</option>

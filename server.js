@@ -2371,6 +2371,52 @@ app.post("/api/orders/update", async (req, res) => {
       updated_at: new Date().toISOString()
     };
 
+    const existingPaymentProvider = String(
+      existingOrder.payment_provider ||
+      existingOrder.paymentProvider ||
+      existingOrder.payment_method ||
+      ""
+    ).trim().toUpperCase();
+
+    const isStorePickup =
+      String(existingOrder.courier || "")
+        .trim()
+        .toLowerCase()
+        .includes("store pickup");
+
+    const isOnlinePayment =
+      existingPaymentProvider.includes("XENDIT") ||
+      existingPaymentProvider.includes("MAYA") ||
+      existingPaymentProvider.includes("SKYRO");
+
+    const isTryingToForceReady =
+      String(order_status || "")
+        .trim()
+        .toLowerCase() === "ready for pickup";
+
+    const isTryingToForcePaid =
+      String(payment_status || "")
+        .trim()
+        .toUpperCase() === "PAID";
+
+    const isAlreadyPaid =
+      String(existingOrder.payment_status || "")
+        .trim()
+        .toUpperCase() === "PAID";
+
+    if (
+      isStorePickup &&
+      isOnlinePayment &&
+      !isAlreadyPaid &&
+      (isTryingToForceReady || isTryingToForcePaid)
+    ) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Online payment Store Pickup must be confirmed by the payment webhook before it can be marked PAID or Ready for Pickup."
+      });
+    }
+
     if (order_status !== undefined) {
       updates.order_status = String(order_status).trim();
 
@@ -2676,12 +2722,28 @@ function findOrderIndex(orders, orderId) {
 }
 
 function markOrderPaid(order, provider, meta = {}) {
+
+  const isStorePickup =
+    String(order.courier || "")
+      .trim()
+      .toLowerCase()
+      .includes("store pickup");
+
   order.status = "PAID";
   order.payment_status = "PAID";
   order.payment_provider = order.payment_provider || provider;
-  order.order_status = "Processing";
-  order.paid_at = order.paid_at || new Date().toISOString();
-  order.updated_at = new Date().toISOString();
+
+  order.order_status =
+    isStorePickup
+      ? "Ready for Pickup"
+      : "Processing";
+
+  order.paid_at =
+    order.paid_at ||
+    new Date().toISOString();
+
+  order.updated_at =
+    new Date().toISOString();
 
   Object.assign(order, meta);
 }
