@@ -2404,6 +2404,25 @@ app.post("/api/orders/update", async (req, res) => {
         .trim()
         .toUpperCase() === "PAID";
 
+    const isTryingToCompletePickup =
+      ["completed", "picked up"].includes(
+        String(order_status || "")
+          .trim()
+          .toLowerCase()
+      );
+
+    if (
+      isStorePickup &&
+      isTryingToCompletePickup &&
+      !isAlreadyPaid
+    ) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Store Pickup must be marked PAID before it can be completed."
+      });
+    }
+
     if (
       isStorePickup &&
       isOnlinePayment &&
@@ -2528,6 +2547,28 @@ app.post("/api/orders/:orderId/cancel", async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Order not found"
+      });
+    }
+
+    const currentOrderStatus =
+      String(orders[index].order_status || "")
+        .trim()
+        .toLowerCase();
+
+    const currentPaymentStatus =
+      String(orders[index].payment_status || "")
+        .trim()
+        .toUpperCase();
+
+    const canCancel =
+      ["pending", "pending payment"].includes(currentOrderStatus) &&
+      currentPaymentStatus !== "PAID";
+
+    if (!canCancel) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Only pending unpaid orders can be cancelled."
       });
     }
 

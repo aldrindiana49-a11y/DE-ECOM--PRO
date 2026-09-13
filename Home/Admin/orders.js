@@ -2808,18 +2808,34 @@ function getShipmentButton(order, orderId) {
     }
 
     if (orderStatus === "ready for pickup") {
-      return `
+
+      if (!isPaid) {
+        return `
       <button
         class="primary-btn"
         type="button"
-        onclick="completeStorePickup(
+        onclick="markStorePickupPaid(
           '${escapeAttribute(orderId)}',
           this
         )"
       >
-        Mark as Picked Up
+        Mark Paid
       </button>
     `;
+      }
+
+      return `
+    <button
+      class="primary-btn"
+      type="button"
+      onclick="completeStorePickup(
+        '${escapeAttribute(orderId)}',
+        this
+      )"
+    >
+      Mark as Picked Up
+    </button>
+  `;
     }
 
     if (isOnlinePayment && !isPaid) {
@@ -2974,8 +2990,7 @@ async function confirmStorePickup(orderId, btn) {
         },
         body: JSON.stringify({
           orderId,
-          order_status: "Ready for Pickup",
-          payment_status: "PAID"
+          order_status: "Ready for Pickup"
         })
       }
     );
@@ -3011,6 +3026,55 @@ async function confirmStorePickup(orderId, btn) {
   }
 }
 
+async function markStorePickupPaid(orderId, btn) {
+  try {
+    setButtonLoading(btn, "Marking Paid...");
+
+    const response = await fetch(
+      "https://de-ecom-pro.onrender.com/api/orders/update",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          orderId,
+          payment_status: "PAID"
+        })
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.message ||
+        "Failed to mark order as paid."
+      );
+    }
+
+    closeOrderModal();
+    applyUpdatedOrderLocal(result.order);
+
+    await showSuccessModal(
+      "Payment Received",
+      "Store pickup payment has been marked as PAID."
+    );
+
+  } catch (error) {
+    console.error(error);
+
+    showToast(
+      error.message ||
+      "Unable to mark payment as paid.",
+      "error"
+    );
+
+  } finally {
+    resetButtonLoading(btn);
+  }
+}
+
 async function completeStorePickup(orderId, btn) {
 
   const confirmed = await showConfirmModal(
@@ -3033,7 +3097,6 @@ async function completeStorePickup(orderId, btn) {
         body: JSON.stringify({
           orderId,
           order_status: "Completed",
-          payment_status: "PAID",
           picked_up_at: new Date().toISOString()
         })
       }
@@ -3529,11 +3592,16 @@ ${!isStorePickup ? `
     </div>
 
    ${(
-      !isStorePickup ||
-      String(order.order_status || "")
+      ["pending", "pending payment"].includes(
+        String(order.order_status || "")
+          .trim()
+          .toLowerCase()
+      ) &&
+      String(order.payment_status || "")
         .trim()
-        .toLowerCase() === "pending payment"
+        .toUpperCase() !== "PAID"
     ) ? `
+
     <div class="order-cancel-actions">
       <select id="cancelReason-${escapeAttribute(orderId)}" class="cancel-reason-dropdown">
         <option value="">Select reason</option>
