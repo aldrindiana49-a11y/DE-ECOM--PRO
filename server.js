@@ -2303,49 +2303,49 @@ async function autoCompleteDeliveredOrders() {
 }
 
 // ================= VIEW ACTIVE ORDERS =================
+
 app.get("/api/orders", async (req, res) => {
   try {
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(
+      Math.max(Number(req.query.limit) || 10, 1),
+      100
+    );
 
-    await autoCompleteDeliveredOrders();
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
 
-    const orders = await readOrders();
+    const { data, error, count } = await supabase
+      .from("orders")
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(from, to);
 
-    // Hide cancelled orders from main dashboard
-    const activeOrders = orders.filter(order => {
-      const orderStatus = String(order.order_status || "")
-        .trim()
-        .toLowerCase();
+    if (error) {
+      throw error;
+    }
 
-      const courier = String(order.courier || "")
-        .trim()
-        .toLowerCase();
-
-      const tracking = String(order.tracking_number || "").trim();
-      const spxOrderId = String(order.spx_order_id || "").trim();
-
-      const isCancelled =
-        orderStatus === "cancelled";
-
-      const isInvalidOldSpxToShip =
-        courier === "spx" &&
-        orderStatus === "to ship" &&
-        !tracking &&
-        !spxOrderId;
-
-      return !isCancelled && !isInvalidOldSpxToShip;
-    });
-
-    res.json({
+    return res.json({
       success: true,
-      orders: activeOrders
+      orders: data || [],
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        totalPages: Math.max(
+          1,
+          Math.ceil((count || 0) / limit)
+        )
+      }
     });
 
-  } catch (err) {
-    console.error("GET ORDERS ERROR:", err);
+  } catch (error) {
+    console.error("GET ORDERS ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Failed to load orders"
+      message: "Failed to load orders",
+      error: error.message
     });
   }
 });
