@@ -20,6 +20,8 @@ let expandedOrderSummary = {};
 let expandedOrderItems = {};
 let currentOrdersPage = 1;
 const ordersPerPage = 10;
+let ordersTotalPages = 1;
+let ordersTotalRecords = 0;
 const cancelledOrdersTableBody =
   document.getElementById("cancelledOrdersTableBody");
 const storePickupOrdersTableBody =
@@ -1442,19 +1444,8 @@ function renderAdminOrders() {
     new Date(b.created_at) - new Date(a.created_at)
   );
 
-  const startIndex =
-    (currentOrdersPage - 1) * ordersPerPage;
-
-  const paginatedOrders =
-    filteredOrders.slice(
-      startIndex,
-      startIndex + ordersPerPage
-    );
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredOrders.length / ordersPerPage)
-  );
+  const paginatedOrders = filteredOrders;
+  const totalPages = ordersTotalPages;
 
   if (!filteredOrders.length) {
     adminOrdersTableBody.innerHTML = `<div class="empty-box">No orders found.</div>`;
@@ -2186,94 +2177,16 @@ function toggleOrderSummary(orderId) {
   renderAdminOrders();
 }
 
-function changeOrdersPage(direction) {
-  const filteredOrders = adminOrders.filter(order => {
-    if (currentOrderFilter === "ALL") {
-      return true;
-    }
+async function changeOrdersPage(direction) {
+  const nextPage = currentOrdersPage + direction;
 
-    const selectedFilter = String(
-      currentOrderFilter || ""
-    ).trim().toLowerCase();
-
-    const orderStatus = String(
-      order.order_status || ""
-    ).trim().toLowerCase();
-
-    const paymentStatus = String(
-      order.payment_status ||
-      order.status ||
-      order.xendit_status ||
-      ""
-    ).trim().toLowerCase();
-
-    const paymentMethod = String(
-      order.payment_provider ||
-      order.paymentProvider ||
-      order.payment_method ||
-      order.paymentMethod ||
-      order.payment_type ||
-      order.payment_option ||
-      order.payment_channel ||
-      order.method ||
-      ""
-    ).trim().toLowerCase();
-
-    const paymentText =
-      `${paymentStatus} ${paymentMethod} `;
-
-    const isCOD =
-      paymentText.includes("cod") ||
-      paymentText.includes("cash on delivery");
-
-    if (selectedFilter === "pending skyro") {
-      return (
-        paymentText.includes("skyro") &&
-        [
-          "pending stock confirmation",
-          "skyro application allowed",
-          "pending skyro approval",
-          "pending skyro application"
-        ].includes(orderStatus)
-      );
-    }
-
-    if (selectedFilter === "skyro approved") {
-      return (
-        paymentText.includes("skyro") &&
-        orderStatus === "skyro approved"
-      );
-    }
-
-    if (
-      selectedFilter === "pending" ||
-      selectedFilter === "pending cod"
-    ) {
-      return isCOD && orderStatus === "pending";
-    }
-
-    return (
-      orderStatus === selectedFilter ||
-      paymentStatus === selectedFilter
-    );
-  });
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredOrders.length / ordersPerPage)
-  );
-
-  currentOrdersPage += direction;
-
-  if (currentOrdersPage < 1) {
-    currentOrdersPage = 1;
+  if (nextPage < 1 || nextPage > ordersTotalPages) {
+    return;
   }
 
-  if (currentOrdersPage > totalPages) {
-    currentOrdersPage = totalPages;
-  }
+  currentOrdersPage = nextPage;
 
-  renderAdminOrders();
+  await loadAdminOrders();
 
   window.scrollTo({
     top: 0,
@@ -2599,8 +2512,16 @@ async function loadAdminOrders() {
         `;
     }
 
-    const response = await fetch("https://de-ecom-pro.onrender.com/api/orders");
+    const response = await fetch(
+      `https://de-ecom-pro.onrender.com/api/orders?page=${currentOrdersPage}&limit=${ordersPerPage}`
+    );
     const data = await response.json();
+
+    ordersTotalPages =
+      Number(data.pagination?.totalPages) || 1;
+
+    ordersTotalRecords =
+      Number(data.pagination?.total) || 0;
 
     if (!data.success || !Array.isArray(data.orders)) {
       throw new Error("Invalid orders response");
@@ -5117,7 +5038,7 @@ document
       currentOrderFilter =
         button.dataset.filter;
       currentOrdersPage = 1;
-      renderAdminOrders();
+      loadAdminOrders();
 
     });
 
