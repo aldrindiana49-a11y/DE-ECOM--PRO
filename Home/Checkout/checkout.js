@@ -92,6 +92,47 @@ async function fetchWithFallback(path, options = {}) {
   );
 }
 
+async function fetchSPXFast(path, options = {}) {
+  const controller = new AbortController();
+
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, 1500);
+
+  try {
+    const response = await fetch(
+      `${PRIMARY_API_URL}${path}`,
+      {
+        ...options,
+        signal: controller.signal
+      }
+    );
+
+    clearTimeout(timeoutId);
+
+    if (response.ok) {
+      return response;
+    }
+
+    if (response.status < 500) {
+      return response;
+    }
+
+  } catch (error) {
+    clearTimeout(timeoutId);
+
+    console.warn(
+      "Primary SPX server slow/unavailable:",
+      error
+    );
+  }
+
+  return fetch(
+    `${BACKUP_API_URL}${path}`,
+    options
+  );
+}
+
 const LALAMOVE_PICKUP = {
   lat: "14.5429244",
   lng: "121.1000368",
@@ -1658,7 +1699,7 @@ async function calculateShippingFee() {
     }));
 
 
-    const res = await fetchWithFallback(
+    const res = await fetchSPXFast(
       "/api/spx/check-shipping-fee",
       {
         method: "POST",
@@ -2091,7 +2132,8 @@ async function placeOrder() {
 
   const name = nameInput?.value.trim() || "";
   const phone = phoneInput?.value.trim() || "";
-  const email = emailInput?.value.trim() || "";
+  const email =
+    emailInput?.value.trim().toLowerCase() || "";
   const selectedPayment =
     document.querySelector(
       'input[name="payment"]:checked'
@@ -2887,10 +2929,8 @@ async function placeOrder() {
 
     try {
 
-      const skyroRes = await fetch(
-
-
-        `${API_BASE_URL}/api/orders/skyro`,
+      const skyroRes = await fetchWithFallback(
+        "/api/orders/skyro",
         {
           method: "POST",
           headers: {
@@ -4076,7 +4116,8 @@ function saveCustomerCheckoutInfo() {
   const data = {
     name: nameInput?.value || "",
     phone: phoneInput?.value || "",
-    email: emailInput?.value || "",
+    email:
+      emailInput?.value.trim().toLowerCase() || "",
     areaGroup: areaGroupSelect?.value || "",
     province: provinceSelect?.value || "",
     city: citySelect?.value || "",

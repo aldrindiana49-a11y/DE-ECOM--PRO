@@ -1573,8 +1573,8 @@ app.post("/api/orders/:orderId/skyro-create", async (req, res) => {
       ),
 
       webhookUrl:
-        "https://de-ecom-pro.onrender.com/api/skyro/webhook",
-
+        process.env.SKYRO_WEBHOOK_URL,
+        
       successUrl:
         "https://drinelectronicsph.com/home-orders/?skyro=success",
 
