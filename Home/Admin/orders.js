@@ -2,6 +2,64 @@
    ORDERS MODULE
 ================================ */
 
+const PRIMARY_API_URL =
+  "https://de-ecom-pro.onrender.com";
+
+const BACKUP_API_URL =
+  "https://drin-electronics-backup-a7u59.ondigitalocean.app";
+
+async function adminFetchWithFallback(path, options = {}) {
+  const servers = [
+    PRIMARY_API_URL,
+    BACKUP_API_URL
+  ];
+
+  let lastError = null;
+
+  for (const baseUrl of servers) {
+    const controller = new AbortController();
+
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 3000);
+
+    try {
+      const response = await fetch(
+        `${baseUrl}${path}`,
+        {
+          ...options,
+          signal: controller.signal
+        }
+      );
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(
+          `Request failed: ${response.status}`
+        );
+      }
+
+      return response;
+
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      console.warn(
+        "Admin API failed:",
+        baseUrl,
+        error
+      );
+
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error(
+    "All admin backend servers failed"
+  );
+}
+
 const adminOrdersTableBody = document.getElementById("adminOrdersTableBody");
 const ordersTotalCount = document.getElementById("ordersTotalCount");
 const ordersPendingCount = document.getElementById("ordersPendingCount");
@@ -2512,9 +2570,10 @@ async function loadAdminOrders() {
         `;
     }
 
-    const response = await fetch(
-      `https://de-ecom-pro.onrender.com/api/orders?page=${currentOrdersPage}&limit=${ordersPerPage}`
+    const response = await adminFetchWithFallback(
+      `/api/orders?page=${currentOrdersPage}&limit=${ordersPerPage}`
     );
+
     const data = await response.json();
 
     ordersTotalPages =
@@ -2951,8 +3010,8 @@ async function confirmStorePickup(orderId, btn) {
 
     setButtonLoading(btn, "Confirming Pickup...");
 
-    const response = await fetch(
-      "https://de-ecom-pro.onrender.com/api/orders/update",
+    const response = await adminFetchWithFallback(
+      "/api/orders/update",
       {
         method: "POST",
         headers: {
@@ -3008,8 +3067,8 @@ async function markStorePickupPaid(orderId, btn) {
   try {
     setButtonLoading(btn, "Marking Paid...");
 
-    const response = await fetch(
-      "https://de-ecom-pro.onrender.com/api/orders/update",
+    const response = await adminFetchWithFallback(
+      "/api/orders/update",
       {
         method: "POST",
         headers: {
@@ -3065,8 +3124,10 @@ async function completeStorePickup(orderId, btn) {
   try {
     setButtonLoading(btn, "Completing Order...");
 
-    const response = await fetch(
-      "https://de-ecom-pro.onrender.com/api/orders/update",
+    // 1) completeStorePickup()
+
+    const response = await adminFetchWithFallback(
+      "/api/orders/update",
       {
         method: "POST",
         headers: {
@@ -3701,8 +3762,8 @@ async function refreshSkyroStatus(orderId, btn) {
   try {
     setButtonLoading(btn, "Checking Skyro...");
 
-    const response = await fetch(
-      `https://de-ecom-pro.onrender.com/api/orders/${orderId}/skyro-status`,
+    const response = await adminFetchWithFallback(
+      `/api/orders/${orderId}/skyro-status`,
       {
         method: "POST",
         headers: {
@@ -3758,8 +3819,8 @@ async function rejectSkyroApplication(orderId, btn) {
 
     setButtonLoading(btn, "Rejecting...");
 
-    const response = await fetch(
-      "https://de-ecom-pro.onrender.com/api/orders/update",
+    const response = await adminFetchWithFallback(
+      "/api/orders/update",
       {
         method: "POST",
         headers: {
@@ -4061,27 +4122,27 @@ async function bookLalamoveShipment(orderId, btn) {
       Pag successful ang booking,
       Processing muna.
     */
-    const updateResponse = await fetch(
-      "https://de-ecom-pro.onrender.com/api/orders/update",
+    const res = await adminFetchWithFallback(
+      "/api/orders/update",
       {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json"
         },
 
         body: JSON.stringify({
           orderId,
-          order_status: "Processing",
-          shipment_arranged_at:
-            new Date().toISOString()
+          order_status: "Processing"
         })
       }
     );
 
     const updateResult =
-      await updateResponse.json();
+      await res.json();
 
-    if (!updateResponse.ok || !updateResult.success) {
+    if (!res.ok || !updateResult.success) {
+
       throw new Error(
         updateResult.message ||
         "Booking successful but status update failed"
@@ -4120,8 +4181,10 @@ async function arrangeManualFreight(orderId, btn) {
       "Arranging Manual Freight..."
     );
 
-    const response = await fetch(
-      "https://de-ecom-pro.onrender.com/api/orders/update",
+    // 2) arrangeManualFreight()
+
+    const response = await adminFetchWithFallback(
+      "/api/orders/update",
       {
         method: "POST",
         headers: {
@@ -4379,8 +4442,8 @@ async function loadCancelledOrders() {
       </div>
     `;
 
-    const res = await fetch(
-      "https://de-ecom-pro.onrender.com/api/orders/cancelled"
+    const res = await adminFetchWithFallback(
+      "/api/orders/cancelled"
     );
 
     const data = await res.json();
@@ -4488,8 +4551,8 @@ async function undoCancelledOrder(orderId) {
 
   try {
 
-    const res = await fetch(
-      "https://de-ecom-pro.onrender.com/api/orders/update",
+    const res = await adminFetchWithFallback(
+      "/api/orders/update",
       {
         method: "POST",
 
@@ -4615,8 +4678,9 @@ async function bulkMarkPacked(btn) {
 
     const results = await Promise.allSettled(
       selectedOrders.map(async orderId => {
-        const response = await fetch(
-          "https://de-ecom-pro.onrender.com/api/orders/update",
+
+        const response = await adminFetchWithFallback(
+          "/api/orders/update",
           {
             method: "POST",
             headers: {
@@ -4704,18 +4768,17 @@ async function markOrderPacked(orderId, btn) {
 
     setButtonLoading(btn, "Packing...");
 
-    const response = await fetch(
-      "https://de-ecom-pro.onrender.com/api/orders/update",
+    const response = await adminFetchWithFallback(
+      "/api/orders/update",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-
         body: JSON.stringify({
           orderId,
-          order_status: "Packed",
-          packed_at: new Date().toISOString()
+          order_status: "Completed",
+          picked_up_at: new Date().toISOString()
         })
       }
     );
@@ -4795,8 +4858,8 @@ async function markOrderShipped(orderId, btn) {
 
     setButtonLoading(btn, "Updating...");
 
-    const res = await fetch(
-      "https://de-ecom-pro.onrender.com/api/orders/update",
+    const res = await adminFetchWithFallback(
+      "/api/orders/update",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -4844,15 +4907,18 @@ async function markOrderDelivered(orderId, btn) {
 
     setButtonLoading(btn, "Updating...");
 
-    const res = await fetch("https://de-ecom-pro.onrender.com/api/orders/update", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        orderId,
-        order_status: "Delivered",
-        delivered_at: new Date().toISOString()
-      })
-    });
+    const res = await adminFetchWithFallback(
+      "/api/orders/update",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          order_status: "Delivered",
+          delivered_at: new Date().toISOString()
+        })
+      }
+    );
 
     const result = await res.json();
 
@@ -4926,11 +4992,17 @@ async function forceUpdateOrderStatus(orderId, status, btn) {
 
     setButtonLoading(btn, "Updating...");
 
-    const res = await fetch("https://de-ecom-pro.onrender.com/api/orders/update", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId, order_status: status })
-    });
+    const res = await adminFetchWithFallback(
+      "/api/orders/update",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          order_status: status
+        })
+      }
+    );
 
     const result = await res.json();
 
