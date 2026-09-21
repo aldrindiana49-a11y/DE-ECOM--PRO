@@ -24,6 +24,7 @@ const courierStatus = document.getElementById("courierStatus");
 const nameInput = document.getElementById("custName");
 const phoneInput = document.getElementById("custPhone");
 const emailInput = document.getElementById("custEmail");
+let loggedInUser = null;
 const deliveryLatInput = document.getElementById("deliveryLat");
 const deliveryLngInput = document.getElementById("deliveryLng");
 const pinStatus = document.getElementById("pinStatus");
@@ -2132,8 +2133,16 @@ async function placeOrder() {
 
   const name = nameInput?.value.trim() || "";
   const phone = phoneInput?.value.trim() || "";
+
   const email =
-    emailInput?.value.trim().toLowerCase() || "";
+    String(
+      loggedInUser?.email ||
+      emailInput?.value ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
+
   const selectedPayment =
     document.querySelector(
       'input[name="payment"]:checked'
@@ -3841,19 +3850,19 @@ saveCustomerBtn?.addEventListener("click", () => {
     [
       nameInput,
       phoneInput,
-      emailInput,
       fullAddressInput,
       areaGroupSelect,
       provinceSelect,
       citySelect,
-      barangaySelect,
+      barangaySelect
     ].forEach(input => {
-
-      if (input) {
-        input.disabled = false;
-      }
-
+      if (input) input.disabled = false;
     });
+
+    if (emailInput) {
+      emailInput.disabled = false;
+      emailInput.readOnly = Boolean(loggedInUser);
+    }
 
     saveCustomerBtn.textContent = "Save";
 
@@ -4053,7 +4062,7 @@ async function loadClaimedVoucher() {
 
   togglePayment(false);
 
-  loadCustomerCheckoutInfo();
+  await loadCustomerCheckoutInfo();
   updateParcelEstimate();
   updateTotalsDisplay();
   initDeliveryMap();
@@ -4116,8 +4125,16 @@ function saveCustomerCheckoutInfo() {
   const data = {
     name: nameInput?.value || "",
     phone: phoneInput?.value || "",
+
     email:
-      emailInput?.value.trim().toLowerCase() || "",
+      String(
+        loggedInUser?.email ||
+        emailInput?.value ||
+        ""
+      )
+        .trim()
+        .toLowerCase(),
+
     areaGroup: areaGroupSelect?.value || "",
     province: provinceSelect?.value || "",
     city: citySelect?.value || "",
@@ -4184,7 +4201,6 @@ function enableCustomerEdit() {
   [
     nameInput,
     phoneInput,
-    emailInput,
     fullAddressInput,
     areaGroupSelect,
     provinceSelect,
@@ -4194,6 +4210,11 @@ function enableCustomerEdit() {
     if (input) input.disabled = false;
   });
 
+  if (emailInput) {
+    emailInput.disabled = false;
+    emailInput.readOnly = Boolean(loggedInUser);
+  }
+
   // SAVE BUTTON ACTIVE AGAIN
   if (saveCustomerBtn) {
     saveCustomerBtn.textContent = "Save";
@@ -4202,7 +4223,22 @@ function enableCustomerEdit() {
   customerSaved = false;
 }
 
-function loadCustomerCheckoutInfo() {
+async function loadCustomerCheckoutInfo() {
+
+  const {
+    data: { user }
+  } = await supabaseClient.auth.getUser();
+
+  loggedInUser = user || null;
+
+  if (loggedInUser && emailInput) {
+    emailInput.value =
+      String(loggedInUser.email || "")
+        .trim()
+        .toLowerCase();
+
+    emailInput.readOnly = true;
+  }
 
   const saved =
     JSON.parse(
@@ -4219,7 +4255,7 @@ function loadCustomerCheckoutInfo() {
     phoneInput.value = saved.phone || "";
   }
 
-  if (emailInput) {
+  if (emailInput && !loggedInUser) {
     emailInput.value = saved.email || "";
   }
 
