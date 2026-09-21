@@ -3158,8 +3158,8 @@ async function placeOrder() {
     );
 
     try {
-      const codRes = await fetch(
-        `${API_BASE_URL}/api/orders/cod`,
+      const codRes = await fetchWithFallback(
+        "/api/orders/cod",
         {
           method: "POST",
           headers: {
@@ -3248,46 +3248,140 @@ async function placeOrder() {
   }
 
   try {
-    const paymentUrl = `${API_BASE_URL}/api/create-payment`;
+    const paymentPayload = {
+      orderId: order.id,
+      guestOrder: order.guestOrder === true,
+      guestTrackingCode: order.guestTrackingCode,
+
+      amount: Number(totalNumber),
+
+      subtotal: Number(subtotalNumber),
+      shippingFee: Number(shippingFeeNumber),
+
+      serviceFee: Number(handlingFee),
+      handlingFee: Number(handlingFee),
+
+      customerName: name,
+      customerPhone: phone,
+      customerEmail: email,
+
+      paymentMethod: "XENDIT",
+      courier: order.courier,
+
+      isLalamoveOrder:
+        selectedCourierNow === "Same Day Delivery / Lalamove",
+
+      lalamoveShippingPaidByCustomer: true,
+      estimatedLalamoveFee:
+        Number(estimatedLalamoveFee || 0),
+
+      address,
+      parcelInfo: currentParcelInfo,
+      items: order.items
+    };
+
     showOrderModal(
       "Please Wait",
       "Redirecting to secure payment gateway... Please do not close this window.",
       true
     );
 
-    const res = await fetch(paymentUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    let res;
 
-      body: JSON.stringify({
-        orderId: order.id,
-        guestOrder: order.guestOrder === true,
-        guestTrackingCode: order.guestTrackingCode,
+    try {
+      res = await fetch(
+        `${PRIMARY_API_URL}/api/create-payment`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(paymentPayload)
+        }
+      );
 
-        amount: Number(totalNumber),
+      if (res.status >= 500) {
+        throw new Error(
+          `Primary Xendit server error: ${res.status}`
+        );
+      }
 
-        subtotal: Number(subtotalNumber),
-        shippingFee: Number(shippingFeeNumber),
+    } catch (primaryError) {
 
-        serviceFee: Number(handlingFee),
-        handlingFee: Number(handlingFee),
+      console.warn(
+        "PRIMARY XENDIT SERVER FAILED:",
+        primaryError
+      );
 
-        customerName: name,
-        customerPhone: phone,
-        customerEmail: email,
+      // Check backup server first for an already-created payment
+      try {
+        const recoveryRes = await fetch(
+          `${BACKUP_API_URL}/api/xendit/payment/${encodeURIComponent(order.id)}`
+        );
 
-        paymentMethod: "XENDIT",
-        courier: order.courier,
+        if (recoveryRes.ok) {
+          const recoveryData =
+            await recoveryRes.json();
 
-        isLalamoveOrder: selectedCourierNow === "Same Day Delivery / Lalamove",
-        lalamoveShippingPaidByCustomer: true,
-        estimatedLalamoveFee: Number(estimatedLalamoveFee || 0),
+          if (
+            recoveryData.found &&
+            recoveryData.checkoutUrl
+          ) {
+            clearCheckedCartItems();
 
-        address,
-        parcelInfo: currentParcelInfo,
-        items: order.items,
-      }),
-    });
+            localStorage.removeItem(
+              "drinCheckoutItems"
+            );
+
+            if (isGuestCheckout) {
+              sessionStorage.setItem(
+                "guestCheckout",
+                "true"
+              );
+
+              sessionStorage.setItem(
+                "guestOrderEmail",
+                email
+              );
+
+              sessionStorage.setItem(
+                "guestOrderId",
+                order.id
+              );
+            }
+
+            sessionStorage.setItem(
+              "paymentStarted",
+              "true"
+            );
+
+            window.location.replace(
+              recoveryData.checkoutUrl
+            );
+
+            return;
+          }
+        }
+
+      } catch (recoveryError) {
+        console.warn(
+          "XENDIT RECOVERY CHECK FAILED:",
+          recoveryError
+        );
+      }
+
+      // No existing checkout URL found, try backup backend
+      res = await fetch(
+        `${BACKUP_API_URL}/api/create-payment`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(paymentPayload)
+        }
+      );
+    }
 
     let data = {};
 

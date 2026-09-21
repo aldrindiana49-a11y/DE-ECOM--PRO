@@ -2174,6 +2174,53 @@ app.post("/api/create-payment", async (req, res) => {
   }
 });
 
+// ================= XENDIT PAYMENT RECOVERY =================
+app.get("/api/xendit/payment/:orderId", async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const { data: order, error } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("external_id", orderId)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (
+      order &&
+      order.checkout_url &&
+      String(order.payment_provider || "")
+        .toUpperCase() === "XENDIT"
+    ) {
+      return res.json({
+        success: true,
+        found: true,
+        checkoutUrl: order.checkout_url,
+        order
+      });
+    }
+
+    return res.json({
+      success: true,
+      found: false
+    });
+
+  } catch (error) {
+    console.error(
+      "XENDIT PAYMENT RECOVERY ERROR:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to recover Xendit payment."
+    });
+  }
+});
+
 // ================= MAYA =================
 app.post("/api/create-maya-payment", async (req, res) => {
   try {
