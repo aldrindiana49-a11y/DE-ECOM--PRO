@@ -2023,6 +2023,34 @@ app.post("/api/create-payment", async (req, res) => {
         ? "https://drinelectronicsph.com/guest-track/?payment=success"
         : "https://drinelectronicsph.com/home-orders/";
 
+    const { data: existingOrder, error: existingOrderError } =
+      await supabase
+        .from("orders")
+        .select("*")
+        .eq("external_id", orderId)
+        .maybeSingle();
+
+    if (existingOrderError) {
+      console.error(
+        "XENDIT EXISTING ORDER CHECK ERROR:",
+        existingOrderError
+      );
+    }
+
+    if (
+      existingOrder &&
+      existingOrder.checkout_url &&
+      String(existingOrder.payment_provider || "")
+        .toUpperCase() === "XENDIT"
+    ) {
+      return res.json({
+        success: true,
+        alreadyCreated: true,
+        checkoutUrl: existingOrder.checkout_url,
+        order: existingOrder
+      });
+    }
+
     const controller = new AbortController();
 
     const timeout = setTimeout(() => {

@@ -32,7 +32,65 @@ const mapSearchResults = document.getElementById("mapSearchResults");
 
 let deliveryMap = null;
 let deliveryMarker = null;
-const API_BASE_URL = "https://de-ecom-pro.onrender.com";
+
+const PRIMARY_API_URL = "https://de-ecom-pro.onrender.com";
+
+const BACKUP_API_URL =
+  "https://drin-electronics-backup-a7u59.ondigitalocean.app";
+
+const API_BASE_URL = PRIMARY_API_URL;
+
+async function fetchWithFallback(path, options = {}) {
+  const servers = [
+    PRIMARY_API_URL,
+    BACKUP_API_URL
+  ];
+
+  let lastError = null;
+
+  for (const baseUrl of servers) {
+    const controller = new AbortController();
+
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 3000);
+
+    try {
+      const response = await fetch(
+        `${baseUrl}${path}`,
+        {
+          ...options,
+          signal: controller.signal
+        }
+      );
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(
+          `Request failed: ${response.status}`
+        );
+      }
+
+      return response;
+
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      console.warn(
+        "API failed:",
+        baseUrl,
+        error
+      );
+
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error(
+    "All backend servers failed"
+  );
+}
 
 const LALAMOVE_PICKUP = {
   lat: "14.5429244",
@@ -1600,25 +1658,31 @@ async function calculateShippingFee() {
     }));
 
 
-    const res = await fetch(`${API_BASE_URL}/api/spx/check-shipping-fee`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        amount: subtotal,
-        paymentMethod,
-        address,
-        parcelInfo: currentParcelInfo,
-        items: normalizedItems,
-
-        base_info: {
-          ed_item_list: orderItems
+    const res = await fetchWithFallback(
+      "/api/spx/check-shipping-fee",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
         },
+        body: JSON.stringify({
+          amount: subtotal,
+          paymentMethod,
+          address,
+          parcelInfo: currentParcelInfo,
+          items: normalizedItems,
 
-        baseInfo: {
-          ed_item_list: orderItems
-        }
-      }),
-    });
+          base_info: {
+            ed_item_list: orderItems
+          },
+
+          baseInfo: {
+            ed_item_list: orderItems
+          }
+        })
+      }
+    );
+
     const data = await res.json();
 
     window.lastSPXResponse = data;
