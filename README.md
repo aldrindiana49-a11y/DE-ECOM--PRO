@@ -27,16 +27,20 @@ https://drinelectronicsph.com/
 
 ## Key Features
 
-- E-commerce product browsing
-- Customer account and checkout workflows
-- Order management
-- Admin-side business operations
-- Database integration using Supabase
-- REST API communication
-- Image processing
-- Spreadsheet and Excel data handling
-- Webhook and third-party integration support
-- Cloud deployment and hosting
+- Product browsing and category navigation
+- Shopping cart and checkout workflow
+- Customer login, signup, profile, and password reset
+- Customer order history and order management
+- Guest order tracking
+- Customer chat and admin chat
+- Hot deals and trending product sections
+- Partner program pages
+- Product detail pages
+- Contact and customer support pages
+- Shipping, refund, privacy, cookie, and terms policy pages
+- SEO support through `robots.txt` and `sitemap.xml`
+- Front-end styling and client-side functionality using HTML, CSS, and JavaScript
+- Backend and API integration through the main Node.js/Express application
 
 ## Development Focus
 
@@ -44,12 +48,39 @@ This project was created as a practical e-commerce system for Drin Electronics. 
 
 ## Project Structure
 
-- `Home/` – customer-facing pages
+- `Home/` – customer-facing e-commerce application
+  - `Admin-chat/` – admin-side chat
+  - `Cart/` – shopping cart
+  - `Categories/` – category browsing
+  - `chat/` – customer chat
+  - `Checkout/` – checkout flow
+  - `contact-us/` – contact page
+  - `cookie-policy/` – cookie policy
+  - `guest-track/` – guest order tracking
+  - `Homecategories/` – home category sections
+  - `Home-orders/` – customer orders
+  - `Homeprofile/` – customer profile
+  - `HotDeals/` – promotions and hot deals
+  - `login/` – customer login
+  - `PartnerProgram/` – partner program
+  - `privacy-policy/` – privacy policy
+  - `Product/` – product details
+  - `refund-policy/` – refund policy
+  - `reset-password/` – password recovery
+  - `shipping-policy/` – shipping policy
+  - `signup/` – customer registration
+  - `terms-and-conditions/` – terms and conditions
+  - `Trending/` – trending products
+  - `index.html` – main customer-facing page
+  - `script.js` – client-side JavaScript
+  - `style.css` – main styles
+  - `robots.txt` – search engine crawler rules
+  - `sitemap.xml` – website sitemap
 - `services/` – backend services and integrations
 - `Data/` – project data and supporting files
-- `Audio/` – audio-related project assets
-- `server.js` – main backend server
-- `package.json` – project dependencies and scripts
+- `Audio/` – audio-related assets
+- `server.js` – main Node.js/Express backend server
+- `package.json` – dependencies and scripts
 - `netlify.toml` – Netlify deployment configuration
 
 ## Backend & API
