@@ -33,6 +33,9 @@ https://drinelectronicsph.com/
 - Customer order history and order management
 - Guest order tracking
 - Customer chat and admin chat
+- Admin dashboard and administrative workflows
+- Academy or learning-related module
+- Academy administration pages
 - Hot deals and trending product sections
 - Partner program pages
 - Product detail pages
@@ -49,6 +52,10 @@ This project was created as a practical e-commerce system for Drin Electronics. 
 ## Project Structure
 
 - `Home/` – customer-facing e-commerce application
+  - `About/` – company/about information
+  - `Academy/` – academy or learning-related pages
+  - `Admin/` – administrative dashboard and admin functions
+  - `Admin-academy/` – academy administration pages
   - `Admin-chat/` – admin-side chat
   - `Cart/` – shopping cart
   - `Categories/` – category browsing
@@ -61,7 +68,9 @@ This project was created as a practical e-commerce system for Drin Electronics. 
   - `Home-orders/` – customer orders
   - `Homeprofile/` – customer profile
   - `HotDeals/` – promotions and hot deals
+  - `Image/` – image assets
   - `login/` – customer login
+  - `netlify/` – Netlify-related files
   - `PartnerProgram/` – partner program
   - `privacy-policy/` – privacy policy
   - `Product/` – product details
@@ -76,11 +85,15 @@ This project was created as a practical e-commerce system for Drin Electronics. 
   - `style.css` – main styles
   - `robots.txt` – search engine crawler rules
   - `sitemap.xml` – website sitemap
+  - `package.json` – front-end/project dependencies
+  - `package-lock.json` – dependency lock file
+  - `_headers` – Netlify/custom HTTP header configuration
 - `services/` – backend services and integrations
 - `Data/` – project data and supporting files
 - `Audio/` – audio-related assets
 - `server.js` – main Node.js/Express backend server
-- `package.json` – dependencies and scripts
+- `package.json` – main project dependencies and scripts
+- `package-lock.json` – dependency lock file
 - `netlify.toml` – Netlify deployment configuration
 
 ## Backend & API
