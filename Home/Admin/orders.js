@@ -68,13 +68,11 @@ const ordersToShipCount = document.getElementById("ordersToShipCount");
 const dashboardToShip = document.getElementById("dashboardToShip");
 const dashboardShipped = document.getElementById("dashboardShipped");
 const dashboardDelivered = document.getElementById("dashboardDelivered");
-
 let adminOrders = [];
 let storePickupOrders = [];
 let roroOrders = [];
-
 let currentOrderFilter = "Processing";
-let currentOrderPeriod = "daily";
+let currentOrderPeriod = "monthly";
 let expandedOrderSummary = {};
 let expandedOrderItems = {};
 let currentOrdersPage = 1;

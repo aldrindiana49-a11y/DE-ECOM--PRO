@@ -2466,60 +2466,30 @@ app.get("/api/orders", async (req, res) => {
 
     } else if (period === "weekly") {
 
-      const weekday =
-        phNow.getUTCDay();
+      endDate = new Date();
 
-      /*
-        Monday = start ng week.
-      */
-      const daysSinceMonday =
-        (weekday + 6) % 7;
-
-      startDate =
-        phDateToUtc(
-          year,
-          month,
-          day - daysSinceMonday
-        );
-
-      endDate =
-        phDateToUtc(
-          year,
-          month,
-          day - daysSinceMonday + 7
-        );
+      startDate = new Date(
+        endDate.getTime() -
+        7 * 24 * 60 * 60 * 1000
+      );
 
     } else if (period === "monthly") {
 
-      startDate =
-        phDateToUtc(
-          year,
-          month,
-          1
-        );
+      endDate = new Date();
 
-      endDate =
-        phDateToUtc(
-          year,
-          month + 1,
-          1
-        );
+      startDate = new Date(
+        endDate.getTime() -
+        30 * 24 * 60 * 60 * 1000
+      );
 
     } else if (period === "yearly") {
 
-      startDate =
-        phDateToUtc(
-          year,
-          0,
-          1
-        );
+      endDate = new Date();
 
-      endDate =
-        phDateToUtc(
-          year + 1,
-          0,
-          1
-        );
+      startDate = new Date(
+        endDate.getTime() -
+        365 * 24 * 60 * 60 * 1000
+      );
     }
 
     let query = supabase
