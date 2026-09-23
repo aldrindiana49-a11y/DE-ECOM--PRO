@@ -2381,20 +2381,564 @@ async function autoCompleteDeliveredOrders() {
 
 app.get("/api/orders", async (req, res) => {
   try {
-    const page = Math.max(Number(req.query.page) || 1, 1);
+    const page = Math.max(
+      Number(req.query.page) || 1,
+      1
+    );
+
     const limit = Math.min(
       Math.max(Number(req.query.limit) || 10, 1),
       100
     );
 
+    const period = String(
+      req.query.period || ""
+    )
+      .trim()
+      .toLowerCase();
+
+    const filter = String(
+      req.query.filter || "all"
+    )
+      .trim()
+      .toLowerCase();
+
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
-    const { data, error, count } = await supabase
+    /*
+      Philippines timezone = UTC+8
+      Gumagawa tayo ng PH date boundaries,
+      tapos kino-convert sa UTC para sa Supabase.
+    */
+    const PH_OFFSET_MS =
+      8 * 60 * 60 * 1000;
+
+    const now = new Date();
+
+    const oneHourAgoIso =
+      new Date(
+        Date.now() - 60 * 60 * 1000
+      ).toISOString();
+
+    const phNow = new Date(
+      now.getTime() + PH_OFFSET_MS
+    );
+
+    const year =
+      phNow.getUTCFullYear();
+
+    const month =
+      phNow.getUTCMonth();
+
+    const day =
+      phNow.getUTCDate();
+
+    let startDate = null;
+    let endDate = null;
+
+    function phDateToUtc(
+      y,
+      m,
+      d
+    ) {
+      return new Date(
+        Date.UTC(y, m, d, 0, 0, 0) -
+        PH_OFFSET_MS
+      );
+    }
+
+    if (period === "daily") {
+
+      startDate =
+        phDateToUtc(
+          year,
+          month,
+          day
+        );
+
+      endDate =
+        phDateToUtc(
+          year,
+          month,
+          day + 1
+        );
+
+    } else if (period === "weekly") {
+
+      const weekday =
+        phNow.getUTCDay();
+
+      /*
+        Monday = start ng week.
+      */
+      const daysSinceMonday =
+        (weekday + 6) % 7;
+
+      startDate =
+        phDateToUtc(
+          year,
+          month,
+          day - daysSinceMonday
+        );
+
+      endDate =
+        phDateToUtc(
+          year,
+          month,
+          day - daysSinceMonday + 7
+        );
+
+    } else if (period === "monthly") {
+
+      startDate =
+        phDateToUtc(
+          year,
+          month,
+          1
+        );
+
+      endDate =
+        phDateToUtc(
+          year,
+          month + 1,
+          1
+        );
+
+    } else if (period === "yearly") {
+
+      startDate =
+        phDateToUtc(
+          year,
+          0,
+          1
+        );
+
+      endDate =
+        phDateToUtc(
+          year + 1,
+          0,
+          1
+        );
+    }
+
+    let query = supabase
       .from("orders")
-      .select("*", { count: "exact" })
-      .order("created_at", { ascending: false })
-      .range(from, to);
+      .select("*", {
+        count: "exact"
+      })
+      .order(
+        "created_at",
+        { ascending: false }
+      );
+
+    if (startDate && endDate) {
+      query = query
+        .gte(
+          "created_at",
+          startDate.toISOString()
+        )
+        .lt(
+          "created_at",
+          endDate.toISOString()
+        );
+    }
+
+    if (
+      [
+        "processing",
+        "packed",
+        "to ship",
+        "shipped",
+        "delivered",
+        "failed delivery"
+      ].includes(filter)
+    ) {
+      query = query.ilike(
+        "order_status",
+        filter
+      );
+    }
+
+    if (filter === "returned") {
+      query = query.or(
+        [
+          "order_status.ilike.returned",
+          "order_status.ilike.returning"
+        ].join(",")
+      );
+    }
+
+    if (filter === "completed") {
+      query = query.or(
+        "order_status.ilike.completed,order_status.ilike.picked up"
+      );
+    }
+
+    if (filter === "paid") {
+      query = query.ilike(
+        "payment_status",
+        "paid"
+      );
+    }
+
+    if (filter === "in transit") {
+      query = query.or(
+        [
+          "order_status.ilike.%in transit%",
+          "order_status.ilike.%parcel on hold%",
+          "order_status.ilike.%on hold%",
+          "order_status.ilike.%shipment on hold%",
+          "order_status.ilike.%delivery on hold%",
+          "order_status.ilike.%delayed%",
+          "order_status.ilike.%arrived at delivery hub%",
+          "order_status.ilike.%at delivery hub%"
+        ].join(",")
+      );
+    }
+
+    if (
+      filter === "pending" ||
+      filter === "pending cod"
+    ) {
+      query = query
+        .ilike("order_status", "pending")
+        .or(
+          "payment_method.ilike.%cod%,payment_provider.ilike.%cod%"
+        );
+    }
+
+    if (filter === "pending payment") {
+      query = query
+        .or(
+          [
+            "order_status.ilike.pending payment",
+            "payment_status.ilike.pending",
+            "payment_status.ilike.pending payment"
+          ].join(",")
+        )
+
+        .or(
+          [
+            "payment_provider.not.ilike.%cod%",
+            "courier.ilike.%store pickup%"
+          ].join(",")
+        )
+
+        .gte(
+          "created_at",
+          oneHourAgoIso
+        );
+    }
+
+    if (filter === "pending skyro") {
+      query = query
+        .or(
+          [
+            "order_status.ilike.pending stock confirmation",
+            "order_status.ilike.pending skyro approval",
+            "order_status.ilike.pending skyro application"
+          ].join(",")
+        )
+        .or(
+          "payment_method.ilike.%skyro%,payment_provider.ilike.%skyro%"
+        );
+    }
+
+    if (filter === "awaiting customer application") {
+      query = query
+        .ilike(
+          "order_status",
+          "skyro application allowed"
+        )
+        .or(
+          "payment_method.ilike.%skyro%,payment_provider.ilike.%skyro%"
+        );
+    }
+
+    if (filter === "skyro approved") {
+      query = query
+        .ilike(
+          "order_status",
+          "skyro approved"
+        )
+        .or(
+          "payment_method.ilike.%skyro%,payment_provider.ilike.%skyro%"
+        );
+    }
+
+
+    if (filter === "expired") {
+      query = query.or(
+        [
+          "order_status.ilike.expired",
+          "order_status.ilike.payment expired",
+          "payment_status.ilike.%expired%",
+          `and(order_status.ilike.pending payment,created_at.lt.${oneHourAgoIso},payment_provider.not.ilike.%cod%,courier.not.ilike.%store pickup%)`
+        ].join(",")
+      );
+    }
+
+    let countQuery = supabase
+      .from("orders")
+      .select("*", {
+        count: "exact"
+      });
+
+    if (startDate && endDate) {
+      countQuery = countQuery
+        .gte(
+          "created_at",
+          startDate.toISOString()
+        )
+        .lt(
+          "created_at",
+          endDate.toISOString()
+        );
+    }
+
+    const {
+      data: periodOrders,
+      error: periodOrdersError,
+      count: periodTotalCount
+    } = await countQuery;
+
+    if (periodOrdersError) {
+      throw periodOrdersError;
+    }
+
+    const periodCounts = {
+      all: Number(periodTotalCount || 0),
+      pendingSummary: 0,
+      pendingCod: 0,
+      pendingSkyro: 0,
+      awaitingSkyroApplication: 0,
+      approvedSkyro: 0,
+      processing: 0,
+      packed: 0,
+      toShip: 0,
+      shipped: 0,
+      inTransit: 0,
+      delivered: 0,
+      completed: 0,
+      paid: 0,
+      pendingPayment: 0,
+      failedDelivery: 0,
+      returned: 0,
+      expired: 0
+    };
+
+    periodOrders.forEach(order => {
+      const orderStatus = String(
+        order.order_status || ""
+      )
+        .trim()
+        .toLowerCase();
+
+      const paymentStatus = String(
+        order.payment_status ||
+        order.status ||
+        order.xendit_status ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
+      const paymentMethod = String(
+        order.payment_provider ||
+        order.payment_method ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
+      const paymentText =
+        `${paymentStatus} ${paymentMethod}`;
+
+      const isCOD =
+        paymentText.includes("cod") ||
+        paymentText.includes("cash on delivery");
+
+      const isSkyro =
+        paymentText.includes("skyro");
+
+      const createdTime =
+        new Date(order.created_at).getTime();
+
+      const explicitExpiryTime =
+        new Date(
+          order.expires_at ||
+          order.expiry_date ||
+          order.invoice_expiry_date ||
+          ""
+        ).getTime();
+
+      const fallbackExpiryTime =
+        Number.isFinite(createdTime)
+          ? createdTime + 60 * 60 * 1000
+          : NaN;
+
+      const expiryTime =
+        Number.isFinite(explicitExpiryTime)
+          ? explicitExpiryTime
+          : fallbackExpiryTime;
+
+      const isPendingOnlinePayment =
+        !isCOD &&
+        !String(order.courier || "")
+          .toLowerCase()
+          .includes("store pickup") &&
+        (
+          orderStatus === "pending payment" ||
+          paymentStatus === "pending" ||
+          paymentStatus === "pending payment"
+        );
+
+      const isTimedOut =
+        isPendingOnlinePayment &&
+        Number.isFinite(expiryTime) &&
+        Date.now() > expiryTime;
+
+      const isExpired =
+        orderStatus === "expired" ||
+        orderStatus === "payment expired" ||
+        paymentStatus.includes("expired") ||
+        isTimedOut;
+
+      if (
+        (
+          orderStatus === "pending" ||
+          orderStatus === "pending payment"
+        ) &&
+        !isExpired
+      ) {
+        periodCounts.pendingSummary++;
+      }
+
+      if (
+        isCOD &&
+        orderStatus === "pending"
+      ) {
+        periodCounts.pendingCod++;
+      }
+
+      if (
+        isSkyro &&
+        [
+          "pending stock confirmation",
+          "pending skyro approval",
+          "pending skyro application"
+        ].includes(orderStatus)
+      ) {
+        periodCounts.pendingSkyro++;
+      }
+
+      if (
+        isSkyro &&
+        orderStatus === "skyro application allowed"
+      ) {
+        periodCounts.awaitingSkyroApplication++;
+      }
+
+      if (
+        isSkyro &&
+        orderStatus === "skyro approved"
+      ) {
+        periodCounts.approvedSkyro++;
+      }
+
+      if (orderStatus === "processing") {
+        periodCounts.processing++;
+      }
+
+      if (orderStatus === "packed") {
+        periodCounts.packed++;
+      }
+
+      if (orderStatus === "to ship") {
+        periodCounts.toShip++;
+      }
+
+      if (orderStatus === "shipped") {
+        periodCounts.shipped++;
+      }
+
+      const activeTransitStatuses = [
+        "in transit",
+        "parcel on hold",
+        "on hold",
+        "shipment on hold",
+        "delivery on hold",
+        "delayed",
+        "delivery delayed",
+        "arrived at delivery hub",
+        "at delivery hub"
+      ];
+
+      if (
+        activeTransitStatuses.some(status =>
+          orderStatus.includes(status)
+        )
+      ) {
+        periodCounts.inTransit++;
+      }
+
+      if (orderStatus === "delivered") {
+        periodCounts.delivered++;
+      }
+
+      if (
+        orderStatus === "completed" ||
+        orderStatus === "picked up"
+      ) {
+        periodCounts.completed++;
+      }
+
+      if (paymentStatus === "paid") {
+        periodCounts.paid++;
+      }
+
+      const isStorePickup =
+        String(order.courier || "")
+          .toLowerCase()
+          .includes("store pickup");
+
+      if (
+        (!isCOD || isStorePickup) &&
+        !isExpired &&
+        (
+          orderStatus === "pending payment" ||
+          paymentStatus === "pending" ||
+          paymentStatus === "pending payment"
+        )
+      ) {
+        periodCounts.pendingPayment++;
+      }
+
+      if (orderStatus === "failed delivery") {
+        periodCounts.failedDelivery++;
+      }
+
+      if (
+        orderStatus === "returned" ||
+        orderStatus === "returning"
+      ) {
+        periodCounts.returned++;
+      }
+
+      if (isExpired) {
+        periodCounts.expired++;
+      }
+    });
+
+    const {
+      data,
+      error,
+      count
+    } = await query.range(
+      from,
+      to
+    );
 
     if (error) {
       throw error;
@@ -2402,24 +2946,43 @@ app.get("/api/orders", async (req, res) => {
 
     return res.json({
       success: true,
+
       orders: data || [],
+
+      period:
+        period || "all",
+
+      filter:
+        filter || "all",
+
+      counts: periodCounts,
+
       pagination: {
+
         page,
         limit,
         total: count || 0,
+
         totalPages: Math.max(
           1,
-          Math.ceil((count || 0) / limit)
+          Math.ceil(
+            (count || 0) / limit
+          )
         )
       }
     });
 
   } catch (error) {
-    console.error("GET ORDERS ERROR:", error);
+
+    console.error(
+      "GET ORDERS ERROR:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
-      message: "Failed to load orders",
+      message:
+        "Failed to load orders",
       error: error.message
     });
   }

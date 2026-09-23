@@ -74,12 +74,14 @@ let storePickupOrders = [];
 let roroOrders = [];
 
 let currentOrderFilter = "Processing";
+let currentOrderPeriod = "daily";
 let expandedOrderSummary = {};
 let expandedOrderItems = {};
 let currentOrdersPage = 1;
 const ordersPerPage = 10;
 let ordersTotalPages = 1;
 let ordersTotalRecords = 0;
+let orderPeriodCounts = {};
 const cancelledOrdersTableBody =
   document.getElementById("cancelledOrdersTableBody");
 const storePickupOrdersTableBody =
@@ -978,6 +980,8 @@ function getOrderStatusClass(status) {
   if (status === "To Ship") return "status-processing";
   if (status === "Shipped") return "status-shipped";
   if (status === "Failed Delivery") return "status-inactive";
+  if (status === "Returned") return "status-inactive";
+  if (status === "Returning") return "status-inactive";
   if (status === "In Transit") return "status-shipped";
   if (status === "Delivered") return "status-delivered";
   if (status === "Cancelled") return "status-inactive";
@@ -992,70 +996,26 @@ function getOrderStatusClass(status) {
 
 function updateOrdersSummary() {
   if (ordersTotalCount) {
-    ordersTotalCount.textContent = adminOrders.length;
+    ordersTotalCount.textContent =
+      Number(orderPeriodCounts.all || 0);
   }
 
   if (ordersPendingCount) {
     ordersPendingCount.textContent =
-      adminOrders.filter(order =>
-        order.order_status === "Pending" ||
-        order.order_status === "Pending Payment"
-      ).length;
+      Number(orderPeriodCounts.pendingSummary || 0);
   }
 
   if (ordersPaidCount) {
     ordersPaidCount.textContent =
-      adminOrders.filter(order =>
-        String(
-          order.payment_status ||
-          order.status ||
-          ""
-        ).toUpperCase() === "PAID"
-      ).length;
+      Number(orderPeriodCounts.paid || 0);
   }
 
   if (ordersToShipCount) {
     ordersToShipCount.textContent =
-      adminOrders.filter(order => {
-        const status = String(order.order_status || "")
-          .trim()
-          .toLowerCase();
-
-        const payment = String(order.payment_status || "")
-          .trim()
-          .toLowerCase();
-
-        const method = String(
-          order.payment_method ||
-          order.payment_provider ||
-          ""
-        ).trim().toLowerCase();
-
-        const courier = String(order.courier || "")
-          .trim()
-          .toLowerCase();
-
-        const isStorePickup =
-          courier.includes("store pickup");
-
-        const isCOD =
-          method.includes("cod") ||
-          payment === "cod";
-
-        const isReadyStatus =
-          ["processing", "packed", "to ship"].includes(status);
-
-        const isPaymentOkay =
-          isCOD || payment === "paid";
-
-        return (
-          !isStorePickup &&
-          isReadyStatus &&
-          isPaymentOkay
-        );
-      }).length;
+      Number(orderPeriodCounts.processing || 0) +
+      Number(orderPeriodCounts.packed || 0) +
+      Number(orderPeriodCounts.toShip || 0);
   }
-
 }
 
 function updateDashboardOrders() {
@@ -1086,196 +1046,50 @@ function updateDashboardOrders() {
 
 function updateOrderFilterCounts() {
   const counts = {
-    all: adminOrders.length,
-    pendingCod: 0,
-    pendingSkyro: 0,
-    awaitingSkyroApplication: 0,
-    approvedSkyro: 0,
-    processing: 0,
-    packed: 0,
-    shipped: 0,
-    inTransit: 0,
-    delivered: 0,
-    completed: 0,
-    paid: 0,
-    pendingPayment: 0,
-    failedDelivery: 0,
-    expired: 0
+    all: Number(orderPeriodCounts.all || 0),
+    pendingCod: Number(orderPeriodCounts.pendingCod || 0),
+    pendingSkyro: Number(orderPeriodCounts.pendingSkyro || 0),
+    awaitingSkyroApplication: Number(
+      orderPeriodCounts.awaitingSkyroApplication || 0
+    ),
+    approvedSkyro: Number(
+      orderPeriodCounts.approvedSkyro || 0
+    ),
+    processing: Number(
+      orderPeriodCounts.processing || 0
+    ),
+    packed: Number(
+      orderPeriodCounts.packed || 0
+    ),
+    shipped: Number(
+      orderPeriodCounts.shipped || 0
+    ),
+    inTransit: Number(
+      orderPeriodCounts.inTransit || 0
+    ),
+    delivered: Number(
+      orderPeriodCounts.delivered || 0
+    ),
+    completed: Number(
+      orderPeriodCounts.completed || 0
+    ),
+    paid: Number(
+      orderPeriodCounts.paid || 0
+    ),
+    pendingPayment: Number(
+      orderPeriodCounts.pendingPayment || 0
+    ),
+    failedDelivery: Number(
+      orderPeriodCounts.failedDelivery || 0
+    ),
+    returned: Number(
+      orderPeriodCounts.returned || 0
+    ),
+    expired: Number(
+      orderPeriodCounts.expired || 0
+    )
   };
 
-  adminOrders.forEach(order => {
-    const orderStatus = String(
-      order.order_status || ""
-    ).trim().toLowerCase();
-
-    const paymentStatus = String(
-      order.payment_status ||
-      order.status ||
-      order.xendit_status ||
-      ""
-    ).trim().toLowerCase();
-
-    const paymentMethod = String(
-      order.payment_provider ||
-      order.paymentProvider ||
-      order.payment_method ||
-      order.paymentMethod ||
-      order.payment_type ||
-      order.payment_option ||
-      order.payment_channel ||
-      order.method ||
-      ""
-    ).trim().toLowerCase();
-
-    const paymentText =
-      `${paymentStatus} ${paymentMethod}`;
-
-    const isCOD =
-      paymentText.includes("cod") ||
-      paymentText.includes("cash on delivery");
-
-    const isSkyro =
-      paymentText.includes("skyro");
-
-    const createdTime =
-      new Date(order.created_at).getTime();
-
-    const explicitExpiryTime =
-      new Date(
-        order.expires_at ||
-        order.expiry_date ||
-        order.invoice_expiry_date ||
-        ""
-      ).getTime();
-
-    const fallbackExpiryTime =
-      Number.isFinite(createdTime)
-        ? createdTime + 60 * 60 * 1000
-        : NaN;
-
-    const expiryTime =
-      Number.isFinite(explicitExpiryTime)
-        ? explicitExpiryTime
-        : fallbackExpiryTime;
-
-    const isPendingOnlinePayment =
-      !isCOD &&
-      !String(order.courier || "")
-        .toLowerCase()
-        .includes("store pickup") &&
-      (
-        orderStatus === "pending payment" ||
-        paymentStatus === "pending" ||
-        paymentStatus === "pending payment"
-      );
-
-    const isTimedOut =
-      isPendingOnlinePayment &&
-      Number.isFinite(expiryTime) &&
-      Date.now() > expiryTime;
-
-    const isExpired =
-      orderStatus === "expired" ||
-      orderStatus === "payment expired" ||
-      paymentStatus.includes("expired") ||
-      isTimedOut;
-
-    if (isCOD && orderStatus === "pending") {
-      counts.pendingCod++;
-    }
-
-    if (
-      isSkyro &&
-      [
-        "pending stock confirmation",
-        "pending skyro approval",
-        "pending skyro application"
-      ].includes(orderStatus)
-    ) {
-      counts.pendingSkyro++;
-    }
-
-    if (
-      isSkyro &&
-      orderStatus === "skyro application allowed"
-    ) {
-      counts.awaitingSkyroApplication++;
-    }
-
-    if (
-      isSkyro &&
-      orderStatus === "skyro approved"
-    ) {
-      counts.approvedSkyro++;
-    }
-
-    if (orderStatus === "processing") {
-      counts.processing++;
-    }
-
-    if (orderStatus === "packed") {
-      counts.packed++;
-    }
-
-    if (orderStatus === "shipped") {
-      counts.shipped++;
-    }
-
-    const activeTransitStatuses = [
-      "in transit",
-      "parcel on hold",
-      "on hold",
-      "shipment on hold",
-      "delivery on hold",
-      "delayed",
-      "delivery delayed",
-      "arrived at delivery hub",
-      "at delivery hub"
-    ];
-
-    if (
-      activeTransitStatuses.some(status =>
-        orderStatus.includes(status)
-      )
-    ) {
-      counts.inTransit++;
-    }
-
-    if (orderStatus === "delivered") {
-      counts.delivered++;
-    }
-
-    if (
-      orderStatus === "completed" ||
-      orderStatus === "picked up"
-    ) {
-      counts.completed++;
-    }
-
-    if (paymentStatus === "paid") {
-      counts.paid++;
-    }
-
-    if (
-      !isCOD &&
-      !isExpired &&
-      (
-        orderStatus === "pending payment" ||
-        paymentStatus === "pending" ||
-        paymentStatus === "pending payment"
-      )
-    ) {
-      counts.pendingPayment++;
-    }
-
-    if (orderStatus === "failed delivery") {
-      counts.failedDelivery++;
-    }
-
-    if (isExpired) {
-      counts.expired++;
-    }
-  });
 
   const countMap = {
     countAll: counts.all,
@@ -1293,6 +1107,7 @@ function updateOrderFilterCounts() {
     countPaid: counts.paid,
     countPendingPayment: counts.pendingPayment,
     countFailedDelivery: counts.failedDelivery,
+    countReturned: counts.returned,
     countExpired: counts.expired
   };
 
@@ -1359,6 +1174,7 @@ function renderAdminOrders() {
       ).trim().toLowerCase();
 
       const paymentMethod = String(
+        order.payment_provider ||
         order.payment_method ||
         order.paymentMethod ||
         order.payment_type ||
@@ -1487,6 +1303,20 @@ function renderAdminOrders() {
 
         return activeTransitStatuses.some(status =>
           orderStatus.includes(status)
+        );
+      }
+
+      if (selectedFilter === "completed") {
+        return (
+          orderStatus === "completed" ||
+          orderStatus === "picked up"
+        );
+      }
+
+      if (selectedFilter === "returned") {
+        return (
+          orderStatus === "returned" ||
+          orderStatus === "returning"
         );
       }
 
@@ -2570,8 +2400,8 @@ async function loadAdminOrders() {
         `;
     }
 
-    const response = await adminFetchWithFallback(
-      `/api/orders?page=${currentOrdersPage}&limit=${ordersPerPage}`
+    const response = await fetch(
+      `${BACKUP_API_URL}/api/orders?page=${currentOrdersPage}&limit=${ordersPerPage}&period=${currentOrderPeriod}&filter=${encodeURIComponent(currentOrderFilter)}`
     );
 
     const data = await response.json();
@@ -2581,6 +2411,9 @@ async function loadAdminOrders() {
 
     ordersTotalRecords =
       Number(data.pagination?.total) || 0;
+
+    orderPeriodCounts =
+      data.counts || {};
 
     if (!data.success || !Array.isArray(data.orders)) {
       throw new Error("Invalid orders response");
@@ -5099,6 +4932,32 @@ window.markOrderDelivered = markOrderDelivered;
 /* ===============================
    INIT
 ================================ */
+
+document
+  .querySelectorAll(".order-period-btn")
+  .forEach(button => {
+
+    button.addEventListener("click", () => {
+
+      document
+        .querySelectorAll(".order-period-btn")
+        .forEach(btn =>
+          btn.classList.remove("active")
+        );
+
+      button.classList.add("active");
+
+      currentOrderPeriod =
+        button.dataset.period || "daily";
+
+      currentOrdersPage = 1;
+
+      loadAdminOrders();
+
+    });
+
+  });
+
 document
   .querySelectorAll(".order-filter-btn")
 
@@ -5164,7 +5023,7 @@ function subscribeToOrderUpdates() {
             payload.eventType === "INSERT" ||
             payload.eventType === "UPDATE"
           ) {
-            applyUpdatedOrderLocal(payload.new);
+            await loadAdminOrders();
           }
 
           const newStatus =
