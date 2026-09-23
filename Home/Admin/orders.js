@@ -3648,7 +3648,15 @@ ${!isStorePickup ? `
 
 ${(
       (
-        ["pending", "pending payment"].includes(
+        [
+          "pending",
+          "pending payment",
+          "processing",
+          "pending stock confirmation",
+          "pending skyro approval",
+          "pending skyro application",
+          "skyro application allowed"
+        ].includes(
           String(order.order_status || "")
             .trim()
             .toLowerCase()
@@ -3706,7 +3714,7 @@ async function confirmSkyroStock(orderId, btn) {
     setButtonLoading(btn, "Creating Skyro Link...");
 
     const response = await fetch(
-      `https://de-ecom-pro.onrender.com/api/orders/${orderId}/skyro-create`,
+      `${BACKUP_API_URL}/api/orders/${orderId}/skyro-create`,
       {
         method: "POST",
         headers: {
@@ -3909,7 +3917,7 @@ This action will move the order to Cancelled.`
     setButtonLoading(btn, "Cancelling...");
 
     const res = await fetch(
-      `https://de-ecom-pro.onrender.com/api/orders/${orderId}/cancel`,
+      `${BACKUP_API_URL}/api/orders/${orderId}/cancel`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -4010,7 +4018,7 @@ async function createSPXShipment(orderId, btn) {
       Gumawa ng SPX shipment / waybill.
     */
     const shipmentResponse = await fetch(
-      `https://de-ecom-pro.onrender.com/api/orders/${orderId}/spx-create`,
+      `${BACKUP_API_URL}/api/orders/${orderId}/spx-create`,
       {
         method: "POST",
         headers: {
@@ -4302,7 +4310,7 @@ async function approveOrderRequest(orderId) {
 
   try {
     const res = await fetch(
-      `https://de-ecom-pro.onrender.com/api/orders/${orderId}/cancel`,
+      `${BACKUP_API_URL}/api/orders/${orderId}/cancel`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

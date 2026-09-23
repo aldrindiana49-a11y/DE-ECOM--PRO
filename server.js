@@ -1574,7 +1574,7 @@ app.post("/api/orders/:orderId/skyro-create", async (req, res) => {
 
       webhookUrl:
         process.env.SKYRO_WEBHOOK_URL,
-        
+
       successUrl:
         "https://drinelectronicsph.com/home-orders/?skyro=success",
 
@@ -2656,8 +2656,15 @@ app.post("/api/orders/:orderId/cancel", async (req, res) => {
         .toUpperCase();
 
     const canCancel =
-      ["pending", "pending payment"].includes(currentOrderStatus) &&
-      currentPaymentStatus !== "PAID";
+      [
+        "pending",
+        "pending payment",
+        "processing",
+        "pending stock confirmation",
+        "pending skyro approval",
+        "pending skyro application",
+        "skyro application allowed"
+      ].includes(currentOrderStatus);
 
     if (!canCancel) {
       return res.status(403).json({
