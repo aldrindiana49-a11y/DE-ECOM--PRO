@@ -9,7 +9,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Drin Electronics Admin Panel</title>
-  <link rel="stylesheet" href="admin.css?v=10013" />
+  <link rel="stylesheet" href="./admin.css?v=99999" />
 
 </head>
 
@@ -684,6 +684,29 @@
 
         </div>
 
+        <div class="order-period-filters" style="
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            margin:0 0 14px 0;
+          ">
+          <button type="button" class="order-period-btn active" data-period="daily">
+            Daily
+          </button>
+
+          <button type="button" class="order-period-btn" data-period="weekly">
+            Weekly
+          </button>
+
+          <button type="button" class="order-period-btn" data-period="monthly">
+            Monthly
+          </button>
+
+          <button type="button" class="order-period-btn" data-period="yearly">
+            Yearly
+          </button>
+        </div>
+
         <div class="orders-toolbar">
 
           <div class="orders-toolbar-left">
@@ -1341,7 +1364,7 @@
   <script src="./inventory.js?v=10012"></script>
   <script src="./generator.js?v=10010"></script>
   <script src="./categories.js?v=10010"></script>
-  <script src="./orders.js?v=10028"></script>
+  <script src="./orders.js?v=10029"></script>
   <script src="./employee.js?v=10010"></script>
 
 </body>
