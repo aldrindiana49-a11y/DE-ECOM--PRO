@@ -2580,6 +2580,7 @@ app.get("/api/orders", async (req, res) => {
 
     if (filter === "pending payment") {
       query = query
+        .neq("order_status", "Cancelled")
         .or(
           [
             "order_status.ilike.pending payment",
@@ -2874,6 +2875,7 @@ app.get("/api/orders", async (req, res) => {
           .includes("store pickup");
 
       if (
+        orderStatus !== "cancelled" &&
         (!isCOD || isStorePickup) &&
         !isExpired &&
         (
