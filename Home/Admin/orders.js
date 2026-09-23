@@ -1279,10 +1279,15 @@ function renderAdminOrders() {
             .toLowerCase()
             .includes("store pickup");
 
-        return (!isCOD || isStorePickup) && !isExpired && (
-          orderStatus === "pending payment" ||
-          paymentStatus === "pending" ||
-          paymentStatus === "pending payment"
+        return (
+          orderStatus !== "cancelled" &&
+          (!isCOD || isStorePickup) &&
+          !isExpired &&
+          (
+            orderStatus === "pending payment" ||
+            paymentStatus === "pending" ||
+            paymentStatus === "pending payment"
+          )
         );
       }
 
