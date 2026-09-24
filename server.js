@@ -2694,6 +2694,7 @@ app.get("/api/orders", async (req, res) => {
       completed: 0,
       paid: 0,
       pendingPayment: 0,
+      storePickup: 0,
       failedDelivery: 0,
       returned: 0,
       expired: 0
@@ -2873,6 +2874,16 @@ app.get("/api/orders", async (req, res) => {
         String(order.courier || "")
           .toLowerCase()
           .includes("store pickup");
+
+      if (
+        isStorePickup &&
+        !isExpired &&
+        orderStatus !== "completed" &&
+        orderStatus !== "picked up" &&
+        orderStatus !== "cancelled"
+      ) {
+        periodCounts.storePickup++;
+      }
 
       if (
         orderStatus !== "cancelled" &&

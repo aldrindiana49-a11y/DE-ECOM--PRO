@@ -3799,6 +3799,148 @@ saveCustomerBtn?.addEventListener("click", () => {
 
   if (!customerSaved) {
 
+    const requiredFields = [
+      nameInput,
+      phoneInput,
+      emailInput,
+      areaGroupSelect,
+      provinceSelect,
+      citySelect,
+      barangaySelect,
+      fullAddressInput
+    ];
+
+    // CHECK ALL REQUIRED FIELDS
+    if (!markRequiredFields(requiredFields)) {
+
+      showOrderModal(
+        "Incomplete Customer Details",
+        `
+        <div style="text-align:center;">
+
+          <div style="
+            font-size:42px;
+            margin-bottom:12px;
+          ">
+            ⚠️
+          </div>
+
+          <h3 style="
+            margin:0 0 10px;
+            color:#111827;
+          ">
+            Please Complete Your Details
+          </h3>
+
+          <p style="
+            color:#4b5563;
+            line-height:1.6;
+            margin:0;
+          ">
+            Please complete your
+            <strong>
+              Name, Contact Number, Email,
+              Area, Province, City, Barangay,
+              and Complete Address
+            </strong>
+            before saving.
+          </p>
+
+        </div>
+        `
+      );
+
+      customerSaved = false;
+      return;
+    }
+
+
+    // VALIDATE NAME
+    const customerName =
+      nameInput?.value.trim() || "";
+
+    if (customerName.length < 2) {
+
+      nameInput.classList.add("input-error");
+
+      showOrderModal(
+        "Invalid Name",
+        "Please enter your complete name."
+      );
+
+      nameInput.focus();
+      return;
+    }
+
+
+    // VALIDATE CONTACT NUMBER
+    const phone =
+      phoneInput?.value.trim() || "";
+
+    if (!/^09\d{9}$/.test(phone)) {
+
+      phoneInput.classList.add("input-error");
+
+      showOrderModal(
+        "Invalid Contact Number",
+        "Please enter a valid 11-digit Philippine mobile number starting with 09."
+      );
+
+      phoneInput.focus();
+      return;
+    }
+
+
+    // VALIDATE EMAIL
+    const email =
+      String(
+        loggedInUser?.email ||
+        emailInput?.value ||
+        ""
+      )
+        .trim()
+        .toLowerCase();
+
+    const validEmail =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!validEmail.test(email)) {
+
+      emailInput?.classList.add("input-error");
+
+      showOrderModal(
+        "Invalid Email",
+        "Please enter a valid email address."
+      );
+
+      emailInput?.focus();
+      return;
+    }
+
+
+    // VALIDATE COMPLETE ADDRESS
+    const fullAddress =
+      fullAddressInput?.value.trim() || "";
+
+    if (fullAddress.length < 5) {
+
+      fullAddressInput.classList.add("input-error");
+
+      showOrderModal(
+        "Complete Address Required",
+        `
+        Please enter your complete delivery address,
+        such as house number, street, subdivision,
+        building, or nearest landmark.
+        `
+      );
+
+      fullAddressInput.focus();
+      return;
+    }
+
+
+    // SAVE ONLY IF EVERYTHING IS COMPLETE
     saveCustomerCheckoutInfo();
 
 
@@ -3810,27 +3952,32 @@ saveCustomerBtn?.addEventListener("click", () => {
       areaGroupSelect,
       provinceSelect,
       citySelect,
-      barangaySelect,
+      barangaySelect
     ].forEach(input => {
 
       if (input) {
         input.disabled = true;
+        input.classList.remove("input-error");
       }
 
     });
 
+
     saveCustomerBtn.textContent = "Edit";
+
+
     const toggleBtn =
       document.getElementById(
         "toggleCustomerBtn"
       );
 
     if (toggleBtn) {
-      toggleBtn.textContent =
-        "Show More";
+      toggleBtn.textContent = "Show More";
     }
 
+
     customerSaved = true;
+
 
     const body =
       document.getElementById(
@@ -3838,12 +3985,9 @@ saveCustomerBtn?.addEventListener("click", () => {
       );
 
     if (body) {
-
-      body.classList.add(
-        "collapsed"
-      );
-
+      body.classList.add("collapsed");
     }
+
 
   } else {
 
@@ -3856,18 +4000,30 @@ saveCustomerBtn?.addEventListener("click", () => {
       citySelect,
       barangaySelect
     ].forEach(input => {
-      if (input) input.disabled = false;
+
+      if (input) {
+        input.disabled = false;
+      }
+
     });
 
+
     if (emailInput) {
+
       emailInput.disabled = false;
-      emailInput.readOnly = Boolean(loggedInUser);
+
+      emailInput.readOnly =
+        Boolean(loggedInUser);
+
     }
+
 
     saveCustomerBtn.textContent = "Save";
 
     customerSaved = false;
+
     enableCustomerEdit();
+
   }
 
 });
@@ -4084,14 +4240,18 @@ async function loadClaimedVoucher() {
   areaGroupSelect,
   provinceSelect,
   citySelect,
-  barangaySelect,
-  courierSelect
+  barangaySelect
 ].forEach((input) => {
 
   if (!input) return;
 
-  input.addEventListener("input", saveCustomerCheckoutInfo);
-  input.addEventListener("change", saveCustomerCheckoutInfo);
+  input.addEventListener("input", () => {
+    input.classList.remove("input-error");
+  });
+
+  input.addEventListener("change", () => {
+    input.classList.remove("input-error");
+  });
 
 });
 

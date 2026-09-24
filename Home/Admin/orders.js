@@ -9,10 +9,23 @@ const BACKUP_API_URL =
   "https://drin-electronics-backup-a7u59.ondigitalocean.app";
 
 async function adminFetchWithFallback(path, options = {}) {
-  const servers = [
-    PRIMARY_API_URL,
-    BACKUP_API_URL
-  ];
+  const method = String(
+    options.method || "GET"
+  ).toUpperCase();
+
+  const isSafeRequest =
+    method === "GET" ||
+    method === "HEAD" ||
+    method === "OPTIONS";
+
+  const servers = isSafeRequest
+    ? [
+      PRIMARY_API_URL,
+      BACKUP_API_URL
+    ]
+    : [
+      PRIMARY_API_URL
+    ];
 
   let lastError = null;
 
@@ -21,7 +34,7 @@ async function adminFetchWithFallback(path, options = {}) {
 
     const timeoutId = setTimeout(() => {
       controller.abort();
-    }, 3000);
+    }, 8000);
 
     try {
       const response = await fetch(
@@ -56,7 +69,7 @@ async function adminFetchWithFallback(path, options = {}) {
   }
 
   throw lastError || new Error(
-    "All admin backend servers failed"
+    "Admin backend request failed"
   );
 }
 
@@ -2190,9 +2203,14 @@ function applyUpdatedOrderLocal(updatedOrder) {
     document.getElementById("countRoroOrders");
 
   if (storePickupCount) {
-    storePickupCount.textContent = storePickupOrders.length;
+    const storePickupTotal =
+      Number(orderPeriodCounts.storePickup || 0);
+
+    storePickupCount.textContent =
+      storePickupTotal;
+
     storePickupCount.style.display =
-      storePickupOrders.length > 0
+      storePickupTotal > 0
         ? "inline-flex"
         : "none";
   }
@@ -2403,8 +2421,8 @@ async function loadAdminOrders() {
         `;
     }
 
-    const response = await fetch(
-      `${BACKUP_API_URL}/api/orders?page=${currentOrdersPage}&limit=${ordersPerPage}&period=${currentOrderPeriod}&filter=${encodeURIComponent(currentOrderFilter)}`
+    const response = await adminFetchWithFallback(
+      `/api/orders?page=${currentOrdersPage}&limit=${ordersPerPage}&period=${currentOrderPeriod}&filter=${encodeURIComponent(currentOrderFilter)}`
     );
 
     const data = await response.json();
@@ -2551,6 +2569,10 @@ async function loadAdminOrders() {
         ) &&
         paymentStatus === "paid";
 
+      const isPaidStorePickup =
+        courier.includes("store pickup") &&
+        paymentStatus === "paid";
+
       const isPendingStorePickup =
         courier.includes("store pickup") &&
         (
@@ -2561,6 +2583,7 @@ async function loadAdminOrders() {
       return (
         isExpired ||
         isCompletedPickup ||
+        isPaidStorePickup ||
         isPendingStorePickup ||
         (
           !courier.includes("store pickup") &&
@@ -2971,8 +2994,7 @@ async function completeStorePickup(orderId, btn) {
         },
         body: JSON.stringify({
           orderId,
-          order_status: "Completed",
-          picked_up_at: new Date().toISOString()
+          order_status: "Completed"
         })
       }
     );
